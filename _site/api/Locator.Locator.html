@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class DbLocator </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class DbLocator ">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/chizer1/DbLocator/new/main/apiSpec/new?filename=DbLocator_DbLocator.md&amp;value=---%0Auid%3A%20DbLocator.DbLocator%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="">
+            
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="DbLocator.DbLocator">
+
+
+
+  <h1 id="DbLocator_DbLocator" data-uid="DbLocator.DbLocator" class="text-break">
+Class DbLocator  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L12"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="DbLocator.html">DbLocator</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>DbLocator.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"></div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class DbLocator</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><span class="xref">DbLocator</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone">object.MemberwiseClone()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="DbLocator_DbLocator__ctor_" data-uid="DbLocator.DbLocator.#ctor*"></a>
+
+  <h3 id="DbLocator_DbLocator__ctor_System_String_System_String_System_String_System_String_System_String_System_String_" data-uid="DbLocator.DbLocator.#ctor(System.String,System.String,System.String,System.String,System.String,System.String)">
+  DbLocator(string, string, string, string, string, string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L27"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public DbLocator(string DbLocatorDbConnectionString, string auth0Url, string auth0TenantId, string auth0TenantSecret, string apiId, string apiIdentifier)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>DbLocatorDbConnectionString</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>auth0Url</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>auth0TenantId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>auth0TenantSecret</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>apiId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>apiIdentifier</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="DbLocator_DbLocator_AddTenant_" data-uid="DbLocator.DbLocator.AddTenant*"></a>
+
+  <h3 id="DbLocator_DbLocator_AddTenant_System_String_System_String_DbLocator_Domain_Status_" data-uid="DbLocator.DbLocator.AddTenant(System.String,System.String,DbLocator.Domain.Status)">
+  AddTenant(string, string, Status)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L62"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Add Tenant to DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;int&gt; AddTenant(string TenantName, string TenantCode, Status TenantStatus)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TenantName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>TenantCode</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>TenantStatus</code> <a class="xref" href="DbLocator.Domain.Status.html">Status</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_AddTenantUser_" data-uid="DbLocator.DbLocator.AddTenantUser*"></a>
+
+  <h3 id="DbLocator_DbLocator_AddTenantUser_System_Int32_System_Int32_" data-uid="DbLocator.DbLocator.AddTenantUser(System.Int32,System.Int32)">
+  AddTenantUser(int, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L103"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Add user to a Tenant in DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;int&gt; AddTenantUser(int TenantId, int userId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TenantId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>userId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_AddConnection_" data-uid="DbLocator.DbLocator.AddConnection*"></a>
+
+  <h3 id="DbLocator_DbLocator_AddConnection_System_Int32_System_Int32_" data-uid="DbLocator.DbLocator.AddConnection(System.Int32,System.Int32)">
+  AddConnection(int, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L131"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Add connection to DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;int&gt; AddConnection(int TenantUserId, int databaseId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TenantUserId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>databaseId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_AddDatabase_" data-uid="DbLocator.DbLocator.AddDatabase*"></a>
+
+  <h3 id="DbLocator_DbLocator_AddDatabase_System_String_System_String_System_Int32_System_Byte_DbLocator_Domain_Status_" data-uid="DbLocator.DbLocator.AddDatabase(System.String,System.String,System.Int32,System.Byte,DbLocator.Domain.Status)">
+  AddDatabase(string, string, int, byte, Status)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L151"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Add new database on specified server and insert record in DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;int&gt; AddDatabase(string databaseName, string databaseUser, int databaseServerId, byte databaseTypeId, Status databaseStatus)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>databaseName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>databaseUser</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>databaseServerId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>databaseTypeId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.byte">byte</a></dt>
+    <dd></dd>
+    <dt><code>databaseStatus</code> <a class="xref" href="DbLocator.Domain.Status.html">Status</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_AddDatabaseServer_" data-uid="DbLocator.DbLocator.AddDatabaseServer*"></a>
+
+  <h3 id="DbLocator_DbLocator_AddDatabaseServer_System_String_System_String_" data-uid="DbLocator.DbLocator.AddDatabaseServer(System.String,System.String)">
+  AddDatabaseServer(string, string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L213"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Add existing database server information to DbLocator database. (This will not create spin up a database server for you)</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;int&gt; AddDatabaseServer(string databaseServerName, string databaseServerIpAddress)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>databaseServerName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>databaseServerIpAddress</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_AddDatabaseType_" data-uid="DbLocator.DbLocator.AddDatabaseType*"></a>
+
+  <h3 id="DbLocator_DbLocator_AddDatabaseType_System_String_" data-uid="DbLocator.DbLocator.AddDatabaseType(System.String)">
+  AddDatabaseType(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L263"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Add database type to DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;int&gt; AddDatabaseType(string name)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>name</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_AddPermission_" data-uid="DbLocator.DbLocator.AddPermission*"></a>
+
+  <h3 id="DbLocator_DbLocator_AddPermission_System_String_System_String_" data-uid="DbLocator.DbLocator.AddPermission(System.String,System.String)">
+  AddPermission(string, string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L299"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Add permission to DbLocator database and to Auth0 API</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task AddPermission(string permissionName, string permissionDescription)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>permissionName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>permissionDescription</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_AddRole_" data-uid="DbLocator.DbLocator.AddRole*"></a>
+
+  <h3 id="DbLocator_DbLocator_AddRole_System_String_System_String_" data-uid="DbLocator.DbLocator.AddRole(System.String,System.String)">
+  AddRole(string, string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L359"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Add role to DbLocator database and Auth0 tenant</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;int&gt; AddRole(string roleName, string roleDescription)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>roleName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>roleDescription</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_AddRolePermission_" data-uid="DbLocator.DbLocator.AddRolePermission*"></a>
+
+  <h3 id="DbLocator_DbLocator_AddRolePermission_System_Int32_System_Int32_" data-uid="DbLocator.DbLocator.AddRolePermission(System.Int32,System.Int32)">
+  AddRolePermission(int, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L339"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Add permission to a role in DbLocator database and Auth0 API</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;int&gt; AddRolePermission(int roleId, int permissionId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>roleId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>permissionId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_AddUser_" data-uid="DbLocator.DbLocator.AddUser*"></a>
+
+  <h3 id="DbLocator_DbLocator_AddUser_System_String_System_String_System_String_System_String_DbLocator_Domain_Status_" data-uid="DbLocator.DbLocator.AddUser(System.String,System.String,System.String,System.String,DbLocator.Domain.Status)">
+  AddUser(string, string, string, string, Status)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L415"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Add user to DbLocator database and Auth0 tenant</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;int&gt; AddUser(string firstName, string lastName, string emailAddress, string password, Status userStatus)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>firstName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>lastName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>emailAddress</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>password</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>userStatus</code> <a class="xref" href="DbLocator.Domain.Status.html">Status</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_AddUserRole_" data-uid="DbLocator.DbLocator.AddUserRole*"></a>
+
+  <h3 id="DbLocator_DbLocator_AddUserRole_System_Int32_System_Int32_" data-uid="DbLocator.DbLocator.AddUserRole(System.Int32,System.Int32)">
+  AddUserRole(int, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L395"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Add user to a role in DbLocator database and Auth0 tenant</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;int&gt; AddUserRole(int userId, int roleId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>userId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>roleId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_DeleteTenant_" data-uid="DbLocator.DbLocator.DeleteTenant*"></a>
+
+  <h3 id="DbLocator_DbLocator_DeleteTenant_System_Int32_" data-uid="DbLocator.DbLocator.DeleteTenant(System.Int32)">
+  DeleteTenant(int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L91"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Delete Tenant from DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task DeleteTenant(int TenantId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TenantId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_DeleteTenantUser_" data-uid="DbLocator.DbLocator.DeleteTenantUser*"></a>
+
+  <h3 id="DbLocator_DbLocator_DeleteTenantUser_System_Int32_System_Int32_" data-uid="DbLocator.DbLocator.DeleteTenantUser(System.Int32,System.Int32)">
+  DeleteTenantUser(int, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L111"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Remove user from a Tenant in DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task DeleteTenantUser(int TenantId, int userId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TenantId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>userId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_DeleteConnection_" data-uid="DbLocator.DbLocator.DeleteConnection*"></a>
+
+  <h3 id="DbLocator_DbLocator_DeleteConnection_System_Int32_" data-uid="DbLocator.DbLocator.DeleteConnection(System.Int32)">
+  DeleteConnection(int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L139"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Delete connection from DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task DeleteConnection(int connectionId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>connectionId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_DeleteDatabase_" data-uid="DbLocator.DbLocator.DeleteDatabase*"></a>
+
+  <h3 id="DbLocator_DbLocator_DeleteDatabase_System_Int32_" data-uid="DbLocator.DbLocator.DeleteDatabase(System.Int32)">
+  DeleteDatabase(int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L201"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Delete database information from DbLocator database and on server it lives on</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task DeleteDatabase(int databaseId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>databaseId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_DeleteDatabaseServer_" data-uid="DbLocator.DbLocator.DeleteDatabaseServer*"></a>
+
+  <h3 id="DbLocator_DbLocator_DeleteDatabaseServer_System_Int32_" data-uid="DbLocator.DbLocator.DeleteDatabaseServer(System.Int32)">
+  DeleteDatabaseServer(int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L251"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Delete database server information from DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task DeleteDatabaseServer(int databaseServerId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>databaseServerId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_DeleteDatabaseType_" data-uid="DbLocator.DbLocator.DeleteDatabaseType*"></a>
+
+  <h3 id="DbLocator_DbLocator_DeleteDatabaseType_System_Int32_" data-uid="DbLocator.DbLocator.DeleteDatabaseType(System.Int32)">
+  DeleteDatabaseType(int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L287"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Delete database type from DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task DeleteDatabaseType(int databaseTypeId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>databaseTypeId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_DeletePermission_" data-uid="DbLocator.DbLocator.DeletePermission*"></a>
+
+  <h3 id="DbLocator_DbLocator_DeletePermission_System_Int32_" data-uid="DbLocator.DbLocator.DeletePermission(System.Int32)">
+  DeletePermission(int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L327"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Delete permission in DbLocator database and Auth0 API</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task DeletePermission(int permissionId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>permissionId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_DeleteRole_" data-uid="DbLocator.DbLocator.DeleteRole*"></a>
+
+  <h3 id="DbLocator_DbLocator_DeleteRole_System_Int32_" data-uid="DbLocator.DbLocator.DeleteRole(System.Int32)">
+  DeleteRole(int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L383"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Delete role from DbLocator database and Auth0 tenant</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task DeleteRole(int roleId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>roleId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_DeleteRolePermission_" data-uid="DbLocator.DbLocator.DeleteRolePermission*"></a>
+
+  <h3 id="DbLocator_DbLocator_DeleteRolePermission_System_Int32_System_Int32_" data-uid="DbLocator.DbLocator.DeleteRolePermission(System.Int32,System.Int32)">
+  DeleteRolePermission(int, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L347"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Delete permission from a role in DbLocator database and Auth0 API</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task DeleteRolePermission(int roleId, int permissionId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>roleId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>permissionId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_DeleteUser_" data-uid="DbLocator.DbLocator.DeleteUser*"></a>
+
+  <h3 id="DbLocator_DbLocator_DeleteUser_System_Int32_" data-uid="DbLocator.DbLocator.DeleteUser(System.Int32)">
+  DeleteUser(int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L468"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Delete user from DbLocator database and Auth0 tenant</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task DeleteUser(int userId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>userId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_DeleteUserRole_" data-uid="DbLocator.DbLocator.DeleteUserRole*"></a>
+
+  <h3 id="DbLocator_DbLocator_DeleteUserRole_System_Int32_System_Int32_" data-uid="DbLocator.DbLocator.DeleteUserRole(System.Int32,System.Int32)">
+  DeleteUserRole(int, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L403"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Remove user from a role in DbLocator database and Auth0 tenant</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task DeleteUserRole(int userId, int roleId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>userId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>roleId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_GeneratePasswordChangeTicket_" data-uid="DbLocator.DbLocator.GeneratePasswordChangeTicket*"></a>
+
+  <h3 id="DbLocator_DbLocator_GeneratePasswordChangeTicket_System_String_System_String_" data-uid="DbLocator.DbLocator.GeneratePasswordChangeTicket(System.String,System.String)">
+  GeneratePasswordChangeTicket(string, string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L429"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Generate Url for user to go update their password in Auth0</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;string&gt; GeneratePasswordChangeTicket(string auth0Id, string redirectUrl)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>auth0Id</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>redirectUrl</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_GetAuth0Id_" data-uid="DbLocator.DbLocator.GetAuth0Id*"></a>
+
+  <h3 id="DbLocator_DbLocator_GetAuth0Id_Microsoft_AspNetCore_Http_HttpContext_" data-uid="DbLocator.DbLocator.GetAuth0Id(Microsoft.AspNetCore.Http.HttpContext)">
+  GetAuth0Id(HttpContext)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L478"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Get a user's Auth0Id from an authenticated http request</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public string GetAuth0Id(HttpContext httpContext)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>httpContext</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.http.httpcontext">HttpContext</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_GetTenants_" data-uid="DbLocator.DbLocator.GetTenants*"></a>
+
+  <h3 id="DbLocator_DbLocator_GetTenants_System_String_System_Int32_System_Int32_" data-uid="DbLocator.DbLocator.GetTenants(System.String,System.Int32,System.Int32)">
+  GetTenants(string, int, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L70"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Gets Tenants from DbLocator database with search text and pagination</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;List&lt;Tenant&gt;&gt; GetTenants(string searchText, int page, int pageSize)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>searchText</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>page</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>pageSize</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="DbLocator.Common.Models.List-1.html">List</a>&lt;<a class="xref" href="DbLocator.Domain.Tenant.html">Tenant</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_GetConnection_" data-uid="DbLocator.DbLocator.GetConnection*"></a>
+
+  <h3 id="DbLocator_DbLocator_GetConnection_System_String_System_Int32_System_Int32_" data-uid="DbLocator.DbLocator.GetConnection(System.String,System.Int32,System.Int32)">
+  GetConnection(string, int, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L123"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Create SQL connection based on user, Tenant and database type</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;SqlConnection&gt; GetConnection(string auth0Id, int TenantId, int databaseTypeId)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>auth0Id</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>TenantId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>databaseTypeId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.data.SqlClient.sqlconnection">SqlConnection</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_GetDatabaseServers_" data-uid="DbLocator.DbLocator.GetDatabaseServers*"></a>
+
+  <h3 id="DbLocator_DbLocator_GetDatabaseServers" data-uid="DbLocator.DbLocator.GetDatabaseServers">
+  GetDatabaseServers()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L227"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Get database servers from DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;List&lt;DatabaseServer&gt;&gt; GetDatabaseServers()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="DbLocator.Domain.DatabaseServer.html">DatabaseServer</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_GetDatabaseTypes_" data-uid="DbLocator.DbLocator.GetDatabaseTypes*"></a>
+
+  <h3 id="DbLocator_DbLocator_GetDatabaseTypes" data-uid="DbLocator.DbLocator.GetDatabaseTypes">
+  GetDatabaseTypes()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L271"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Get database types from DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;List&lt;DatabaseType&gt;&gt; GetDatabaseTypes()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="DbLocator.Domain.DatabaseType.html">DatabaseType</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_GetDatabases_" data-uid="DbLocator.DbLocator.GetDatabases*"></a>
+
+  <h3 id="DbLocator_DbLocator_GetDatabases_System_String_System_Int32_System_Int32_" data-uid="DbLocator.DbLocator.GetDatabases(System.String,System.Int32,System.Int32)">
+  GetDatabases(string, int, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L171"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Get databases from DbLocator database with search text and pagination</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;List&lt;Database&gt;&gt; GetDatabases(string searchText, int page, int pageSize)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>searchText</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>page</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>pageSize</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="DbLocator.Common.Models.List-1.html">List</a>&lt;<a class="xref" href="DbLocator.Domain.Database.html">Database</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_GetPermissions_" data-uid="DbLocator.DbLocator.GetPermissions*"></a>
+
+  <h3 id="DbLocator_DbLocator_GetPermissions" data-uid="DbLocator.DbLocator.GetPermissions">
+  GetPermissions()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L307"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Get permission information in DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;List&lt;Permission&gt;&gt; GetPermissions()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="DbLocator.Domain.Permission.html">Permission</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_GetRoles_" data-uid="DbLocator.DbLocator.GetRoles*"></a>
+
+  <h3 id="DbLocator_DbLocator_GetRoles" data-uid="DbLocator.DbLocator.GetRoles">
+  GetRoles()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L367"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Get roles from DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;List&lt;Role&gt;&gt; GetRoles()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="DbLocator.Domain.Role.html">Role</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_GetUsers_" data-uid="DbLocator.DbLocator.GetUsers*"></a>
+
+  <h3 id="DbLocator_DbLocator_GetUsers_System_String_System_Int32_System_Int32_" data-uid="DbLocator.DbLocator.GetUsers(System.String,System.Int32,System.Int32)">
+  GetUsers(string, int, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L437"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Get users from DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;List&lt;User&gt;&gt; GetUsers(string keyWord, int pageNumber, int pageSize)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>keyWord</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>pageNumber</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>pageSize</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="DbLocator.Common.Models.List-1.html">List</a>&lt;<a class="xref" href="DbLocator.Domain.User.html">User</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_UpdateTenant_" data-uid="DbLocator.DbLocator.UpdateTenant*"></a>
+
+  <h3 id="DbLocator_DbLocator_UpdateTenant_System_Int32_System_String_System_String_DbLocator_Domain_Status_" data-uid="DbLocator.DbLocator.UpdateTenant(System.Int32,System.String,System.String,DbLocator.Domain.Status)">
+  UpdateTenant(int, string, string, Status)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L78"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Update Tenant information in DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task UpdateTenant(int TenantId, string TenantName, string TenantCode, Status TenantStatus)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>TenantId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>TenantName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>TenantCode</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>TenantStatus</code> <a class="xref" href="DbLocator.Domain.Status.html">Status</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_UpdateDatabase_" data-uid="DbLocator.DbLocator.UpdateDatabase*"></a>
+
+  <h3 id="DbLocator_DbLocator_UpdateDatabase_System_Int32_System_String_System_String_System_Int32_System_Byte_DbLocator_Domain_Status_" data-uid="DbLocator.DbLocator.UpdateDatabase(System.Int32,System.String,System.String,System.Int32,System.Byte,DbLocator.Domain.Status)">
+  UpdateDatabase(int, string, string, int, byte, Status)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L179"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Update database information in DbLocator database and make updates on database server</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task UpdateDatabase(int databaseId, string databaseName, string databaseUser, int databaseServerId, byte databaseTypeId, Status databaseStatus)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>databaseId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>databaseName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>databaseUser</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>databaseServerId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>databaseTypeId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.byte">byte</a></dt>
+    <dd></dd>
+    <dt><code>databaseStatus</code> <a class="xref" href="DbLocator.Domain.Status.html">Status</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_UpdateDatabaseServer_" data-uid="DbLocator.DbLocator.UpdateDatabaseServer*"></a>
+
+  <h3 id="DbLocator_DbLocator_UpdateDatabaseServer_System_Int32_System_String_System_String_" data-uid="DbLocator.DbLocator.UpdateDatabaseServer(System.Int32,System.String,System.String)">
+  UpdateDatabaseServer(int, string, string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L235"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Update database server information in DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task UpdateDatabaseServer(int databaseServerId, string databaseServerName, string databaseServerIpAddress)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>databaseServerId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>databaseServerName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>databaseServerIpAddress</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_UpdateDatabaseType_" data-uid="DbLocator.DbLocator.UpdateDatabaseType*"></a>
+
+  <h3 id="DbLocator_DbLocator_UpdateDatabaseType_System_Int32_System_String_" data-uid="DbLocator.DbLocator.UpdateDatabaseType(System.Int32,System.String)">
+  UpdateDatabaseType(int, string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L279"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Update database type information in DbLocator database</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task UpdateDatabaseType(int databaseTypeId, string name)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>databaseTypeId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>name</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_UpdatePermission_" data-uid="DbLocator.DbLocator.UpdatePermission*"></a>
+
+  <h3 id="DbLocator_DbLocator_UpdatePermission_System_Int32_System_String_System_String_" data-uid="DbLocator.DbLocator.UpdatePermission(System.Int32,System.String,System.String)">
+  UpdatePermission(int, string, string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L315"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Update permission information in DbLocator database and to Auth0 API</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task UpdatePermission(int permissionId, string permissionName, string permissionDescription)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>permissionId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>permissionName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>permissionDescription</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_UpdateRole_" data-uid="DbLocator.DbLocator.UpdateRole*"></a>
+
+  <h3 id="DbLocator_DbLocator_UpdateRole_System_Int32_System_String_System_String_" data-uid="DbLocator.DbLocator.UpdateRole(System.Int32,System.String,System.String)">
+  UpdateRole(int, string, string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L375"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Update role information in DbLocator database and Auth0 tenant</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task UpdateRole(int roleId, string roleName, string roleDescription)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>roleId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>roleName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>roleDescription</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_UpdateUser_" data-uid="DbLocator.DbLocator.UpdateUser*"></a>
+
+  <h3 id="DbLocator_DbLocator_UpdateUser_System_Int32_System_String_System_String_System_String_System_String_DbLocator_Domain_Status_" data-uid="DbLocator.DbLocator.UpdateUser(System.Int32,System.String,System.String,System.String,System.String,DbLocator.Domain.Status)">
+  UpdateUser(int, string, string, string, string, Status)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L445"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Update user information in DbLocator database and Auth0 tenant</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task UpdateUser(int userId, string firstName, string lastName, string emailAddress, string password, Status userStatus)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>userId</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>firstName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>lastName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>emailAddress</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>password</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>userStatus</code> <a class="xref" href="DbLocator.Domain.Status.html">Status</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="DbLocator_DbLocator_UpdateUserPassword_" data-uid="DbLocator.DbLocator.UpdateUserPassword*"></a>
+
+  <h3 id="DbLocator_DbLocator_UpdateUserPassword_System_String_System_String_" data-uid="DbLocator.DbLocator.UpdateUserPassword(System.String,System.String)">
+  UpdateUserPassword(string, string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L460"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Update user password in Auth0</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task UpdateUserPassword(string auth0, string password)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>auth0</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>password</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/chizer1/DbLocator/blob/main/DbLocator.cs/#L12" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

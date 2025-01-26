@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class InvoiceRepository </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class InvoiceRepository ">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/Convisi/Convisi/new/64aedd49fc93389748be8be094dcf4945c7f98ab/apiSpec/new?filename=ConvisiAPI_Repositories_InvoiceRepository.md&amp;value=---%0Auid%3A%20ConvisiAPI.Repositories.InvoiceRepository%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="">
+            
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="ConvisiAPI.Repositories.InvoiceRepository">
+
+
+
+  <h1 id="ConvisiAPI_Repositories_InvoiceRepository" data-uid="ConvisiAPI.Repositories.InvoiceRepository" class="text-break">
+Class InvoiceRepository  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/InvoiceRepository.cs/#L8"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="ConvisiAPI.html">ConvisiAPI</a>.<a class="xref" href="ConvisiAPI.Repositories.html">Repositories</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>Service.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"></div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class InvoiceRepository : BaseTenantRepository</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><a class="xref" href="ConvisiAPI.Repositories.BaseTenantRepository.html">BaseTenantRepository</a></div>
+      <div><span class="xref">InvoiceRepository</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="ConvisiAPI.Repositories.BaseTenantRepository.html#ConvisiAPI_Repositories_BaseTenantRepository_UserID">BaseTenantRepository.UserID()</a>
+    </div>
+    <div>
+      <a class="xref" href="ConvisiAPI.Repositories.BaseTenantRepository.html#ConvisiAPI_Repositories_BaseTenantRepository_TenantID">BaseTenantRepository.TenantID()</a>
+    </div>
+    <div>
+      <a class="xref" href="ConvisiAPI.Repositories.BaseTenantRepository.html#ConvisiAPI_Repositories_BaseTenantRepository_TenantCode">BaseTenantRepository.TenantCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="ConvisiAPI.Repositories.BaseTenantRepository.html#ConvisiAPI_Repositories_BaseTenantRepository_TenantDB">BaseTenantRepository.TenantDB()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone">object.MemberwiseClone()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="ConvisiAPI_Repositories_InvoiceRepository__ctor_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.#ctor*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_InvoiceRepository__ctor_ConvisiAPI_Services_DbLocatorService_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.#ctor(ConvisiAPI.Services.DbLocatorService)">
+  InvoiceRepository(DbLocatorService)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/InvoiceRepository.cs/#L8"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public InvoiceRepository(DbLocatorService DbLocatorService)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>DbLocatorService</code> <a class="xref" href="ConvisiAPI.Services.DbLocatorService.html">DbLocatorService</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="ConvisiAPI_Repositories_InvoiceRepository_AddInvoice_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.AddInvoice*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_InvoiceRepository_AddInvoice_ConvisiAPI_Models_AddInvoice_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.AddInvoice(ConvisiAPI.Models.AddInvoice)">
+  AddInvoice(AddInvoice)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/InvoiceRepository.cs/#L372"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Adds an invoice</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;Invoice&gt; AddInvoice(AddInvoice addInvoice)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>addInvoice</code> <a class="xref" href="ConvisiAPI.Models.AddInvoice.html">AddInvoice</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.Invoice.html">Invoice</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_InvoiceRepository_GetInvoice_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetInvoice*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_InvoiceRepository_GetInvoice_System_Int32_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetInvoice(System.Int32)">
+  GetInvoice(int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/InvoiceRepository.cs/#L57"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;Invoice&gt; GetInvoice(int invoiceID)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>invoiceID</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.Invoice.html">Invoice</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_InvoiceRepository_GetInvoiceHeader_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetInvoiceHeader*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_InvoiceRepository_GetInvoiceHeader_System_String_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetInvoiceHeader(System.String)">
+  GetInvoiceHeader(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/InvoiceRepository.cs/#L11"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns invoice header</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;InvoiceHeader&gt; GetInvoiceHeader(string invoiceNumber)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>invoiceNumber</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.InvoiceHeader.html">InvoiceHeader</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_InvoiceRepository_GetInvoiceLineItems_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetInvoiceLineItems*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_InvoiceRepository_GetInvoiceLineItems_System_String_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetInvoiceLineItems(System.String)">
+  GetInvoiceLineItems(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/InvoiceRepository.cs/#L97"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of invoice line items.</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;IEnumerable&lt;LineItem&gt;&gt; GetInvoiceLineItems(string invoiceNumber)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>invoiceNumber</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="ConvisiAPI.Models.LineItem.html">LineItem</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_InvoiceRepository_GetInvoicePaymentAllocations_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetInvoicePaymentAllocations*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_InvoiceRepository_GetInvoicePaymentAllocations_System_String_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetInvoicePaymentAllocations(System.String)">
+  GetInvoicePaymentAllocations(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/InvoiceRepository.cs/#L182"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of payment allocations for an invoice</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;IEnumerable&lt;PaymentAllocation&gt;&gt; GetInvoicePaymentAllocations(string invoiceNumber)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>invoiceNumber</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="ConvisiAPI.Models.PaymentAllocation.html">PaymentAllocation</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_InvoiceRepository_GetInvoiceTerms_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetInvoiceTerms*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_InvoiceRepository_GetInvoiceTerms" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetInvoiceTerms">
+  GetInvoiceTerms()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/InvoiceRepository.cs/#L358"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of invoice terms</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;IEnumerable&lt;InvoiceTerm&gt;&gt; GetInvoiceTerms()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="ConvisiAPI.Models.InvoiceTerm.html">InvoiceTerm</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_InvoiceRepository_GetInvoices_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetInvoices*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_InvoiceRepository_GetInvoices_ConvisiAPI_Models_SearchInvoiceParams_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetInvoices(ConvisiAPI.Models.SearchInvoiceParams)">
+  GetInvoices(SearchInvoiceParams)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/InvoiceRepository.cs/#L208"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of invoices</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;Invoices&gt; GetInvoices(SearchInvoiceParams searchInvoiceParams)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>searchInvoiceParams</code> <a class="xref" href="ConvisiAPI.Models.SearchInvoiceParams.html">SearchInvoiceParams</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.Invoices.html">Invoices</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_InvoiceRepository_GetProjectLineItems_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetProjectLineItems*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_InvoiceRepository_GetProjectLineItems_System_Int32_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetProjectLineItems(System.Int32)">
+  GetProjectLineItems(int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/InvoiceRepository.cs/#L323"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Generate list of project's projected line items</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;IEnumerable&lt;LineItem&gt;&gt; GetProjectLineItems(int projectID)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>projectID</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="ConvisiAPI.Models.LineItem.html">LineItem</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_InvoiceRepository_GetSlugs_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetSlugs*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_InvoiceRepository_GetSlugs" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetSlugs">
+  GetSlugs()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/InvoiceRepository.cs/#L507"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override Task&lt;IEnumerable&lt;string&gt;&gt; GetSlugs()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_InvoiceRepository_GetUnpaidInvoices_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetUnpaidInvoices*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_InvoiceRepository_GetUnpaidInvoices_System_Int32_" data-uid="ConvisiAPI.Repositories.InvoiceRepository.GetUnpaidInvoices(System.Int32)">
+  GetUnpaidInvoices(int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/InvoiceRepository.cs/#L136"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of unpaid invoices</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;IEnumerable&lt;UnpaidInvoice&gt;&gt; GetUnpaidInvoices(int accountID)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>accountID</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="ConvisiAPI.Models.UnpaidInvoice.html">UnpaidInvoice</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/InvoiceRepository.cs/#L8" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

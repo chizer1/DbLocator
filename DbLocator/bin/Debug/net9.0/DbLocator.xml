@@ -1,0 +1,380 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DbLocator</name>
+    </assembly>
+    <members>
+        <member name="T:DbLocator.DbLocator">
+            <summary>
+            DbLocator class is the main class that is used to interact with the DbLocator database.
+            </summary>
+        </member>
+        <member name="M:DbLocator.DbLocator.#ctor(System.String)">
+            <summary>
+            Constructor for DbLocator class
+            </summary>
+        </member>
+        <member name="M:DbLocator.DbLocator.AddTenant(System.String,System.String,DbLocator.Domain.Status)">
+             <summary>
+            Add Tenant to DbLocator database
+             </summary>
+             <returns>TenantId</returns>
+             <param name="tenantName">Name of the Tenant</param>
+             <param name="tenantCode">Code of the Tenant</param>
+             <param name="tenantStatus">Status of the Tenant</param>
+        </member>
+        <member name="M:DbLocator.DbLocator.GetTenants">
+             <summary>
+            Get Tenants
+             </summary>
+             <returns>List of Tenants</returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.UpdateTenant(System.Int32,System.String,System.String,DbLocator.Domain.Status)">
+             <summary>
+            Update Tenant information in DbLocator database
+             </summary>
+             <param name="tenantId">Id of the Tenant</param>
+             <param name="tenantName">Name of the Tenant</param>
+             <param name="tenantCode">Code of the Tenant</param>
+             <param name="tenantStatus">Status of the Tenant</param>
+             <returns></returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.DeleteTenant(System.Int32)">
+             <summary>
+            Delete Tenant from DbLocator database
+             </summary>
+             <param name="tenantId">Id of the Tenant</param>
+             <returns></returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.GetConnection(System.Int32,System.Int32)">
+            <summary>
+            Create SQL connection based on user, Tenant and database type
+            </summary>
+            <param name="tenantId">Id of the Tenant</param>
+            <param name="databaseTypeId">Id of the database type</param>
+            <returns>SqlConnection</returns>
+            <returns></returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.GetConnections">
+            <summary>
+            Get connections from DbLocator database
+            </summary>
+            <returns>List of Connections</returns>
+            <returns></returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.AddConnection(System.Int32,System.Int32)">
+             <summary>
+            Add connection to DbLocator database
+             </summary>
+             <param name="TenantUserId">Id of the Tenant user</param>
+             <param name="databaseId">Id of the database</param>
+             <returns>ConnectionId</returns>
+             <returns></returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.DeleteConnection(System.Int32)">
+             <summary>
+            Delete connection from DbLocator database
+             </summary>
+             <param name="connectionId">Id of the connection</param>
+             <returns></returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.AddDatabase(System.String,System.String,System.Int32,System.Byte,DbLocator.Domain.Status,System.Boolean,System.Boolean)">
+             <summary>
+            Add new database on specified server and insert record in DbLocator database
+             </summary>
+             <param name="databaseName">Name of the database</param>
+             <param name="databaseUser">User of the database</param>
+             <param name="databaseServerId">Id of the database server</param>
+             <param name="databaseTypeId">Id of the database type</param>
+             <param name="databaseStatus">Status of the database</param>
+             <param name="useTrustedConnection">Use trusted connection</param>
+             <param name="createDatabase">Create database</param>
+             <returns>DatabaseId</returns>
+             <returns></returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.GetDatabases">
+             <summary>
+            Get databases
+             </summary>
+             <returns>List of Databases</returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.UpdateDatabase(System.Int32,System.String,System.String,System.Int32,System.Byte,DbLocator.Domain.Status)">
+             <summary>
+            Update database information in DbLocator database and make updates on database server
+             </summary>
+             <param name="databaseId">Id of the database</param>
+             <param name="databaseName">Name of the database</param>
+             <param name="databaseUser">User of the database</param>
+             <param name="databaseServerId">Id of the database server</param>
+             <param name="databaseTypeId">Id of the database type</param>
+             <param name="databaseStatus">Status of the database</param>
+             <returns></returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.DeleteDatabase(System.Int32)">
+             <summary>
+            Delete database information from DbLocator database and on server it lives on
+             </summary>
+             <param name="databaseId">Id of the database</param>
+             <returns></returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.AddDatabaseServer(System.String,System.String)">
+             <summary>
+            Add database server to DbLocator database.
+             </summary>
+             <param name="databaseServerName">Name of the database server</param>
+             <param name="databaseServerIpAddress">IP address of the database server</param>
+             <returns>DatabaseServerId</returns>
+             <remarks> This method will not create a new database server. It will only add a record in the DbLocator database.</remarks>
+        </member>
+        <member name="M:DbLocator.DbLocator.GetDatabaseServers">
+             <summary>
+            Get database servers from DbLocator database
+             </summary>
+             <returns>List of DatabaseServers</returns>
+             <returns></returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.UpdateDatabaseServer(System.Int32,System.String,System.String)">
+             <summary>
+            Update database server information in DbLocator database
+             </summary>
+             <param name="databaseServerId">Id of the database server</param>
+             <param name="databaseServerName">Name of the database server</param>
+             <param name="databaseServerIpAddress">IP address of the database server</param>
+             <returns></returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.DeleteDatabaseServer(System.Int32)">
+             <summary>
+            Delete database server information from DbLocator database
+             </summary>
+             <param name="databaseServerId">Id of the database server</param>
+             <returns></returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.AddDatabaseType(System.String)">
+             <summary>
+            Add database type to DbLocator database
+             </summary>
+             <param name="name">Name of the database type</param>
+             <returns>DatabaseTypeId</returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.GetDatabaseTypes">
+             <summary>
+            Get database types from DbLocator database
+             </summary>
+             <returns>List of DatabaseTypes</returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.UpdateDatabaseType(System.Int32,System.String)">
+             <summary>
+            Update database type information in DbLocator database
+             </summary>
+             <param name="databaseTypeId">Id of the database type</param>
+             <param name="name">Name of the database type</param>
+             <returns></returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.DeleteDatabaseType(System.Int32)">
+             <summary>
+            Delete database type from DbLocator database
+             </summary>
+             <param name="databaseTypeId">Id of the database type</param>
+             <returns></returns>
+        </member>
+        <member name="T:DbLocator.Domain.Connection">
+            <summary>
+            Represents a connection to a database.
+            </summary>
+            <param name="id">The unique identifier for the connection.</param>
+            <param name="database">The identifier of the database.</param>
+            <param name="tenant">The identifier of the tenant</param>
+        </member>
+        <member name="M:DbLocator.Domain.Connection.#ctor(System.Int32,DbLocator.Domain.Database,DbLocator.Domain.Tenant)">
+            <summary>
+            Represents a connection to a database.
+            </summary>
+            <param name="id">The unique identifier for the connection.</param>
+            <param name="database">The identifier of the database.</param>
+            <param name="tenant">The identifier of the tenant</param>
+        </member>
+        <member name="P:DbLocator.Domain.Connection.Id">
+            <summary>
+            Gets the unique identifier for the connection.
+            </summary>
+        </member>
+        <member name="P:DbLocator.Domain.Connection.Database">
+            <summary>
+            Gets or sets the identifier of the database.
+            </summary>
+        </member>
+        <member name="P:DbLocator.Domain.Connection.Tenant">
+            <summary>
+            Gets or sets the identifier of the tenant.
+            </summary>
+        </member>
+        <member name="T:DbLocator.Domain.Database">
+            <summary>
+            Represents a database.
+            </summary>
+            <param name="id">The database ID.</param>
+            <param name="name">The name of the database.</param>
+            <param name="databaseType">The type of the database.</param>
+            <param name="databaseServer">The Database server.</param>
+            <param name="status">The status of the database.</param>
+            <param name="useTrustedConnection"> Use trusted connection.</param>
+        </member>
+        <member name="M:DbLocator.Domain.Database.#ctor(System.Int32,System.String,DbLocator.Domain.DatabaseType,DbLocator.Domain.DatabaseServer,DbLocator.Domain.Status,System.Boolean)">
+            <summary>
+            Represents a database.
+            </summary>
+            <param name="id">The database ID.</param>
+            <param name="name">The name of the database.</param>
+            <param name="databaseType">The type of the database.</param>
+            <param name="databaseServer">The Database server.</param>
+            <param name="status">The status of the database.</param>
+            <param name="useTrustedConnection"> Use trusted connection.</param>
+        </member>
+        <member name="P:DbLocator.Domain.Database.Id">
+            <summary>
+            Gets the database ID.
+            </summary>
+        </member>
+        <member name="P:DbLocator.Domain.Database.Name">
+            <summary>
+            Gets the name of the database.
+            </summary>
+        </member>
+        <member name="P:DbLocator.Domain.Database.Type">
+            <summary>
+            Gets or sets the database type.
+            </summary>
+        </member>
+        <member name="P:DbLocator.Domain.Database.Server">
+            <summary>
+            Gets the ID of the database server.
+            </summary>
+        </member>
+        <member name="P:DbLocator.Domain.Database.Status">
+            <summary>
+            Gets or sets the status of the database.
+            </summary>
+        </member>
+        <member name="P:DbLocator.Domain.Database.UseTrustedConnection">
+            <summary>
+            Gets or sets a value indicating whether to use a trusted connection.
+            </summary>
+            <value><c>true</c> if a trusted connection should be used; otherwise, <c>false</c>.</value>
+            <remarks>
+            If <c>true</c>, the database user and password are ignored.
+            </remarks>
+        </member>
+        <member name="T:DbLocator.Domain.DatabaseServer">
+            <summary>
+            Represents a database server.
+            </summary>
+            <param name="id">The unique identifier of the database server.</param>
+            <param name="name">The name of the database server.</param>
+            <param name="ipAddress">The IP address of the database server.</param>
+        </member>
+        <member name="M:DbLocator.Domain.DatabaseServer.#ctor(System.Int32,System.String,System.String)">
+            <summary>
+            Represents a database server.
+            </summary>
+            <param name="id">The unique identifier of the database server.</param>
+            <param name="name">The name of the database server.</param>
+            <param name="ipAddress">The IP address of the database server.</param>
+        </member>
+        <member name="P:DbLocator.Domain.DatabaseServer.Id">
+            <summary>
+            Gets the unique identifier of the database server.
+            </summary>
+        </member>
+        <member name="P:DbLocator.Domain.DatabaseServer.Name">
+            <summary>
+            Gets the name of the database server.
+            </summary>
+        </member>
+        <member name="P:DbLocator.Domain.DatabaseServer.IpAddress">
+            <summary>
+            Gets the IP address of the database server.
+            </summary>
+        </member>
+        <member name="T:DbLocator.Domain.DatabaseType">
+            <summary>
+            Represents a type of database.
+            </summary>
+            <param name="id">The unique identifier of the database type.</param>
+            <param name="name">The name of the database type.</param>
+        </member>
+        <member name="M:DbLocator.Domain.DatabaseType.#ctor(System.Int32,System.String)">
+            <summary>
+            Represents a type of database.
+            </summary>
+            <param name="id">The unique identifier of the database type.</param>
+            <param name="name">The name of the database type.</param>
+        </member>
+        <member name="P:DbLocator.Domain.DatabaseType.Id">
+            <summary>
+            Gets the unique identifier of the database type.
+            </summary>
+        </member>
+        <member name="P:DbLocator.Domain.DatabaseType.Name">
+            <summary>
+            Gets the name of the database type.
+            </summary>
+        </member>
+        <member name="T:DbLocator.Domain.Status">
+            <summary>
+            Represents the status of an entity.
+            </summary>
+        </member>
+        <member name="F:DbLocator.Domain.Status.Active">
+            <summary>
+            The entity is active.
+            </summary>
+        </member>
+        <member name="F:DbLocator.Domain.Status.Inactive">
+            <summary>
+            The entity is inactive.
+            </summary>
+        </member>
+        <member name="T:DbLocator.Domain.Tenant">
+            <summary>
+            Represents a Tenant with an ID, name, code, and status.
+            </summary>
+        </member>
+        <member name="M:DbLocator.Domain.Tenant.#ctor(System.Int32,System.String,System.String,DbLocator.Domain.Status)">
+            <summary>
+            Represents a Tenant with an ID, name, code, and status.
+            </summary>
+        </member>
+        <member name="P:DbLocator.Domain.Tenant.Id">
+            <summary>
+            Gets the ID of the Tenant.
+            </summary>
+        </member>
+        <member name="P:DbLocator.Domain.Tenant.Name">
+            <summary>
+            Gets the name of the Tenant.
+            </summary>
+        </member>
+        <member name="P:DbLocator.Domain.Tenant.Code">
+            <summary>
+            Gets the code of the Tenant.
+            </summary>
+        </member>
+        <member name="P:DbLocator.Domain.Tenant.Status">
+            <summary>
+            Gets the status of the Tenant.
+            </summary>
+        </member>
+        <member name="T:DbLocator.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:DbLocator.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbLocator.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:DbLocator.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

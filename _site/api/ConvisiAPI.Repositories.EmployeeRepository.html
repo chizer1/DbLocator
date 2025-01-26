@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Class EmployeeRepository </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Class EmployeeRepository ">
+      
+      
+      <link rel="icon" href="../favicon.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/Convisi/Convisi/new/64aedd49fc93389748be8be094dcf4945c7f98ab/apiSpec/new?filename=ConvisiAPI_Repositories_EmployeeRepository.md&amp;value=---%0Auid%3A%20ConvisiAPI.Repositories.EmployeeRepository%0Asummary%3A%20&#39;*You%20can%20override%20summary%20for%20the%20API%20here%20using%20*MARKDOWN*%20syntax&#39;%0A---%0A%0A*Please%20type%20below%20more%20information%20about%20this%20API%3A*%0A%0A">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="ManagedReference">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../logo.svg" alt="">
+            
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="ConvisiAPI.Repositories.EmployeeRepository">
+
+
+
+  <h1 id="ConvisiAPI_Repositories_EmployeeRepository" data-uid="ConvisiAPI.Repositories.EmployeeRepository" class="text-break">
+Class EmployeeRepository  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L8"><i class="bi bi-code-slash"></i></a>
+  </h1>
+
+  <div class="facts text-secondary">
+    <dl><dt>Namespace</dt><dd><a class="xref" href="ConvisiAPI.html">ConvisiAPI</a>.<a class="xref" href="ConvisiAPI.Repositories.html">Repositories</a></dd></dl>
+  <dl><dt>Assembly</dt><dd>Service.dll</dd></dl>
+  </div>
+
+  <div class="markdown summary"></div>
+  <div class="markdown conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public class EmployeeRepository : BaseTenantRepository</code></pre>
+  </div>
+
+
+
+
+  <dl class="typelist inheritance">
+    <dt>Inheritance</dt>
+    <dd>
+      <div><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object">object</a></div>
+      <div><a class="xref" href="ConvisiAPI.Repositories.BaseTenantRepository.html">BaseTenantRepository</a></div>
+      <div><span class="xref">EmployeeRepository</span></div>
+    </dd>
+  </dl>
+
+
+
+  <dl class="typelist inheritedMembers">
+    <dt>Inherited Members</dt>
+    <dd>
+    <div>
+      <a class="xref" href="ConvisiAPI.Repositories.BaseTenantRepository.html#ConvisiAPI_Repositories_BaseTenantRepository_UserID">BaseTenantRepository.UserID()</a>
+    </div>
+    <div>
+      <a class="xref" href="ConvisiAPI.Repositories.BaseTenantRepository.html#ConvisiAPI_Repositories_BaseTenantRepository_TenantID">BaseTenantRepository.TenantID()</a>
+    </div>
+    <div>
+      <a class="xref" href="ConvisiAPI.Repositories.BaseTenantRepository.html#ConvisiAPI_Repositories_BaseTenantRepository_TenantCode">BaseTenantRepository.TenantCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="ConvisiAPI.Repositories.BaseTenantRepository.html#ConvisiAPI_Repositories_BaseTenantRepository_TenantDB">BaseTenantRepository.TenantDB()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object)">object.Equals(object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.equals#system-object-equals(system-object-system-object)">object.Equals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gethashcode">object.GetHashCode()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.gettype">object.GetType()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.memberwiseclone">object.MemberwiseClone()</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.referenceequals">object.ReferenceEquals(object, object)</a>
+    </div>
+    <div>
+      <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.object.tostring">object.ToString()</a>
+    </div>
+  </dd></dl>
+
+
+
+
+
+
+  <h2 class="section" id="constructors">Constructors
+</h2>
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository__ctor_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.#ctor*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository__ctor_ConvisiAPI_Services_DbLocatorService_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.#ctor(ConvisiAPI.Services.DbLocatorService)">
+  EmployeeRepository(DbLocatorService)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L8"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public EmployeeRepository(DbLocatorService DbLocatorService)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>DbLocatorService</code> <a class="xref" href="ConvisiAPI.Services.DbLocatorService.html">DbLocatorService</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2 class="section" id="methods">Methods
+</h2>
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_AddEmployee_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.AddEmployee*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_AddEmployee_ConvisiAPI_Models_AddEmployee_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.AddEmployee(ConvisiAPI.Models.AddEmployee)">
+  AddEmployee(AddEmployee)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L550"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Adds a new employee</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;Employee&gt; AddEmployee(AddEmployee addEmployee)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>addEmployee</code> <a class="xref" href="ConvisiAPI.Models.AddEmployee.html">AddEmployee</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.Employee.html">Employee</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_AddEmployeeExpense_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.AddEmployeeExpense*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_AddEmployeeExpense_System_String_ConvisiAPI_Models_AddEmployeeExpense_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.AddEmployeeExpense(System.String,ConvisiAPI.Models.AddEmployeeExpense)">
+  AddEmployeeExpense(string, AddEmployeeExpense)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1147"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Creates a new employee expense</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;EmployeeExpense&gt; AddEmployeeExpense(string employeeSlug, AddEmployeeExpense addEmployeeExpense)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>addEmployeeExpense</code> <a class="xref" href="ConvisiAPI.Models.AddEmployeeExpense.html">AddEmployeeExpense</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.EmployeeExpense.html">EmployeeExpense</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_AddEmployeeRate_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.AddEmployeeRate*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_AddEmployeeRate_System_String_ConvisiAPI_Models_AddEmployeeRate_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.AddEmployeeRate(System.String,ConvisiAPI.Models.AddEmployeeRate)">
+  AddEmployeeRate(string, AddEmployeeRate)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1098"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Creates a new employee rate</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;EmployeeRate&gt; AddEmployeeRate(string employeeSlug, AddEmployeeRate addEmployeeRate)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>addEmployeeRate</code> <a class="xref" href="ConvisiAPI.Models.AddEmployeeRate.html">AddEmployeeRate</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.EmployeeRate.html">EmployeeRate</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_AddEmployeeSalary_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.AddEmployeeSalary*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_AddEmployeeSalary_System_String_ConvisiAPI_Models_AddEmployeeSalary_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.AddEmployeeSalary(System.String,ConvisiAPI.Models.AddEmployeeSalary)">
+  AddEmployeeSalary(string, AddEmployeeSalary)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1200"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Creates a new employee salary</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;EmployeeSalary&gt; AddEmployeeSalary(string employeeSlug, AddEmployeeSalary addEmployeeSalary)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>addEmployeeSalary</code> <a class="xref" href="ConvisiAPI.Models.AddEmployeeSalary.html">AddEmployeeSalary</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.EmployeeSalary.html">EmployeeSalary</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_ContactSlugExists_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.ContactSlugExists*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_ContactSlugExists_System_String_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.ContactSlugExists(System.String)">
+  ContactSlugExists(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1450"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;bool&gt; ContactSlugExists(string contactSlug)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>contactSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_CreateContactSlug_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.CreateContactSlug*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_CreateContactSlug_System_String_System_String_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.CreateContactSlug(System.String,System.String)">
+  CreateContactSlug(string, string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1426"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Creates a contact slug for new contact</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;string&gt; CreateContactSlug(string firstName, string lastName)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>firstName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>lastName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_CreateEmployeeSlug_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.CreateEmployeeSlug*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_CreateEmployeeSlug_System_String_System_String_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.CreateEmployeeSlug(System.String,System.String)">
+  CreateEmployeeSlug(string, string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L448"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Generates a employee slug when creating a new employee</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;string&gt; CreateEmployeeSlug(string employeeFirstName, string employeeLastName)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeFirstName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>employeeLastName</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_DeleteEmployeeExpense_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.DeleteEmployeeExpense*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_DeleteEmployeeExpense_System_String_System_Int32_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.DeleteEmployeeExpense(System.String,System.Int32)">
+  DeleteEmployeeExpense(string, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L932"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;EmployeeExpense&gt; DeleteEmployeeExpense(string employeeSlug, int employeeExpenseID)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>employeeExpenseID</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.EmployeeExpense.html">EmployeeExpense</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_DeleteEmployeeSalary_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.DeleteEmployeeSalary*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_DeleteEmployeeSalary_System_String_System_Int32_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.DeleteEmployeeSalary(System.String,System.Int32)">
+  DeleteEmployeeSalary(string, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L954"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;EmployeeSalary&gt; DeleteEmployeeSalary(string employeeSlug, int employeeSalaryID)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>employeeSalaryID</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.EmployeeSalary.html">EmployeeSalary</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_EmployeeSlugExists_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.EmployeeSlugExists*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_EmployeeSlugExists_System_String_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.EmployeeSlugExists(System.String)">
+  EmployeeSlugExists(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L474"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Check if employee slug already exists</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;bool&gt; EmployeeSlugExists(string employeeSlug)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.boolean">bool</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetAvailableEmployees_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetAvailableEmployees*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetAvailableEmployees_System_DateTime_System_DateTime_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetAvailableEmployees(System.DateTime,System.DateTime)">
+  GetAvailableEmployees(DateTime, DateTime)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L245"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of employees that are available to start a project during a specific time period</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;List&lt;EmployeeList&gt;&gt; GetAvailableEmployees(DateTime startDate, DateTime endDate)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>startDate</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.datetime">DateTime</a></dt>
+    <dd></dd>
+    <dt><code>endDate</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.datetime">DateTime</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="ConvisiAPI.Models.EmployeeList.html">EmployeeList</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployee_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployee*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployee_System_String_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployee(System.String)">
+  GetEmployee(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L297"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns an employee</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;Employee&gt; GetEmployee(string employeeSlug)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.Employee.html">Employee</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeAddress_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeAddress*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeAddress_System_String_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeAddress(System.String)">
+  GetEmployeeAddress(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L508"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns an employee's address</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;Address&gt; GetEmployeeAddress(string employeeSlug)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.Address.html">Address</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeAttributeTypes_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeAttributeTypes*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeAttributeTypes" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeAttributeTypes">
+  GetEmployeeAttributeTypes()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L11"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;List&lt;AttributeType&gt;&gt; GetEmployeeAttributeTypes()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="ConvisiAPI.Models.AttributeType.html">AttributeType</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeContacts_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeContacts*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeContacts_System_String_System_Int32_System_Int32_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeContacts(System.String,System.Int32,System.Int32)">
+  GetEmployeeContacts(string, int, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1354"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Get an employee's contacts</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;Contacts&gt; GetEmployeeContacts(string employeeSlug, int pageNumber, int pageSize)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>pageNumber</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>pageSize</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.Contacts.html">Contacts</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeExpenseTypes_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeExpenseTypes*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeExpenseTypes_System_String_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeExpenseTypes(System.String)">
+  GetEmployeeExpenseTypes(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1064"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of employee expense types</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;IEnumerable&lt;ExpenseType&gt;&gt; GetEmployeeExpenseTypes(string expenseEntity)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>expenseEntity</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="ConvisiAPI.Models.ExpenseType.html">ExpenseType</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeExpenses_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeExpenses*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeExpenses_System_String_System_Int32_System_Int32_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeExpenses(System.String,System.Int32,System.Int32)">
+  GetEmployeeExpenses(string, int, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L977"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of employee's expenses]</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;EmployeeExpenses&gt; GetEmployeeExpenses(string employeeSlug, int pageNumber, int pageSize)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>pageNumber</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>pageSize</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.EmployeeExpenses.html">EmployeeExpenses</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeFinanceSummary_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeFinanceSummary*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeFinanceSummary_System_String_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeFinanceSummary(System.String)">
+  GetEmployeeFinanceSummary(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L371"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;EmployeeFinance&gt; GetEmployeeFinanceSummary(string employeeSlug)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.EmployeeFinance.html">EmployeeFinance</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeList_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeList*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeList" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeList">
+  GetEmployeeList()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L919"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of employees</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;IEnumerable&lt;EmployeeList&gt;&gt; GetEmployeeList()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="ConvisiAPI.Models.EmployeeList.html">EmployeeList</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeProjects_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeProjects*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeProjects_System_String_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeProjects(System.String)">
+  GetEmployeeProjects(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L764"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of projects tied to an employee</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;Projects&gt; GetEmployeeProjects(string employeeSlug)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.Projects.html">Projects</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeRateTypes_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeRateTypes*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeRateTypes" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeRateTypes">
+  GetEmployeeRateTypes()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1084"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of employee rate types</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;IEnumerable&lt;RateType&gt;&gt; GetEmployeeRateTypes()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="ConvisiAPI.Models.RateType.html">RateType</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeRates_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeRates*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeRates_System_String_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeRates(System.String)">
+  GetEmployeeRates(string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L902"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of an employee's rates</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;List&lt;EmployeeRate&gt;&gt; GetEmployeeRates(string employeeSlug)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.list-1">List</a>&lt;<a class="xref" href="ConvisiAPI.Models.EmployeeRate.html">EmployeeRate</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeSalaries_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeSalaries*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeSalaries_System_String_System_Int32_System_Int32_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeSalaries(System.String,System.Int32,System.Int32)">
+  GetEmployeeSalaries(string, int, int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L829"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of an employee's salaries</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;EmployeeSalaries&gt; GetEmployeeSalaries(string employeeSlug, int pageNumber, int pageSize)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>pageNumber</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+    <dt><code>pageSize</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.EmployeeSalaries.html">EmployeeSalaries</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeSalaryTypes_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeSalaryTypes*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeeSalaryTypes" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeeSalaryTypes">
+  GetEmployeeSalaryTypes()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1050"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of employee salary types</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;IEnumerable&lt;SalaryType&gt;&gt; GetEmployeeSalaryTypes()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="ConvisiAPI.Models.SalaryType.html">SalaryType</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployees_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployees*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployees_ConvisiAPI_Models_SearchEmployeeParams_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployees(ConvisiAPI.Models.SearchEmployeeParams)">
+  GetEmployees(SearchEmployeeParams)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L53"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;Employees&gt; GetEmployees(SearchEmployeeParams searchEmployeeParams)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>searchEmployeeParams</code> <a class="xref" href="ConvisiAPI.Models.SearchEmployeeParams.html">SearchEmployeeParams</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.Employees.html">Employees</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeesAttachedToProjects_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeesAttachedToProjects*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetEmployeesAttachedToProjects" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetEmployeesAttachedToProjects">
+  GetEmployeesAttachedToProjects()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L201"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of employees who are attached to a project</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;IEnumerable&lt;EmployeeList&gt;&gt; GetEmployeesAttachedToProjects()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="ConvisiAPI.Models.EmployeeList.html">EmployeeList</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetProjectsByEmployeeID_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetProjectsByEmployeeID*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetProjectsByEmployeeID_System_Int32_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetProjectsByEmployeeID(System.Int32)">
+  GetProjectsByEmployeeID(int)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L222"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Returns a list of projects attached to employee</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;IEnumerable&lt;ProjectList&gt;&gt; GetProjectsByEmployeeID(int employeeID)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeID</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.int32">int</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="ConvisiAPI.Models.ProjectList.html">ProjectList</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_GetSlugs_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetSlugs*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_GetSlugs" data-uid="ConvisiAPI.Repositories.EmployeeRepository.GetSlugs">
+  GetSlugs()
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1670"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"></div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public override Task&lt;IEnumerable&lt;string&gt;&gt; GetSlugs()</code></pre>
+  </div>
+
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ienumerable-1">IEnumerable</a>&lt;<a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a>&gt;&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_InsertContactEmail_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.InsertContactEmail*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_InsertContactEmail_ConvisiAPI_Models_AddContactEmail_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.InsertContactEmail(ConvisiAPI.Models.AddContactEmail)">
+  InsertContactEmail(AddContactEmail)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1597"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Add an employee contact email</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;ContactEmail&gt; InsertContactEmail(AddContactEmail addContactEmail)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>addContactEmail</code> <a class="xref" href="ConvisiAPI.Models.AddContactEmail.html">AddContactEmail</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.ContactEmail.html">ContactEmail</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_InsertContactPhone_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.InsertContactPhone*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_InsertContactPhone_ConvisiAPI_Models_AddContactPhone_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.InsertContactPhone(ConvisiAPI.Models.AddContactPhone)">
+  InsertContactPhone(AddContactPhone)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1635"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Add an employee contact phone number</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;ContactPhone&gt; InsertContactPhone(AddContactPhone addContactPhone)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>addContactPhone</code> <a class="xref" href="ConvisiAPI.Models.AddContactPhone.html">AddContactPhone</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.ContactPhone.html">ContactPhone</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_InsertEmployeeContact_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.InsertEmployeeContact*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_InsertEmployeeContact_ConvisiAPI_Models_AddEmployeeContact_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.InsertEmployeeContact(ConvisiAPI.Models.AddEmployeeContact)">
+  InsertEmployeeContact(AddEmployeeContact)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1484"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Updates an employee contact</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;Contact&gt; InsertEmployeeContact(AddEmployeeContact addEmployeeContact)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>addEmployeeContact</code> <a class="xref" href="ConvisiAPI.Models.AddEmployeeContact.html">AddEmployeeContact</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.Contact.html">Contact</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_UpdateEmployee_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.UpdateEmployee*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_UpdateEmployee_System_String_ConvisiAPI_Models_UpdateEmployee_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.UpdateEmployee(System.String,ConvisiAPI.Models.UpdateEmployee)">
+  UpdateEmployee(string, UpdateEmployee)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L166"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Updates an employee's information</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;Employee&gt; UpdateEmployee(string employeeSlug, UpdateEmployee updateEmployee)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>updateEmployee</code> <a class="xref" href="ConvisiAPI.Models.UpdateEmployee.html">UpdateEmployee</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.Employee.html">Employee</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_UpdateEmployeeExpense_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.UpdateEmployeeExpense*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_UpdateEmployeeExpense_ConvisiAPI_Models_UpdateEmployeeExpense_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.UpdateEmployeeExpense(ConvisiAPI.Models.UpdateEmployeeExpense)">
+  UpdateEmployeeExpense(UpdateEmployeeExpense)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1254"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Updates an employee expense</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;EmployeeExpense&gt; UpdateEmployeeExpense(UpdateEmployeeExpense updateEmployeeExpense)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>updateEmployeeExpense</code> <a class="xref" href="ConvisiAPI.Models.UpdateEmployeeExpense.html">UpdateEmployeeExpense</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.EmployeeExpense.html">EmployeeExpense</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_UpdateEmployeeSalary_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.UpdateEmployeeSalary*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_UpdateEmployeeSalary_ConvisiAPI_Models_UpdateEmployeeSalary_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.UpdateEmployeeSalary(ConvisiAPI.Models.UpdateEmployeeSalary)">
+  UpdateEmployeeSalary(UpdateEmployeeSalary)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1293"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Updates an employee salary</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;EmployeeSalary&gt; UpdateEmployeeSalary(UpdateEmployeeSalary updateEmployeeSalary)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>updateEmployeeSalary</code> <a class="xref" href="ConvisiAPI.Models.UpdateEmployeeSalary.html">UpdateEmployeeSalary</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.EmployeeSalary.html">EmployeeSalary</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_UpdateEmployeeUserGuid_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.UpdateEmployeeUserGuid*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_UpdateEmployeeUserGuid_System_String_System_String_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.UpdateEmployeeUserGuid(System.String,System.String)">
+  UpdateEmployeeUserGuid(string, string)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L1332"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Updates an employee user guid</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task UpdateEmployeeUserGuid(string employeeSlug, string userGuid)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>userGuid</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task">Task</a></dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+  <a id="ConvisiAPI_Repositories_EmployeeRepository_UpsertEmployeeAddress_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.UpsertEmployeeAddress*"></a>
+
+  <h3 id="ConvisiAPI_Repositories_EmployeeRepository_UpsertEmployeeAddress_System_String_ConvisiAPI_Models_Address_" data-uid="ConvisiAPI.Repositories.EmployeeRepository.UpsertEmployeeAddress(System.String,ConvisiAPI.Models.Address)">
+  UpsertEmployeeAddress(string, Address)
+  <a class="header-action link-secondary" title="View source" href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L627"><i class="bi bi-code-slash"></i></a>
+  </h3>
+
+  <div class="markdown level1 summary"><p>Upserts an employee address</p>
+</div>
+  <div class="markdown level1 conceptual"></div>
+
+  <div class="codewrapper">
+    <pre><code class="lang-csharp hljs">public Task&lt;Address&gt; UpsertEmployeeAddress(string employeeSlug, Address employeeAddress)</code></pre>
+  </div>
+
+  <h4 class="section">Parameters</h4>
+  <dl class="parameters">
+    <dt><code>employeeSlug</code> <a class="xref" href="https://learn.microsoft.com/dotnet/api/system.string">string</a></dt>
+    <dd></dd>
+    <dt><code>employeeAddress</code> <a class="xref" href="ConvisiAPI.Models.Address.html">Address</a></dt>
+    <dd></dd>
+  </dl>
+
+  <h4 class="section">Returns</h4>
+  <dl class="parameters">
+    <dt><a class="xref" href="https://learn.microsoft.com/dotnet/api/system.threading.tasks.task-1">Task</a>&lt;<a class="xref" href="ConvisiAPI.Models.Address.html">Address</a>&gt;</dt>
+    <dd></dd>
+  </dl>
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/Convisi/Convisi/blob/64aedd49fc93389748be8be094dcf4945c7f98ab/API/Service/Repositories/EmployeeRepository.cs/#L8" class="edit-link">Edit this page</a>
+        </div>
+
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
