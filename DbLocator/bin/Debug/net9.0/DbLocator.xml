@@ -78,19 +78,46 @@
              <param name="connectionId">Id of the connection</param>
              <returns></returns>
         </member>
-        <member name="M:DbLocator.DbLocator.AddDatabase(System.String,System.String,System.Int32,System.Byte,DbLocator.Domain.Status,System.Boolean,System.Boolean)">
-             <summary>
-            Add new database on specified server and insert record in DbLocator database
-             </summary>
-             <param name="databaseName">Name of the database</param>
-             <param name="databaseUser">User of the database</param>
-             <param name="databaseServerId">Id of the database server</param>
-             <param name="databaseTypeId">Id of the database type</param>
-             <param name="databaseStatus">Status of the database</param>
-             <param name="useTrustedConnection">Use trusted connection</param>
-             <param name="createDatabase">Create database</param>
-             <returns>DatabaseId</returns>
-             <returns></returns>
+        <member name="M:DbLocator.DbLocator.AddDatabase(System.String,System.String,System.Int32,System.Byte,DbLocator.Domain.Status)">
+            <summary>
+            Insert database record and create new database on specified server with the user provided
+            </summary>
+            <param name="databaseName">Name of the database</param>
+            <param name="databaseUser">User of the database</param>
+            <param name="databaseServerId">Id of the database server</param>
+            <param name="databaseTypeId">Id of the database type</param>
+            <param name="databaseStatus">Status of the database</param>
+            <returns>DatabaseId</returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.AddDatabase(System.String,System.Int32,System.Byte,DbLocator.Domain.Status,System.Boolean)">
+            <summary>
+            Insert database record and create new database on specified server if createDatabase is true and use trusted connection
+            </summary>
+            <param name="databaseName">Name of the database</param>
+            <param name="databaseServerId">Id of the database server</param>
+            <param name="databaseTypeId">Id of the database type</param>
+            <param name="databaseStatus">Status of the database</param>
+            <param name="createDatabase">Create database</param>
+            <returns>DatabaseId</returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.AddDatabase(System.String,System.String,System.Int32,System.Byte)">
+            <summary>
+            Insert database record and create new database on specified server with the user provided
+            </summary>
+            <param name="databaseName">Name of the database</param>
+            <param name="databaseUser">User of the database</param>
+            <param name="databaseServerId">Id of the database server</param>
+            <param name="databaseTypeId">Id of the database type</param>
+            <returns>DatabaseId</returns>
+        </member>
+        <member name="M:DbLocator.DbLocator.AddDatabase(System.String,System.Int32,System.Byte)">
+            <remarks>
+            Insert database record and create new database on specified server and use trusted connection
+            </remarks>
+            <param name="databaseName">Name of the database</param>
+            <param name="databaseServerId">Id of the database server</param>
+            <param name="databaseTypeId">Id of the database type</param>
+            <returns>DatabaseId</returns>
         </member>
         <member name="M:DbLocator.DbLocator.GetDatabases">
              <summary>

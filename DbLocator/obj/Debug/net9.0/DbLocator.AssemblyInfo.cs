@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("DbLocator")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e98c903b3bbf675d1a335a4e80f35bdbd84dce09")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5f4049147316831c694cb77f8a64dd1a93e2a426")]
 [assembly: System.Reflection.AssemblyProductAttribute("DbLocator")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DbLocator")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

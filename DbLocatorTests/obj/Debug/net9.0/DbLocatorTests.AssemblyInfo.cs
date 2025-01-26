@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DbLocatorTests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5f4049147316831c694cb77f8a64dd1a93e2a426")]
 [assembly: System.Reflection.AssemblyProductAttribute("DbLocatorTests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DbLocatorTests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

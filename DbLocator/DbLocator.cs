@@ -143,25 +143,20 @@ public class DbLocator
     #region Databases
 
     /// <summary>
-    ///Add new database on specified server and insert record in DbLocator database
+    /// Insert database record and create new database on specified server with the user provided
     /// </summary>
     /// <param name="databaseName">Name of the database</param>
     /// <param name="databaseUser">User of the database</param>
     /// <param name="databaseServerId">Id of the database server</param>
     /// <param name="databaseTypeId">Id of the database type</param>
     /// <param name="databaseStatus">Status of the database</param>
-    /// <param name="useTrustedConnection">Use trusted connection</param>
-    /// <param name="createDatabase">Create database</param>
     /// <returns>DatabaseId</returns>
-    /// <returns></returns>
     public async Task<int> AddDatabase(
         string databaseName,
         string databaseUser,
         int databaseServerId,
         byte databaseTypeId,
-        Status databaseStatus,
-        bool useTrustedConnection,
-        bool createDatabase
+        Status databaseStatus
     )
     {
         return await _databases.AddDatabase(
@@ -169,10 +164,74 @@ public class DbLocator
             databaseUser,
             databaseServerId,
             databaseTypeId,
+            databaseStatus
+        );
+    }
+
+    /// <summary>
+    /// Insert database record and create new database on specified server if createDatabase is true and use trusted connection
+    /// </summary>
+    /// <param name="databaseName">Name of the database</param>
+    /// <param name="databaseServerId">Id of the database server</param>
+    /// <param name="databaseTypeId">Id of the database type</param>
+    /// <param name="databaseStatus">Status of the database</param>
+    /// <param name="createDatabase">Create database</param>
+    /// <returns>DatabaseId</returns>
+    public async Task<int> AddDatabase(
+        string databaseName,
+        int databaseServerId,
+        byte databaseTypeId,
+        Status databaseStatus,
+        bool createDatabase
+    )
+    {
+        return await _databases.AddDatabase(
+            databaseName,
+            databaseServerId,
+            databaseTypeId,
             databaseStatus,
-            useTrustedConnection,
             createDatabase
         );
+    }
+
+    /// <summary>
+    /// Insert database record and create new database on specified server with the user provided
+    /// </summary>
+    /// <param name="databaseName">Name of the database</param>
+    /// <param name="databaseUser">User of the database</param>
+    /// <param name="databaseServerId">Id of the database server</param>
+    /// <param name="databaseTypeId">Id of the database type</param>
+    /// <returns>DatabaseId</returns>
+    public async Task<int> AddDatabase(
+        string databaseName,
+        string databaseUser,
+        int databaseServerId,
+        byte databaseTypeId
+    )
+    {
+        return await _databases.AddDatabase(
+            databaseName,
+            databaseUser,
+            databaseServerId,
+            databaseTypeId,
+            Status.Active
+        );
+    }
+
+    /// <summary>
+    /// Insert database record and create new database on specified server and use trusted connection
+    /// </summary>
+    /// <param name="databaseName">Name of the database</param>
+    /// <param name="databaseServerId">Id of the database server</param>
+    /// <param name="databaseTypeId">Id of the database type</param>
+    /// <returns>DatabaseId</returns>
+    public async Task<int> AddDatabase(
+        string databaseName,
+        int databaseServerId,
+        byte databaseTypeId
+    )
+    {
+        return await _databases.AddDatabase(databaseName, databaseServerId, databaseTypeId);
     }
 
     /// <summary>

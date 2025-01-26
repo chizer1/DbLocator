@@ -25,3 +25,4 @@
 /home/steve/Documents/DbLocator/DbLocator/obj/Debug/net9.0/DbLocator.pdb
 /home/steve/Documents/DbLocator/DbLocator/obj/Debug/net9.0/DbLocator.genruntimeconfig.cache
 /home/steve/Documents/DbLocator/DbLocator/obj/Debug/net9.0/ref/DbLocator.dll
+/home/steve/Documents/DbLocator/DbLocator/obj/Debug/net9.0/DbLocator.sourcelink.json

@@ -17,11 +17,7 @@ internal sealed class AddDatabaseCommandValidator : AbstractValidator<AddDatabas
 {
     public AddDatabaseCommandValidator()
     {
-        // RuleFor(x => x.DatabaseName).NotEmpty().WithMessage("Database Name is required.");
-        // RuleFor(x => x.DatabaseUser).NotEmpty().WithMessage("Database User is required.");
-        RuleFor(x => x.DatabaseServerId)
-            .GreaterThan(0)
-            .WithMessage("Database Server is required.");
+        RuleFor(x => x.DatabaseServerId).GreaterThan(0).WithMessage("Database Server is required.");
         RuleFor(x => x.DatabaseTypeId)
             .GreaterThan((byte)0)
             .WithMessage("Database Type is required.");

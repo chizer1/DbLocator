@@ -31,7 +31,6 @@ internal class Databases
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus,
-        bool useTrustedConnection,
         bool createDatabase
     )
     {
@@ -42,7 +41,88 @@ internal class Databases
                 databaseServerId,
                 databaseTypeId,
                 databaseStatus,
-                useTrustedConnection,
+                false,
+                createDatabase
+            )
+        );
+    }
+
+    public async Task<int> AddDatabase(
+        string databaseName,
+        string databaseUser,
+        int databaseServerId,
+        byte databaseTypeId
+    )
+    {
+        return await _addDatabase.Handle(
+            new AddDatabaseCommand(
+                databaseName,
+                databaseUser,
+                databaseServerId,
+                databaseTypeId,
+                Status.Active,
+                false,
+                true
+            )
+        );
+    }
+
+    public async Task<int> AddDatabase(
+        string databaseName,
+        int databaseServerId,
+        byte databaseTypeId
+    )
+    {
+        return await _addDatabase.Handle(
+            new AddDatabaseCommand(
+                databaseName,
+                null,
+                databaseServerId,
+                databaseTypeId,
+                Status.Active,
+                true,
+                true
+            )
+        );
+    }
+
+    public async Task<int> AddDatabase(
+        string databaseName,
+        string databaseUser,
+        int databaseServerId,
+        byte databaseTypeId,
+        Status databaseStatus
+    )
+    {
+        return await _addDatabase.Handle(
+            new AddDatabaseCommand(
+                databaseName,
+                databaseUser,
+                databaseServerId,
+                databaseTypeId,
+                databaseStatus,
+                false,
+                true
+            )
+        );
+    }
+
+    public async Task<int> AddDatabase(
+        string databaseName,
+        int databaseServerId,
+        byte databaseTypeId,
+        Status databaseStatus,
+        bool createDatabase
+    )
+    {
+        return await _addDatabase.Handle(
+            new AddDatabaseCommand(
+                databaseName,
+                null,
+                databaseServerId,
+                databaseTypeId,
+                databaseStatus,
+                true,
                 createDatabase
             )
         );
