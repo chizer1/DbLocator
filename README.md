@@ -29,4 +29,4 @@ It is up to you on how you want to store / retrieve these values.
 
 Initializing the DbLocator object will automatically run the EF core migration scripts / create the DbLocatorDB if not created yet
 
-- Example repository implementing this class library: [https://github.com/chizer1/DbLocator-Example](https://github.com/chizer1/DbLocatorExample)
+- Example repository implementing this class library: [https://github.com/chizer1/DbLocatorExample](https://github.com/chizer1/DbLocatorExample)
