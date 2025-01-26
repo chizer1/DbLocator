@@ -4,7 +4,6 @@ using DbLocator.Features.Tenants.AddTenant;
 using DbLocator.Features.Tenants.DeleteTenant;
 using DbLocator.Features.Tenants.GetTenants;
 using DbLocator.Features.Tenants.UpdateTenant;
-using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Library;
 
@@ -15,9 +14,11 @@ internal class Tenants
     private readonly UpdateTenant _updateTenant;
     private readonly DeleteTenant _deleteTenant;
 
-    public Tenants(DbContext dbContext)
+    public Tenants(string dbLocatorConnectionString)
     {
-        ITenantRepository tenantRepository = new TenantRepository(dbContext);
+        var factory = DbContextFactory.CreateDbContextFactory(dbLocatorConnectionString);
+
+        ITenantRepository tenantRepository = new TenantRepository(factory);
 
         _addTenant = new AddTenant(tenantRepository);
         _getTenants = new GetTenants(tenantRepository);

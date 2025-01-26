@@ -15,9 +15,11 @@ internal class Databases
     private readonly UpdateDatabase _updateDatabase;
     private readonly DeleteDatabase _deleteDatabase;
 
-    public Databases(DbContext dbContext)
+    public Databases(string dbLocatorConnectionString)
     {
-        IDatabaseRepository databaseRepository = new DatabaseRepository(dbContext);
+        var factory = DbContextFactory.CreateDbContextFactory(dbLocatorConnectionString);
+
+        IDatabaseRepository databaseRepository = new DatabaseRepository(factory);
 
         _addDatabase = new AddDatabase(databaseRepository);
         _getDatabases = new GetDatabases(databaseRepository);

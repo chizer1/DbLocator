@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.Databases
 {
-    internal class DatabaseRepository(DbContext DbLocatorDb) : IDatabaseRepository
+    internal class DatabaseRepository(IDbContextFactory<DbLocatorContext> dbContextFactory)
+        : IDatabaseRepository
     {
         public async Task<int> AddDatabase(
             string databaseName,
@@ -16,6 +17,8 @@ namespace DbLocator.Features.Databases
             bool createDatabase
         )
         {
+            await using var dbContext = dbContextFactory.CreateDbContext();
+
             var database = new DatabaseEntity
             {
                 DatabaseName = databaseName,
@@ -48,14 +51,14 @@ namespace DbLocator.Features.Databases
             await EnsureDatabaseExists(databaseName, createDatabase);
             await EnsureUserDoesNotExist(databaseUser);
 
-            await DbLocatorDb.Set<DatabaseEntity>().AddAsync(database);
-            await DbLocatorDb.SaveChangesAsync();
+            await dbContext.Set<DatabaseEntity>().AddAsync(database);
+            await dbContext.SaveChangesAsync();
 
             foreach (var commandText in commands)
             {
-                using var command = DbLocatorDb.Database.GetDbConnection().CreateCommand();
+                using var command = dbContext.Database.GetDbConnection().CreateCommand();
                 command.CommandText = commandText;
-                await DbLocatorDb.Database.OpenConnectionAsync();
+                await dbContext.Database.OpenConnectionAsync();
                 await command.ExecuteNonQueryAsync();
             }
 
@@ -66,10 +69,12 @@ namespace DbLocator.Features.Databases
 
         private async Task EnsureDatabaseExists(string databaseName, bool createDatabase)
         {
-            using var command = DbLocatorDb.Database.GetDbConnection().CreateCommand();
+            await using var dbContext = dbContextFactory.CreateDbContext();
+
+            using var command = dbContext.Database.GetDbConnection().CreateCommand();
             command.CommandText =
                 $"SELECT COUNT(*) FROM sys.databases WHERE name = '{databaseName}'";
-            await DbLocatorDb.Database.OpenConnectionAsync();
+            await dbContext.Database.OpenConnectionAsync();
             var result = await command.ExecuteScalarAsync();
             if (result is int count)
             {
@@ -82,10 +87,12 @@ namespace DbLocator.Features.Databases
 
         private async Task EnsureUserDoesNotExist(string databaseUser)
         {
-            using var command = DbLocatorDb.Database.GetDbConnection().CreateCommand();
+            await using var dbContext = dbContextFactory.CreateDbContext();
+
+            using var command = dbContext.Database.GetDbConnection().CreateCommand();
             command.CommandText =
                 $"SELECT COUNT(*) FROM sys.server_principals WHERE name = '{databaseUser}'";
-            await DbLocatorDb.Database.OpenConnectionAsync();
+            await dbContext.Database.OpenConnectionAsync();
             var result = await command.ExecuteScalarAsync();
             if (result is int count && count > 0)
                 throw new InvalidOperationException($"User {databaseUser} already exists.");
@@ -93,8 +100,10 @@ namespace DbLocator.Features.Databases
 
         public async Task<Database> GetDatabase(int databaseId)
         {
+            await using var dbContext = dbContextFactory.CreateDbContext();
+
             var database =
-                await DbLocatorDb
+                await dbContext
                     .Set<DatabaseEntity>()
                     .Include(d => d.DatabaseServer)
                     .Include(d => d.DatabaseType)
@@ -124,7 +133,9 @@ namespace DbLocator.Features.Databases
 
         public async Task<List<Database>> GetDatabases()
         {
-            var databaseEntities = await DbLocatorDb
+            await using var dbContext = dbContextFactory.CreateDbContext();
+
+            var databaseEntities = await dbContext
                 .Set<DatabaseEntity>()
                 .Include(d => d.DatabaseServer)
                 .Include(d => d.DatabaseType)
@@ -160,8 +171,10 @@ namespace DbLocator.Features.Databases
             Status databaseStatus
         )
         {
+            await using var dbContext = dbContextFactory.CreateDbContext();
+
             var databaseEntity =
-                await DbLocatorDb
+                await dbContext
                     .Set<DatabaseEntity>()
                     .FirstOrDefaultAsync(d => d.DatabaseId == databaseId)
                 ?? throw new InvalidOperationException("Database not found.");
@@ -175,8 +188,8 @@ namespace DbLocator.Features.Databases
             databaseEntity.DatabaseTypeId = databaseTypeId;
             databaseEntity.DatabaseStatusId = (byte)databaseStatus;
 
-            DbLocatorDb.Update(databaseEntity);
-            await DbLocatorDb.SaveChangesAsync();
+            dbContext.Update(databaseEntity);
+            await dbContext.SaveChangesAsync();
 
             var commands = new List<string>();
             if (oldDatabaseName != databaseName)
@@ -189,9 +202,9 @@ namespace DbLocator.Features.Databases
 
             foreach (var commandText in commands)
             {
-                using var command = DbLocatorDb.Database.GetDbConnection().CreateCommand();
+                using var command = dbContext.Database.GetDbConnection().CreateCommand();
                 command.CommandText = commandText;
-                await DbLocatorDb.Database.OpenConnectionAsync();
+                await dbContext.Database.OpenConnectionAsync();
                 await command.ExecuteNonQueryAsync();
             }
 
@@ -200,12 +213,14 @@ namespace DbLocator.Features.Databases
 
         public async Task DeleteDatabase(int databaseId)
         {
+            await using var dbContext = dbContextFactory.CreateDbContext();
+
             var databaseEntity =
-                await DbLocatorDb.Set<DatabaseEntity>().FindAsync(databaseId)
+                await dbContext.Set<DatabaseEntity>().FindAsync(databaseId)
                 ?? throw new InvalidOperationException("Database not found.");
 
-            DbLocatorDb.Set<DatabaseEntity>().Remove(databaseEntity);
-            await DbLocatorDb.SaveChangesAsync();
+            dbContext.Set<DatabaseEntity>().Remove(databaseEntity);
+            await dbContext.SaveChangesAsync();
 
             var commands = new[]
             {
@@ -215,9 +230,9 @@ namespace DbLocator.Features.Databases
 
             foreach (var commandText in commands)
             {
-                using var command = DbLocatorDb.Database.GetDbConnection().CreateCommand();
+                using var command = dbContext.Database.GetDbConnection().CreateCommand();
                 command.CommandText = commandText;
-                await DbLocatorDb.Database.OpenConnectionAsync();
+                await dbContext.Database.OpenConnectionAsync();
                 await command.ExecuteNonQueryAsync();
             }
 
@@ -226,9 +241,11 @@ namespace DbLocator.Features.Databases
 
         private async Task SwapBackToDbLocatorDatabase()
         {
-            using var swapCommand = DbLocatorDb.Database.GetDbConnection().CreateCommand();
+            await using var dbContext = dbContextFactory.CreateDbContext();
+
+            using var swapCommand = dbContext.Database.GetDbConnection().CreateCommand();
             swapCommand.CommandText = "use [DbLocator]";
-            await DbLocatorDb.Database.OpenConnectionAsync();
+            await dbContext.Database.OpenConnectionAsync();
             await swapCommand.ExecuteNonQueryAsync();
         }
     }

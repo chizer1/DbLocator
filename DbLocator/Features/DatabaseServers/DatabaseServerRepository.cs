@@ -4,28 +4,33 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseServers
 {
-    internal class DatabaseServerRepository(DbContext DbLocatorDb) : IDatabaseServerRepository
+    internal class DatabaseServerRepository(IDbContextFactory<DbLocatorContext> dbContextFactory)
+        : IDatabaseServerRepository
     {
         public async Task<int> AddDatabaseServer(
             string databaseServerName,
             string databaseServerIpAddress
         )
         {
+            await using var dbContext = dbContextFactory.CreateDbContext();
+
             var databaseServer = new DatabaseServerEntity
             {
                 DatabaseServerName = databaseServerName,
                 DatabaseServerIpaddress = databaseServerIpAddress,
             };
 
-            DbLocatorDb.Add(databaseServer);
-            await DbLocatorDb.SaveChangesAsync();
+            dbContext.Add(databaseServer);
+            await dbContext.SaveChangesAsync();
 
             return databaseServer.DatabaseServerId;
         }
 
         public async Task<DatabaseServer> GetDatabaseServer(int databaseServerId)
         {
-            var databaseServerEntity = await DbLocatorDb
+            await using var dbContext = dbContextFactory.CreateDbContext();
+
+            var databaseServerEntity = await dbContext
                 .Set<DatabaseServerEntity>()
                 .Where(ds => ds.DatabaseServerId == databaseServerId)
                 .FirstOrDefaultAsync();
@@ -39,9 +44,9 @@ namespace DbLocator.Features.DatabaseServers
 
         public async Task<List<DatabaseServer>> GetDatabaseServers()
         {
-            var databaseServerEntities = await DbLocatorDb
-                .Set<DatabaseServerEntity>()
-                .ToListAsync();
+            await using var dbContext = dbContextFactory.CreateDbContext();
+
+            var databaseServerEntities = await dbContext.Set<DatabaseServerEntity>().ToListAsync();
 
             return databaseServerEntities
                 .Select(ds => new DatabaseServer(
@@ -58,8 +63,10 @@ namespace DbLocator.Features.DatabaseServers
             string databaseServerIpAddress
         )
         {
+            await using var dbContext = dbContextFactory.CreateDbContext();
+
             var databaseServer =
-                await DbLocatorDb
+                await dbContext
                     .Set<DatabaseServerEntity>()
                     .FirstOrDefaultAsync(ds => ds.DatabaseServerId == databaseServerId)
                 ?? throw new KeyNotFoundException(
@@ -69,22 +76,24 @@ namespace DbLocator.Features.DatabaseServers
             databaseServer.DatabaseServerName = databaseServerName;
             databaseServer.DatabaseServerIpaddress = databaseServerIpAddress;
 
-            DbLocatorDb.Update(databaseServer);
-            await DbLocatorDb.SaveChangesAsync();
+            dbContext.Update(databaseServer);
+            await dbContext.SaveChangesAsync();
         }
 
         public async Task DeleteDatabaseServer(int databaseServerId)
         {
+            await using var dbContext = dbContextFactory.CreateDbContext();
+
             var databaseServer =
-                await DbLocatorDb
+                await dbContext
                     .Set<DatabaseServerEntity>()
                     .FirstOrDefaultAsync(ds => ds.DatabaseServerId == databaseServerId)
                 ?? throw new KeyNotFoundException(
                     $"Database Server with ID {databaseServerId} not found."
                 );
 
-            DbLocatorDb.Remove(databaseServer);
-            await DbLocatorDb.SaveChangesAsync();
+            dbContext.Remove(databaseServer);
+            await dbContext.SaveChangesAsync();
         }
     }
 }

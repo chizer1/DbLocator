@@ -20,13 +20,6 @@ internal class DbLocatorContext : DbContext
 
     public virtual DbSet<TenantEntity> Tenants { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.ConfigureWarnings(warnings =>
-            warnings.Ignore(RelationalEventId.PendingModelChangesWarning)
-        );
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ConnectionEntity>(entity =>

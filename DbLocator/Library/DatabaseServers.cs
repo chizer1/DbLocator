@@ -15,11 +15,11 @@ internal class DatabaseServers
     private readonly UpdateDatabaseServer _updateDatabaseServer;
     private readonly DeleteDatabaseServer _deleteDatabaseServer;
 
-    public DatabaseServers(DbContext dbContext)
+    public DatabaseServers(string dbLocatorConnectionString)
     {
-        IDatabaseServerRepository databaseServerRepository = new DatabaseServerRepository(
-            dbContext
-        );
+        var factory = DbContextFactory.CreateDbContextFactory(dbLocatorConnectionString);
+
+        IDatabaseServerRepository databaseServerRepository = new DatabaseServerRepository(factory);
 
         _addDatabaseServer = new AddDatabaseServer(databaseServerRepository);
         _getDatabaseServers = new GetDatabaseServers(databaseServerRepository);

@@ -4,10 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.Tenants;
 
-internal class TenantRepository(DbContext DbLocatorDb) : ITenantRepository
+internal class TenantRepository(IDbContextFactory<DbLocatorContext> dbContextFactory)
+    : ITenantRepository
 {
     public async Task<int> AddTenant(string tenantName, string tenantCode, Status tenantStatus)
     {
+        await using var dbContext = dbContextFactory.CreateDbContext();
+
         var tenant = new TenantEntity
         {
             TenantName = tenantName,
@@ -15,29 +18,33 @@ internal class TenantRepository(DbContext DbLocatorDb) : ITenantRepository
             TenantStatusId = (byte)tenantStatus,
         };
 
-        await DbLocatorDb.Set<TenantEntity>().AddAsync(tenant);
-        await DbLocatorDb.SaveChangesAsync();
+        await dbContext.Set<TenantEntity>().AddAsync(tenant);
+        await dbContext.SaveChangesAsync();
 
         return tenant.TenantId;
     }
 
     public async Task<Tenant> GetTenant(int tenantId)
     {
-        var TenantEntity =
-            await DbLocatorDb.Set<TenantEntity>().FirstOrDefaultAsync(c => c.TenantId == tenantId)
+        await using var dbContext = dbContextFactory.CreateDbContext();
+
+        var tenantEntity =
+            await dbContext.Set<TenantEntity>().FirstOrDefaultAsync(c => c.TenantId == tenantId)
             ?? throw new KeyNotFoundException($"Tenant with ID {tenantId} not found.");
 
         return new Tenant(
-            TenantEntity.TenantId,
-            TenantEntity.TenantName,
-            TenantEntity.TenantCode,
-            (Status)TenantEntity.TenantStatusId
+            tenantEntity.TenantId,
+            tenantEntity.TenantName,
+            tenantEntity.TenantCode,
+            (Status)tenantEntity.TenantStatusId
         );
     }
 
     public async Task<List<Tenant>> GetTenants()
     {
-        var tenants = await DbLocatorDb.Set<TenantEntity>().ToListAsync();
+        await using var dbContext = dbContextFactory.CreateDbContext();
+
+        var tenants = await dbContext.Set<TenantEntity>().ToListAsync();
 
         return tenants
             .Select(entity => new Tenant(
@@ -56,25 +63,29 @@ internal class TenantRepository(DbContext DbLocatorDb) : ITenantRepository
         Status tenantStatus
     )
     {
-        var Tenant =
-            await DbLocatorDb.Set<TenantEntity>().FirstOrDefaultAsync(c => c.TenantId == tenantId)
+        await using var dbContext = dbContextFactory.CreateDbContext();
+
+        var tenant =
+            await dbContext.Set<TenantEntity>().FirstOrDefaultAsync(c => c.TenantId == tenantId)
             ?? throw new KeyNotFoundException($"Tenant with ID {tenantId} not found.");
 
-        Tenant.TenantName = tenantName;
-        Tenant.TenantCode = tenantCode;
-        Tenant.TenantStatusId = (byte)tenantStatus;
+        tenant.TenantName = tenantName;
+        tenant.TenantCode = tenantCode;
+        tenant.TenantStatusId = (byte)tenantStatus;
 
-        DbLocatorDb.Set<TenantEntity>().Update(Tenant);
-        await DbLocatorDb.SaveChangesAsync();
+        dbContext.Set<TenantEntity>().Update(tenant);
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteTenant(int tenantId)
     {
-        var Tenant =
-            await DbLocatorDb.Set<TenantEntity>().FirstOrDefaultAsync(c => c.TenantId == tenantId)
+        await using var dbContext = dbContextFactory.CreateDbContext();
+
+        var tenant =
+            await dbContext.Set<TenantEntity>().FirstOrDefaultAsync(c => c.TenantId == tenantId)
             ?? throw new KeyNotFoundException($"Tenant with ID {tenantId} not found.");
 
-        DbLocatorDb.Set<TenantEntity>().Remove(Tenant);
-        await DbLocatorDb.SaveChangesAsync();
+        dbContext.Set<TenantEntity>().Remove(tenant);
+        await dbContext.SaveChangesAsync();
     }
 }

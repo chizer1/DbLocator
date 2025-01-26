@@ -17,10 +17,12 @@ internal class Connections
     private readonly GetConnections _getConnections;
     private readonly DeleteConnection _deleteConnection;
 
-    public Connections(DbContext dbContext)
+    public Connections(string dbLocatorConnectionString)
     {
-        IConnectionRepository connectionRepository = new ConnectionRepository(dbContext);
-        ITenantRepository tenantRepository = new TenantRepository(dbContext);
+        var factory = DbContextFactory.CreateDbContextFactory(dbLocatorConnectionString);
+
+        IConnectionRepository connectionRepository = new ConnectionRepository(factory);
+        ITenantRepository tenantRepository = new TenantRepository(factory);
 
         _addConnection = new AddConnection(connectionRepository);
         _getConnection = new GetConnection(connectionRepository, tenantRepository);

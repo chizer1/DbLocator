@@ -23,20 +23,20 @@ public class DbLocator
     /// <summary>
     /// Constructor for DbLocator class
     /// </summary>
-    public DbLocator(string DbLocatorDbConnectionString)
+    public DbLocator(string dbLocatorConnectionString)
     {
         var options = new DbContextOptionsBuilder<DbLocatorContext>()
-            .UseSqlServer(DbLocatorDbConnectionString)
+            .UseSqlServer(dbLocatorConnectionString)
             .Options;
 
-        var DbLocatorDb = new DbLocatorContext(options);
-        DbLocatorDb.Database.Migrate();
+        var dbLocator = new DbLocatorContext(options);
+        dbLocator.Database.Migrate();
 
-        _tenants = new Tenants(DbLocatorDb);
-        _connections = new Connections(DbLocatorDb);
-        _databases = new Databases(DbLocatorDb);
-        _databaseServers = new DatabaseServers(DbLocatorDb);
-        _databaseTypes = new DatabaseTypes(DbLocatorDb);
+        _tenants = new Tenants(dbLocatorConnectionString);
+        _connections = new Connections(dbLocatorConnectionString);
+        _databases = new Databases(dbLocatorConnectionString);
+        _databaseServers = new DatabaseServers(dbLocatorConnectionString);
+        _databaseTypes = new DatabaseTypes(dbLocatorConnectionString);
     }
 
     #region Tenants

@@ -4,7 +4,6 @@ using DbLocator.Features.DatabaseTypes.AddDatabaseType;
 using DbLocator.Features.DatabaseTypes.DeleteDatabaseType;
 using DbLocator.Features.DatabaseTypes.GetDatabaseTypes;
 using DbLocator.Features.DatabaseTypes.UpdateDatabaseType;
-using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Library;
 
@@ -15,9 +14,11 @@ internal class DatabaseTypes
     private readonly UpdateDatabaseType _updateDatabaseType;
     private readonly DeleteDatabaseType _deleteDatabaseType;
 
-    public DatabaseTypes(DbContext dbContext)
+    public DatabaseTypes(string dbLocatorConnectionString)
     {
-        IDatabaseTypeRepository databaseTypeRepository = new DatabaseTypeRepository(dbContext);
+        var factory = DbContextFactory.CreateDbContextFactory(dbLocatorConnectionString);
+
+        IDatabaseTypeRepository databaseTypeRepository = new DatabaseTypeRepository(factory);
 
         _addDatabaseType = new AddDatabaseType(databaseTypeRepository);
         _getDatabaseTypes = new GetDatabaseTypes(databaseTypeRepository);
