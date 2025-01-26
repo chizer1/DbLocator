@@ -28,9 +28,7 @@ public class DatabaseTests
             databaseUser,
             _databaseServerID,
             _databaseTypeId,
-            Status.Active,
-            false,
-            true
+            Status.Active
         );
 
         var databaseName2 = $"[{StringUtilities.RandomString(10)}]";
@@ -40,9 +38,7 @@ public class DatabaseTests
             databaseUser2,
             _databaseServerID,
             _databaseTypeId,
-            Status.Active,
-            false,
-            true
+            Status.Active
         );
 
         var databases = (await _DbLocator.GetDatabases()).ToList();
@@ -60,9 +56,7 @@ public class DatabaseTests
             databaseUser,
             _databaseServerID,
             _databaseTypeId,
-            Status.Active,
-            false,
-            true
+            Status.Active
         );
 
         await _DbLocator.DeleteDatabase(databaseId);
@@ -81,9 +75,7 @@ public class DatabaseTests
             databaseUser,
             _databaseServerID,
             _databaseTypeId,
-            Status.Active,
-            false,
-            true
+            Status.Active
         );
 
         var databaseName2 = $"[{StringUtilities.RandomString(10)}]";
