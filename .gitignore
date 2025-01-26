@@ -9,9 +9,11 @@
 *.user
 *.userosscache
 *.sln.docstates
-bin/
+**/bin/
 *.obj
 _site/
+**/packages.lock.json
+# ignore bin
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
