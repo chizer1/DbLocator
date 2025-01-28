@@ -1,10 +1,11 @@
-name: "Create Release"
+name: "Release and Deploy to Nuget"
+
 
 on: 
   workflow_dispatch:
 
 jobs:
-    release:
+    release-and-deploy:
         name: Create Release
         runs-on: ubuntu-latest
 
@@ -32,3 +33,20 @@ jobs:
                 name: ${{ env.semVer }}
                 draft: false
                 prerelease: false
+
+          - name: Setup .NET
+            uses: actions/setup-dotnet@v3
+            with:
+              dotnet-version: 9.x.x
+    
+          - name: Restore dependencies
+            run: dotnet restore
+    
+          - name: Build project
+            run: dotnet build --configuration Release
+    
+          - name: Pack NuGet package
+            run: dotnet pack --configuration Release /p:PackageVersion=${{ env.semVer }}
+    
+          - name: Push NuGet package to GitHub
+            run: dotnet nuget push DbLocator/bin/Release/*.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.PAT }} --skip-duplicate
