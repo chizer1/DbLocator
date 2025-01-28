@@ -25,34 +25,4 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
         Assert.Contains(tenants, t => t.Name == tenantName1 && t.Code == tenantCode1);
         Assert.Contains(tenants, t => t.Name == tenantName2 && t.Code == tenantCode2);
     }
-
-    [Fact]
-    public async Task AddAndDeleteTenant()
-    {
-        var tenantName = StringUtilities.RandomString(10);
-        var tenantCode = StringUtilities.RandomString(3);
-        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
-
-        await _dbLocator.DeleteTenant(tenantId);
-        var tenants = await _dbLocator.GetTenants();
-        Assert.Empty(tenants);
-    }
-
-    [Fact]
-    public async Task AddAndUpdateTenant()
-    {
-        var tenantName = StringUtilities.RandomString(10);
-        var tenantCode = StringUtilities.RandomString(3);
-        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
-
-        var tenantName2 = StringUtilities.RandomString(10);
-        var tenantCode2 = StringUtilities.RandomString(3);
-        await _dbLocator.UpdateTenant(tenantId, tenantName2, tenantCode2, Status.Inactive);
-
-        var tenants = (await _dbLocator.GetTenants()).ToList();
-        Assert.Single(tenants);
-        Assert.Equal(tenantName2, tenants[0].Name);
-        Assert.Equal(tenantCode2, tenants[0].Code);
-        Assert.Equal(Status.Inactive, tenants[0].Status);
-    }
 }

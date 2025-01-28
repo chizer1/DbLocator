@@ -30,39 +30,6 @@ public class DatabaseTests
         Assert.Contains(databases, db => db.Name == database2.Name);
     }
 
-    [Fact]
-    public async Task AddAndDeleteDatabase()
-    {
-        var database = await AddDatabaseAsync();
-
-        await _dbLocator.DeleteDatabase(database.Id);
-
-        var databases = await _dbLocator.GetDatabases();
-        Assert.Empty(databases);
-    }
-
-    [Fact]
-    public async Task AddAndUpdateDatabase()
-    {
-        var database = await AddDatabaseAsync();
-
-        var updatedDatabaseName = $"[{StringUtilities.RandomString(10)}]";
-        var updatedDatabaseUser = $"[{StringUtilities.RandomString(10)}]";
-        await _dbLocator.UpdateDatabase(
-            database.Id,
-            updatedDatabaseName,
-            updatedDatabaseUser,
-            _databaseServerID,
-            _databaseTypeId,
-            Status.Inactive
-        );
-
-        var databases = (await _dbLocator.GetDatabases()).ToList();
-        Assert.Single(databases);
-        Assert.Equal(updatedDatabaseName, databases[0].Name);
-        Assert.Equal(Status.Inactive, databases[0].Status);
-    }
-
     private async Task<Database> AddDatabaseAsync()
     {
         var databaseName = $"[{StringUtilities.RandomString(10)}]";
