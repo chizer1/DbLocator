@@ -18,6 +18,7 @@ jobs:
                   versionSpec: '6.0.x'
 
             - name: Determine Version
+              id: gitversion
               uses: gittools/actions/gitversion/execute@v3.1.1
               with:
                   useConfigFile: true
@@ -26,15 +27,15 @@ jobs:
               uses: actions/setup-dotnet@v3
               with:
                 dotnet-version: 9.x.x
-                
+
             - name: Restore dependencies
               run: dotnet restore
 
             - name: Build project
               run: dotnet build --configuration Release
-
+              
             - name: Pack NuGet package
-              run: dotnet pack --configuration Release /p:PackageVersion=${{ env.semVer }}
+              run: dotnet pack --configuration Release /p:PackageVersion=${{ steps.gitversion.outputs.semVer }}
 
             - name: Push NuGet package to GitHub
-              run: dotnet nuget push DbLocator/DbLocator/bin/Release/${{ env.semVer }}.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.PAT }} --skip-duplicate
+              run: dotnet nuget push DbLocator/bin/Release/${{ steps.gitversion.outputs.semVer }}.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.PAT }} --skip-duplicate
