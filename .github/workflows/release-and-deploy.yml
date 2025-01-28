@@ -1,4 +1,4 @@
-name: "Release and Deploy to Nuget"
+name: "Release and Deploy"
 
 
 on: 
