@@ -1,2 +1,10 @@
-workflow: GitHubFlow/v1
-next-version: 1.0.1
+next-version: 1.0.2
+branches:
+  main:
+    regex: main
+    tag: ''
+    increment: Minor
+    prevent-increment-of-merged-branch-version: true
+    track-merge-target: true
+    tracks-release-branches: false
+    is-release-branch: false
