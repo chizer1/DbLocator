@@ -11,8 +11,6 @@
     <Description>Multi-Tenant SQL connection management</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <IsPackable>true</IsPackable>
-    <AssemblyVersion>1.0.1</AssemblyVersion>
-    <FileVersion>1.0.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
