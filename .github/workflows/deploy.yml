@@ -34,7 +34,7 @@ jobs:
               run: dotnet build --configuration Release
 
             - name: Pack NuGet package
-              run: dotnet pack --configuration Release /p:PackageVersion=${{ env.semVer }}
+              run: dotnet pack --configuration Release /p:PackageVersion=${{ steps.determine_version.outputs.semVer }}
 
             - name: Push NuGet package to GitHub
-              run: dotnet nuget push DbLocator/bin/Release/${{ env.semVer }}.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.PAT }} --skip-duplicate
+              run: dotnet nuget push DbLocator/bin/Release/*.${{ steps.determine_version.outputs.semVer }}.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.PAT }} --skip-duplicate
