@@ -9,6 +9,8 @@ jobs:
 
         steps:
             - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
             - name: Install GitVersion
               uses: gittools/actions/gitversion/setup@v3.1.1
