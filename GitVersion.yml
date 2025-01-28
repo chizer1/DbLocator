@@ -1,7 +1,7 @@
 next-version: 1.0.2
 branches:
-  main:
-    regex: main
+  master:
+    regex: master
     tag: ''
     increment: Minor
     prevent-increment-of-merged-branch-version: true
