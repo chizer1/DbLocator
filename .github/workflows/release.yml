@@ -26,9 +26,9 @@ jobs:
           - name: Create Release
             uses: thomaseizinger/create-release@2.0.0
             with:
-                github_token: ${{ secrets.GITHUB_TOKEN }}
-                target_commitish: ${{ github.sha }}
-                tag_name: ${{ env.semVer }}
-                name: ${{ env.semVer }}
-                draft: false
-                prerelease: false
+              github_token: ${{ secrets.GITHUB_TOKEN }}
+              target_commitish: ${{ github.sha }}
+              tag_name: ${{ steps.gitversion.outputs.SemVer }}
+              name: ${{ steps.gitversion.outputs.SemVer }}
+              draft: false
+              prerelease: false
