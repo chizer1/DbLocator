@@ -43,7 +43,7 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
             .Where(x => x.Name == databaseServerName)
             .ToList();
 
-        Assert.Empty(databaseServers);
+        Assert.NotEmpty(databaseServers);
     }
 
     [Fact]
