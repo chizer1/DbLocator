@@ -7,70 +7,67 @@ namespace DbLocatorTests;
 [Collection("DbLocator")]
 public class DatabaseTests
 {
-    private readonly DbLocator.DbLocator _DbLocator;
+    private readonly DbLocator.DbLocator _dbLocator;
     private readonly int _databaseServerID;
     private readonly byte _databaseTypeId;
 
-    public DatabaseTests(DbLocatorFixture DbLocatorFixture)
+    public DatabaseTests(DbLocatorFixture dbLocatorFixture)
     {
-        _DbLocator = DbLocatorFixture.DbLocator;
-        _databaseServerID = _DbLocator.AddDatabaseServer("DatabaseServer", "localhost").Result;
-        _databaseTypeId = (byte)_DbLocator.AddDatabaseType("DatabaseType").Result;
+        _dbLocator = dbLocatorFixture.DbLocator;
+        _databaseServerID = _dbLocator.AddDatabaseServer("DatabaseServer", "localhost").Result;
+        _databaseTypeId = (byte)_dbLocator.AddDatabaseType("DatabaseType").Result;
     }
 
     [Fact]
     public async Task AddMultipleDatabasesAndSearchByKeyWord()
     {
-        var databaseName = $"[{StringUtilities.RandomString(10)}]";
-        var databaseUser = $"[{StringUtilities.RandomString(10)}]";
-        var databaseId = await _DbLocator.AddDatabase(
-            databaseName,
-            databaseUser,
-            _databaseServerID,
-            _databaseTypeId,
-            Status.Active
-        );
+        var database1 = await AddDatabaseAsync();
+        var database2 = await AddDatabaseAsync();
 
-        var databaseName2 = $"[{StringUtilities.RandomString(10)}]";
-        var databaseUser2 = $"[{StringUtilities.RandomString(10)}]";
-        var databaseId2 = await _DbLocator.AddDatabase(
-            databaseName2,
-            databaseUser2,
-            _databaseServerID,
-            _databaseTypeId,
-            Status.Active
-        );
-
-        var databases = (await _DbLocator.GetDatabases()).ToList();
-        Assert.Single(databases);
-        Assert.Equal(databaseName, databases[0].Name);
+        var databases = (await _dbLocator.GetDatabases()).ToList();
+        Assert.Equal(2, databases.Count);
+        Assert.Contains(databases, db => db.Name == database1.Name);
+        Assert.Contains(databases, db => db.Name == database2.Name);
     }
 
     [Fact]
     public async Task AddAndDeleteDatabase()
     {
-        var databaseName = $"[{StringUtilities.RandomString(10)}]";
-        var databaseUser = $"[{StringUtilities.RandomString(10)}]";
-        var databaseId = await _DbLocator.AddDatabase(
-            databaseName,
-            databaseUser,
-            _databaseServerID,
-            _databaseTypeId,
-            Status.Active
-        );
+        var database = await AddDatabaseAsync();
 
-        await _DbLocator.DeleteDatabase(databaseId);
+        await _dbLocator.DeleteDatabase(database.Id);
 
-        var database = await _DbLocator.GetDatabases();
-        Assert.Empty(database);
+        var databases = await _dbLocator.GetDatabases();
+        Assert.Empty(databases);
     }
 
     [Fact]
     public async Task AddAndUpdateDatabase()
     {
+        var database = await AddDatabaseAsync();
+
+        var updatedDatabaseName = $"[{StringUtilities.RandomString(10)}]";
+        var updatedDatabaseUser = $"[{StringUtilities.RandomString(10)}]";
+        await _dbLocator.UpdateDatabase(
+            database.Id,
+            updatedDatabaseName,
+            updatedDatabaseUser,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Inactive
+        );
+
+        var databases = (await _dbLocator.GetDatabases()).ToList();
+        Assert.Single(databases);
+        Assert.Equal(updatedDatabaseName, databases[0].Name);
+        Assert.Equal(Status.Inactive, databases[0].Status);
+    }
+
+    private async Task<Database> AddDatabaseAsync()
+    {
         var databaseName = $"[{StringUtilities.RandomString(10)}]";
         var databaseUser = $"[{StringUtilities.RandomString(10)}]";
-        var databaseId = await _DbLocator.AddDatabase(
+        var databaseId = await _dbLocator.AddDatabase(
             databaseName,
             databaseUser,
             _databaseServerID,
@@ -78,22 +75,6 @@ public class DatabaseTests
             Status.Active
         );
 
-        var databaseName2 = $"[{StringUtilities.RandomString(10)}]";
-        var databaseUser2 = $"[{StringUtilities.RandomString(10)}]";
-        await _DbLocator.UpdateDatabase(
-            databaseId,
-            databaseName2,
-            databaseUser2,
-            _databaseServerID,
-            _databaseTypeId,
-            Status.Inactive
-        );
-
-        var oldDatabases = (await _DbLocator.GetDatabases()).ToList();
-        Assert.Empty(oldDatabases);
-
-        var newDatabases = (await _DbLocator.GetDatabases()).ToList();
-        Assert.Equal(databaseName2, newDatabases[0].Name);
-        Assert.Equal(Status.Inactive, newDatabases[0].Status);
+        return (await _dbLocator.GetDatabases()).Single(db => db.Id == databaseId);
     }
 }

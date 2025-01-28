@@ -5,56 +5,54 @@ using DbLocatorTests.Utilities;
 namespace DbLocatorTests;
 
 [Collection("DbLocator")]
-public class TenantTests(DbLocatorFixture DbLocatorFixture)
+public class TenantTests(DbLocatorFixture dbLocatorFixture)
 {
-    private readonly DbLocator.DbLocator _DbLocator = DbLocatorFixture.DbLocator;
+    private readonly DbLocator.DbLocator _dbLocator = dbLocatorFixture.DbLocator;
 
     [Fact]
     public async Task AddMultipleTenantsAndSearchByKeyWord()
     {
-        var TenantName = StringUtilities.RandomString(10);
-        var TenantCode = StringUtilities.RandomString(3);
-        var TenantId = await _DbLocator.AddTenant(TenantName, TenantCode, Status.Active);
+        var tenantName1 = StringUtilities.RandomString(10);
+        var tenantCode1 = StringUtilities.RandomString(3);
+        await _dbLocator.AddTenant(tenantName1, tenantCode1, Status.Active);
 
-        var TenantName2 = StringUtilities.RandomString(10);
-        var TenantCode2 = StringUtilities.RandomString(3);
-        var TenantId2 = await _DbLocator.AddTenant(TenantName2, TenantCode2, Status.Active);
+        var tenantName2 = StringUtilities.RandomString(10);
+        var tenantCode2 = StringUtilities.RandomString(3);
+        await _dbLocator.AddTenant(tenantName2, tenantCode2, Status.Active);
 
-        var Tenants = (await _DbLocator.GetTenants()).ToList();
-        Assert.Single(Tenants);
-        Assert.Equal(TenantName, Tenants[0].Name);
-        Assert.Equal(TenantCode, Tenants[0].Code);
+        var tenants = (await _dbLocator.GetTenants()).ToList();
+        Assert.Equal(2, tenants.Count);
+        Assert.Contains(tenants, t => t.Name == tenantName1 && t.Code == tenantCode1);
+        Assert.Contains(tenants, t => t.Name == tenantName2 && t.Code == tenantCode2);
     }
 
     [Fact]
     public async Task AddAndDeleteTenant()
     {
-        var TenantName = StringUtilities.RandomString(10);
-        var TenantCode = StringUtilities.RandomString(3);
-        var TenantId = await _DbLocator.AddTenant(TenantName, TenantCode, Status.Active);
+        var tenantName = StringUtilities.RandomString(10);
+        var tenantCode = StringUtilities.RandomString(3);
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
 
-        await _DbLocator.DeleteTenant(TenantId);
-        var Tenant = await _DbLocator.GetTenants();
-        Assert.Empty(Tenant);
+        await _dbLocator.DeleteTenant(tenantId);
+        var tenants = await _dbLocator.GetTenants();
+        Assert.Empty(tenants);
     }
 
     [Fact]
     public async Task AddAndUpdateTenant()
     {
-        var TenantName = StringUtilities.RandomString(10);
-        var TenantCode = StringUtilities.RandomString(3);
-        var TenantId = await _DbLocator.AddTenant(TenantName, TenantCode, Status.Active);
+        var tenantName = StringUtilities.RandomString(10);
+        var tenantCode = StringUtilities.RandomString(3);
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
 
-        var TenantName2 = StringUtilities.RandomString(10);
-        var TenantCode2 = StringUtilities.RandomString(3);
-        await _DbLocator.UpdateTenant(TenantId, TenantName2, TenantCode2, Status.Inactive);
+        var tenantName2 = StringUtilities.RandomString(10);
+        var tenantCode2 = StringUtilities.RandomString(3);
+        await _dbLocator.UpdateTenant(tenantId, tenantName2, tenantCode2, Status.Inactive);
 
-        var oldTenants = (await _DbLocator.GetTenants()).ToList();
-        Assert.Empty(oldTenants);
-
-        var newTenants = (await _DbLocator.GetTenants()).ToList();
-        Assert.Equal(TenantName2, newTenants[0].Name);
-        Assert.Equal(TenantCode2, newTenants[0].Code);
-        Assert.Equal(Status.Inactive, newTenants[0].Status);
+        var tenants = (await _dbLocator.GetTenants()).ToList();
+        Assert.Single(tenants);
+        Assert.Equal(tenantName2, tenants[0].Name);
+        Assert.Equal(tenantCode2, tenants[0].Code);
+        Assert.Equal(Status.Inactive, tenants[0].Status);
     }
 }

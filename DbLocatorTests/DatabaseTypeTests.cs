@@ -4,56 +4,56 @@ using DbLocatorTests.Utilities;
 namespace DbLocatorTests;
 
 [Collection("DbLocator")]
-public class DatabaseTypeTests(DbLocatorFixture DbLocatorFixture)
+public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
 {
-    private readonly DbLocator.DbLocator _DbLocator = DbLocatorFixture.DbLocator;
+    private readonly DbLocator.DbLocator _dbLocator = dbLocatorFixture.DbLocator;
 
     [Fact]
     public async Task AddMultipleDatabaseTypesAndSearchByKeyWord()
     {
-        var databaseTypeName = StringUtilities.RandomString(10);
-        var databaseTypeId = await _DbLocator.AddDatabaseType(databaseTypeName);
+        var databaseTypeName1 = StringUtilities.RandomString(10);
+        var databaseTypeId1 = await _dbLocator.AddDatabaseType(databaseTypeName1);
 
         var databaseTypeName2 = StringUtilities.RandomString(10);
-        var databaseTypeId2 = await _DbLocator.AddDatabaseType(databaseTypeName2);
+        var databaseTypeId2 = await _dbLocator.AddDatabaseType(databaseTypeName2);
 
-        var databaseTypes = (await _DbLocator.GetDatabaseTypes())
-            .Where(x => x.Name == databaseTypeName)
+        var databaseTypes = (await _dbLocator.GetDatabaseTypes())
+            .Where(x => x.Name == databaseTypeName1)
             .ToList();
 
         Assert.Single(databaseTypes);
-        Assert.Equal(databaseTypeName, databaseTypes[0].Name);
+        Assert.Equal(databaseTypeName1, databaseTypes[0].Name);
     }
 
     [Fact]
     public async Task AddAndDeleteDatabaseType()
     {
         var databaseTypeName = StringUtilities.RandomString(10);
-        var databaseTypeId = await _DbLocator.AddDatabaseType(databaseTypeName);
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
 
-        await _DbLocator.DeleteDatabaseType(databaseTypeId);
-        var databaseType = (await _DbLocator.GetDatabaseTypes())
+        await _dbLocator.DeleteDatabaseType(databaseTypeId);
+        var databaseTypes = (await _dbLocator.GetDatabaseTypes())
             .Where(x => x.Name == databaseTypeName)
             .ToList();
 
-        Assert.Empty(databaseType);
+        Assert.Empty(databaseTypes);
     }
 
     [Fact]
     public async Task AddAndUpdateDatabaseType()
     {
-        var databaseTypeName = StringUtilities.RandomString(10);
-        var databaseTypeId = await _DbLocator.AddDatabaseType(databaseTypeName);
+        var databaseTypeName1 = StringUtilities.RandomString(10);
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName1);
 
         var databaseTypeName2 = StringUtilities.RandomString(10);
-        await _DbLocator.UpdateDatabaseType(databaseTypeId, databaseTypeName2);
+        await _dbLocator.UpdateDatabaseType(databaseTypeId, databaseTypeName2);
 
-        var oldDatabaseTypes = (await _DbLocator.GetDatabaseTypes())
-            .Where(x => x.Name == databaseTypeName)
+        var oldDatabaseTypes = (await _dbLocator.GetDatabaseTypes())
+            .Where(x => x.Name == databaseTypeName1)
             .ToList();
         Assert.Empty(oldDatabaseTypes);
 
-        var newDatabaseTypes = (await _DbLocator.GetDatabaseTypes())
+        var newDatabaseTypes = (await _dbLocator.GetDatabaseTypes())
             .Where(x => x.Name == databaseTypeName2)
             .ToList();
         Assert.Single(newDatabaseTypes);

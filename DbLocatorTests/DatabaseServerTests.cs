@@ -4,28 +4,22 @@ using DbLocatorTests.Utilities;
 namespace DbLocatorTests;
 
 [Collection("DbLocator")]
-public class DatabaseServerTests(DbLocatorFixture DbLocatorFixture)
+public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
 {
-    private readonly DbLocator.DbLocator _DbLocator = DbLocatorFixture.DbLocator;
+    private readonly DbLocator.DbLocator _dbLocator = dbLocatorFixture.DbLocator;
 
     [Fact]
     public async Task AddMultipleDatabaseServersAndSearchByKeyWord()
     {
         var databaseServerName = StringUtilities.RandomString(10);
         var databaseServerLocation = StringUtilities.RandomString(10);
-        var databaseServerId = await _DbLocator.AddDatabaseServer(
-            databaseServerName,
-            databaseServerLocation
-        );
+        await _dbLocator.AddDatabaseServer(databaseServerName, databaseServerLocation);
 
         var databaseServerName2 = StringUtilities.RandomString(10);
         var databaseServerLocation2 = StringUtilities.RandomString(10);
-        var databaseServerId2 = await _DbLocator.AddDatabaseServer(
-            databaseServerName2,
-            databaseServerLocation2
-        );
+        await _dbLocator.AddDatabaseServer(databaseServerName2, databaseServerLocation2);
 
-        var databaseServers = (await _DbLocator.GetDatabaseServers())
+        var databaseServers = (await _dbLocator.GetDatabaseServers())
             .Where(x => x.Name == databaseServerName)
             .ToList();
 
@@ -39,16 +33,17 @@ public class DatabaseServerTests(DbLocatorFixture DbLocatorFixture)
     {
         var databaseServerName = StringUtilities.RandomString(10);
         var databaseServerLocation = StringUtilities.RandomString(10);
-        var databaseServerId = await _DbLocator.AddDatabaseServer(
+        var databaseServerId = await _dbLocator.AddDatabaseServer(
             databaseServerName,
             databaseServerLocation
         );
 
-        await _DbLocator.DeleteDatabaseServer(databaseServerId);
-        var databaseServer = (await _DbLocator.GetDatabaseServers())
+        await _dbLocator.DeleteDatabaseServer(databaseServerId);
+        var databaseServers = (await _dbLocator.GetDatabaseServers())
             .Where(x => x.Name == databaseServerName)
             .ToList();
-        Assert.Empty(databaseServer);
+
+        Assert.Empty(databaseServers);
     }
 
     [Fact]
@@ -56,20 +51,20 @@ public class DatabaseServerTests(DbLocatorFixture DbLocatorFixture)
     {
         var databaseServerName = StringUtilities.RandomString(10);
         var databaseServerLocation = StringUtilities.RandomString(10);
-        var databaseServerId = await _DbLocator.AddDatabaseServer(
+        var databaseServerId = await _dbLocator.AddDatabaseServer(
             databaseServerName,
             databaseServerLocation
         );
 
         var databaseServerName2 = StringUtilities.RandomString(10);
         var databaseServerLocation2 = StringUtilities.RandomString(10);
-        await _DbLocator.UpdateDatabaseServer(
+        await _dbLocator.UpdateDatabaseServer(
             databaseServerId,
             databaseServerName2,
             databaseServerLocation2
         );
 
-        var databaseServers = (await _DbLocator.GetDatabaseServers())
+        var databaseServers = (await _dbLocator.GetDatabaseServers())
             .Where(x => x.Name == databaseServerName2)
             .ToList();
 
