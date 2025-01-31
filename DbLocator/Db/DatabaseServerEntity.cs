@@ -1,0 +1,12 @@
+﻿namespace DbLocator.Db;
+
+internal class DatabaseServerEntity
+{
+    internal int DatabaseServerId { get; set; }
+
+    internal string DatabaseServerName { get; set; }
+
+    internal string DatabaseServerIpaddress { get; set; }
+
+    internal virtual ICollection<DatabaseEntity> Databases { get; set; } = [];
+}

@@ -1,0 +1,34 @@
+name: "Create Release"
+
+on: 
+  workflow_dispatch:
+
+jobs:
+    release:
+        name: Create Release
+        runs-on: ubuntu-latest
+
+        steps:
+          - uses: actions/checkout@v4
+            with:
+                fetch-depth: 0
+
+          - name: Install GitVersion
+            uses: gittools/actions/gitversion/setup@v3.1.1
+            with:
+                versionSpec: '6.0.x'
+
+          - name: Determine Version
+            uses: gittools/actions/gitversion/execute@v3.1.1
+            with:
+                useConfigFile: true
+
+          - name: Create Release
+            uses: thomaseizinger/create-release@2.0.0
+            with:
+                github_token: ${{ secrets.GITHUB_TOKEN }}
+                target_commitish: ${{ github.sha }}
+                tag_name: ${{ env.semVer }}
+                name: ${{ env.semVer }}
+                draft: false
+                prerelease: false

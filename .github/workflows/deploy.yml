@@ -1,0 +1,40 @@
+name: "Deploy to Nuget"
+
+on:
+  workflow_dispatch:
+
+jobs: 
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+
+            - name: Install GitVersion
+              uses: gittools/actions/gitversion/setup@v3.1.1
+              with:
+                  versionSpec: '6.0.x'
+
+            - name: Determine Version
+              uses: gittools/actions/gitversion/execute@v3.1.1
+              with:
+                  useConfigFile: true
+
+            - name: Download dotnet
+              uses: actions/setup-dotnet@v4
+              with:
+                dotnet-version: 9.0.x
+
+            - name: Restore dependencies
+              run: dotnet restore
+
+            - name: Build project
+              run: dotnet build --configuration Release
+
+            - name: Pack NuGet package
+              run: dotnet pack --configuration Release /p:PackageVersion=${{ env.semVer }}
+
+            - name: Push NuGet package to GitHub
+              run: dotnet nuget push DbLocator/bin/Release/*.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.PAT }} --skip-duplicate

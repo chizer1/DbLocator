@@ -1,0 +1,106 @@
+using DbLocator.Db;
+using DbLocator.Domain;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+
+namespace DbLocator.Features.Databases;
+
+internal record UpdateDatabaseCommand(
+    int DatabaseId,
+    string DatabaseName,
+    string DatabaseUsername,
+    int? DatabaseServerId,
+    byte? DatabaseTypeId,
+    Status? DatabaseStatus,
+    bool? UseTrustedConnection
+);
+
+internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateDatabaseCommand>
+{
+    internal UpdateDatabaseCommandValidator()
+    {
+        RuleFor(x => x.DatabaseId).NotNull().WithMessage("Database Id is required.");
+    }
+}
+
+internal class UpdateDatabase(IDbContextFactory<DbLocatorContext> dbContextFactory)
+{
+    internal async Task Handle(UpdateDatabaseCommand command)
+    {
+        await new UpdateDatabaseCommandValidator().ValidateAndThrowAsync(command);
+
+        await using var dbContext = dbContextFactory.CreateDbContext();
+
+        var databaseEntity =
+            await dbContext
+                .Set<DatabaseEntity>()
+                .FirstOrDefaultAsync(d => d.DatabaseId == command.DatabaseId)
+            ?? throw new InvalidOperationException(
+                $"Database Id '{command.DatabaseId}' not found."
+            );
+
+        if (
+            command.DatabaseServerId.HasValue
+            && !await dbContext
+                .Set<DatabaseServerEntity>()
+                .AnyAsync(ds => ds.DatabaseServerId == command.DatabaseServerId.Value)
+        )
+            throw new KeyNotFoundException(
+                $"Database Server Id '{command.DatabaseServerId}' not found."
+            );
+
+        if (
+            command.DatabaseTypeId.HasValue
+            && !await dbContext
+                .Set<DatabaseTypeEntity>()
+                .AnyAsync(dt => dt.DatabaseTypeId == command.DatabaseTypeId.Value)
+        )
+            throw new KeyNotFoundException(
+                $"Database Type Id '{command.DatabaseTypeId}' not found."
+            );
+
+        var oldDatabaseName = databaseEntity.DatabaseName;
+        var oldDatabaseUser = databaseEntity.DatabaseUser;
+
+        if (!string.IsNullOrEmpty(command.DatabaseName))
+            databaseEntity.DatabaseName = command.DatabaseName;
+
+        if (!string.IsNullOrEmpty(command.DatabaseUsername))
+            databaseEntity.DatabaseUser = command.DatabaseUsername;
+
+        if (command.DatabaseServerId.HasValue)
+            databaseEntity.DatabaseServerId = command.DatabaseServerId.Value;
+
+        if (command.DatabaseTypeId.HasValue)
+            databaseEntity.DatabaseTypeId = command.DatabaseTypeId.Value;
+
+        if (command.DatabaseStatus.HasValue)
+            databaseEntity.DatabaseStatusId = (byte)command.DatabaseStatus.Value;
+
+        if (command.UseTrustedConnection.HasValue)
+            databaseEntity.UseTrustedConnection = command.UseTrustedConnection.Value;
+
+        dbContext.Update(databaseEntity);
+        await dbContext.SaveChangesAsync();
+
+        var commands = new List<string>();
+        if (oldDatabaseName != command.DatabaseName && !string.IsNullOrEmpty(command.DatabaseName))
+            commands.Add($"ALTER DATABASE {oldDatabaseName} MODIFY NAME = {command.DatabaseName}");
+
+        if (
+            oldDatabaseUser != command.DatabaseUsername
+            && !string.IsNullOrEmpty(command.DatabaseUsername)
+        )
+            commands.Add(
+                $"USE {command.DatabaseName}; ALTER USER {oldDatabaseUser} WITH NAME = {command.DatabaseUsername}"
+            );
+
+        foreach (var commandText in commands)
+        {
+            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+            cmd.CommandText = commandText;
+            await dbContext.Database.OpenConnectionAsync();
+            await cmd.ExecuteNonQueryAsync();
+        }
+    }
+}

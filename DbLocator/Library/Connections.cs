@@ -1,0 +1,49 @@
+using System.Data.SqlClient;
+using DbLocator.Db;
+using DbLocator.Domain;
+using DbLocator.Features.Connections;
+using Microsoft.EntityFrameworkCore;
+
+namespace DbLocator.Library;
+
+internal class Connections(IDbContextFactory<DbLocatorContext> dbContextFactory)
+{
+    private readonly AddConnection _addConnection = new(dbContextFactory);
+    private readonly DeleteConnection _deleteConnection = new(dbContextFactory);
+    private readonly GetConnection _getConnection = new(dbContextFactory);
+    private readonly GetConnections _getConnections = new(dbContextFactory);
+
+    internal async Task<int> AddConnection(int tenantId, int databaseId)
+    {
+        return await _addConnection.Handle(new AddConnectionCommand(tenantId, databaseId));
+    }
+
+    internal async Task DeleteConnection(int connectionId)
+    {
+        await _deleteConnection.Handle(new DeleteConnectionCommand(connectionId));
+    }
+
+    internal async Task<SqlConnection> GetConnection(int tenantId, int databaseTypeId)
+    {
+        return await _getConnection.Handle(
+            new GetConnectionQuery(tenantId, databaseTypeId, null, null)
+        );
+    }
+
+    internal async Task<SqlConnection> GetConnection(int connectionId)
+    {
+        return await _getConnection.Handle(new GetConnectionQuery(null, null, connectionId, null));
+    }
+
+    internal async Task<SqlConnection> GetConnection(string tenantCode, int databaseTypeId)
+    {
+        return await _getConnection.Handle(
+            new GetConnectionQuery(null, databaseTypeId, null, tenantCode)
+        );
+    }
+
+    internal async Task<List<Connection>> GetConnections()
+    {
+        return await _getConnections.Handle(new GetConnectionsQuery());
+    }
+}
