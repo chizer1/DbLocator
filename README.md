@@ -63,6 +63,28 @@ Locator dbLocator = new("{YourConnectionString}");
 
 After initializing the Locator object and running your application, it will automatically create the DbLocator database and you can start using its methods.
 
-## Example implementations
+### 5. Code example
+
+```csharp
+
+var tenantCode = "acme";
+var tenantId = await dbLocator.AddTenant("Acme Corp", tenantCode, 1);
+
+var databaseTypeId = await dbLocator.AddDatabaseType("Client");
+
+var databaseServerId = await dbLocator.AddDatabaseServer("localhost", "127.0.0.1");
+
+var databaseId = await dbLocator.AddDatabase("Acme_Client", "acme_client_user", databaseServerId, databaseTypeId, 1);
+
+var connectionId = await dbLocator.AddConnection(tenantId, databaseId);
+
+// several ways to start a SQL Connection
+SqlConnection connection1 = await dbLocator.GetConnection(connectionId);
+SqlConnection connection2 = await dbLocator.GetConnection(tenantId, databaseTypeId);
+SqlConnection connection3 = await dbLocator.GetConnection(tenantCode, databaseTypeId);
+
+```
+
+## Implementations
 
 - [https://github.com/chizer1/DbLocatorExample](https://github.com/chizer1/DbLocatorExample)
