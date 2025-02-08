@@ -68,13 +68,13 @@ After initializing the Locator object and running your application, it will auto
 ```csharp
 
 var tenantCode = "acme";
-var tenantId = await dbLocator.AddTenant("Acme Corp", tenantCode, 1);
+var tenantId = await dbLocator.AddTenant("Acme Corp", tenantCode, Status.Active);
 
 var databaseTypeId = await dbLocator.AddDatabaseType("Client");
 
 var databaseServerId = await dbLocator.AddDatabaseServer("localhost", "127.0.0.1");
 
-var databaseId = await dbLocator.AddDatabase("Acme_Client", "acme_client_user", databaseServerId, databaseTypeId, 1);
+var databaseId = await dbLocator.AddDatabase("Acme_Client", "acme_client_user", databaseServerId, databaseTypeId, Status.Active);
 
 var connectionId = await dbLocator.AddConnection(tenantId, databaseId);
 
