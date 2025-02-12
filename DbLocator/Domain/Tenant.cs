@@ -1,7 +1,7 @@
 namespace DbLocator.Domain;
 
 /// <summary>
-/// Represents a Tenant with an id, name, code, and status.
+/// Represents a tenant
 /// </summary>
 public class Tenant(int id, string name, string code, Status status)
 {

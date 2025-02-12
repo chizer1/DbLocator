@@ -28,14 +28,14 @@ internal class AddConnection(IDbContextFactory<DbLocatorContext> dbContextFactor
             .AnyAsync(t => t.TenantId == command.TenantId);
 
         if (!tenantExists)
-            throw new KeyNotFoundException($"Tenant with ID '{command.TenantId}' not found.");
+            throw new KeyNotFoundException($"Tenant with Id '{command.TenantId}' not found.");
 
         var databaseExists = await dbContext
             .Set<DatabaseEntity>()
             .AnyAsync(d => d.DatabaseId == command.DatabaseId);
 
         if (!databaseExists)
-            throw new KeyNotFoundException($"Database with ID '{command.DatabaseId}' not found.");
+            throw new KeyNotFoundException($"Database with Id '{command.DatabaseId}' not found.");
 
         var connectionExists = await dbContext
             .Set<ConnectionEntity>()

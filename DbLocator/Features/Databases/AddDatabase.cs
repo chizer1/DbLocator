@@ -23,7 +23,9 @@ internal sealed class AddDatabaseCommandValidator : AbstractValidator<AddDatabas
             .NotEmpty()
             .WithMessage("Database Name is required.")
             .MaximumLength(50)
-            .WithMessage("Database Name cannot be more than 50 characters.");
+            .WithMessage("Database Name cannot be more than 50 characters.")
+            .Matches(@"^\S*$")
+            .WithMessage("Database Name cannot contain spaces.");
         RuleFor(x => x.DatabaseServerId).NotEmpty().WithMessage("Database Server Id  is required.");
         RuleFor(x => x.DatabaseTypeId).NotEmpty().WithMessage("Database Type Id is required.");
         RuleFor(x => x.DatabaseStatus).IsInEnum().WithMessage("Database Status is required.");
