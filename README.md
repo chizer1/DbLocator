@@ -1,4 +1,4 @@
-# About
+# DbLocator
 
 The purpose of this library is to simplify database interactions for applications managing multi-tenant environments with multiple database connections.
 

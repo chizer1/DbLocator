@@ -169,7 +169,7 @@ public class Locator
     }
 
     /// <summary>
-    /// Create SQL connection based on user, Tenant and database type
+    /// Create SQL connection based on tenant and database type
     /// </summary>
     /// <param name="tenantId">Id of the Tenant</param>
     /// <param name="databaseTypeId">Id of the database type</param>
@@ -204,13 +204,13 @@ public class Locator
     /// <summary>
     ///Add connection to DbLocator database
     /// </summary>
-    /// <param name="TenantUserId">Id of the Tenant user</param>
+    /// <param name="tenantId">Id of the tenat</param>
     /// <param name="databaseId">Id of the database</param>
     /// <returns>ConnectionId</returns>
     /// <returns></returns>
-    public async Task<int> AddConnection(int TenantUserId, int databaseId)
+    public async Task<int> AddConnection(int tenantId, int databaseId)
     {
-        return await _connections.AddConnection(TenantUserId, databaseId);
+        return await _connections.AddConnection(tenantId, databaseId);
     }
 
     /// <summary>
