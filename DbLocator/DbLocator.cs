@@ -10,7 +10,8 @@ using Microsoft.EntityFrameworkCore;
 namespace DbLocator;
 
 /// <summary>
-/// Locator class is the main class that is used to interact with the DbLocator database.
+/// The Locator class provides methods to interact with the DbLocator database.
+/// Including operations for tenants, connections, databases, database servers, and database types.
 /// </summary>
 public class Locator
 {
@@ -21,8 +22,11 @@ public class Locator
     private readonly Tenants _tenants;
 
     /// <summary>
-    /// Constructor for Locator class
+    /// Initializes a new instance of the <see cref="Locator"/> class with the specified connection string.
+    /// This constructor sets up the database context, applies migrations, and initializes the various services.
     /// </summary>
+    /// <param name="dbLocatorConnectionString">The connection string for the DbLocator database.</param>
+    /// <exception cref="ArgumentException">Thrown when the connection string is null or whitespace.</exception>
     public Locator(string dbLocatorConnectionString)
     {
         if (string.IsNullOrWhiteSpace(dbLocatorConnectionString))
@@ -51,54 +55,54 @@ public class Locator
     #region Tenants
 
     /// <summary>
-    ///Add Tenant to DbLocator database
+    ///Add tenant
     /// </summary>
+    /// <param name="tenantName"></param>
+    /// <param name="tenantCode"></param>
+    /// <param name="tenantStatus"></param>
     /// <returns>TenantId</returns>
-    /// <param name="tenantName">Name of the Tenant</param>
-    /// <param name="tenantCode">Code of the Tenant</param>
-    /// <param name="tenantStatus">Status of the Tenant</param>
     public async Task<int> AddTenant(string tenantName, string tenantCode, Status tenantStatus)
     {
         return await _tenants.AddTenant(tenantName, tenantCode, tenantStatus);
     }
 
     /// <summary>
-    ///Add Tenant to DbLocator database
+    ///Add tenant
     /// </summary>
+    /// <param name="tenantName"></param>
+    /// <param name="tenantStatus"></param>
     /// <returns>TenantId</returns>
-    /// <param name="tenantName">Name of the Tenant</param>
-    /// <param name="tenantStatus">Status of the Tenant</param>
     public async Task<int> AddTenant(string tenantName, Status tenantStatus)
     {
         return await _tenants.AddTenant(tenantName, tenantStatus);
     }
 
     /// <summary>
-    ///Add Tenant to DbLocator database
+    ///Add Tenant
     /// </summary>
     /// <returns>TenantId</returns>
-    /// <param name="tenantName">Name of the Tenant</param>
+    /// <param name="tenantName"></param>
     public async Task<int> AddTenant(string tenantName)
     {
         return await _tenants.AddTenant(tenantName);
     }
 
     /// <summary>
-    ///Get Tenants
+    ///Get tenants
     /// </summary>
-    /// <returns>List of Tenants</returns>
+    /// <returns>List of tenants</returns>
     public async Task<List<Tenant>> GetTenants()
     {
         return await _tenants.GetTenants();
     }
 
     /// <summary>
-    ///Update Tenant information in DbLocator database
+    ///Update tenant
     /// </summary>
-    /// <param name="tenantId">Id of the Tenant</param>
-    /// <param name="tenantName">Name of the Tenant</param>
-    /// <param name="tenantCode">Code of the Tenant</param>
-    /// <param name="tenantStatus">Status of the Tenant</param>
+    /// <param name="tenantId"></param>
+    /// <param name="tenantName"></param>
+    /// <param name="tenantCode"></param>
+    /// <param name="tenantStatus"></param>
     /// <returns></returns>
     public async Task UpdateTenant(
         int tenantId,
@@ -111,10 +115,10 @@ public class Locator
     }
 
     /// <summary>
-    ///Update Tenant information in DbLocator database
+    ///Update tenant
     /// </summary>
-    /// <param name="tenantId">Id of the Tenant</param>
-    /// <param name="tenantName">Name of the Tenant</param>
+    /// <param name="tenantId"></param>
+    /// <param name="tenantName"></param>
     /// <returns></returns>
     public async Task UpdateTenant(int tenantId, string tenantName)
     {
@@ -122,10 +126,10 @@ public class Locator
     }
 
     /// <summary>
-    ///Update Tenant information in DbLocator database
+    ///Update tenant
     /// </summary>
-    /// <param name="tenantId">Id of the Tenant</param>
-    /// <param name="tenantStatus">Status of the Tenant</param>
+    /// <param name="tenantId"></param>
+    /// <param name="tenantStatus"></param>
     /// <returns></returns>
     public async Task UpdateTenant(int tenantId, Status tenantStatus)
     {
@@ -133,11 +137,11 @@ public class Locator
     }
 
     /// <summary>
-    ///Update Tenant information in DbLocator database
+    ///Update tenant
     /// </summary>
-    /// <param name="tenantId">Id of the Tenant</param>
-    /// <param name="tenantName">Name of the Tenant</param>
-    /// <param name="tenantCode">Code of the Tenant</param>
+    /// <param name="tenantId"></param>
+    /// <param name="tenantName"></param>
+    /// <param name="tenantCode"></param>
     /// <returns></returns>
     public async Task UpdateTenant(int tenantId, string tenantName, string tenantCode)
     {
@@ -145,9 +149,9 @@ public class Locator
     }
 
     /// <summary>
-    ///Delete Tenant from DbLocator database
+    ///Delete tenant
     /// </summary>
-    /// <param name="tenantId">Id of the Tenant</param>
+    /// <param name="tenantId"></param>
     /// <returns></returns>
     public async Task DeleteTenant(int tenantId)
     {
@@ -159,9 +163,9 @@ public class Locator
     #region Connections
 
     /// <summary>
-    /// Create SQL connection based on connectionId
+    /// Get SQL connection
     /// </summary>
-    /// <param name="connectionId">Id of the connection</param>
+    /// <param name="connectionId"></param>
     /// <returns>SqlConnection</returns>
     public async Task<SqlConnection> GetConnection(int connectionId)
     {
@@ -169,10 +173,10 @@ public class Locator
     }
 
     /// <summary>
-    /// Create SQL connection based on user, Tenant and database type
+    /// Get SQL connection
     /// </summary>
-    /// <param name="tenantId">Id of the Tenant</param>
-    /// <param name="databaseTypeId">Id of the database type</param>
+    /// <param name="tenantId"></param>
+    /// <param name="databaseTypeId"></param>
     /// <returns>SqlConnection</returns>
     /// <returns></returns>
     public async Task<SqlConnection> GetConnection(int tenantId, int databaseTypeId)
@@ -181,10 +185,10 @@ public class Locator
     }
 
     /// <summary>
-    /// Create SQL connection based on tenant code and database type
+    /// Get SQL connection
     /// </summary>
-    /// <param name="tenantCode">Code of the Tenant</param>
-    /// <param name="databaseTypeId">Id of the database type</param>
+    /// <param name="tenantCode"></param>
+    /// <param name="databaseTypeId"></param>
     /// <returns>SqlConnection</returns>
     public async Task<SqlConnection> GetConnection(string tenantCode, int databaseTypeId)
     {
@@ -192,9 +196,9 @@ public class Locator
     }
 
     /// <summary>
-    /// Get connections from DbLocator database
+    /// Get connections
     /// </summary>
-    /// <returns>List of Connections</returns>
+    /// <returns>List of connections</returns>
     /// <returns></returns>
     public async Task<List<Connection>> GetConnections()
     {
@@ -202,21 +206,20 @@ public class Locator
     }
 
     /// <summary>
-    ///Add connection to DbLocator database
+    ///Add connection
     /// </summary>
-    /// <param name="TenantUserId">Id of the Tenant user</param>
-    /// <param name="databaseId">Id of the database</param>
+    /// <param name="tenantId"></param>
+    /// <param name="databaseId"></param>
     /// <returns>ConnectionId</returns>
-    /// <returns></returns>
-    public async Task<int> AddConnection(int TenantUserId, int databaseId)
+    public async Task<int> AddConnection(int tenantId, int databaseId)
     {
-        return await _connections.AddConnection(TenantUserId, databaseId);
+        return await _connections.AddConnection(tenantId, databaseId);
     }
 
     /// <summary>
-    ///Delete connection from DbLocator database
+    ///Delete connection
     /// </summary>
-    /// <param name="connectionId">Id of the connection</param>
+    /// <param name="connectionId"></param>
     /// <returns></returns>
     public async Task DeleteConnection(int connectionId)
     {
@@ -228,13 +231,13 @@ public class Locator
     #region Databases
 
     /// <summary>
-    /// Insert database record and create new database on specified server with the user provided
+    /// Add database
     /// </summary>
-    /// <param name="databaseName">Name of the database</param>
-    /// <param name="databaseUser">User of the database</param>
-    /// <param name="databaseServerId">Id of the database server</param>
-    /// <param name="databaseTypeId">Id of the database type</param>
-    /// <param name="databaseStatus">Status of the database</param>
+    /// <param name="databaseName"></param>
+    /// <param name="databaseUser"></param>
+    /// <param name="databaseServerId"></param>
+    /// <param name="databaseTypeId"></param>
+    /// <param name="databaseStatus"></param>
     /// <returns>DatabaseId</returns>
     public async Task<int> AddDatabase(
         string databaseName,
@@ -254,13 +257,13 @@ public class Locator
     }
 
     /// <summary>
-    /// Insert database record and create new database on specified server if createDatabase is true and use trusted connection
+    /// Add database
     /// </summary>
-    /// <param name="databaseName">Name of the database</param>
-    /// <param name="databaseServerId">Id of the database server</param>
-    /// <param name="databaseTypeId">Id of the database type</param>
-    /// <param name="databaseStatus">Status of the database</param>
-    /// <param name="createDatabase">Create database</param>
+    /// <param name="databaseName"></param>
+    /// <param name="databaseServerId"></param>
+    /// <param name="databaseTypeId"></param>
+    /// <param name="databaseStatus"></param>
+    /// <param name="createDatabase"></param>
     /// <returns>DatabaseId</returns>
     public async Task<int> AddDatabase(
         string databaseName,
@@ -280,12 +283,12 @@ public class Locator
     }
 
     /// <summary>
-    /// Insert database record and create new database on specified server with the user provided
+    /// Add database
     /// </summary>
-    /// <param name="databaseName">Name of the database</param>
-    /// <param name="databaseUser">User of the database</param>
-    /// <param name="databaseServerId">Id of the database server</param>
-    /// <param name="databaseTypeId">Id of the database type</param>
+    /// <param name="databaseName"></param>
+    /// <param name="databaseUser"></param>
+    /// <param name="databaseServerId"></param>
+    /// <param name="databaseTypeId"></param>
     /// <returns>DatabaseId</returns>
     public async Task<int> AddDatabase(
         string databaseName,
@@ -304,11 +307,11 @@ public class Locator
     }
 
     /// <summary>
-    /// Insert database record and create new database on specified server and use trusted connection
+    /// Add database
     /// </summary>
-    /// <param name="databaseName">Name of the database</param>
-    /// <param name="databaseServerId">Id of the database server</param>
-    /// <param name="databaseTypeId">Id of the database type</param>
+    /// <param name="databaseName"></param>
+    /// <param name="databaseServerId"></param>
+    /// <param name="databaseTypeId"></param>
     /// <returns>DatabaseId</returns>
     public async Task<int> AddDatabase(
         string databaseName,
@@ -329,14 +332,14 @@ public class Locator
     }
 
     /// <summary>
-    ///Update database information in DbLocator database and make updates on database server
+    ///Update database
     /// </summary>
-    /// <param name="databaseId">Id of the database</param>
-    /// <param name="databaseName">Name of the database</param>
-    /// <param name="databaseUser">User of the database</param>
-    /// <param name="databaseServerId">Id of the database server</param>
-    /// <param name="databaseTypeId">Id of the database type</param>
-    /// <param name="databaseStatus">Status of the database</param>
+    /// <param name="databaseId"></param>
+    /// <param name="databaseName"></param>
+    /// <param name="databaseUser"></param>
+    /// <param name="databaseServerId"></param>
+    /// <param name="databaseTypeId"></param>
+    /// <param name="databaseStatus"></param>
     /// <returns></returns>
     public async Task UpdateDatabase(
         int databaseId,
@@ -358,10 +361,10 @@ public class Locator
     }
 
     /// <summary>
-    /// Update database information in DbLocator database and make updates on database server
+    /// Update database
     /// </summary>
-    /// <param name="databaseId">Id of the database</param>
-    /// <param name="databaseServerId">Id of the database server</param>
+    /// <param name="databaseId"></param>
+    /// <param name="databaseServerId"></param>
     /// <returns></returns>
     public async Task UpdateDatabase(int databaseId, int databaseServerId)
     {
@@ -369,10 +372,10 @@ public class Locator
     }
 
     /// <summary>
-    /// Update database information in DbLocator database and make updates on database server
+    /// Update database
     /// </summary>
-    /// <param name="databaseId">Id of the database</param>
-    /// <param name="databaseTypeId">Id of the database type</param>
+    /// <param name="databaseId"></param>
+    /// <param name="databaseTypeId"></param>
     /// <returns></returns>
     public async Task UpdateDatabase(int databaseId, byte databaseTypeId)
     {
@@ -380,10 +383,10 @@ public class Locator
     }
 
     /// <summary>
-    /// Update database information in DbLocator database and make updates on database server
+    /// Update database
     /// </summary>
-    /// <param name="databaseId">Id of the database</param>
-    /// <param name="databaseName">Name of the database</param>
+    /// <param name="databaseId"></param>
+    /// <param name="databaseName"></param>
     /// <returns></returns>
     public async Task UpdateDatabase(int databaseId, string databaseName)
     {
@@ -391,11 +394,11 @@ public class Locator
     }
 
     /// <summary>
-    /// Update database information in DbLocator database and make updates on database server
+    /// Update database
     /// </summary>
-    /// <param name="databaseId">Id of the database</param>
-    /// <param name="databaseName">Name of the database</param>
-    /// <param name="databaseUser">User of the database</param>
+    /// <param name="databaseId"></param>
+    /// <param name="databaseName"></param>
+    /// <param name="databaseUser"></param>
     /// <returns></returns>
     public async Task UpdateDatabase(int databaseId, string databaseName, string databaseUser)
     {
@@ -403,10 +406,10 @@ public class Locator
     }
 
     /// <summary>
-    /// Update database information in DbLocator database and make updates on database server
+    /// Update database
     /// </summary>
-    /// <param name="databaseId">Id of the database</param>
-    /// <param name="databaseStatus">Status of the database</param>
+    /// <param name="databaseId"></param>
+    /// <param name="databaseStatus"></param>
     /// <returns></returns>
     public async Task UpdateDatabase(int databaseId, Status databaseStatus)
     {
@@ -414,10 +417,10 @@ public class Locator
     }
 
     /// <summary>
-    /// Update database information in DbLocator database and make updates on database server
+    /// Update database
     /// </summary>
-    /// <param name="databaseId">Id of the database</param>
-    /// <param name="useTrustedConnection">Use trusted connection</param>
+    /// <param name="databaseId"></param>
+    /// <param name="useTrustedConnection"></param>
     /// <returns></returns>
     public async Task UpdateDatabase(int databaseId, bool useTrustedConnection)
     {
@@ -425,9 +428,9 @@ public class Locator
     }
 
     /// <summary>
-    ///Delete database information from DbLocator database and on server it lives on
+    ///Delete database
     /// </summary>
-    /// <param name="databaseId">Id of the database</param>
+    /// <param name="databaseId"></param>
     /// <returns></returns>
     public async Task DeleteDatabase(int databaseId)
     {
@@ -439,12 +442,11 @@ public class Locator
     #region DatabaseServers
 
     /// <summary>
-    ///Add database server to DbLocator database.
+    ///Add database server
     /// </summary>
-    /// <param name="databaseServerName">Name of the database server</param>
-    /// <param name="databaseServerIpAddress">IP address of the database server</param>
+    /// <param name="databaseServerName"></param>
+    /// <param name="databaseServerIpAddress"></param>
     /// <returns>DatabaseServerId</returns>
-    /// <remarks> This method will not create a new database server. It will only add a record in the DbLocator database.</remarks>
     public async Task<int> AddDatabaseServer(
         string databaseServerName,
         string databaseServerIpAddress
@@ -457,9 +459,9 @@ public class Locator
     }
 
     /// <summary>
-    ///Get database servers from DbLocator database
+    ///Get database servers
     /// </summary>
-    /// <returns>List of DatabaseServers</returns>
+    /// <returns>List of database servers</returns>
     /// <returns></returns>
     public async Task<List<DatabaseServer>> GetDatabaseServers()
     {
@@ -467,11 +469,11 @@ public class Locator
     }
 
     /// <summary>
-    ///Update database server information in DbLocator database
+    ///Update database server
     /// </summary>
-    /// <param name="databaseServerId">Id of the database server</param>
-    /// <param name="databaseServerName">Name of the database server</param>
-    /// <param name="databaseServerIpAddress">IP address of the database server</param>
+    /// <param name="databaseServerId"></param>
+    /// <param name="databaseServerName"></param>
+    /// <param name="databaseServerIpAddress"></param>
     /// <returns></returns>
     public async Task UpdateDatabaseServer(
         int databaseServerId,
@@ -487,9 +489,9 @@ public class Locator
     }
 
     /// <summary>
-    ///Delete database server information from DbLocator database
+    ///Delete database server
     /// </summary>
-    /// <param name="databaseServerId">Id of the database server</param>
+    /// <param name="databaseServerId"></param>
     /// <returns></returns>
     public async Task DeleteDatabaseServer(int databaseServerId)
     {
@@ -501,39 +503,39 @@ public class Locator
     #region DatabaseTypes
 
     /// <summary>
-    ///Add database type to DbLocator database
+    ///Add database type
     /// </summary>
-    /// <param name="name">Name of the database type</param>
+    /// <param name="databaseTypeName"></param>
     /// <returns>DatabaseTypeId</returns>
-    public async Task<byte> AddDatabaseType(string name)
+    public async Task<byte> AddDatabaseType(string databaseTypeName)
     {
-        return await _databaseTypes.AddDatabaseType(name);
+        return await _databaseTypes.AddDatabaseType(databaseTypeName);
     }
 
     /// <summary>
-    ///Get database types from DbLocator database
+    ///Get database types
     /// </summary>
-    /// <returns>List of DatabaseTypes</returns>
+    /// <returns>List of database types</returns>
     public async Task<List<DatabaseType>> GetDatabaseTypes()
     {
         return await _databaseTypes.GetDatabaseTypes();
     }
 
     /// <summary>
-    ///Update database type information in DbLocator database
+    ///Update database type
     /// </summary>
-    /// <param name="databaseTypeId">Id of the database type</param>
-    /// <param name="name">Name of the database type</param>
+    /// <param name="databaseTypeId"></param>
+    /// <param name="databaseTypeName"></param>
     /// <returns></returns>
-    public async Task UpdateDatabaseType(byte databaseTypeId, string name)
+    public async Task UpdateDatabaseType(byte databaseTypeId, string databaseTypeName)
     {
-        await _databaseTypes.UpdateDatabaseType(databaseTypeId, name);
+        await _databaseTypes.UpdateDatabaseType(databaseTypeId, databaseTypeName);
     }
 
     /// <summary>
-    ///Delete database type from DbLocator database
+    ///Delete database type
     /// </summary>
-    /// <param name="databaseTypeId">Id of the database type</param>
+    /// <param name="databaseTypeId"></param>
     /// <returns></returns>
     public async Task DeleteDatabaseType(byte databaseTypeId)
     {
