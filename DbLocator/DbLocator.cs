@@ -366,7 +366,7 @@ public class Locator
             databaseUser,
             databaseUserPassword,
             databaseServerId,
-            databaseTypeId,b
+            databaseTypeId,
             databaseStatus,
             createDatabase
         );
