@@ -21,6 +21,11 @@ internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateD
 {
     internal UpdateDatabaseCommandValidator()
     {
+        RuleFor(x => x.DatabaseName)
+            .MaximumLength(50)
+            .WithMessage("Database Name cannot be more than 50 characters.")
+            .Matches(@"^\S*$")
+            .WithMessage("Database Name cannot contain spaces.");
         RuleFor(x => x.DatabaseId).NotNull().WithMessage("Database Id is required.");
 
         RuleFor(x => x.DatabaseName)
