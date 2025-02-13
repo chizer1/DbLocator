@@ -475,8 +475,6 @@ public class Locator
     /// <param name="databaseId"></param>
     /// <param name="databaseUser"></param>
     /// <param name="databaseUserPassword"></param>
-    /// <param name="databaseName"></param>
-    /// <param name="databaseUser"></param>
     /// <returns></returns>
     public async Task UpdateDatabase(
         int databaseId,
