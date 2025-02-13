@@ -410,6 +410,7 @@ public class Locator
     /// <param name="databaseId"></param>
     /// <param name="databaseName"></param>
     /// <param name="databaseUser"></param>
+    /// <param name="databaseUserPassword"></param>
     /// <param name="databaseServerId"></param>
     /// <param name="databaseTypeId"></param>
     /// <param name="databaseStatus"></param>
@@ -418,6 +419,7 @@ public class Locator
         int databaseId,
         string databaseName,
         string databaseUser,
+        string databaseUserPassword,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
@@ -427,6 +429,7 @@ public class Locator
             databaseId,
             databaseName,
             databaseUser,
+            databaseUserPassword,
             databaseServerId,
             databaseTypeId,
             databaseStatus
@@ -470,12 +473,16 @@ public class Locator
     /// Update database
     /// </summary>
     /// <param name="databaseId"></param>
-    /// <param name="databaseName"></param>
     /// <param name="databaseUser"></param>
+    /// <param name="databaseUserPassword"></param>
     /// <returns></returns>
-    public async Task UpdateDatabase(int databaseId, string databaseName, string databaseUser)
+    public async Task UpdateDatabase(
+        int databaseId,
+        string databaseUser,
+        string databaseUserPassword
+    )
     {
-        await _databases.UpdateDatabase(databaseId, databaseName, databaseUser);
+        await _databases.UpdateDatabase(databaseId, databaseUser, databaseUserPassword);
     }
 
     /// <summary>

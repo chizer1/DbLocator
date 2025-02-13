@@ -14,7 +14,7 @@ internal class Databases(
     private readonly AddDatabase _addDatabase = new(dbContextFactory, encryption);
     private readonly DeleteDatabase _deleteDatabase = new(dbContextFactory);
     private readonly GetDatabases _getDatabases = new(dbContextFactory);
-    private readonly UpdateDatabase _updateDatabase = new(dbContextFactory);
+    private readonly UpdateDatabase _updateDatabase = new(dbContextFactory, encryption);
 
     internal async Task<int> AddDatabase(
         string databaseName,
@@ -162,6 +162,7 @@ internal class Databases(
         int databaseId,
         string databaseName,
         string databaseUser,
+        string databaseUserPassword,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
@@ -172,6 +173,7 @@ internal class Databases(
                 databaseId,
                 databaseName,
                 databaseUser,
+                databaseUserPassword,
                 databaseServerId,
                 databaseTypeId,
                 databaseStatus,
@@ -183,31 +185,31 @@ internal class Databases(
     internal async Task UpdateDatabase(int databaseId, int databaseServerId)
     {
         await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(databaseId, null, null, databaseServerId, null, null, null)
+            new UpdateDatabaseCommand(
+                databaseId,
+                null,
+                null,
+                null,
+                databaseServerId,
+                null,
+                null,
+                null
+            )
         );
     }
 
-    internal async Task UpdateDatabase(int databaseId, byte databaseTypeId)
-    {
-        await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(databaseId, null, null, null, databaseTypeId, null, null)
-        );
-    }
-
-    internal async Task UpdateDatabase(int databaseId, string databaseName)
-    {
-        await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(databaseId, databaseName, null, null, null, null, null)
-        );
-    }
-
-    internal async Task UpdateDatabase(int databaseId, string databaseName, string databaseUser)
+    internal async Task UpdateDatabase(
+        int databaseId,
+        string databaseUser,
+        string databaseUserPassword
+    )
     {
         await _updateDatabase.Handle(
             new UpdateDatabaseCommand(
                 databaseId,
-                databaseName,
+                null,
                 databaseUser,
+                databaseUserPassword,
                 null,
                 null,
                 null,
@@ -216,10 +218,42 @@ internal class Databases(
         );
     }
 
+    internal async Task UpdateDatabase(int databaseId, byte databaseTypeId)
+    {
+        await _updateDatabase.Handle(
+            new UpdateDatabaseCommand(
+                databaseId,
+                null,
+                null,
+                null,
+                null,
+                databaseTypeId,
+                null,
+                null
+            )
+        );
+    }
+
+    internal async Task UpdateDatabase(int databaseId, string databaseName)
+    {
+        await _updateDatabase.Handle(
+            new UpdateDatabaseCommand(databaseId, databaseName, null, null, null, null, null, null)
+        );
+    }
+
     internal async Task UpdateDatabase(int databaseId, Status databaseStatus)
     {
         await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(databaseId, null, null, null, null, databaseStatus, null)
+            new UpdateDatabaseCommand(
+                databaseId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                databaseStatus,
+                null
+            )
         );
     }
 
@@ -228,6 +262,7 @@ internal class Databases(
         await _updateDatabase.Handle(
             new UpdateDatabaseCommand(
                 databaseId,
+                null,
                 null,
                 null,
                 null,

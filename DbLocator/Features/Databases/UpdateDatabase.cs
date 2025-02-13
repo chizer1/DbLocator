@@ -1,5 +1,6 @@
 using DbLocator.Db;
 using DbLocator.Domain;
+using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,7 +9,8 @@ namespace DbLocator.Features.Databases;
 internal record UpdateDatabaseCommand(
     int DatabaseId,
     string DatabaseName,
-    string DatabaseUsername,
+    string DatabaseUser,
+    string DatabaseUserPassword,
     int? DatabaseServerId,
     byte? DatabaseTypeId,
     Status? DatabaseStatus,
@@ -19,16 +21,41 @@ internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateD
 {
     internal UpdateDatabaseCommandValidator()
     {
+        RuleFor(x => x.DatabaseId).NotNull().WithMessage("Database Id is required.");
+
         RuleFor(x => x.DatabaseName)
+            .NotEmpty()
+            .WithMessage("Database Name is required.")
             .MaximumLength(50)
             .WithMessage("Database Name cannot be more than 50 characters.")
             .Matches(@"^\S*$")
             .WithMessage("Database Name cannot contain spaces.");
-        RuleFor(x => x.DatabaseId).NotNull().WithMessage("Database Id is required.");
+
+        // optional parameter
+        // RuleFor(x => x.DatabaseUserPassword)
+        //     .MinimumLength(10)
+        //     .WithMessage("Database User Password must be at least 10 characters long.")
+        //     .Matches(@"[A-Z]")
+        //     .WithMessage("Database User Password must contain at least one uppercase letter.")
+        //     .Matches(@"[0-9]")
+        //     .WithMessage("Database User Password must contain at least one number.")
+        //     .Matches(@"[\W_]")
+        //     .WithMessage("Database User Password must contain at least one special character.")
+        //     .MaximumLength(50);
+
+        // optional parameter
+        RuleFor(x => x.DatabaseUser)
+            .MaximumLength(50)
+            .WithMessage("Database User cannot be more than 50 characters.")
+            .Matches(@"^\S*$")
+            .WithMessage("Database User cannot contain spaces.");
     }
 }
 
-internal class UpdateDatabase(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class UpdateDatabase(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    Encryption encryption
+)
 {
     internal async Task Handle(UpdateDatabaseCommand command)
     {
@@ -70,8 +97,11 @@ internal class UpdateDatabase(IDbContextFactory<DbLocatorContext> dbContextFacto
         if (!string.IsNullOrEmpty(command.DatabaseName))
             databaseEntity.DatabaseName = command.DatabaseName;
 
-        if (!string.IsNullOrEmpty(command.DatabaseUsername))
-            databaseEntity.DatabaseUser = command.DatabaseUsername;
+        if (!string.IsNullOrEmpty(command.DatabaseUserPassword))
+            databaseEntity.DatabaseUserPassword = encryption.Encrypt(command.DatabaseUserPassword);
+
+        if (!string.IsNullOrEmpty(command.DatabaseUser))
+            databaseEntity.DatabaseUser = command.DatabaseUser;
 
         if (command.DatabaseServerId.HasValue)
             databaseEntity.DatabaseServerId = command.DatabaseServerId.Value;
@@ -92,12 +122,14 @@ internal class UpdateDatabase(IDbContextFactory<DbLocatorContext> dbContextFacto
         if (oldDatabaseName != command.DatabaseName && !string.IsNullOrEmpty(command.DatabaseName))
             commands.Add($"ALTER DATABASE {oldDatabaseName} MODIFY NAME = {command.DatabaseName}");
 
-        if (
-            oldDatabaseUser != command.DatabaseUsername
-            && !string.IsNullOrEmpty(command.DatabaseUsername)
-        )
+        if (oldDatabaseUser != command.DatabaseUser && !string.IsNullOrEmpty(command.DatabaseUser))
             commands.Add(
-                $"USE {command.DatabaseName}; ALTER USER {oldDatabaseUser} WITH NAME = {command.DatabaseUsername}"
+                $"USE {command.DatabaseName}; ALTER USER {oldDatabaseUser} WITH NAME = {command.DatabaseUser}"
+            );
+
+        if (command.DatabaseUserPassword != null)
+            commands.Add(
+                $"ALTER LOGIN {command.DatabaseUser} WITH PASSWORD = '{command.DatabaseUserPassword}'"
             );
 
         foreach (var commandText in commands)

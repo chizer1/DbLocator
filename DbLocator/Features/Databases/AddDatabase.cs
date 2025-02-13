@@ -34,16 +34,16 @@ internal sealed class AddDatabaseCommandValidator : AbstractValidator<AddDatabas
         RuleFor(x => x.DatabaseStatus).IsInEnum().WithMessage("Database Status is required.");
 
         // optional parameter
-        RuleFor(x => x.DatabaseUserPassword)
-            .MinimumLength(10)
-            .WithMessage("Database User Password must be at least 10 characters long.")
-            .Matches(@"[A-Z]")
-            .WithMessage("Database User Password must contain at least one uppercase letter.")
-            .Matches(@"[0-9]")
-            .WithMessage("Database User Password must contain at least one number.")
-            .Matches(@"[\W_]")
-            .WithMessage("Database User Password must contain at least one special character.")
-            .MaximumLength(50);
+        // RuleFor(x => x.DatabaseUserPassword)
+        //     .MinimumLength(10)
+        //     .WithMessage("Database User Password must be at least 10 characters long.")
+        //     .Matches(@"[A-Z]")
+        //     .WithMessage("Database User Password must contain at least one uppercase letter.")
+        //     .Matches(@"[0-9]")
+        //     .WithMessage("Database User Password must contain at least one number.")
+        //     .Matches(@"[\W_]")
+        //     .WithMessage("Database User Password must contain at least one special character.")
+        //     .MaximumLength(50);
 
         // optional parameter
         RuleFor(x => x.DatabaseUser)
