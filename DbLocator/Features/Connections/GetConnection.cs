@@ -1,5 +1,6 @@
 using System.Data.SqlClient;
 using DbLocator.Db;
+using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,7 +18,10 @@ internal sealed class GetConnectionQueryValidator : AbstractValidator<GetConnect
     internal GetConnectionQueryValidator() { }
 }
 
-internal class GetConnection(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class GetConnection(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    Encryption encrypytion
+)
 {
     internal async Task<SqlConnection> Handle(GetConnectionQuery query)
     {
@@ -28,7 +32,7 @@ internal class GetConnection(IDbContextFactory<DbLocatorContext> dbContextFactor
         var connectionEntity = await GetConnectionEntityAsync(dbContext, query);
         var database = await GetDatabaseEntityAsync(dbContext, connectionEntity.DatabaseId);
 
-        var connectionString = BuildConnectionString(database);
+        var connectionString = BuildConnectionString(database, encrypytion);
 
         return new SqlConnection(connectionString);
     }
@@ -128,10 +132,10 @@ internal class GetConnection(IDbContextFactory<DbLocatorContext> dbContextFactor
             ?? throw new KeyNotFoundException($"Database with Id {databaseId} not found.");
     }
 
-    private static string BuildConnectionString(DatabaseEntity database)
+    private static string BuildConnectionString(DatabaseEntity database, Encryption encrypytion)
     {
         return database.UseTrustedConnection
             ? $"Server={database.DatabaseServer.DatabaseServerName};Database={database.DatabaseName};Trusted_Connection=True;"
-            : $"Server={database.DatabaseServer.DatabaseServerName};Database={database.DatabaseName};User Id={database.DatabaseUser};Password={database.DatabaseUserPassword};";
+            : $"Server={database.DatabaseServer.DatabaseServerName};Database={database.DatabaseName};User Id={database.DatabaseUser};Password={encrypytion.Decrypt(database.DatabaseUserPassword)};";
     }
 }

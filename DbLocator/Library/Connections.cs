@@ -2,15 +2,19 @@ using System.Data.SqlClient;
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.Connections;
+using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Library;
 
-internal class Connections(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class Connections(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    Encryption encryption
+)
 {
     private readonly AddConnection _addConnection = new(dbContextFactory);
     private readonly DeleteConnection _deleteConnection = new(dbContextFactory);
-    private readonly GetConnection _getConnection = new(dbContextFactory);
+    private readonly GetConnection _getConnection = new(dbContextFactory, encryption);
     private readonly GetConnections _getConnections = new(dbContextFactory);
 
     internal async Task<int> AddConnection(int tenantId, int databaseId)

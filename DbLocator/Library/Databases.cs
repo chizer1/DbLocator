@@ -1,13 +1,17 @@
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.Databases;
+using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Library;
 
-internal class Databases(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class Databases(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    Encryption encryption
+)
 {
-    private readonly AddDatabase _addDatabase = new(dbContextFactory);
+    private readonly AddDatabase _addDatabase = new(dbContextFactory, encryption);
     private readonly DeleteDatabase _deleteDatabase = new(dbContextFactory);
     private readonly GetDatabases _getDatabases = new(dbContextFactory);
     private readonly UpdateDatabase _updateDatabase = new(dbContextFactory);
@@ -15,6 +19,7 @@ internal class Databases(IDbContextFactory<DbLocatorContext> dbContextFactory)
     internal async Task<int> AddDatabase(
         string databaseName,
         string databaseUser,
+        string databaseUserPassword,
         int databaseServerId,
         byte databaseTypeId
     )
@@ -23,6 +28,7 @@ internal class Databases(IDbContextFactory<DbLocatorContext> dbContextFactory)
             new AddDatabaseCommand(
                 databaseName,
                 databaseUser,
+                databaseUserPassword,
                 databaseServerId,
                 databaseTypeId,
                 Status.Active,
@@ -35,6 +41,7 @@ internal class Databases(IDbContextFactory<DbLocatorContext> dbContextFactory)
     internal async Task<int> AddDatabase(
         string databaseName,
         string databaseUser,
+        string databaseUserPassword,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
@@ -44,6 +51,7 @@ internal class Databases(IDbContextFactory<DbLocatorContext> dbContextFactory)
             new AddDatabaseCommand(
                 databaseName,
                 databaseUser,
+                databaseUserPassword,
                 databaseServerId,
                 databaseTypeId,
                 databaseStatus,
@@ -56,6 +64,7 @@ internal class Databases(IDbContextFactory<DbLocatorContext> dbContextFactory)
     internal async Task<int> AddDatabase(
         string databaseName,
         string databaseUser,
+        string databaseUserPassword,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus,
@@ -66,10 +75,32 @@ internal class Databases(IDbContextFactory<DbLocatorContext> dbContextFactory)
             new AddDatabaseCommand(
                 databaseName,
                 databaseUser,
+                databaseUserPassword,
                 databaseServerId,
                 databaseTypeId,
                 databaseStatus,
                 false,
+                createDatabase
+            )
+        );
+    }
+
+    internal async Task<int> AddDatabase(
+        string databaseName,
+        int databaseServerId,
+        byte databaseTypeId,
+        bool createDatabase
+    )
+    {
+        return await _addDatabase.Handle(
+            new AddDatabaseCommand(
+                databaseName,
+                null,
+                null,
+                databaseServerId,
+                databaseTypeId,
+                Status.Active,
+                true,
                 createDatabase
             )
         );
@@ -84,6 +115,7 @@ internal class Databases(IDbContextFactory<DbLocatorContext> dbContextFactory)
         return await _addDatabase.Handle(
             new AddDatabaseCommand(
                 databaseName,
+                null,
                 null,
                 databaseServerId,
                 databaseTypeId,
@@ -105,6 +137,7 @@ internal class Databases(IDbContextFactory<DbLocatorContext> dbContextFactory)
         return await _addDatabase.Handle(
             new AddDatabaseCommand(
                 databaseName,
+                null,
                 null,
                 databaseServerId,
                 databaseTypeId,
