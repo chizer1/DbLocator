@@ -26,31 +26,36 @@ internal sealed class AddDatabaseCommandValidator : AbstractValidator<AddDatabas
             .WithMessage("Database Name is required.")
             .MaximumLength(50)
             .WithMessage("Database Name cannot be more than 50 characters.")
-            .Matches(@"^\S*$")
-            .WithMessage("Database Name cannot contain spaces.");
+            .Matches(@"^[a-zA-Z0-9_]+$")
+            .WithMessage("Database Name can only contain letters, numbers, and underscores.");
 
         RuleFor(x => x.DatabaseServerId).NotEmpty().WithMessage("Database Server Id is required.");
         RuleFor(x => x.DatabaseTypeId).NotEmpty().WithMessage("Database Type Id is required.");
         RuleFor(x => x.DatabaseStatus).IsInEnum().WithMessage("Database Status is required.");
 
-        // optional parameter
-        // RuleFor(x => x.DatabaseUserPassword)
-        //     .MinimumLength(10)
-        //     .WithMessage("Database User Password must be at least 10 characters long.")
-        //     .Matches(@"[A-Z]")
-        //     .WithMessage("Database User Password must contain at least one uppercase letter.")
-        //     .Matches(@"[0-9]")
-        //     .WithMessage("Database User Password must contain at least one number.")
-        //     .Matches(@"[\W_]")
-        //     .WithMessage("Database User Password must contain at least one special character.")
-        //     .MaximumLength(50);
-
-        // optional parameter
         RuleFor(x => x.DatabaseUser)
+            .NotEmpty()
+            .WithMessage("Database User is required.")
             .MaximumLength(50)
             .WithMessage("Database User cannot be more than 50 characters.")
-            .Matches(@"^\S*$")
-            .WithMessage("Database User cannot contain spaces.");
+            .Matches(@"^[a-zA-Z0-9_]+$")
+            .WithMessage("Database User can only contain letters, numbers, and underscores.");
+
+        RuleFor(x => x.DatabaseUserPassword)
+            .NotEmpty()
+            .WithMessage("Database User Password is required.")
+            .MinimumLength(8)
+            .WithMessage("Database User Password must be at least 8 characters long.")
+            .Matches(@"[A-Z]")
+            .WithMessage("Database User Password must contain at least one uppercase letter.")
+            .Matches(@"[a-z]")
+            .WithMessage("Database User Password must contain at least one lowercase letter.")
+            .Matches(@"[0-9]")
+            .WithMessage("Database User Password must contain at least one number.")
+            .Matches(@"[\W_]")
+            .WithMessage("Database User Password must contain at least one special character.")
+            .MaximumLength(50)
+            .WithMessage("Database User Password cannot be more than 50 characters.");
     }
 }
 
@@ -83,22 +88,6 @@ internal class AddDatabase(
                 $"Database Type Id '{command.DatabaseTypeId}' not found."
             );
 
-        var commands = new List<string>();
-
-        if (command.CreateDatabase)
-        {
-            // check if SQL Server user exists as well
-
-            commands.Add($"create database {command.DatabaseName}");
-
-            commands.AddRange(
-                [
-                    $"create login {command.DatabaseUser} with password = '{command.DatabaseUserPassword}'",
-                    $"use {command.DatabaseName}; create user {command.DatabaseUser} for login {command.DatabaseUser}",
-                ]
-            );
-        }
-
         var database = new DatabaseEntity
         {
             DatabaseName = command.DatabaseName,
@@ -113,12 +102,24 @@ internal class AddDatabase(
         await dbContext.Set<DatabaseEntity>().AddAsync(database);
         await dbContext.SaveChangesAsync();
 
-        foreach (var commandText in commands)
+        if (command.CreateDatabase)
         {
-            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-            cmd.CommandText = commandText;
-            await dbContext.Database.OpenConnectionAsync();
-            await cmd.ExecuteNonQueryAsync();
+            var commands = new List<string>();
+            commands.AddRange(
+                [
+                    $"create database {command.DatabaseName}",
+                    $"create login {command.DatabaseUser} with password = '{command.DatabaseUserPassword}'",
+                    $"use {command.DatabaseName}; create user {command.DatabaseUser} for login {command.DatabaseUser}",
+                ]
+            );
+
+            foreach (var commandText in commands)
+            {
+                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+                cmd.CommandText = commandText;
+                await dbContext.Database.OpenConnectionAsync();
+                await cmd.ExecuteNonQueryAsync();
+            }
         }
 
         return database.DatabaseId;

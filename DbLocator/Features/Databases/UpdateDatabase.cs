@@ -21,39 +21,37 @@ internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateD
 {
     internal UpdateDatabaseCommandValidator()
     {
-        RuleFor(x => x.DatabaseName)
-            .MaximumLength(50)
-            .WithMessage("Database Name cannot be more than 50 characters.")
-            .Matches(@"^\S*$")
-            .WithMessage("Database Name cannot contain spaces.");
         RuleFor(x => x.DatabaseId).NotNull().WithMessage("Database Id is required.");
 
         RuleFor(x => x.DatabaseName)
-            .NotEmpty()
-            .WithMessage("Database Name is required.")
             .MaximumLength(50)
-            .WithMessage("Database Name cannot be more than 50 characters.")
-            .Matches(@"^\S*$")
-            .WithMessage("Database Name cannot contain spaces.");
+            .WithMessage("Database Name cannot be more than 128 characters.")
+            .Matches(@"^[a-zA-Z0-9_]+$")
+            .WithMessage("Database Name can only contain letters, numbers, and underscores.");
 
-        // optional parameter
-        // RuleFor(x => x.DatabaseUserPassword)
-        //     .MinimumLength(10)
-        //     .WithMessage("Database User Password must be at least 10 characters long.")
-        //     .Matches(@"[A-Z]")
-        //     .WithMessage("Database User Password must contain at least one uppercase letter.")
-        //     .Matches(@"[0-9]")
-        //     .WithMessage("Database User Password must contain at least one number.")
-        //     .Matches(@"[\W_]")
-        //     .WithMessage("Database User Password must contain at least one special character.")
-        //     .MaximumLength(50);
-
-        // optional parameter
         RuleFor(x => x.DatabaseUser)
+            .NotEmpty()
+            .WithMessage("Database User is required.")
             .MaximumLength(50)
-            .WithMessage("Database User cannot be more than 50 characters.")
-            .Matches(@"^\S*$")
-            .WithMessage("Database User cannot contain spaces.");
+            .WithMessage("Database User cannot be more than 128 characters.")
+            .Matches(@"^[a-zA-Z0-9_]+$")
+            .WithMessage("Database User can only contain letters, numbers, and underscores.");
+
+        RuleFor(x => x.DatabaseUserPassword)
+            .NotEmpty()
+            .WithMessage("Database User Password is required.")
+            .MinimumLength(8)
+            .WithMessage("Database User Password must be at least 8 characters long.")
+            .Matches(@"[A-Z]")
+            .WithMessage("Database User Password must contain at least one uppercase letter.")
+            .Matches(@"[a-z]")
+            .WithMessage("Database User Password must contain at least one lowercase letter.")
+            .Matches(@"[0-9]")
+            .WithMessage("Database User Password must contain at least one number.")
+            .Matches(@"[\W_]")
+            .WithMessage("Database User Password must contain at least one special character.")
+            .MaximumLength(50)
+            .WithMessage("Database User Password cannot be more than 128 characters.");
     }
 }
 
@@ -125,16 +123,16 @@ internal class UpdateDatabase(
 
         var commands = new List<string>();
         if (oldDatabaseName != command.DatabaseName && !string.IsNullOrEmpty(command.DatabaseName))
-            commands.Add($"ALTER DATABASE {oldDatabaseName} MODIFY NAME = {command.DatabaseName}");
+            commands.Add($"alter database {oldDatabaseName} modify name = {command.DatabaseName}");
 
         if (oldDatabaseUser != command.DatabaseUser && !string.IsNullOrEmpty(command.DatabaseUser))
             commands.Add(
-                $"USE {command.DatabaseName}; ALTER USER {oldDatabaseUser} WITH NAME = {command.DatabaseUser}"
+                $"use {command.DatabaseName}; alter user {oldDatabaseUser} with name = {command.DatabaseUser}"
             );
 
         if (command.DatabaseUserPassword != null)
             commands.Add(
-                $"ALTER LOGIN {command.DatabaseUser} WITH PASSWORD = '{command.DatabaseUserPassword}'"
+                $"alter login {command.DatabaseUser} with password = '{command.DatabaseUserPassword}'"
             );
 
         foreach (var commandText in commands)
