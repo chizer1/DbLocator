@@ -25,7 +25,7 @@ internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateD
 
         RuleFor(x => x.DatabaseName)
             .MaximumLength(50)
-            .WithMessage("Database Name cannot be more than 128 characters.")
+            .WithMessage("Database Name cannot be more than 50 characters.")
             .Matches(@"^[a-zA-Z0-9_]+$")
             .WithMessage("Database Name can only contain letters, numbers, and underscores.");
 
@@ -33,7 +33,7 @@ internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateD
             .NotEmpty()
             .WithMessage("Database User is required.")
             .MaximumLength(50)
-            .WithMessage("Database User cannot be more than 128 characters.")
+            .WithMessage("Database User cannot be more than 50 characters.")
             .Matches(@"^[a-zA-Z0-9_]+$")
             .WithMessage("Database User can only contain letters, numbers, and underscores.");
 
@@ -51,7 +51,7 @@ internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateD
             .Matches(@"[\W_]")
             .WithMessage("Database User Password must contain at least one special character.")
             .MaximumLength(50)
-            .WithMessage("Database User Password cannot be more than 128 characters.");
+            .WithMessage("Database User Password cannot be more than 50 characters.");
     }
 }
 

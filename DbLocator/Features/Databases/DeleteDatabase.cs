@@ -40,11 +40,10 @@ namespace DbLocator.Features.Databases
 
             if (command.DeleteDatabase == true)
             {
-                var commands = new[]
-                {
-                    $"DROP DATABASE {databaseEntity.DatabaseName}",
-                    $"DROP LOGIN {databaseEntity.DatabaseUser}",
-                };
+                var commands = new List<string> { $"drop database {databaseEntity.DatabaseName}" };
+
+                if (!string.IsNullOrEmpty(databaseEntity.DatabaseUser))
+                    commands.Add($"drop login {databaseEntity.DatabaseUser}");
 
                 foreach (var commandText in commands)
                 {

@@ -21,11 +21,11 @@ internal sealed class AddDatabaseServerCommandValidator
             .NotEmpty()
             .WithMessage("Database Server IP Address is required.")
             .MaximumLength(50)
-            .WithMessage("Database Server IP Address cannot be more than 50 characters.");
-        // .Matches(
-        //     @"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-        // )
-        // .WithMessage("Database Server IP Address must be a valid IP address.");
+            .WithMessage("Database Server IP Address cannot be more than 50 characters.")
+            .Matches(
+                @"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+            )
+            .WithMessage("Database Server IP Address must be a valid IP address.");
     }
 }
 

@@ -134,8 +134,22 @@ internal class GetConnection(
 
     private static string BuildConnectionString(DatabaseEntity database, Encryption encrypytion)
     {
-        return database.UseTrustedConnection
-            ? $"Server={database.DatabaseServer.DatabaseServerName};Database={database.DatabaseName};Trusted_Connection=True;"
-            : $"Server={database.DatabaseServer.DatabaseServerName};Database={database.DatabaseName};User Id={database.DatabaseUser};Password={encrypytion.Decrypt(database.DatabaseUserPassword)};";
+        var connectionStringBuilder = new SqlConnectionStringBuilder
+        {
+            DataSource = database.DatabaseServer.DatabaseServerName, // but what if user wants to use IP address instead?
+            InitialCatalog = database.DatabaseName
+        };
+
+        if (database.UseTrustedConnection)
+        {
+            connectionStringBuilder.IntegratedSecurity = true;
+        }
+        else
+        {
+            connectionStringBuilder.UserID = database.DatabaseUser;
+            connectionStringBuilder.Password = encrypytion.Decrypt(database.DatabaseUserPassword);
+        }
+
+        return connectionStringBuilder.ConnectionString;
     }
 }
