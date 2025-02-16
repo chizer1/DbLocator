@@ -1,7 +1,6 @@
 using DbLocator;
 using DbLocator.Domain;
 using DbLocatorTests.Fixtures;
-using DbLocatorTests.Utilities;
 
 namespace DbLocatorTests;
 
@@ -33,12 +32,12 @@ public class DatabaseTests
 
     public async Task<Database> AddDatabaseAsync()
     {
-        var databaseName = $"{StringUtilities.RandomString(10)}";
-        var databaseUser = $"{StringUtilities.RandomString(10)}";
+        var databaseName = "Acme";
+        var databaseUser = "Acme_App";
         var databaseId = await _dbLocator.AddDatabase(
             databaseName,
             databaseUser,
-            StringUtilities.RandomString(10) + "1!",
+            "Password1!",
             _databaseServerID,
             _databaseTypeId,
             Status.Active

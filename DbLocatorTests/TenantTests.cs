@@ -1,7 +1,6 @@
 ﻿using DbLocator;
 using DbLocator.Domain;
 using DbLocatorTests.Fixtures;
-using DbLocatorTests.Utilities;
 
 namespace DbLocatorTests;
 
@@ -13,12 +12,12 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task AddMultipleTenantsAndSearchByKeyWord()
     {
-        var tenantName1 = StringUtilities.RandomString(10);
-        var tenantCode1 = StringUtilities.RandomString(3);
+        var tenantName1 = "Acme Industries";
+        var tenantCode1 = "acme";
         await _dbLocator.AddTenant(tenantName1, tenantCode1, Status.Active);
 
-        var tenantName2 = StringUtilities.RandomString(10);
-        var tenantCode2 = StringUtilities.RandomString(3);
+        var tenantName2 = "Delta Corp";
+        var tenantCode2 = "delta";
         await _dbLocator.AddTenant(tenantName2, tenantCode2, Status.Active);
 
         var tenants = (await _dbLocator.GetTenants()).ToList();
