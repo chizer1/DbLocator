@@ -150,7 +150,12 @@ internal class Databases(
 
     internal async Task DeleteDatabase(int databaseId)
     {
-        await _deleteDatabase.Handle(new DeleteDatabaseCommand(databaseId));
+        await _deleteDatabase.Handle(new DeleteDatabaseCommand(databaseId, false));
+    }
+
+    internal async Task DeleteDatabase(int databaseId, bool deleteDatabase)
+    {
+        await _deleteDatabase.Handle(new DeleteDatabaseCommand(databaseId, deleteDatabase));
     }
 
     internal async Task<List<Database>> GetDatabases()

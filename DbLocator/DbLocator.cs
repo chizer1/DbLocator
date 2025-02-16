@@ -517,6 +517,17 @@ public class Locator
         await _databases.DeleteDatabase(databaseId);
     }
 
+    /// <summary>
+    ///Delete database
+    /// </summary>
+    /// <param name="databaseId"></param>
+    /// <param name="deleteDatabase"></param>
+    /// <returns></returns>
+    public async Task DeleteDatabase(int databaseId, bool deleteDatabase)
+    {
+        await _databases.DeleteDatabase(databaseId, deleteDatabase);
+    }
+
     #endregion
 
     #region DatabaseServers

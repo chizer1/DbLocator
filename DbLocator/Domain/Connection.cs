@@ -4,22 +4,22 @@ namespace DbLocator.Domain;
 /// Represents a connection to a database.
 /// </summary>
 /// <param name="id">The unique identifier for the connection.</param>
-/// <param name="database">The identifier of the database.</param>
-/// <param name="tenant">The identifier of the tenant</param>
+/// <param name="database">The database for the connection.</param>
+/// <param name="tenant">The tenant for the connection.</param>
 public class Connection(int id, Database database, Tenant tenant)
 {
     /// <summary>
-    /// Gets the unique identifier for the connection.
+    /// The unique identifier for the connection.
     /// </summary>
-    public int Id { get; init; } = id;
+    public int Id { get; set; } = id;
 
     /// <summary>
-    /// Gets or sets the identifier of the database.
+    /// The database for the connection.
     /// </summary>
     public Database Database { get; set; } = database;
 
     /// <summary>
-    /// Gets or sets the identifier of the tenant.
+    /// The tenant for the connection.
     /// </summary>
     public Tenant Tenant { get; set; } = tenant;
 };
