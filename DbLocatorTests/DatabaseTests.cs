@@ -38,7 +38,7 @@ public class DatabaseTests
         var databaseId = await _dbLocator.AddDatabase(
             databaseName,
             databaseUser,
-            StringUtilities.RandomString(10) + "!",
+            StringUtilities.RandomString(10) + "1!",
             _databaseServerID,
             _databaseTypeId,
             Status.Active
