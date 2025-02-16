@@ -33,8 +33,8 @@ public class DatabaseTests
 
     public async Task<Database> AddDatabaseAsync()
     {
-        var databaseName = $"[{StringUtilities.RandomString(10)}]";
-        var databaseUser = $"[{StringUtilities.RandomString(10)}]";
+        var databaseName = $"{StringUtilities.RandomString(10)}";
+        var databaseUser = $"{StringUtilities.RandomString(10)}";
         var databaseId = await _dbLocator.AddDatabase(
             databaseName,
             databaseUser,
