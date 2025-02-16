@@ -18,22 +18,9 @@ public class DatabaseTests
         _databaseTypeId = _dbLocator.AddDatabaseType("DatabaseType").Result;
     }
 
-    [Fact]
-    public async Task AddMultipleDatabasesAndSearchByKeyWord()
+    private async Task<Database> AddDatabaseAsync(string databaseName)
     {
-        var database1 = await AddDatabaseAsync();
-        var database2 = await AddDatabaseAsync();
-
-        var databases = (await _dbLocator.GetDatabases()).ToList();
-        Assert.Equal(2, databases.Count);
-        Assert.Contains(databases, db => db.Name == database1.Name);
-        Assert.Contains(databases, db => db.Name == database2.Name);
-    }
-
-    public async Task<Database> AddDatabaseAsync()
-    {
-        var databaseName = "Acme";
-        var databaseUser = "Acme_App";
+        var databaseUser = $"{databaseName}_App";
         var databaseId = await _dbLocator.AddDatabase(
             databaseName,
             databaseUser,
@@ -44,5 +31,17 @@ public class DatabaseTests
         );
 
         return (await _dbLocator.GetDatabases()).Single(db => db.Id == databaseId);
+    }
+
+    [Fact]
+    public async Task AddMultipleDatabasesAndSearchByKeyWord()
+    {
+        var database1 = await AddDatabaseAsync("Acme1");
+        var database2 = await AddDatabaseAsync("Acme2");
+
+        var databases = (await _dbLocator.GetDatabases()).ToList();
+        Assert.Equal(2, databases.Count);
+        Assert.Contains(databases, db => db.Name == database1.Name);
+        Assert.Contains(databases, db => db.Name == database2.Name);
     }
 }
