@@ -30,16 +30,12 @@ internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateD
             .WithMessage("Database Name can only contain letters, numbers, and underscores.");
 
         RuleFor(x => x.DatabaseUser)
-            .NotEmpty()
-            .WithMessage("Database User is required.")
             .MaximumLength(50)
             .WithMessage("Database User cannot be more than 50 characters.")
             .Matches(@"^[a-zA-Z0-9_]+$")
             .WithMessage("Database User can only contain letters, numbers, and underscores.");
 
         RuleFor(x => x.DatabaseUserPassword)
-            .NotEmpty()
-            .WithMessage("Database User Password is required.")
             .MinimumLength(8)
             .WithMessage("Database User Password must be at least 8 characters long.")
             .Matches(@"[A-Z]")

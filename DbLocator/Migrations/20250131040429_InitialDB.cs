@@ -110,7 +110,8 @@ namespace DbLocator.Migrations
                     ),
                     DatabaseServerID = table.Column<int>(type: "int", nullable: false),
                     DatabaseTypeID = table.Column<byte>(type: "tinyint", nullable: false),
-                    DatabaseStatusID = table.Column<byte>(type: "tinyint", nullable: false)
+                    DatabaseStatusID = table.Column<byte>(type: "tinyint", nullable: false),
+                    UseTrustedConnection = table.Column<bool>(type: "bit", nullable: true)
                 },
                 constraints: table =>
                 {
