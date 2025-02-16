@@ -78,6 +78,8 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
                 .HasForeignKey(d => d.DatabaseTypeId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Database_DatabaseType");
+
+            entity.Property(e => e.UseTrustedConnection).HasColumnName("UseTrustedConnection");
         });
 
         modelBuilder.Entity<DatabaseServerEntity>(entity =>

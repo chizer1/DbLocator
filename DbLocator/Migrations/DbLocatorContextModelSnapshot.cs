@@ -92,6 +92,10 @@ namespace DbLocator.Migrations
 
                     b.HasIndex(new[] { "DatabaseTypeId" }, "IX_Database_DatabaseTypeID");
 
+                    b.Property<bool>("UseTrustedConnection")
+                        .HasColumnType("bit")
+                        .HasColumnName("UseTrustedConnection");
+
                     b.ToTable("Database", (string)null);
                 });
 

@@ -34,16 +34,12 @@ internal sealed class AddDatabaseCommandValidator : AbstractValidator<AddDatabas
         RuleFor(x => x.DatabaseStatus).IsInEnum().WithMessage("Database Status is required.");
 
         RuleFor(x => x.DatabaseUser)
-            .NotEmpty()
-            .WithMessage("Database User is required.")
             .MaximumLength(50)
             .WithMessage("Database User cannot be more than 50 characters.")
             .Matches(@"^[a-zA-Z0-9_]+$")
             .WithMessage("Database User can only contain letters, numbers, and underscores.");
 
         RuleFor(x => x.DatabaseUserPassword)
-            .NotEmpty()
-            .WithMessage("Database User Password is required.")
             .MinimumLength(8)
             .WithMessage("Database User Password must be at least 8 characters long.")
             .Matches(@"[A-Z]")
@@ -91,12 +87,14 @@ internal class AddDatabase(
         var database = new DatabaseEntity
         {
             DatabaseName = command.DatabaseName,
-            DatabaseUser = command.DatabaseUser,
-            DatabaseUserPassword = encryption.Encrypt(command.DatabaseUserPassword),
+            DatabaseUser = command.UseTrustedConnection ? null : command.DatabaseUser,
+            DatabaseUserPassword = command.UseTrustedConnection
+                ? null
+                : encryption.Encrypt(command.DatabaseUserPassword),
             DatabaseServerId = command.DatabaseServerId,
             DatabaseTypeId = command.DatabaseTypeId,
             DatabaseStatusId = (byte)command.DatabaseStatus,
-            UseTrustedConnection = command.UseTrustedConnection,
+            UseTrustedConnection = command.UseTrustedConnection
         };
 
         await dbContext.Set<DatabaseEntity>().AddAsync(database);
@@ -104,14 +102,17 @@ internal class AddDatabase(
 
         if (command.CreateDatabase)
         {
-            var commands = new List<string>();
-            commands.AddRange(
-                [
-                    $"create database {command.DatabaseName}",
-                    $"create login {command.DatabaseUser} with password = '{command.DatabaseUserPassword}'",
-                    $"use {command.DatabaseName}; create user {command.DatabaseUser} for login {command.DatabaseUser}",
-                ]
-            );
+            var commands = new List<string> { $"create database {command.DatabaseName}" };
+
+            if (!command.UseTrustedConnection)
+            {
+                commands.AddRange(
+                    [
+                        $"create login {command.DatabaseUser} with password = '{command.DatabaseUserPassword}'",
+                        $"use {command.DatabaseName}; create user {command.DatabaseUser} for login {command.DatabaseUser}"
+                    ]
+                );
+            }
 
             foreach (var commandText in commands)
             {
