@@ -1,7 +1,7 @@
-using System.Data.SqlClient;
 using DbLocator.Db;
 using DbLocator.Utilities;
 using FluentValidation;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.Connections;
@@ -137,7 +137,8 @@ internal class GetConnection(
         var connectionStringBuilder = new SqlConnectionStringBuilder
         {
             DataSource = database.DatabaseServer.DatabaseServerName, // but what if user wants to use IP address instead?
-            InitialCatalog = database.DatabaseName
+            InitialCatalog = database.DatabaseName,
+            TrustServerCertificate = true
         };
 
         if (database.UseTrustedConnection)

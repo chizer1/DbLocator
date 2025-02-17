@@ -1,9 +1,9 @@
-using System.Data.SqlClient;
 using System.Runtime.CompilerServices;
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Library;
 using DbLocator.Utilities;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 [assembly: InternalsVisibleTo("DbLocatorTests")]

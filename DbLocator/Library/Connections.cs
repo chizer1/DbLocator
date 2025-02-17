@@ -1,8 +1,8 @@
-using System.Data.SqlClient;
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.Connections;
 using DbLocator.Utilities;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Library;
