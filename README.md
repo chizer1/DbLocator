@@ -51,6 +51,7 @@ Below are some graphs to help visualize what it does.
 You will need an instance of SQL Server running. For local development, you can either:
   - Use the SQL Server image in this repository by running `docker compose up` from the root. This requires Docker Desktop to be installed (https://docs.docker.com/get-started/get-docker/)
   - Install SQL Server directly on your machine (https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
+  - Spin up a new SQL Server instance in the cloud. **Note**: This library may not play nicely with Azure SQL as this library has code that relies on traditional SQL Server logins which Azure SQL doesn't support.
 
 ### 4. Initialization 
 
@@ -58,8 +59,14 @@ After installing the DbLocator package and setting up SQL Server, you can start 
 
 ```csharp
 Locator dbLocator = new("{YourConnectionString}");
-// Example ConnectionString: "Server=localhost;Database=DbLocator;User Id=sa;Password=1StrongPwd!!;Encrypt=True;TrustServerCertificate=True;"
+// ConnectionString if using Docker image from this repo:
+// "Server=localhost;Database=DbLocator;User Id=sa;Password=1StrongPwd!!;Encrypt=True;TrustServerCertificate=True;"
 ```
+In a real world scenario, you wouldn't want to connect an sysadmin login to this library for security purposes (Principle of Least Privilege).
+You would want to create a login with these server level roles:
+1. **dbcreator**: If you want to create databases from this library
+2. **securityadmin**: If you want to create logins from this library.
+3. No server level roles, if you don't want to autocreate databases or logins and just map to existing ones. 
 
 After initializing the Locator object and running your application, it will automatically create the DbLocator database and you can start using its methods.
 
