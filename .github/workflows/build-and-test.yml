@@ -36,7 +36,7 @@ jobs:
         run: reportgenerator -reports:TestResults/**/coverage.cobertura.xml -targetdir:CoverageReport
       
       - name: Upload Coverage Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Code-Coverage-Report
           path: CoverageReport
