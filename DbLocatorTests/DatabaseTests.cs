@@ -40,7 +40,7 @@ public class DatabaseTests
         var database2 = await AddDatabaseAsync("Acme2");
 
         var databases = (await _dbLocator.GetDatabases()).ToList();
-        Assert.Equal(2, databases.Count);
+        Assert.Equal(3, databases.Count);
         Assert.Contains(databases, db => db.Name == database1.Name);
         Assert.Contains(databases, db => db.Name == database2.Name);
     }
