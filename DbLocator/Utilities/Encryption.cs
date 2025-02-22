@@ -7,6 +7,9 @@ internal class Encryption(string encryptionKey)
 {
     public string Encrypt(string plainText)
     {
+        if (string.IsNullOrEmpty(encryptionKey))
+            return plainText;
+
         byte[] keyBytes = Encoding.UTF8.GetBytes(encryptionKey.PadRight(32));
         byte[] ivBytes = new byte[16];
 
@@ -22,6 +25,9 @@ internal class Encryption(string encryptionKey)
 
     public string Decrypt(string encryptedText)
     {
+        if (string.IsNullOrEmpty(encryptionKey))
+            return encryptedText;
+
         byte[] keyBytes = Encoding.UTF8.GetBytes(encryptionKey.PadRight(32));
         byte[] ivBytes = new byte[16];
 
