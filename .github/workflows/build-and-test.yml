@@ -29,5 +29,14 @@ jobs:
       - name: Build Project
         run: dotnet build /warnAsError
             
-      - name: Run Tests
-        run: dotnet test
+      - name: Run Tests with Coverage
+        run: dotnet test --collect:"XPlat Code Coverage"
+      
+      - name: Generate Coverage Report
+        run: reportgenerator -reports:TestResults/**/coverage.cobertura.xml -targetdir:CoverageReport
+      
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: Code-Coverage-Report
+          path: CoverageReport
