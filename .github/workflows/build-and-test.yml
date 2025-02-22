@@ -29,6 +29,9 @@ jobs:
       - name: Build Project
         run: dotnet build /warnAsError
             
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+        
       - name: Run Tests with Coverage
         run: dotnet test --collect:"XPlat Code Coverage"
       
