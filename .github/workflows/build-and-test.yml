@@ -28,16 +28,19 @@ jobs:
 
       - name: Build Project
         run: dotnet build /warnAsError
-            
+
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
-        
+
       - name: Run Tests with Coverage
-        run: dotnet test --collect:"XPlat Code Coverage"
-      
+        run: dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=TestResults/
+
+      - name: Debug Coverage Files
+        run: ls -R TestResults
+
       - name: Generate Coverage Report
-        run: reportgenerator -reports:TestResults/**/coverage.cobertura.xml -targetdir:CoverageReport
-      
+        run: reportgenerator -reports:TestResults/coverage.cobertura.xml -targetdir:CoverageReport
+
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
