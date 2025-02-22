@@ -12,23 +12,23 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task AddConnection()
     {
-        var tenantName = "Tenant";
+        var tenantName = "Tenant2";
         var tenantId = await _dbLocator.AddTenant(tenantName);
 
-        var databaseTypeName = "DatabaseType";
+        var databaseTypeName = "DatabaseType2";
         var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
 
-        var databaseServerName = "DBServer";
+        var databaseServerName = "DBServer2";
         var databaseServerIpAddress = "127.0.0.1";
         var databaseServerId = await _dbLocator.AddDatabaseServer(
             databaseServerName,
             databaseServerIpAddress
         );
 
-        var databaseName = "Database";
+        var databaseName = "Database2";
         var databaseId = await _dbLocator.AddDatabase(
             databaseName,
-            "database_user",
+            "database2_user",
             "WvP26JM%6QP92y&PV",
             databaseServerId,
             databaseTypeId,
