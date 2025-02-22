@@ -29,7 +29,7 @@ public class Locator
     /// <param name="dbLocatorConnectionString">The connection string for the DbLocator database.</param>
     /// <exception cref="ArgumentException">Thrown when the connection string is null or whitespace.</exception>
     public Locator(string dbLocatorConnectionString)
-        : this(dbLocatorConnectionString, string.Empty) { }
+        : this(dbLocatorConnectionString, null) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Locator"/> class with the specified connection string and encryption key.
