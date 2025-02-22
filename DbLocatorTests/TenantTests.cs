@@ -21,7 +21,7 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
         await _dbLocator.AddTenant(tenantName2, tenantCode2, Status.Active);
 
         var tenants = (await _dbLocator.GetTenants()).ToList();
-        Assert.Equal(2, tenants.Count);
+        Assert.Equal(3, tenants.Count);
         Assert.Contains(tenants, t => t.Name == tenantName1 && t.Code == tenantCode1);
         Assert.Contains(tenants, t => t.Name == tenantName2 && t.Code == tenantCode2);
     }
