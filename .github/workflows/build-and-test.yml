@@ -32,11 +32,14 @@ jobs:
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
+      - name: Ensure TestResults Directory Exists
+        run: mkdir -p TestResults
+
       - name: Run Tests with Coverage
-        run: dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=TestResults/
+        run: dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=TestResults/ --logger "console;verbosity=detailed"
 
       - name: Debug Coverage Files
-        run: ls -R TestResults
+        run: find . -name "*.cobertura.xml"
 
       - name: Generate Coverage Report
         run: reportgenerator -reports:TestResults/coverage.cobertura.xml -targetdir:CoverageReport
