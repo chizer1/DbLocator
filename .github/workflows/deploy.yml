@@ -1,4 +1,4 @@
-name: "Deploy to Nuget"
+name: "Deploy Nuget"
 
 on:
   workflow_dispatch:
