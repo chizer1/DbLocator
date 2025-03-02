@@ -11,7 +11,6 @@ What it can't do:
 1. It does not handle user roles, permissions, or access control at the SQL Server level. 
 2. Since the library focuses on managing database connections rather than the content of tenant databases, it inherently does not handle schema definitions, modifications, or data structure enforcement.
 
-Below are some graphs to help visualize what it does.
 ```
                          +--------------+
                          |   DbLocator  |
@@ -37,23 +36,18 @@ Below are some graphs to help visualize what it does.
   +------------+      +-----------+                +------------+
 ```
 
-![Screenshot from 2025-01-25 15-28-20](https://github.com/user-attachments/assets/6fbd631d-e637-4db4-b057-c02c1ba38edb)
-
 ## How to run
 
-### 1. Add GitHub package source 
-`dotnet nuget add source https://nuget.pkg.github.com/chizer1/index.json --name DbLocator --username <YourGitHubUsername> --password <YourGitHubPAT>`
-
-### 2. Add package to your .Net project
+### 1. Add package to your .Net project
 `dotnet add package DbLocator`
 
-### 3. SQL Server setup
+### 2. SQL Server setup
 You will need an instance of SQL Server running. For local development, you can either:
   - Use the SQL Server image in this repository by running `docker compose up` from the root. This requires Docker Desktop to be installed (https://docs.docker.com/get-started/get-docker/)
   - Install SQL Server directly on your machine (https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
   - Spin up a new SQL Server instance in the cloud. **Note**: This library may not play nicely with Azure SQL as this library has code that relies on traditional SQL Server logins which Azure SQL doesn't support.
 
-### 4. Initialization 
+### 3. Initialization 
 
 After installing the DbLocator package and setting up SQL Server, you can start using the library. The main class of the library is `Locator`, which can be initialized like this:
 
@@ -70,7 +64,7 @@ You would want to create a login with these server level roles:
 
 After initializing the Locator object and running your application, it will automatically create the DbLocator database and you can start using its methods.
 
-### 5. Code example
+### 4. Code example
 
 ```csharp
 
