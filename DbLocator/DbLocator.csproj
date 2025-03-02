@@ -11,6 +11,7 @@
     <RepositoryUrl>https://github.com/chizer1/DbLocator</RepositoryUrl>
     <Description>.NET Library for Multi-Tenant SQL Server connection management</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
