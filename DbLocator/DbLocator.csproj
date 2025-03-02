@@ -7,8 +7,9 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <OutputType>Library</OutputType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Authors>chizer01</Authors>
-    <Description>Multi-Tenant SQL connection management</Description>
+    <Authors>Steve Bosilovatz</Authors>
+    <RepositoryUrl>https://github.com/chizer1/DbLocator</RepositoryUrl>
+    <Description>.NET Library for Multi-Tenant SQL Server connection management</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
@@ -16,6 +17,7 @@
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.2" />
+    <None Include="../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
   
 </Project>
