@@ -44,6 +44,15 @@ internal class AddConnection(IDbContextFactory<DbLocatorContext> dbContextFactor
         if (connectionExists)
             throw new InvalidOperationException("Connection already exists.");
 
+        var connectionOfSameTypeExists = await dbContext
+            .Set<ConnectionEntity>()
+            .AnyAsync(c =>
+                c.TenantId == command.TenantId && c.Database.DatabaseTypeId == command.DatabaseId
+            );
+
+        if (connectionOfSameTypeExists)
+            throw new InvalidOperationException("Connection of same type already exists.");
+
         var connection = new ConnectionEntity
         {
             TenantId = command.TenantId,
