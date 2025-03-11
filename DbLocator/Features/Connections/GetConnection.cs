@@ -134,9 +134,14 @@ internal class GetConnection(
 
     private static string BuildConnectionString(DatabaseEntity database, Encryption encrypytion)
     {
+        var dataSource =
+            database.DatabaseServer.DatabaseServerHostName
+            ?? database.DatabaseServer.DatabaseServerFullyQualifiedDomainName
+            ?? database.DatabaseServer.DatabaseServerIpaddress;
+
         var connectionStringBuilder = new SqlConnectionStringBuilder
         {
-            DataSource = database.DatabaseServer.DatabaseServerName, // but what if user wants to use IP address instead?
+            DataSource = dataSource,
             InitialCatalog = database.DatabaseName,
             TrustServerCertificate = true
         };

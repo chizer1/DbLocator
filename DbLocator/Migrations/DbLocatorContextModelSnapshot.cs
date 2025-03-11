@@ -108,8 +108,18 @@ namespace DbLocator.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DatabaseServerId"));
 
+                    b.Property<string>("DatabaseServerFullyQualifiedDomainName")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("DatabaseServerFullyQualifiedDomainName");
+
+                    b.Property<string>("DatabaseServerHostName")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("DatabaseServerIpaddress")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)")

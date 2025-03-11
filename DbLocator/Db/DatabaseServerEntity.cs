@@ -6,7 +6,11 @@ internal class DatabaseServerEntity
 
     internal string DatabaseServerName { get; set; }
 
+    internal string DatabaseServerHostName { get; set; }
+
     internal string DatabaseServerIpaddress { get; set; }
+
+    internal string DatabaseServerFullyQualifiedDomainName { get; set; }
 
     internal virtual ICollection<DatabaseEntity> Databases { get; set; } = [];
 }

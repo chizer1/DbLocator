@@ -4,7 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseServers;
 
-internal record AddDatabaseServerCommand(string DatabaseServerName, string DatabaseServerIpAddress);
+internal record AddDatabaseServerCommand(
+    string DatabaseServerName,
+    string DatabaseServerHostName,
+    string DatabaseServerFullyQualifiedDomainName,
+    string DatabaseServerIpAddress
+);
 
 internal sealed class AddDatabaseServerCommandValidator
     : AbstractValidator<AddDatabaseServerCommand>
@@ -17,9 +22,19 @@ internal sealed class AddDatabaseServerCommandValidator
             .MaximumLength(50)
             .WithMessage("Database Server Name cannot be more than 50 characters.");
 
+        RuleFor(x => x.DatabaseServerHostName)
+            .MaximumLength(50)
+            .WithMessage("Database Server Host Name cannot be more than 50 characters.");
+
+        RuleFor(x => x.DatabaseServerFullyQualifiedDomainName)
+            .MaximumLength(50)
+            .WithMessage(
+                "Database Server Fully Qualified Domain Name cannot be more than 50 characters."
+            )
+            .Matches(@"^((?=[a-z0-9-]{1,63}\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,63}$")
+            .WithMessage("Database Server Fully Qualified Domain Name must be a valid FQDN.");
+
         RuleFor(x => x.DatabaseServerIpAddress)
-            .NotEmpty()
-            .WithMessage("Database Server IP Address is required.")
             .MaximumLength(50)
             .WithMessage("Database Server IP Address cannot be more than 50 characters.")
             .Matches(
@@ -31,31 +46,99 @@ internal sealed class AddDatabaseServerCommandValidator
 
 internal class AddDatabaseServer(IDbContextFactory<DbLocatorContext> dbContextFactory)
 {
+    private readonly IDbContextFactory<DbLocatorContext> _dbContextFactory = dbContextFactory;
+
     internal async Task<int> Handle(AddDatabaseServerCommand command)
     {
         await new AddDatabaseServerCommandValidator().ValidateAndThrowAsync(command);
 
-        if (
-            await dbContextFactory
-                .CreateDbContext()
-                .Set<DatabaseServerEntity>()
-                .AnyAsync(ds => ds.DatabaseServerName == command.DatabaseServerName)
-        )
-            throw new InvalidOperationException(
-                $"Database Server Name '{command.DatabaseServerName}' already exists."
-            );
+        await using var dbContext = _dbContextFactory.CreateDbContext();
 
-        await using var dbContext = dbContextFactory.CreateDbContext();
+        await Validation(command, dbContext);
 
         var databaseServer = new DatabaseServerEntity
         {
             DatabaseServerName = command.DatabaseServerName,
-            DatabaseServerIpaddress = command.DatabaseServerIpAddress,
+            DatabaseServerIpaddress = string.IsNullOrEmpty(command.DatabaseServerIpAddress)
+                ? null
+                : command.DatabaseServerIpAddress,
+            DatabaseServerHostName = string.IsNullOrEmpty(command.DatabaseServerHostName)
+                ? null
+                : command.DatabaseServerHostName,
+            DatabaseServerFullyQualifiedDomainName = string.IsNullOrEmpty(
+                command.DatabaseServerFullyQualifiedDomainName
+            )
+                ? null
+                : command.DatabaseServerFullyQualifiedDomainName,
         };
 
         dbContext.Add(databaseServer);
         await dbContext.SaveChangesAsync();
 
         return databaseServer.DatabaseServerId;
+    }
+
+    private static async Task Validation(
+        AddDatabaseServerCommand command,
+        DbLocatorContext dbContext
+    )
+    {
+        if (
+            string.IsNullOrEmpty(command.DatabaseServerHostName)
+            && string.IsNullOrEmpty(command.DatabaseServerFullyQualifiedDomainName)
+            && string.IsNullOrEmpty(command.DatabaseServerIpAddress)
+        )
+        {
+            throw new InvalidOperationException(
+                "At least one of the following fields must be provided: Database Server Host Name, Database Server Fully Qualified Domain Name, Database Server IP Address."
+            );
+        }
+
+        if (
+            await dbContext
+                .Set<DatabaseServerEntity>()
+                .AnyAsync(ds => ds.DatabaseServerName == command.DatabaseServerName)
+        )
+        {
+            throw new InvalidOperationException(
+                $"Database Server Name '{command.DatabaseServerName}' already exists."
+            );
+        }
+
+        if (
+            await dbContext
+                .Set<DatabaseServerEntity>()
+                .AnyAsync(ds => ds.DatabaseServerHostName == command.DatabaseServerHostName)
+        )
+        {
+            throw new InvalidOperationException(
+                $"Database Server Host Name '{command.DatabaseServerHostName}' already exists."
+            );
+        }
+
+        if (
+            await dbContext
+                .Set<DatabaseServerEntity>()
+                .AnyAsync(ds =>
+                    ds.DatabaseServerFullyQualifiedDomainName
+                    == command.DatabaseServerFullyQualifiedDomainName
+                )
+        )
+        {
+            throw new InvalidOperationException(
+                $"Database Server Fully Qualified Domain Name '{command.DatabaseServerFullyQualifiedDomainName}' already exists."
+            );
+        }
+
+        if (
+            await dbContext
+                .Set<DatabaseServerEntity>()
+                .AnyAsync(ds => ds.DatabaseServerIpaddress == command.DatabaseServerIpAddress)
+        )
+        {
+            throw new InvalidOperationException(
+                $"Database Server IP Address '{command.DatabaseServerIpAddress}' already exists."
+            );
+        }
     }
 }
