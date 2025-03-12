@@ -102,7 +102,8 @@ internal class AddDatabaseServer(IDbContextFactory<DbLocatorContext> dbContextFa
         }
 
         if (
-            await dbContext
+            !string.IsNullOrEmpty(command.DatabaseServerHostName)
+            && await dbContext
                 .Set<DatabaseServerEntity>()
                 .AnyAsync(ds => ds.DatabaseServerHostName == command.DatabaseServerHostName)
         )
@@ -113,7 +114,8 @@ internal class AddDatabaseServer(IDbContextFactory<DbLocatorContext> dbContextFa
         }
 
         if (
-            await dbContext
+            !string.IsNullOrEmpty(command.DatabaseServerFullyQualifiedDomainName)
+            && await dbContext
                 .Set<DatabaseServerEntity>()
                 .AnyAsync(ds =>
                     ds.DatabaseServerFullyQualifiedDomainName
@@ -127,7 +129,8 @@ internal class AddDatabaseServer(IDbContextFactory<DbLocatorContext> dbContextFa
         }
 
         if (
-            await dbContext
+            !string.IsNullOrEmpty(command.DatabaseServerIpAddress)
+            && await dbContext
                 .Set<DatabaseServerEntity>()
                 .AnyAsync(ds => ds.DatabaseServerIpaddress == command.DatabaseServerIpAddress)
         )
