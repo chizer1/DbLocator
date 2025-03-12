@@ -566,22 +566,28 @@ public class Locator
     }
 
     /// <summary>
-    ///Update database server
+    ///Update database server, need to provide at least one of the following fields: Database Server Host Name, Database Server Fully Qualified Domain Name, Database Server IP Address.
     /// </summary>
     /// <param name="databaseServerId"></param>
     /// <param name="databaseServerName"></param>
     /// <param name="databaseServerIpAddress"></param>
+    /// <param name="databaseServerHostName"></param>
+    /// <param name="databaseServerFullyQualifiedDomainName"></param>
     /// <returns></returns>
     public async Task UpdateDatabaseServer(
         int databaseServerId,
         string databaseServerName,
-        string databaseServerIpAddress
+        string databaseServerIpAddress,
+        string databaseServerHostName,
+        string databaseServerFullyQualifiedDomainName
     )
     {
         await _databaseServers.UpdateDatabaseServer(
             databaseServerId,
             databaseServerName,
-            databaseServerIpAddress
+            databaseServerIpAddress,
+            databaseServerHostName,
+            databaseServerFullyQualifiedDomainName
         );
     }
 

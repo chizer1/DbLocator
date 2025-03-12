@@ -42,14 +42,18 @@ internal class DatabaseServers(IDbContextFactory<DbLocatorContext> dbContextFact
     internal async Task UpdateDatabaseServer(
         int databaseServerId,
         string databaseServerName,
-        string databaseServerIpAddress
+        string databaseServerIpAddress = null,
+        string databaseServerHostName = null,
+        string databaseServerFullyQualifiedDomainName = null
     )
     {
         await _updateDatabaseServer.Handle(
             new UpdateDatabaseServerCommand(
                 databaseServerId,
                 databaseServerName,
-                databaseServerIpAddress
+                databaseServerIpAddress,
+                databaseServerHostName,
+                databaseServerFullyQualifiedDomainName
             )
         );
     }

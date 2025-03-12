@@ -120,6 +120,16 @@ namespace DbLocator.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<string>("DatabaseServerFullyQualifiedDomainName")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("DatabaseServerHostName")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
                     b.HasKey("DatabaseServerId")
                         .HasName("PK_DatabaseServer");
 

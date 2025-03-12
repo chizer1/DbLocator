@@ -96,7 +96,6 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
                 .IsUnicode(false);
             entity
                 .Property(e => e.DatabaseServerIpaddress)
-                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("DatabaseServerIPAddress");

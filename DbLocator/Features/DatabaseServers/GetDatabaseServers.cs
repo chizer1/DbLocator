@@ -27,7 +27,9 @@ internal class GetDatabaseServers(IDbContextFactory<DbLocatorContext> dbContextF
             .. databaseServerEntities.Select(ds => new DatabaseServer(
                 ds.DatabaseServerId,
                 ds.DatabaseServerName,
-                ds.DatabaseServerIpaddress
+                ds.DatabaseServerIpaddress,
+                ds.DatabaseServerHostName,
+                ds.DatabaseServerFullyQualifiedDomainName
             ))
         ];
     }

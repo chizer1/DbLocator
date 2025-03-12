@@ -111,8 +111,7 @@ namespace DbLocator.Migrations
                     b.Property<string>("DatabaseServerFullyQualifiedDomainName")
                         .HasMaxLength(50)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("DatabaseServerFullyQualifiedDomainName");
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("DatabaseServerHostName")
                         .HasMaxLength(50)
