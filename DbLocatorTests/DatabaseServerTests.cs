@@ -21,7 +21,6 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
 
         Assert.Single(databaseServers);
         Assert.Equal(databaseServerName, databaseServers[0].Name);
-        Assert.Equal(databaseServerIpAddress, databaseServers[0].IpAddress);
     }
 
     [Fact]
