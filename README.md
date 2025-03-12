@@ -73,7 +73,7 @@ var tenantId = await dbLocator.AddTenant("Acme Corp", tenantCode, Status.Active)
 
 var databaseTypeId = await dbLocator.AddDatabaseType("Client");
 
-var databaseServerId = await dbLocator.AddDatabaseServer("Docker SQL Server", "localhost", null, null);
+var databaseServerId = await dbLocator.AddDatabaseServer("Docker SQL Server", null, "localhost", null); // using hostname to connect to server
 
 var databaseId = await dbLocator.AddDatabase("Acme_Client", "acme_client_user", databaseServerId, databaseTypeId, Status.Active);
 
