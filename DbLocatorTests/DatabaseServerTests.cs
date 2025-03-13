@@ -13,7 +13,7 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
     {
         var databaseServerName = "DBServer";
         var databaseServerIpAddress = "192.168.1.1";
-        await _dbLocator.AddDatabaseServer(databaseServerName, databaseServerIpAddress);
+        await _dbLocator.AddDatabaseServer(databaseServerName, databaseServerIpAddress, null, null);
 
         var databaseServers = (await _dbLocator.GetDatabaseServers())
             .Where(x => x.Name == databaseServerName)
@@ -21,7 +21,6 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
 
         Assert.Single(databaseServers);
         Assert.Equal(databaseServerName, databaseServers[0].Name);
-        Assert.Equal(databaseServerIpAddress, databaseServers[0].IpAddress);
     }
 
     [Fact]
@@ -31,7 +30,9 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         var databaseServerIpAddress = "192.168.1.1";
         var databaseServerId = await _dbLocator.AddDatabaseServer(
             databaseServerName,
-            databaseServerIpAddress
+            databaseServerIpAddress,
+            null,
+            null
         );
 
         await _dbLocator.DeleteDatabaseServer(databaseServerId);

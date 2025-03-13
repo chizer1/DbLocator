@@ -7,7 +7,9 @@ namespace DbLocator.Features.DatabaseServers;
 internal record UpdateDatabaseServerCommand(
     int DatabaseServerId,
     string DatabaseServerName,
-    string DatabaseServerIpAddress
+    string DatabaseServerIpAddress,
+    string DatabaseServerHostName,
+    string DatabaseServerFullyQualifiedDomainName
 );
 
 internal sealed class UpdateDatabaseServerCommandValidator
@@ -23,15 +25,21 @@ internal sealed class UpdateDatabaseServerCommandValidator
             .MaximumLength(50)
             .WithMessage("Database Server Name cannot be more than 50 characters.");
 
-        RuleFor(x => x.DatabaseServerIpAddress)
-            .NotEmpty()
-            .WithMessage("Database Server IP Address is required.")
+        RuleFor(x => x.DatabaseServerHostName)
             .MaximumLength(50)
-            .WithMessage("Database Server IP Address cannot be more than 50 characters.")
-            .Matches(
-                @"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-            )
-            .WithMessage("Database Server IP Address must be a valid IP address.");
+            .WithMessage("Database Server Host Name cannot be more than 50 characters.");
+
+        RuleFor(x => x.DatabaseServerFullyQualifiedDomainName)
+            .MaximumLength(50)
+            .WithMessage(
+                "Database Server Fully Qualified Domain Name cannot be more than 50 characters."
+            );
+        // todo: add ip regex
+
+        RuleFor(x => x.DatabaseServerIpAddress)
+            .MaximumLength(50)
+            .WithMessage("Database Server IP Address cannot be more than 50 characters.");
+        // todo: add domain regex
     }
 }
 
@@ -40,6 +48,8 @@ internal class UpdateDatabaseServer(IDbContextFactory<DbLocatorContext> dbContex
     internal async Task Handle(UpdateDatabaseServerCommand command)
     {
         await new UpdateDatabaseServerCommandValidator().ValidateAndThrowAsync(command);
+
+        Validate(command);
 
         await using var dbContext = dbContextFactory.CreateDbContext();
 
@@ -51,30 +61,31 @@ internal class UpdateDatabaseServer(IDbContextFactory<DbLocatorContext> dbContex
                 $"Database Server Id '{command.DatabaseServerId}' not found."
             );
 
-        if (
-            await dbContextFactory
-                .CreateDbContext()
-                .Set<DatabaseServerEntity>()
-                .AnyAsync(ds => ds.DatabaseServerName == command.DatabaseServerName)
-        )
-            throw new InvalidOperationException(
-                $"Database Server Name '{command.DatabaseServerName}' already exists."
-            );
-
-        if (
-            await dbContextFactory
-                .CreateDbContext()
-                .Set<DatabaseServerEntity>()
-                .AnyAsync(ds => ds.DatabaseServerIpaddress == command.DatabaseServerIpAddress)
-        )
-            throw new InvalidOperationException(
-                $"Database Server IP Address '{command.DatabaseServerIpAddress}' already exists."
-            );
-
         databaseServer.DatabaseServerName = command.DatabaseServerName;
-        databaseServer.DatabaseServerIpaddress = command.DatabaseServerIpAddress;
+
+        if (!string.IsNullOrEmpty(command.DatabaseServerHostName))
+            databaseServer.DatabaseServerHostName = command.DatabaseServerHostName;
+        if (!string.IsNullOrEmpty(command.DatabaseServerFullyQualifiedDomainName))
+            databaseServer.DatabaseServerFullyQualifiedDomainName =
+                command.DatabaseServerFullyQualifiedDomainName;
+        if (!string.IsNullOrEmpty(command.DatabaseServerIpAddress))
+            databaseServer.DatabaseServerIpaddress = command.DatabaseServerIpAddress;
 
         dbContext.Update(databaseServer);
         await dbContext.SaveChangesAsync();
+    }
+
+    private static void Validate(UpdateDatabaseServerCommand command)
+    {
+        if (
+            string.IsNullOrEmpty(command.DatabaseServerHostName)
+            && string.IsNullOrEmpty(command.DatabaseServerFullyQualifiedDomainName)
+            && string.IsNullOrEmpty(command.DatabaseServerIpAddress)
+        )
+        {
+            throw new InvalidOperationException(
+                "At least one of the following fields must be provided: Database Server Host Name, Database Server Fully Qualified Domain Name, Database Server IP Address."
+            );
+        }
     }
 }

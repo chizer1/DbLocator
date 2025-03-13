@@ -23,6 +23,22 @@ internal class AddConnection(IDbContextFactory<DbLocatorContext> dbContextFactor
 
         await using var dbContext = dbContextFactory.CreateDbContext();
 
+        await Validation(command, dbContext);
+
+        var connection = new ConnectionEntity
+        {
+            TenantId = command.TenantId,
+            DatabaseId = command.DatabaseId
+        };
+
+        await dbContext.Set<ConnectionEntity>().AddAsync(connection);
+        await dbContext.SaveChangesAsync();
+
+        return connection.ConnectionId;
+    }
+
+    private static async Task Validation(AddConnectionCommand command, DbLocatorContext dbContext)
+    {
         var tenantExists = await dbContext
             .Set<TenantEntity>()
             .AnyAsync(t => t.TenantId == command.TenantId);
@@ -52,16 +68,5 @@ internal class AddConnection(IDbContextFactory<DbLocatorContext> dbContextFactor
 
         if (connectionOfSameTypeExists)
             throw new InvalidOperationException("Connection of same type already exists.");
-
-        var connection = new ConnectionEntity
-        {
-            TenantId = command.TenantId,
-            DatabaseId = command.DatabaseId
-        };
-
-        await dbContext.Set<ConnectionEntity>().AddAsync(connection);
-        await dbContext.SaveChangesAsync();
-
-        return connection.ConnectionId;
     }
 }

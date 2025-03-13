@@ -22,7 +22,9 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var databaseServerIpAddress = "127.0.0.1";
         var databaseServerId = await _dbLocator.AddDatabaseServer(
             databaseServerName,
-            databaseServerIpAddress
+            databaseServerIpAddress,
+            null,
+            null
         );
 
         var databaseName = "Database2";

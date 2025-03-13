@@ -36,7 +36,9 @@ internal class GetDatabases(IDbContextFactory<DbLocatorContext> dbContextFactory
                 new DatabaseServer(
                     d.DatabaseServer.DatabaseServerId,
                     d.DatabaseServer.DatabaseServerName,
-                    d.DatabaseServer.DatabaseServerIpaddress
+                    d.DatabaseServer.DatabaseServerIpaddress,
+                    d.DatabaseServer.DatabaseServerHostName,
+                    d.DatabaseServer.DatabaseServerFullyQualifiedDomainName
                 ),
                 (Status)d.DatabaseStatusId,
                 d.UseTrustedConnection

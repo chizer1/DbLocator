@@ -14,7 +14,9 @@ public class DatabaseTests
     public DatabaseTests(DbLocatorFixture dbLocatorFixture)
     {
         _dbLocator = dbLocatorFixture.DbLocator;
-        _databaseServerID = _dbLocator.AddDatabaseServer("DatabaseServer", "192.168.1.1").Result;
+        _databaseServerID = _dbLocator
+            .AddDatabaseServer("DatabaseServer", "127.168.1.1", null, null)
+            .Result;
         _databaseTypeId = _dbLocator.AddDatabaseType("DatabaseType").Result;
     }
 

@@ -89,9 +89,13 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
             entity.HasKey(e => e.DatabaseServerId).HasName("PK_DatabaseServer");
 
             entity.Property(e => e.DatabaseServerId).HasColumnName("DatabaseServerID");
+            entity.Property(e => e.DatabaseServerHostName).HasMaxLength(50).IsUnicode(false);
+            entity
+                .Property(e => e.DatabaseServerFullyQualifiedDomainName)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity
                 .Property(e => e.DatabaseServerIpaddress)
-                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("DatabaseServerIPAddress");

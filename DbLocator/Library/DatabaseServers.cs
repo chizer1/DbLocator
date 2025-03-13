@@ -14,11 +14,18 @@ internal class DatabaseServers(IDbContextFactory<DbLocatorContext> dbContextFact
 
     internal async Task<int> AddDatabaseServer(
         string databaseServerName,
-        string databaseServerIpAddress
+        string databaseServerHostName = null,
+        string databaseServerIpAddress = null,
+        string databaseServerFullyQualifiedDomainName = null
     )
     {
         return await _addDatabaseServer.Handle(
-            new AddDatabaseServerCommand(databaseServerName, databaseServerIpAddress)
+            new AddDatabaseServerCommand(
+                databaseServerName,
+                databaseServerHostName,
+                databaseServerIpAddress,
+                databaseServerFullyQualifiedDomainName
+            )
         );
     }
 
@@ -35,14 +42,18 @@ internal class DatabaseServers(IDbContextFactory<DbLocatorContext> dbContextFact
     internal async Task UpdateDatabaseServer(
         int databaseServerId,
         string databaseServerName,
-        string databaseServerIpAddress
+        string databaseServerIpAddress = null,
+        string databaseServerHostName = null,
+        string databaseServerFullyQualifiedDomainName = null
     )
     {
         await _updateDatabaseServer.Handle(
             new UpdateDatabaseServerCommand(
                 databaseServerId,
                 databaseServerName,
-                databaseServerIpAddress
+                databaseServerIpAddress,
+                databaseServerHostName,
+                databaseServerFullyQualifiedDomainName
             )
         );
     }

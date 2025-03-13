@@ -23,11 +23,23 @@ namespace DbLocator.Migrations
                         maxLength: 50,
                         nullable: false
                     ),
+                    DatabaseServerHostName = table.Column<string>(
+                        type: "varchar(50)",
+                        unicode: false,
+                        maxLength: 50,
+                        nullable: true
+                    ),
+                    DatabaseServerFullyQualifiedDomainName = table.Column<string>(
+                        type: "varchar(50)",
+                        unicode: false,
+                        maxLength: 50,
+                        nullable: true
+                    ),
                     DatabaseServerIPAddress = table.Column<string>(
                         type: "varchar(50)",
                         unicode: false,
                         maxLength: 50,
-                        nullable: false
+                        nullable: true
                     )
                 },
                 constraints: table =>
