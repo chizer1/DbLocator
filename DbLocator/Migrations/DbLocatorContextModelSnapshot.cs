@@ -130,6 +130,8 @@ namespace DbLocator.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<bool>("IsLinkedServer").HasColumnType("bit").IsRequired();
+
                     b.HasKey("DatabaseServerId")
                         .HasName("PK_DatabaseServer");
 

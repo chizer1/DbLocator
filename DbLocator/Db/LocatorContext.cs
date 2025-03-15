@@ -104,6 +104,7 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
                 .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.IsLinkedServer).IsRequired();
         });
 
         modelBuilder.Entity<DatabaseTypeEntity>(entity =>

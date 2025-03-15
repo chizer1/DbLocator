@@ -8,12 +8,14 @@ namespace DbLocator.Domain;
 /// <param name="ipAddress">The IP address of the database server.</param>
 /// <param name="hostName">The host name of the database server.</param>
 /// <param name="fullyQualifiedDomainName">The fully qualified domain name of the database server.</param>
+/// <param name="isLinkedServer">This server is linked to where DbLocator database lives</param>
 public class DatabaseServer(
     int id,
     string name,
     string ipAddress,
     string hostName,
-    string fullyQualifiedDomainName
+    string fullyQualifiedDomainName,
+    bool isLinkedServer
 )
 {
     /// <summary>
@@ -40,4 +42,9 @@ public class DatabaseServer(
     /// Gets the fully qualified domain name of the database server.
     /// </summary>
     public string FullyQualifiedDomainName { get; init; } = fullyQualifiedDomainName;
+
+    /// <summary>
+    /// This server is linked to where DbLocator database lives
+    /// </summary>
+    public bool IsLinkedServer { get; init; } = isLinkedServer;
 };

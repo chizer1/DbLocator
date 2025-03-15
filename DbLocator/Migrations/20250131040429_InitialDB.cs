@@ -40,7 +40,8 @@ namespace DbLocator.Migrations
                         unicode: false,
                         maxLength: 50,
                         nullable: true
-                    )
+                    ),
+                    IsLinkedServer = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -29,7 +29,8 @@ internal class GetDatabaseServers(IDbContextFactory<DbLocatorContext> dbContextF
                 ds.DatabaseServerName,
                 ds.DatabaseServerIpaddress,
                 ds.DatabaseServerHostName,
-                ds.DatabaseServerFullyQualifiedDomainName
+                ds.DatabaseServerFullyQualifiedDomainName,
+                ds.IsLinkedServer
             ))
         ];
     }

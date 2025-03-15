@@ -12,5 +12,7 @@ internal class DatabaseServerEntity
 
     internal string DatabaseServerFullyQualifiedDomainName { get; set; }
 
+    internal bool IsLinkedServer { get; set; }
+
     internal virtual ICollection<DatabaseEntity> Databases { get; set; } = [];
 }

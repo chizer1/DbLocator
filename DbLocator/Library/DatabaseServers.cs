@@ -16,7 +16,8 @@ internal class DatabaseServers(IDbContextFactory<DbLocatorContext> dbContextFact
         string databaseServerName,
         string databaseServerHostName = null,
         string databaseServerIpAddress = null,
-        string databaseServerFullyQualifiedDomainName = null
+        string databaseServerFullyQualifiedDomainName = null,
+        bool isLinkedServer = false
     )
     {
         return await _addDatabaseServer.Handle(
@@ -24,7 +25,8 @@ internal class DatabaseServers(IDbContextFactory<DbLocatorContext> dbContextFact
                 databaseServerName,
                 databaseServerHostName,
                 databaseServerIpAddress,
-                databaseServerFullyQualifiedDomainName
+                databaseServerFullyQualifiedDomainName,
+                isLinkedServer
             )
         );
     }

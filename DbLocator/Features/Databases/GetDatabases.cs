@@ -38,7 +38,8 @@ internal class GetDatabases(IDbContextFactory<DbLocatorContext> dbContextFactory
                     d.DatabaseServer.DatabaseServerName,
                     d.DatabaseServer.DatabaseServerIpaddress,
                     d.DatabaseServer.DatabaseServerHostName,
-                    d.DatabaseServer.DatabaseServerFullyQualifiedDomainName
+                    d.DatabaseServer.DatabaseServerFullyQualifiedDomainName,
+                    d.DatabaseServer.IsLinkedServer
                 ),
                 (Status)d.DatabaseStatusId,
                 d.UseTrustedConnection

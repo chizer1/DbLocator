@@ -102,16 +102,43 @@ internal class AddDatabase(
 
         if (command.CreateDatabase)
         {
-            var commands = new List<string> { $"create database {command.DatabaseName}" };
+            var databaseServer = await dbContext
+                .Set<DatabaseServerEntity>()
+                .FirstOrDefaultAsync(ds => ds.DatabaseServerId == command.DatabaseServerId);
 
-            if (!command.UseTrustedConnection)
+            var commands = new List<string>();
+
+            if (databaseServer.IsLinkedServer)
             {
-                commands.AddRange(
-                    [
-                        $"create login {command.DatabaseUser} with password = '{command.DatabaseUserPassword}'",
-                        $"use {command.DatabaseName}; create user {command.DatabaseUser} for login {command.DatabaseUser}"
-                    ]
+                Console.WriteLine(databaseServer.DatabaseServerHostName);
+
+                commands.Add(
+                    $"exec('create database {command.DatabaseName}') at {databaseServer.DatabaseServerHostName};"
                 );
+
+                if (!command.UseTrustedConnection)
+                {
+                    commands.Add(
+                        $"exec('create login {command.DatabaseUser} with password = ''{command.DatabaseUserPassword}''') at {databaseServer.DatabaseServerHostName};"
+                    );
+                    commands.Add(
+                        $"exec('use {command.DatabaseName}; create user {command.DatabaseUser} for login {command.DatabaseUser}') at {databaseServer.DatabaseServerHostName};"
+                    );
+                }
+            }
+            else
+            {
+                commands.Add($"create database {command.DatabaseName}");
+
+                if (!command.UseTrustedConnection)
+                {
+                    commands.Add(
+                        $"create login {command.DatabaseUser} with password = '{command.DatabaseUserPassword}'"
+                    );
+                    commands.Add(
+                        $"use {command.DatabaseName}; create user {command.DatabaseUser} for login {command.DatabaseUser}"
+                    );
+                }
             }
 
             foreach (var commandText in commands)
