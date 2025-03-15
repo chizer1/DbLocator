@@ -51,7 +51,8 @@ internal class GetConnections(IDbContextFactory<DbLocatorContext> dbContextFacto
                                 connectionEntity
                                     .Database
                                     .DatabaseServer
-                                    .DatabaseServerFullyQualifiedDomainName
+                                    .DatabaseServerFullyQualifiedDomainName,
+                                connectionEntity.Database.DatabaseServer.IsLinkedServer
                             )
                             : null,
                         (Status)connectionEntity.Database.DatabaseStatusId,

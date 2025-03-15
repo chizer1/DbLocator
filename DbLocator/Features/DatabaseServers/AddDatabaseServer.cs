@@ -8,7 +8,8 @@ internal record AddDatabaseServerCommand(
     string DatabaseServerName,
     string DatabaseServerHostName,
     string DatabaseServerFullyQualifiedDomainName,
-    string DatabaseServerIpAddress
+    string DatabaseServerIpAddress,
+    bool IsLinkedServer
 );
 
 internal sealed class AddDatabaseServerCommandValidator
@@ -66,6 +67,7 @@ internal class AddDatabaseServer(IDbContextFactory<DbLocatorContext> dbContextFa
             )
                 ? null
                 : command.DatabaseServerFullyQualifiedDomainName,
+            IsLinkedServer = command.IsLinkedServer
         };
 
         dbContext.Add(databaseServer);
