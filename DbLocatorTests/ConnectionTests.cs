@@ -24,7 +24,8 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
             databaseServerName,
             databaseServerIpAddress,
             null,
-            null
+            null,
+            false
         );
 
         var databaseName = "Database2";

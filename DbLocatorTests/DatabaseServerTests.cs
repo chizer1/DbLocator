@@ -13,7 +13,13 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
     {
         var databaseServerName = "DBServer";
         var databaseServerIpAddress = "192.168.1.1";
-        await _dbLocator.AddDatabaseServer(databaseServerName, databaseServerIpAddress, null, null);
+        await _dbLocator.AddDatabaseServer(
+            databaseServerName,
+            databaseServerIpAddress,
+            null,
+            null,
+            false
+        );
 
         var databaseServers = (await _dbLocator.GetDatabaseServers())
             .Where(x => x.Name == databaseServerName)
@@ -32,7 +38,8 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
             databaseServerName,
             databaseServerIpAddress,
             null,
-            null
+            null,
+            false
         );
 
         await _dbLocator.DeleteDatabaseServer(databaseServerId);
