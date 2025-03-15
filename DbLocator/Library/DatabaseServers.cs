@@ -14,10 +14,10 @@ internal class DatabaseServers(IDbContextFactory<DbLocatorContext> dbContextFact
 
     internal async Task<int> AddDatabaseServer(
         string databaseServerName,
+        bool isLinkedServer,
         string databaseServerHostName = null,
         string databaseServerIpAddress = null,
-        string databaseServerFullyQualifiedDomainName = null,
-        bool isLinkedServer = false
+        string databaseServerFullyQualifiedDomainName = null
     )
     {
         return await _addDatabaseServer.Handle(

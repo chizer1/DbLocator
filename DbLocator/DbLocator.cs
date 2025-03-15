@@ -539,16 +539,19 @@ public class Locator
     /// <param name="databaseServerIpAddress"></param>
     /// <param name="databaseServerHostName"></param>
     /// <param name="databaseServerFullyQualifiedDomainName"></param>
+    /// <param name="isLinkedServer"></param>
     /// <returns>DatabaseServerId</returns>
     public async Task<int> AddDatabaseServer(
         string databaseServerName,
         string databaseServerIpAddress,
         string databaseServerHostName,
-        string databaseServerFullyQualifiedDomainName
+        string databaseServerFullyQualifiedDomainName,
+        bool isLinkedServer
     )
     {
         return await _databaseServers.AddDatabaseServer(
             databaseServerName,
+            isLinkedServer,
             databaseServerIpAddress,
             databaseServerHostName,
             databaseServerFullyQualifiedDomainName
