@@ -110,8 +110,6 @@ internal class AddDatabase(
 
             if (databaseServer.IsLinkedServer)
             {
-                Console.WriteLine(databaseServer.DatabaseServerHostName);
-
                 commands.Add(
                     $"exec('create database {command.DatabaseName}') at {databaseServer.DatabaseServerHostName};"
                 );
