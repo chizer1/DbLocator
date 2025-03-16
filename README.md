@@ -73,7 +73,8 @@ var tenantId = await dbLocator.AddTenant("Acme Corp", tenantCode, Status.Active)
 
 var databaseTypeId = await dbLocator.AddDatabaseType("Client");
 
-var databaseServerId = await dbLocator.AddDatabaseServer("Docker SQL Server", null, "localhost", null); // using hostname to connect to server
+// using hostname to connect to server (localhost if using docker image from repo)
+var databaseServerId = await dbLocator.AddDatabaseServer("Docker SQL Server", null, "localhost", null, false); 
 
 var databaseId = await dbLocator.AddDatabase("Acme_Client", "acme_client_user", databaseServerId, databaseTypeId, Status.Active);
 
@@ -83,6 +84,31 @@ var connectionId = await dbLocator.AddConnection(tenantId, databaseId);
 SqlConnection connection1 = await dbLocator.GetConnection(connectionId);
 SqlConnection connection2 = await dbLocator.GetConnection(tenantId, databaseTypeId);
 SqlConnection connection3 = await dbLocator.GetConnection(tenantCode, databaseTypeId);
+
+```
+
+### 5. Linked Servers
+
+If you plan to use multiple database servers with the DbLocator library, you may want to connect them to the server that hosts the DbLocator database. While the library does not automatically create linked servers for you, once set up, you can leverage them for seamless cross-server connections.
+
+More about Linked Servers (https://learn.microsoft.com/en-us/sql/relational-databases/linked-servers/linked-servers-database-engine?view=sql-server-ver16)
+
+Here is an example if you want set it up:
+
+```sql
+
+-- Run the following stored procedures from the server that hosts the DbLocator database
+exec sp_addlinkedserver 
+    @server = 'RemoteServerName',  -- Name of the linked server (hostname)
+    @srvproduct = '',
+    @provider = 'SQLNCLI',
+    @datasrc = 'RemoteServerInstance';  -- Remote SQL Server instance (ip address or fully qualified domain name)
+
+exec sp_addlinkedsrvlogin 
+    @rmtsrvname = 'RemoteServerName',  -- Name of the linked server (hostname)
+    @locallogin = NULL,  
+    @rmtuser = 'sa', -- which ever user you want to connect for linked server access
+    @rmtpassword = 'YourRemotePassword'; -- that user's password
 
 ```
 
