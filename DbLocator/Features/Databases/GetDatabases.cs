@@ -31,7 +31,7 @@ internal class GetDatabases(IDbContextFactory<DbLocatorContext> dbContextFactory
             .. databaseEntities.Select(d => new Database(
                 d.DatabaseId,
                 d.DatabaseName,
-                d.DatabaseUser,
+                //d.DatabaseUser,
                 new DatabaseType(d.DatabaseType.DatabaseTypeId, d.DatabaseType.DatabaseTypeName),
                 new DatabaseServer(
                     d.DatabaseServer.DatabaseServerId,

@@ -7,19 +7,17 @@ using Microsoft.EntityFrameworkCore;
 namespace DbLocator.Library;
 
 internal class Databases(
-    IDbContextFactory<DbLocatorContext> dbContextFactory,
-    Encryption encryption
+    IDbContextFactory<DbLocatorContext> dbContextFactory //,
+//Encryption encryption
 )
 {
-    private readonly AddDatabase _addDatabase = new(dbContextFactory, encryption);
+    private readonly AddDatabase _addDatabase = new(dbContextFactory);
     private readonly DeleteDatabase _deleteDatabase = new(dbContextFactory);
     private readonly GetDatabases _getDatabases = new(dbContextFactory);
-    private readonly UpdateDatabase _updateDatabase = new(dbContextFactory, encryption);
+    private readonly UpdateDatabase _updateDatabase = new(dbContextFactory);
 
     internal async Task<int> AddDatabase(
         string databaseName,
-        string databaseUser,
-        string databaseUserPassword,
         int databaseServerId,
         byte databaseTypeId
     )
@@ -27,8 +25,6 @@ internal class Databases(
         return await _addDatabase.Handle(
             new AddDatabaseCommand(
                 databaseName,
-                databaseUser,
-                databaseUserPassword,
                 databaseServerId,
                 databaseTypeId,
                 Status.Active,
@@ -40,8 +36,6 @@ internal class Databases(
 
     internal async Task<int> AddDatabase(
         string databaseName,
-        string databaseUser,
-        string databaseUserPassword,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
@@ -50,8 +44,6 @@ internal class Databases(
         return await _addDatabase.Handle(
             new AddDatabaseCommand(
                 databaseName,
-                databaseUser,
-                databaseUserPassword,
                 databaseServerId,
                 databaseTypeId,
                 databaseStatus,
@@ -63,8 +55,6 @@ internal class Databases(
 
     internal async Task<int> AddDatabase(
         string databaseName,
-        string databaseUser,
-        string databaseUserPassword,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus,
@@ -74,8 +64,6 @@ internal class Databases(
         return await _addDatabase.Handle(
             new AddDatabaseCommand(
                 databaseName,
-                databaseUser,
-                databaseUserPassword,
                 databaseServerId,
                 databaseTypeId,
                 databaseStatus,
@@ -95,53 +83,9 @@ internal class Databases(
         return await _addDatabase.Handle(
             new AddDatabaseCommand(
                 databaseName,
-                null,
-                null,
                 databaseServerId,
                 databaseTypeId,
                 Status.Active,
-                true,
-                createDatabase
-            )
-        );
-    }
-
-    internal async Task<int> AddDatabase(
-        string databaseName,
-        int databaseServerId,
-        byte databaseTypeId
-    )
-    {
-        return await _addDatabase.Handle(
-            new AddDatabaseCommand(
-                databaseName,
-                null,
-                null,
-                databaseServerId,
-                databaseTypeId,
-                Status.Active,
-                true,
-                true
-            )
-        );
-    }
-
-    internal async Task<int> AddDatabase(
-        string databaseName,
-        int databaseServerId,
-        byte databaseTypeId,
-        Status databaseStatus,
-        bool createDatabase
-    )
-    {
-        return await _addDatabase.Handle(
-            new AddDatabaseCommand(
-                databaseName,
-                null,
-                null,
-                databaseServerId,
-                databaseTypeId,
-                databaseStatus,
                 true,
                 createDatabase
             )

@@ -1,4 +1,5 @@
 using DbLocator.Db;
+using DbLocator.Domain;
 using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.Data.SqlClient;
@@ -32,7 +33,7 @@ internal class GetConnection(
         var connectionEntity = await GetConnectionEntityAsync(dbContext, query);
         var database = await GetDatabaseEntityAsync(dbContext, connectionEntity.DatabaseId);
 
-        var connectionString = BuildConnectionString(database, encrypytion);
+        var connectionString = await BuildConnectionString(database, encrypytion, dbContext);
 
         return new SqlConnection(connectionString);
     }
@@ -132,7 +133,12 @@ internal class GetConnection(
             ?? throw new KeyNotFoundException($"Database with Id {databaseId} not found.");
     }
 
-    private static string BuildConnectionString(DatabaseEntity database, Encryption encrypytion)
+    private static async Task<string> BuildConnectionString(
+        DatabaseEntity database,
+        Encryption encrypytion,
+        DbLocatorContext dbContext,
+        DatabaseRole[] roles = null
+    )
     {
         // try to connect using the fully qualified domain name, if not available try the ip address
         // then try the host name
@@ -154,10 +160,75 @@ internal class GetConnection(
         }
         else
         {
-            connectionStringBuilder.UserID = database.DatabaseUser;
-            connectionStringBuilder.Password = encrypytion.Decrypt(database.DatabaseUserPassword);
+            var user = await GetDatabaseUser(database, dbContext, encrypytion, roles);
+            connectionStringBuilder.UserID = user.UserName;
+            connectionStringBuilder.Password = encrypytion.Decrypt(user.UserPassword);
         }
 
         return connectionStringBuilder.ConnectionString;
+    }
+
+    private static async Task<DatabaseUserEntity> GetDatabaseUser(
+        DatabaseEntity database,
+        DbLocatorContext dbContext,
+        Encryption encryption,
+        DatabaseRole[] roleList = null
+    )
+    {
+        roleList ??= [DatabaseRole.DataReader, DatabaseRole.DataWriter];
+        var roles = string.Join(",", roleList.Select(r => r.ToString()));
+
+        var user = database.DatabaseUsers.FirstOrDefault(u => u.Roles == roles.ToString());
+        if (user == null)
+        {
+            user = await CreateDatabaseUser(database, dbContext, encryption, roleList, roles);
+        }
+
+        return user;
+    }
+
+    private static async Task<DatabaseUserEntity> CreateDatabaseUser(
+        DatabaseEntity database,
+        DbLocatorContext dbContext,
+        Encryption encryption,
+        DatabaseRole[] roleList,
+        string roles
+    )
+    {
+        var password = Guid.NewGuid().ToString();
+        var user = new DatabaseUserEntity
+        {
+            DatabaseId = database.DatabaseId,
+            UserName = Guid.NewGuid().ToString(),
+            Roles = roles,
+            UserPassword = encryption.Encrypt(password)
+        };
+
+        var commands = new List<string>
+        {
+            $"create login {user.UserName} with password = '{password}'",
+            $"use {database.DatabaseName}; create user {user.UserName} for login {user.UserName}"
+        };
+
+        foreach (var role in roleList)
+        {
+            var roleName = Enum.GetName(role).ToLower();
+            commands.Add(
+                $"use {database.DatabaseName}; exec sp_addrolemember 'db_{roleName}', '{user.UserName}'"
+            );
+        }
+
+        foreach (var commandText in commands)
+        {
+            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+            cmd.CommandText = commandText;
+            await dbContext.Database.OpenConnectionAsync();
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        await dbContext.Set<DatabaseUserEntity>().AddAsync(user);
+        await dbContext.SaveChangesAsync();
+
+        return user;
     }
 }

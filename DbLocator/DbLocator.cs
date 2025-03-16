@@ -58,7 +58,7 @@ public class Locator
 
         var encryption = new Encryption(encryptionKey);
         _connections = new Connections(dbContextFactory, encryption);
-        _databases = new Databases(dbContextFactory, encryption);
+        _databases = new Databases(dbContextFactory); //, encryption);
         _databaseServers = new DatabaseServers(dbContextFactory);
         _databaseTypes = new DatabaseTypes(dbContextFactory);
         _tenants = new Tenants(dbContextFactory);
@@ -246,16 +246,12 @@ public class Locator
     /// Add database
     /// </summary>
     /// <param name="databaseName"></param>
-    /// <param name="databaseUser"></param>
-    /// <param name="databasePassword"></param>
     /// <param name="databaseServerId"></param>
     /// <param name="databaseTypeId"></param>
     /// <param name="databaseStatus"></param>
     /// <returns>DatabaseId</returns>
     public async Task<int> AddDatabase(
         string databaseName,
-        string databaseUser,
-        string databasePassword,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
@@ -263,8 +259,6 @@ public class Locator
     {
         return await _databases.AddDatabase(
             databaseName,
-            databaseUser,
-            databasePassword,
             databaseServerId,
             databaseTypeId,
             databaseStatus
@@ -301,74 +295,20 @@ public class Locator
     /// Add database
     /// </summary>
     /// <param name="databaseName"></param>
-    /// <param name="databaseUser"></param>
-    /// <param name="databasePassword"></param>
     /// <param name="databaseServerId"></param>
     /// <param name="databaseTypeId"></param>
     /// <returns>DatabaseId</returns>
     public async Task<int> AddDatabase(
         string databaseName,
-        string databaseUser,
-        string databasePassword,
         int databaseServerId,
         byte databaseTypeId
     )
     {
         return await _databases.AddDatabase(
             databaseName,
-            databaseUser,
-            databasePassword,
             databaseServerId,
             databaseTypeId,
             Status.Active
-        );
-    }
-
-    /// <summary>
-    /// Add database
-    /// </summary>
-    /// <param name="databaseName"></param>
-    /// <param name="databaseServerId"></param>
-    /// <param name="databaseTypeId"></param>
-    /// <returns>DatabaseId</returns>
-    public async Task<int> AddDatabase(
-        string databaseName,
-        int databaseServerId,
-        byte databaseTypeId
-    )
-    {
-        return await _databases.AddDatabase(databaseName, databaseServerId, databaseTypeId);
-    }
-
-    /// <summary>
-    /// Add database
-    /// </summary>
-    /// <param name="databaseName"></param>
-    /// <param name="databaseUser"></param>
-    /// <param name="databaseUserPassword"></param>
-    /// <param name="databaseServerId"></param>
-    /// <param name="databaseTypeId"></param>
-    /// <param name="databaseStatus"></param>
-    /// <param name="createDatabase"></param>
-    /// <returns>DatabaseId</returns>
-    public async Task<int> AddDatabase(
-        string databaseName,
-        string databaseUser,
-        string databaseUserPassword,
-        int databaseServerId,
-        byte databaseTypeId,
-        Status databaseStatus,
-        bool createDatabase
-    )
-    {
-        return await _databases.AddDatabase(
-            databaseName,
-            databaseUser,
-            databaseUserPassword,
-            databaseServerId,
-            databaseTypeId,
-            databaseStatus,
-            createDatabase
         );
     }
 

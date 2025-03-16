@@ -52,8 +52,8 @@ internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateD
 }
 
 internal class UpdateDatabase(
-    IDbContextFactory<DbLocatorContext> dbContextFactory,
-    Encryption encryption
+    IDbContextFactory<DbLocatorContext> dbContextFactory //,
+//Encryption encryption
 )
 {
     internal async Task Handle(UpdateDatabaseCommand command)
@@ -91,16 +91,16 @@ internal class UpdateDatabase(
             );
 
         var oldDatabaseName = databaseEntity.DatabaseName;
-        var oldDatabaseUser = databaseEntity.DatabaseUser;
+        // var oldDatabaseUser = databaseEntity.DatabaseUser;
 
         if (!string.IsNullOrEmpty(command.DatabaseName))
             databaseEntity.DatabaseName = command.DatabaseName;
 
-        if (!string.IsNullOrEmpty(command.DatabaseUserPassword))
-            databaseEntity.DatabaseUserPassword = encryption.Encrypt(command.DatabaseUserPassword);
+        // if (!string.IsNullOrEmpty(command.DatabaseUserPassword))
+        //     databaseEntity.DatabaseUserPassword = encryption.Encrypt(command.DatabaseUserPassword);
 
-        if (!string.IsNullOrEmpty(command.DatabaseUser))
-            databaseEntity.DatabaseUser = command.DatabaseUser;
+        // if (!string.IsNullOrEmpty(command.DatabaseUser))
+        //     databaseEntity.DatabaseUser = command.DatabaseUser;
 
         if (command.DatabaseServerId.HasValue)
             databaseEntity.DatabaseServerId = command.DatabaseServerId.Value;
@@ -121,10 +121,10 @@ internal class UpdateDatabase(
         if (oldDatabaseName != command.DatabaseName && !string.IsNullOrEmpty(command.DatabaseName))
             commands.Add($"alter database {oldDatabaseName} modify name = {command.DatabaseName}");
 
-        if (oldDatabaseUser != command.DatabaseUser && !string.IsNullOrEmpty(command.DatabaseUser))
-            commands.Add(
-                $"use {command.DatabaseName}; alter user {oldDatabaseUser} with name = {command.DatabaseUser}"
-            );
+        // if (oldDatabaseUser != command.DatabaseUser && !string.IsNullOrEmpty(command.DatabaseUser))
+        //     commands.Add(
+        //         $"use {command.DatabaseName}; alter user {oldDatabaseUser} with name = {command.DatabaseUser}"
+        //     );
 
         if (command.DatabaseUserPassword != null)
             commands.Add(

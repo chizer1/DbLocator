@@ -31,8 +31,6 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var databaseName = "Database2";
         var databaseId = await _dbLocator.AddDatabase(
             databaseName,
-            "database2_user",
-            "WvP26JM%6QP92y&PV",
             databaseServerId,
             databaseTypeId,
             Status.Active

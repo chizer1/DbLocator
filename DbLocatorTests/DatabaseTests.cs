@@ -25,8 +25,6 @@ public class DatabaseTests
         var databaseUser = $"{databaseName}_App";
         var databaseId = await _dbLocator.AddDatabase(
             databaseName,
-            databaseUser,
-            "Password1!",
             _databaseServerID,
             _databaseTypeId,
             Status.Active

@@ -8,6 +8,8 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
 
     public virtual DbSet<DatabaseEntity> Databases { get; set; }
 
+    public virtual DbSet<DatabaseUserEntity> DatabaseUsers { get; set; }
+
     public virtual DbSet<DatabaseServerEntity> DatabaseServers { get; set; }
 
     public virtual DbSet<DatabaseTypeEntity> DatabaseTypes { get; set; }
@@ -47,6 +49,27 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
                 .HasConstraintName("FK_Connection_Tenant");
         });
 
+        modelBuilder.Entity<DatabaseUserEntity>(entity =>
+        {
+            entity.ToTable("DatabaseUser");
+
+            entity.HasKey(e => e.DatabaseUserId).HasName("PK_DatabaseUser");
+
+            entity.HasIndex(e => e.DatabaseId, "IX_DatabaseUser_DatabaseID");
+
+            entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseUserID");
+            entity.Property(e => e.DatabaseId).HasColumnName("DatabaseID");
+            entity.Property(e => e.UserName).HasMaxLength(50).IsUnicode(false);
+            entity.Property(e => e.UserPassword).HasMaxLength(50).IsUnicode(false);
+
+            entity
+                .HasOne(d => d.Database)
+                .WithMany(p => p.DatabaseUsers)
+                .HasForeignKey(d => d.DatabaseId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DatabaseUser_DatabaseId");
+        });
+
         modelBuilder.Entity<DatabaseEntity>(entity =>
         {
             entity.ToTable("Database");
@@ -62,8 +85,6 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
             entity.Property(e => e.DatabaseServerId).HasColumnName("DatabaseServerID");
             entity.Property(e => e.DatabaseStatusId).HasColumnName("DatabaseStatusID");
             entity.Property(e => e.DatabaseTypeId).HasColumnName("DatabaseTypeID");
-            entity.Property(e => e.DatabaseUser).HasMaxLength(50).IsUnicode(false);
-            entity.Property(e => e.DatabaseUserPassword).HasMaxLength(50).IsUnicode(false);
 
             entity
                 .HasOne(d => d.DatabaseServer)
