@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DbLocator.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Db;
 
@@ -66,7 +67,7 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
             entity.HasKey(e => e.DatabaseUserRoleId).HasName("PK_DatabaseUserRoleId");
 
             entity.Property(e => e.DatabaseRoleId).HasColumnName("DatabaseRoleID");
-            entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseRoleID");
+            entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseUserID");
         });
 
         modelBuilder.Entity<DatabaseUserEntity>(entity =>
@@ -75,13 +76,10 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
 
             entity.HasKey(e => e.DatabaseUserId).HasName("PK_DatabaseUser");
 
-            entity
-                .HasIndex(e => e.DatabaseId, "IX_DatabaseUser_DatabaseID_Roles")
-                .IncludeProperties(e => e.Roles);
+            entity.HasIndex(e => e.DatabaseId, "IX_DatabaseUser_DatabaseID");
 
             entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseUserID");
             entity.Property(e => e.DatabaseId).HasColumnName("DatabaseID");
-            entity.Property(e => e.Roles).HasMaxLength(50).IsUnicode(false);
             entity.Property(e => e.UserName).HasMaxLength(50).IsUnicode(false);
             entity.Property(e => e.UserPassword).HasMaxLength(50).IsUnicode(false);
 
@@ -91,6 +89,8 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
                 .HasForeignKey(d => d.DatabaseId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DatabaseUser_DatabaseId");
+
+            entity.HasMany((e) => e.UserRoles).WithMany((p) => p.Users);
         });
 
         modelBuilder.Entity<DatabaseEntity>(entity =>
@@ -177,5 +177,19 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
             entity.Property(e => e.TenantName).IsRequired().HasMaxLength(50).IsUnicode(false);
             entity.Property(e => e.TenantStatusId).HasColumnName("TenantStatusID");
         });
+
+        // DATA SEED
+        foreach (var e in Enum.GetValues(typeof(DatabaseRole)).Cast<DatabaseRole>())
+        {
+            modelBuilder
+                .Entity<DatabaseRoleEntity>()
+                .HasData(
+                    new DatabaseRoleEntity
+                    {
+                        DatabaseRoleId = (int)e,
+                        DatabaseRoleName = e.ToString()
+                    }
+                );
+        }
     }
 }

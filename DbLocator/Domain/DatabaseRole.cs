@@ -11,45 +11,45 @@ public enum DatabaseRole
     /// <summary>
     /// The user has all database permissions
     /// </summary>
-    Owner,
+    Owner = 1,
 
     /// <summary>
     /// The user can perform any activity in the database, except for modifying the database itself
     /// </summary>
-    SecurityAdmin,
+    SecurityAdmin = 2,
 
     /// <summary>
     /// The user can modify access to the database for other users
     /// </summary>
-    AccessAdmin,
+    AccessAdmin = 3,
 
     /// <summary>
     /// The user can backup the database
     /// </summary>
-    BackupOperator,
+    BackupOperator = 4,
 
     /// <summary>
     /// The user can run any Data Definition Language (DDL) command in the database
     /// </summary>
-    DdlAdmin,
+    DdlAdmin = 5,
 
     /// <summary>
     /// The user can update, delete, and insert into any table in the database. Cannot select unless used with DataReader or similar role.
     /// </summary>
-    DataWriter,
+    DataWriter = 6,
 
     /// <summary>
     /// The user can select from any table in the database. Cannot update, delete, or insert unless used with DataWriter or similar role.
     /// </summary>
-    DataReader,
+    DataReader = 7,
 
     /// <summary>
     /// The user cannot update, delete, or insert into any table in the database.
     /// </summary>
-    DenyDataWriter,
+    DenyDataWriter = 8,
 
     /// <summary>
     /// The user cannot select from any table in the database.
     /// </summary>
-    DenyDataReader
+    DenyDataReader = 9
 }

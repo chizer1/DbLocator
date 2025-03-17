@@ -6,7 +6,6 @@ internal class DatabaseUserEntity
     internal int DatabaseId { get; set; }
     internal string UserName { get; set; }
     internal string UserPassword { get; set; }
-    internal string Roles { get; set; }
 
     internal virtual DatabaseEntity Database { get; set; }
 

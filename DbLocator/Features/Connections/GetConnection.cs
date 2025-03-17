@@ -182,8 +182,7 @@ internal class GetConnection(
     )
     {
         roleList ??= [DatabaseRole.DataReader, DatabaseRole.DataWriter];
-        var roles = string.Join('_', roleList.Select(r => ((int)r).ToString()));
-        var user = await CreateDatabaseUser(database, dbContext, encryption, roleList, roles);
+        var user = await CreateDatabaseUser(database, dbContext, encryption, roleList);
 
         return user;
     }
@@ -192,13 +191,18 @@ internal class GetConnection(
         DatabaseEntity database,
         DbLocatorContext dbContext,
         Encryption encryption,
-        DatabaseRole[] roleList,
-        string roles
+        DatabaseRole[] roleList
     )
     {
-        var user = await dbContext.DatabaseUsers.SingleOrDefaultAsync(u =>
-            u.DatabaseId == database.DatabaseId && u.Roles == roles
-        );
+        var roles = roleList.Select(r => (int)r);
+        var users = await dbContext
+            .Set<DatabaseUserEntity>()
+            .Include(u => u.UserRoles)
+            .Where(u => u.DatabaseId == database.DatabaseId)
+            .ToListAsync();
+
+        roles = roles.OrderBy(t => t);
+        var user = users.FirstOrDefault(u => u.UserRoles.OrderBy(t => t) == roles);
 
         if (user != null)
         {
@@ -206,12 +210,11 @@ internal class GetConnection(
         }
 
         var password = Guid.NewGuid().ToString();
-        var username = $"DbLocatorUser_{database.DatabaseName}_{roles}";
+        var username = $"DbLocatorUser_{database.DatabaseName}_{string.Join('_', roles)}";
         user = new DatabaseUserEntity
         {
             DatabaseId = database.DatabaseId,
             UserName = username,
-            Roles = roles,
             UserPassword = encryption.Encrypt(password)
         };
 
