@@ -99,7 +99,7 @@ public class Locator
 
         var encryption = new Encryption(encryptionKey);
         _connections = new Connections(dbContextFactory, encryption);
-        _databases = new Databases(dbContextFactory, encryption);
+        _databases = new Databases(dbContextFactory);
         _databaseServers = new DatabaseServers(dbContextFactory);
         _databaseTypes = new DatabaseTypes(dbContextFactory);
         _tenants = new Tenants(dbContextFactory, distributedCache);
