@@ -49,6 +49,26 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
                 .HasConstraintName("FK_Connection_Tenant");
         });
 
+        modelBuilder.Entity<DatabaseRoleEntity>(entity =>
+        {
+            entity.ToTable("DatabaseRole");
+
+            entity.HasKey(e => e.DatabaseRoleId).HasName("PK_DatabaseRole");
+
+            entity.Property(e => e.DatabaseRoleId).HasColumnName("DatabaseRoleID");
+            entity.Property(e => e.DatabaseRoleName).HasMaxLength(50).IsUnicode(false);
+        });
+
+        modelBuilder.Entity<DatabaseUserRoleEntity>(entity =>
+        {
+            entity.ToTable("DatabaseUserRole");
+
+            entity.HasKey(e => e.DatabaseUserRoleId).HasName("PK_DatabaseUserRoleId");
+
+            entity.Property(e => e.DatabaseRoleId).HasColumnName("DatabaseRoleID");
+            entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseRoleID");
+        });
+
         modelBuilder.Entity<DatabaseUserEntity>(entity =>
         {
             entity.ToTable("DatabaseUser");
