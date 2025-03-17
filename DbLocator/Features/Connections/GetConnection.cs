@@ -206,7 +206,7 @@ internal class GetConnection(
         }
 
         var password = Guid.NewGuid().ToString();
-        var username = $"User_{database.DatabaseId}_{database.DatabaseServerId}_{roles}";
+        var username = $"DbLocatorUser_{database.DatabaseName}_{roles}";
         user = new DatabaseUserEntity
         {
             DatabaseId = database.DatabaseId,
@@ -234,9 +234,21 @@ internal class GetConnection(
 
         try
         {
-            foreach (var commandText in commands)
+            var databaseServer = await dbContext
+                .Set<DatabaseServerEntity>()
+                .FirstOrDefaultAsync(ds => ds.DatabaseServerId == database.DatabaseServerId);
+
+            for (var i = 0; i < commands.Count; i++)
             {
+                var commandText = commands[i];
                 using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+
+                if (databaseServer.IsLinkedServer)
+                {
+                    commandText =
+                        $"exec('{commandText.Replace("'", "''")}') at {databaseServer.DatabaseServerHostName};";
+                }
+
                 cmd.CommandText = commandText;
                 await dbContext.Database.OpenConnectionAsync();
                 await cmd.ExecuteNonQueryAsync();
