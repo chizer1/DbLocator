@@ -8,11 +8,12 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
 {
     private readonly Locator _dbLocator = dbLocatorFixture.DbLocator;
 
+    private readonly string databaseServerName = TestHelpers.GetRandomString();
+
     [Fact]
     public async Task AddMultipleDatabaseServersAndSearchByKeyWord()
     {
-        var databaseServerName = "DBServer";
-        var databaseServerIpAddress = "192.168.1.1";
+        var databaseServerIpAddress = TestHelpers.GetRandomIpAddressString();
         await _dbLocator.AddDatabaseServer(
             databaseServerName,
             databaseServerIpAddress,
@@ -32,8 +33,7 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task AddAndDeleteDatabaseServer()
     {
-        var databaseServerName = "DBServer";
-        var databaseServerIpAddress = "192.168.1.1";
+        var databaseServerIpAddress = TestHelpers.GetRandomIpAddressString();
         var databaseServerId = await _dbLocator.AddDatabaseServer(
             databaseServerName,
             databaseServerIpAddress,

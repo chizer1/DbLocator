@@ -55,10 +55,13 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
 
             entity.HasKey(e => e.DatabaseUserId).HasName("PK_DatabaseUser");
 
-            entity.HasIndex(e => e.DatabaseId, "IX_DatabaseUser_DatabaseID");
+            entity
+                .HasIndex(e => e.DatabaseId, "IX_DatabaseUser_DatabaseID_Roles")
+                .IncludeProperties(e => e.Roles);
 
             entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseUserID");
             entity.Property(e => e.DatabaseId).HasColumnName("DatabaseID");
+            entity.Property(e => e.Roles).HasMaxLength(50).IsUnicode(false);
             entity.Property(e => e.UserName).HasMaxLength(50).IsUnicode(false);
             entity.Property(e => e.UserPassword).HasMaxLength(50).IsUnicode(false);
 

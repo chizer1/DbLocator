@@ -14,10 +14,8 @@ public class DatabaseTests
     public DatabaseTests(DbLocatorFixture dbLocatorFixture)
     {
         _dbLocator = dbLocatorFixture.DbLocator;
-        _databaseServerID = _dbLocator
-            .AddDatabaseServer("DatabaseServer", "127.168.1.1", null, null, false)
-            .Result;
-        _databaseTypeId = _dbLocator.AddDatabaseType("DatabaseType").Result;
+        _databaseServerID = dbLocatorFixture.LocalhostServerId;
+        _databaseTypeId = _dbLocator.AddDatabaseType(TestHelpers.GetRandomString()).Result;
     }
 
     private async Task<Database> AddDatabaseAsync(string databaseName)
@@ -36,11 +34,11 @@ public class DatabaseTests
     [Fact]
     public async Task AddMultipleDatabasesAndSearchByKeyWord()
     {
-        var database1 = await AddDatabaseAsync("Acme1");
-        var database2 = await AddDatabaseAsync("Acme2");
+        var dbNamePrefix = TestHelpers.GetRandomString();
+        var database1 = await AddDatabaseAsync($"{dbNamePrefix}1");
+        var database2 = await AddDatabaseAsync($"{dbNamePrefix}2");
 
         var databases = (await _dbLocator.GetDatabases()).ToList();
-        Assert.Equal(3, databases.Count);
         Assert.Contains(databases, db => db.Name == database1.Name);
         Assert.Contains(databases, db => db.Name == database2.Name);
     }

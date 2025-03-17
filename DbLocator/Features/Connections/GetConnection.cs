@@ -11,7 +11,8 @@ internal record GetConnectionQuery(
     int? TenantId,
     int? DatabaseTypeId,
     int? ConnectionId,
-    string TenantCode
+    string TenantCode,
+    DatabaseRole[] Roles = null
 );
 
 internal sealed class GetConnectionQueryValidator : AbstractValidator<GetConnectionQuery>
@@ -33,7 +34,12 @@ internal class GetConnection(
         var connectionEntity = await GetConnectionEntityAsync(dbContext, query);
         var database = await GetDatabaseEntityAsync(dbContext, connectionEntity.DatabaseId);
 
-        var connectionString = await BuildConnectionString(database, encrypytion, dbContext);
+        var connectionString = await BuildConnectionString(
+            database,
+            encrypytion,
+            dbContext,
+            query.Roles
+        );
 
         return new SqlConnection(connectionString);
     }
@@ -176,13 +182,8 @@ internal class GetConnection(
     )
     {
         roleList ??= [DatabaseRole.DataReader, DatabaseRole.DataWriter];
-        var roles = string.Join(",", roleList.Select(r => r.ToString()));
-
-        var user = database.DatabaseUsers.FirstOrDefault(u => u.Roles == roles.ToString());
-        if (user == null)
-        {
-            user = await CreateDatabaseUser(database, dbContext, encryption, roleList, roles);
-        }
+        var roles = string.Join('_', roleList.Select(r => ((int)r).ToString()));
+        var user = await CreateDatabaseUser(database, dbContext, encryption, roleList, roles);
 
         return user;
     }
@@ -195,19 +196,32 @@ internal class GetConnection(
         string roles
     )
     {
+        var user = await dbContext.DatabaseUsers.SingleOrDefaultAsync(u =>
+            u.DatabaseId == database.DatabaseId && u.Roles == roles
+        );
+
+        if (user != null)
+        {
+            return user;
+        }
+
         var password = Guid.NewGuid().ToString();
-        var user = new DatabaseUserEntity
+        var username = $"User_{database.DatabaseId}_{database.DatabaseServerId}_{roles}";
+        user = new DatabaseUserEntity
         {
             DatabaseId = database.DatabaseId,
-            UserName = Guid.NewGuid().ToString(),
+            UserName = username,
             Roles = roles,
             UserPassword = encryption.Encrypt(password)
         };
 
+        await dbContext.Set<DatabaseUserEntity>().AddAsync(user);
+        await dbContext.SaveChangesAsync();
+
         var commands = new List<string>
         {
-            $"create login {user.UserName} with password = '{password}'",
-            $"use {database.DatabaseName}; create user {user.UserName} for login {user.UserName}"
+            $"create login {username} with password = '{password}'",
+            $"use {database.DatabaseName}; create user {username} for login {user.UserName}"
         };
 
         foreach (var role in roleList)
@@ -218,16 +232,27 @@ internal class GetConnection(
             );
         }
 
-        foreach (var commandText in commands)
+        try
+        {
+            foreach (var commandText in commands)
+            {
+                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+                cmd.CommandText = commandText;
+                await dbContext.Database.OpenConnectionAsync();
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+        catch (SqlException)
         {
             using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-            cmd.CommandText = commandText;
+            cmd.CommandText = "use [DbLocator]";
             await dbContext.Database.OpenConnectionAsync();
             await cmd.ExecuteNonQueryAsync();
-        }
 
-        await dbContext.Set<DatabaseUserEntity>().AddAsync(user);
-        await dbContext.SaveChangesAsync();
+            dbContext.Set<DatabaseUserEntity>().Remove(user);
+            await dbContext.SaveChangesAsync();
+            throw;
+        }
 
         return user;
     }

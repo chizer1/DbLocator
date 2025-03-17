@@ -178,10 +178,11 @@ public class Locator
     /// Get SQL connection
     /// </summary>
     /// <param name="connectionId"></param>
+    /// <param name="roles"></param>
     /// <returns>SqlConnection</returns>
-    public async Task<SqlConnection> GetConnection(int connectionId)
+    public async Task<SqlConnection> GetConnection(int connectionId, DatabaseRole[] roles = null)
     {
-        return await _connections.GetConnection(connectionId);
+        return await _connections.GetConnection(connectionId, roles);
     }
 
     /// <summary>
@@ -189,11 +190,16 @@ public class Locator
     /// </summary>
     /// <param name="tenantId"></param>
     /// <param name="databaseTypeId"></param>
+    /// <param name="roles"></param>
     /// <returns>SqlConnection</returns>
     /// <returns></returns>
-    public async Task<SqlConnection> GetConnection(int tenantId, int databaseTypeId)
+    public async Task<SqlConnection> GetConnection(
+        int tenantId,
+        int databaseTypeId,
+        DatabaseRole[] roles = null
+    )
     {
-        return await _connections.GetConnection(tenantId, databaseTypeId);
+        return await _connections.GetConnection(tenantId, databaseTypeId, roles);
     }
 
     /// <summary>
@@ -201,10 +207,15 @@ public class Locator
     /// </summary>
     /// <param name="tenantCode"></param>
     /// <param name="databaseTypeId"></param>
+    /// <param name="roles"></param>
     /// <returns>SqlConnection</returns>
-    public async Task<SqlConnection> GetConnection(string tenantCode, int databaseTypeId)
+    public async Task<SqlConnection> GetConnection(
+        string tenantCode,
+        int databaseTypeId,
+        DatabaseRole[] roles = null
+    )
     {
-        return await _connections.GetConnection(tenantCode, databaseTypeId);
+        return await _connections.GetConnection(tenantCode, databaseTypeId, roles);
     }
 
     /// <summary>
