@@ -58,16 +58,25 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
 
             entity.Property(e => e.DatabaseRoleId).HasColumnName("DatabaseRoleID");
             entity.Property(e => e.DatabaseRoleName).HasMaxLength(50).IsUnicode(false);
-        });
 
-        modelBuilder.Entity<DatabaseUserRoleEntity>(entity =>
-        {
-            entity.ToTable("DatabaseUserRole");
-
-            entity.HasKey(e => e.DatabaseUserRoleId).HasName("PK_DatabaseUserRoleId");
-
-            entity.Property(e => e.DatabaseRoleId).HasColumnName("DatabaseRoleID");
-            entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseUserID");
+            entity
+                .HasMany((e) => e.Users)
+                .WithMany((p) => p.UserRoles)
+                //.UsingEntity<DatabaseUserRoleEntity>();
+                .UsingEntity(
+                    "DatabaseUserRole",
+                    l =>
+                        l.HasOne(typeof(DatabaseUserEntity))
+                            .WithMany()
+                            .HasForeignKey("DatabaseUserID")
+                            .HasPrincipalKey(nameof(DatabaseUserEntity.DatabaseUserId)),
+                    r =>
+                        r.HasOne(typeof(DatabaseRoleEntity))
+                            .WithMany()
+                            .HasForeignKey("DatabaseRoleID")
+                            .HasPrincipalKey(nameof(DatabaseRoleEntity.DatabaseRoleId)),
+                    j => j.HasKey("DatabaseUserID", "DatabaseRoleID")
+                );
         });
 
         modelBuilder.Entity<DatabaseUserEntity>(entity =>
@@ -90,7 +99,31 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DatabaseUser_DatabaseId");
 
-            entity.HasMany((e) => e.UserRoles).WithMany((p) => p.Users);
+            entity
+                .HasMany((e) => e.UserRoles)
+                .WithMany((p) => p.Users)
+                //.UsingEntity<DatabaseUserRoleEntity>();
+                .UsingEntity(
+                    "DatabaseUserRole",
+                    l =>
+                        l.HasOne(typeof(DatabaseUserEntity))
+                            .WithMany()
+                            .HasForeignKey("DatabaseUserID")
+                            .HasPrincipalKey(nameof(DatabaseUserEntity.DatabaseUserId)),
+                    r =>
+                        r.HasOne(typeof(DatabaseRoleEntity))
+                            .WithMany()
+                            .HasForeignKey("DatabaseRoleID")
+                            .HasPrincipalKey(nameof(DatabaseRoleEntity.DatabaseRoleId)),
+                    j => j.HasKey("DatabaseUserID", "DatabaseRoleID")
+                );
+            // .(m =>
+            // {
+            //     m.MapLeftKey("DatabaseUserID");
+            //     m.MapRightKey("DatabaseRoleID");
+            //     m.ToTable("DatabaseUserRole");
+            // });
+            ;
         });
 
         modelBuilder.Entity<DatabaseEntity>(entity =>

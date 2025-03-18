@@ -9,5 +9,5 @@ internal class DatabaseUserEntity
 
     internal virtual DatabaseEntity Database { get; set; }
 
-    internal virtual ICollection<DatabaseUserRoleEntity> UserRoles { get; set; } = [];
+    internal virtual ICollection<DatabaseRoleEntity> UserRoles { get; set; } = [];
 }

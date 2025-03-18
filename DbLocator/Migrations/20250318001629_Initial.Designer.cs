@@ -11,18 +11,33 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DbLocator.Migrations
 {
     [DbContext(typeof(DbLocatorContext))]
-    [Migration("20250131040429_InitialDB")]
-    partial class InitialDB
+    [Migration("20250318001629_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("DatabaseUserRole", b =>
+                {
+                    b.Property<int>("DatabaseUserID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DatabaseRoleID")
+                        .HasColumnType("int");
+
+                    b.HasKey("DatabaseUserID", "DatabaseRoleID");
+
+                    b.HasIndex("DatabaseRoleID");
+
+                    b.ToTable("DatabaseUserRole");
+                });
 
             modelBuilder.Entity("DbLocator.Db.ConnectionEntity", b =>
                 {
@@ -78,15 +93,9 @@ namespace DbLocator.Migrations
                         .HasColumnType("tinyint")
                         .HasColumnName("DatabaseTypeID");
 
-                    b.Property<string>("DatabaseUser")
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<string>("DatabaseUserPassword")
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
+                    b.Property<bool>("UseTrustedConnection")
+                        .HasColumnType("bit")
+                        .HasColumnName("UseTrustedConnection");
 
                     b.HasKey("DatabaseId")
                         .HasName("PK_Database");
@@ -98,6 +107,73 @@ namespace DbLocator.Migrations
                     b.ToTable("Database", (string)null);
                 });
 
+            modelBuilder.Entity("DbLocator.Db.DatabaseRoleEntity", b =>
+                {
+                    b.Property<int>("DatabaseRoleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("DatabaseRoleID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DatabaseRoleId"));
+
+                    b.Property<string>("DatabaseRoleName")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("DatabaseRoleId")
+                        .HasName("PK_DatabaseRole");
+
+                    b.ToTable("DatabaseRole", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            DatabaseRoleId = 1,
+                            DatabaseRoleName = "Owner"
+                        },
+                        new
+                        {
+                            DatabaseRoleId = 2,
+                            DatabaseRoleName = "SecurityAdmin"
+                        },
+                        new
+                        {
+                            DatabaseRoleId = 3,
+                            DatabaseRoleName = "AccessAdmin"
+                        },
+                        new
+                        {
+                            DatabaseRoleId = 4,
+                            DatabaseRoleName = "BackupOperator"
+                        },
+                        new
+                        {
+                            DatabaseRoleId = 5,
+                            DatabaseRoleName = "DdlAdmin"
+                        },
+                        new
+                        {
+                            DatabaseRoleId = 6,
+                            DatabaseRoleName = "DataWriter"
+                        },
+                        new
+                        {
+                            DatabaseRoleId = 7,
+                            DatabaseRoleName = "DataReader"
+                        },
+                        new
+                        {
+                            DatabaseRoleId = 8,
+                            DatabaseRoleName = "DenyDataWriter"
+                        },
+                        new
+                        {
+                            DatabaseRoleId = 9,
+                            DatabaseRoleName = "DenyDataReader"
+                        });
+                });
+
             modelBuilder.Entity("DbLocator.Db.DatabaseServerEntity", b =>
                 {
                     b.Property<int>("DatabaseServerId")
@@ -106,19 +182,6 @@ namespace DbLocator.Migrations
                         .HasColumnName("DatabaseServerID");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DatabaseServerId"));
-
-                    b.Property<string>("DatabaseServerIpaddress")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("DatabaseServerIPAddress");
-
-                    b.Property<string>("DatabaseServerName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("DatabaseServerFullyQualifiedDomainName")
                         .HasMaxLength(50)
@@ -130,7 +193,20 @@ namespace DbLocator.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
-                    b.Property<bool>("IsLinkedServer").HasColumnType("bit").IsRequired();
+                    b.Property<string>("DatabaseServerIpaddress")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("DatabaseServerIPAddress");
+
+                    b.Property<string>("DatabaseServerName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("IsLinkedServer")
+                        .HasColumnType("bit");
 
                     b.HasKey("DatabaseServerId")
                         .HasName("PK_DatabaseServer");
@@ -157,6 +233,37 @@ namespace DbLocator.Migrations
                         .HasName("PK_DatabaseType");
 
                     b.ToTable("DatabaseType", (string)null);
+                });
+
+            modelBuilder.Entity("DbLocator.Db.DatabaseUserEntity", b =>
+                {
+                    b.Property<int>("DatabaseUserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("DatabaseUserID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DatabaseUserId"));
+
+                    b.Property<int>("DatabaseId")
+                        .HasColumnType("int")
+                        .HasColumnName("DatabaseID");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("UserPassword")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("DatabaseUserId")
+                        .HasName("PK_DatabaseUser");
+
+                    b.HasIndex(new[] { "DatabaseId" }, "IX_DatabaseUser_DatabaseID");
+
+                    b.ToTable("DatabaseUser", (string)null);
                 });
 
             modelBuilder.Entity("DbLocator.Db.TenantEntity", b =>
@@ -187,6 +294,21 @@ namespace DbLocator.Migrations
                         .HasName("PK_Tenant");
 
                     b.ToTable("Tenant", (string)null);
+                });
+
+            modelBuilder.Entity("DatabaseUserRole", b =>
+                {
+                    b.HasOne("DbLocator.Db.DatabaseRoleEntity", null)
+                        .WithMany()
+                        .HasForeignKey("DatabaseRoleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DbLocator.Db.DatabaseUserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("DatabaseUserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DbLocator.Db.ConnectionEntity", b =>
@@ -227,9 +349,22 @@ namespace DbLocator.Migrations
                     b.Navigation("DatabaseType");
                 });
 
+            modelBuilder.Entity("DbLocator.Db.DatabaseUserEntity", b =>
+                {
+                    b.HasOne("DbLocator.Db.DatabaseEntity", "Database")
+                        .WithMany("DatabaseUsers")
+                        .HasForeignKey("DatabaseId")
+                        .IsRequired()
+                        .HasConstraintName("FK_DatabaseUser_DatabaseId");
+
+                    b.Navigation("Database");
+                });
+
             modelBuilder.Entity("DbLocator.Db.DatabaseEntity", b =>
                 {
                     b.Navigation("Connections");
+
+                    b.Navigation("DatabaseUsers");
                 });
 
             modelBuilder.Entity("DbLocator.Db.DatabaseServerEntity", b =>

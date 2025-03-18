@@ -202,7 +202,9 @@ internal class GetConnection(
             .ToListAsync();
 
         roles = roles.OrderBy(t => t);
-        var user = users.FirstOrDefault(u => u.UserRoles.OrderBy(t => t) == roles);
+        var user = users.FirstOrDefault(u =>
+            u.UserRoles.Select(r => r.DatabaseRoleId).OrderBy(t => t).SequenceEqual(roles)
+        );
 
         if (user != null)
         {
@@ -211,11 +213,17 @@ internal class GetConnection(
 
         var password = Guid.NewGuid().ToString();
         var username = $"DbLocatorUser_{database.DatabaseName}_{string.Join('_', roles)}";
+        var userRoles = await dbContext
+            .Set<DatabaseRoleEntity>()
+            .Where(r => roles.Contains(r.DatabaseRoleId))
+            .ToListAsync();
+
         user = new DatabaseUserEntity
         {
             DatabaseId = database.DatabaseId,
             UserName = username,
-            UserPassword = encryption.Encrypt(password)
+            UserPassword = encryption.Encrypt(password),
+            UserRoles = userRoles
         };
 
         await dbContext.Set<DatabaseUserEntity>().AddAsync(user);
