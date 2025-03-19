@@ -18,6 +18,7 @@ public class Locator
 {
     private readonly Connections _connections;
     private readonly Databases _databases;
+    private readonly DatabaseUsers _databaseUsers;
     private readonly DatabaseServers _databaseServers;
     private readonly DatabaseTypes _databaseTypes;
     private readonly Tenants _tenants;
@@ -59,6 +60,7 @@ public class Locator
         var encryption = new Encryption(encryptionKey);
         _connections = new Connections(dbContextFactory, encryption);
         _databases = new Databases(dbContextFactory);
+        _databaseUsers = new DatabaseUsers(dbContextFactory, encryption);
         _databaseServers = new DatabaseServers(dbContextFactory);
         _databaseTypes = new DatabaseTypes(dbContextFactory);
         _tenants = new Tenants(dbContextFactory);
@@ -250,6 +252,295 @@ public class Locator
     }
 
     #endregion
+
+    #region DatabaseUsers
+
+    /// <summary>
+    /// Add database user
+    /// </summary>
+    /// <param name="DatabaseId"></param>
+    /// <param name="UserName"></param>
+    /// <param name="UserPassword"></param>
+    /// <param name="UserRoles"></param>
+    /// <param name="CreateUser"></param>
+    /// <returns>DatabaseUserId</returns>
+
+    public async Task<int> AddDatabaseUser(
+        int DatabaseId,
+        string UserName,
+        string UserPassword,
+        IEnumerable<DatabaseRole> UserRoles,
+        bool CreateUser
+    )
+    {
+        return await _databaseUsers.AddDatabaseUser(
+            DatabaseId,
+            UserName,
+            UserPassword,
+            UserRoles,
+            CreateUser
+        );
+    }
+
+    /// <summary>
+    /// Add database user
+    /// </summary>
+    /// <param name="DatabaseId"></param>
+    /// <param name="UserName"></param>
+    /// <param name="UserPasswordFactory"></param>
+    /// <param name="UserRoles"></param>
+    /// <param name="CreateUser"></param>
+    /// <returns>DatabaseUserId</returns>
+
+    public async Task<int> AddDatabaseUser(
+        int DatabaseId,
+        string UserName,
+        Func<string> UserPasswordFactory,
+        IEnumerable<DatabaseRole> UserRoles,
+        bool CreateUser
+    )
+    {
+        return await _databaseUsers.AddDatabaseUser(
+            DatabaseId,
+            UserName,
+            UserPasswordFactory,
+            UserRoles,
+            CreateUser
+        );
+    }
+
+    /// <summary>
+    /// Add database user
+    /// </summary>
+    /// <param name="DatabaseId"></param>
+    /// <param name="UserName"></param>
+    /// <param name="UserRoles"></param>
+    /// <param name="CreateUser"></param>
+    /// <returns>DatabaseUserId</returns>
+
+    public async Task<int> AddDatabaseUser(
+        int DatabaseId,
+        string UserName,
+        IEnumerable<DatabaseRole> UserRoles,
+        bool CreateUser
+    )
+    {
+        return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName, UserRoles, CreateUser);
+    }
+
+    /// <summary>
+    /// Add database user
+    /// </summary>
+    /// <param name="DatabaseId"></param>
+    /// <param name="UserName"></param>
+    /// <param name="UserPassword"></param>
+    /// <param name="UserRoles"></param>
+    /// <returns>DatabaseUserId</returns>
+
+    public async Task<int> AddDatabaseUser(
+        int DatabaseId,
+        string UserName,
+        string UserPassword,
+        IEnumerable<DatabaseRole> UserRoles
+    )
+    {
+        return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName, UserPassword, UserRoles);
+    }
+
+    /// <summary>
+    /// Add database user
+    /// </summary>
+    /// <param name="DatabaseId"></param>
+    /// <param name="UserName"></param>
+    /// <param name="UserPasswordFactory"></param>
+    /// <param name="UserRoles"></param>
+    /// <returns>DatabaseUserId</returns>
+
+    public async Task<int> AddDatabaseUser(
+        int DatabaseId,
+        string UserName,
+        Func<string> UserPasswordFactory,
+        IEnumerable<DatabaseRole> UserRoles
+    )
+    {
+        return await _databaseUsers.AddDatabaseUser(
+            DatabaseId,
+            UserName,
+            UserPasswordFactory,
+            UserRoles
+        );
+    }
+
+    /// <summary>
+    /// Add database user
+    /// </summary>
+    /// <param name="DatabaseId"></param>
+    /// <param name="UserName"></param>
+    /// <param name="UserRoles"></param>
+    /// <returns>DatabaseUserId</returns>
+
+    public async Task<int> AddDatabaseUser(
+        int DatabaseId,
+        string UserName,
+        IEnumerable<DatabaseRole> UserRoles
+    )
+    {
+        return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName, UserRoles);
+    }
+
+    /// <summary>
+    /// Get database users
+    /// </summary>
+    /// <returns>List of database users</returns>
+    public async Task<List<DatabaseUser>> GetDatabaseUsers()
+    {
+        return await _databaseUsers.GetDatabaseUsers();
+    }
+
+    /// <summary>
+    /// Update database user
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="DatabaseUserName"></param>
+    /// <param name="DatabaseUserPassword"></param>
+    /// <param name="UserRoles"></param>
+    /// <param name="UpdateDatabase"></param>
+    /// <returns></returns>
+
+    public async Task UpdateDatabaseUser(
+        int DatabaseUserId,
+        string DatabaseUserName,
+        string DatabaseUserPassword,
+        IEnumerable<DatabaseRole> UserRoles,
+        bool UpdateDatabase
+    )
+    {
+        await _databaseUsers.UpdateDatabaseUser(
+            DatabaseUserId,
+            DatabaseUserName,
+            DatabaseUserPassword,
+            UserRoles,
+            UpdateDatabase
+        );
+    }
+
+    /// <summary>
+    /// Update database user
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="DatabaseUserName"></param>
+    /// <param name="DatabaseUserPasswordFactory"></param>
+    /// <param name="UserRoles"></param>
+    /// <param name="UpdateDatabase"></param>
+    /// <returns></returns>
+
+    public async Task UpdateDatabaseUser(
+        int DatabaseUserId,
+        string DatabaseUserName,
+        Func<string> DatabaseUserPasswordFactory,
+        IEnumerable<DatabaseRole> UserRoles,
+        bool UpdateDatabase
+    )
+    {
+        await _databaseUsers.UpdateDatabaseUser(
+            DatabaseUserId,
+            DatabaseUserName,
+            DatabaseUserPasswordFactory,
+            UserRoles,
+            UpdateDatabase
+        );
+    }
+
+    /// <summary>
+    /// Update database user
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="DatabaseUserName"></param>
+    /// <param name="UserRoles"></param>
+    /// <param name="UpdateDatabase"></param>
+    /// <returns></returns>
+
+    public async Task UpdateDatabaseUser(
+        int DatabaseUserId,
+        string DatabaseUserName,
+        IEnumerable<DatabaseRole> UserRoles,
+        bool UpdateDatabase
+    )
+    {
+        await _databaseUsers.UpdateDatabaseUser(
+            DatabaseUserId,
+            DatabaseUserName,
+            UserRoles,
+            UpdateDatabase
+        );
+    }
+
+    /// <summary>
+    /// Update database user
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="DatabaseUserName"></param>
+    /// <param name="DatabaseUserPassword"></param>
+    /// <param name="UserRoles"></param>
+    /// <returns></returns>
+
+    public async Task UpdateDatabaseUser(
+        int DatabaseUserId,
+        string DatabaseUserName,
+        string DatabaseUserPassword,
+        IEnumerable<DatabaseRole> UserRoles
+    )
+    {
+        await _databaseUsers.UpdateDatabaseUser(
+            DatabaseUserId,
+            DatabaseUserName,
+            DatabaseUserPassword,
+            UserRoles
+        );
+    }
+
+    /// <summary>
+    /// Update database user
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="DatabaseUserName"></param>
+    /// <param name="DatabaseUserPasswordFactory"></param>
+    /// <param name="UserRoles"></param>
+    /// <returns></returns>
+
+    public async Task UpdateDatabaseUser(
+        int DatabaseUserId,
+        string DatabaseUserName,
+        Func<string> DatabaseUserPasswordFactory,
+        IEnumerable<DatabaseRole> UserRoles
+    )
+    {
+        await _databaseUsers.UpdateDatabaseUser(
+            DatabaseUserId,
+            DatabaseUserName,
+            DatabaseUserPasswordFactory,
+            UserRoles
+        );
+    }
+
+    /// <summary>
+    /// Update database user
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="DatabaseUserName"></param>
+    /// <param name="UserRoles"></param>
+    /// <returns></returns>
+
+    public async Task UpdateDatabaseUser(
+        int DatabaseUserId,
+        string DatabaseUserName,
+        IEnumerable<DatabaseRole> UserRoles
+    )
+    {
+        await _databaseUsers.UpdateDatabaseUser(DatabaseUserId, DatabaseUserName, UserRoles);
+    }
+
+    # endregion
 
     #region Databases
 

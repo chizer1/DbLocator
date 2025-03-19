@@ -232,14 +232,14 @@ internal class GetConnection(
         var commands = new List<string>
         {
             $"create login {username} with password = '{password}'",
-            $"use {database.DatabaseName}; create user {username} for login {user.UserName}"
+            $"use {database.DatabaseName}; create user {username} for login {username}"
         };
 
         foreach (var role in roleList)
         {
             var roleName = Enum.GetName(role).ToLower();
             commands.Add(
-                $"use {database.DatabaseName}; exec sp_addrolemember 'db_{roleName}', '{user.UserName}'"
+                $"use {database.DatabaseName}; exec sp_addrolemember 'db_{roleName}', '{username}'"
             );
         }
 

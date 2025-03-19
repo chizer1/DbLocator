@@ -13,7 +13,6 @@ namespace DbLocator.Domain;
 public class Database(
     int id,
     string name,
-    //string user,
     DatabaseType type,
     DatabaseServer server,
     Status status,

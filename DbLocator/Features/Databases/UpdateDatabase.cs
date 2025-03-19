@@ -51,10 +51,7 @@ internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateD
     }
 }
 
-internal class UpdateDatabase(
-    IDbContextFactory<DbLocatorContext> dbContextFactory //,
-//Encryption encryption
-)
+internal class UpdateDatabase(IDbContextFactory<DbLocatorContext> dbContextFactory)
 {
     internal async Task Handle(UpdateDatabaseCommand command)
     {
