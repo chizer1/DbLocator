@@ -2,6 +2,7 @@ using DbLocator.Db;
 using DbLocator.Domain;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace DbLocator.Features.Tenants;
 
@@ -12,7 +13,7 @@ internal sealed class GetTenantsQueryValidator : AbstractValidator<GetTenantsQue
     internal GetTenantsQueryValidator() { }
 }
 
-internal class GetTenants(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class GetTenants(IDbContextFactory<DbLocatorContext> dbContextFactory, FusionCache cache)
 {
     internal async Task<List<Tenant>> Handle(GetTenantsQuery query)
     {
@@ -20,16 +21,24 @@ internal class GetTenants(IDbContextFactory<DbLocatorContext> dbContextFactory)
 
         await using var dbContext = dbContextFactory.CreateDbContext();
 
-        var tenants = await dbContext.Set<TenantEntity>().ToListAsync();
+        var tenantEntities =
+            cache != null
+                ? await cache.GetOrSetAsync(
+                    "tenants",
+                    async _ => await dbContext.Set<TenantEntity>().ToListAsync(),
+                    TimeSpan.FromHours(8)
+                )
+                : await dbContext.Set<TenantEntity>().ToListAsync();
 
-        return
-        [
-            .. tenants.Select(entity => new Tenant(
+        var tenants = tenantEntities
+            .Select(entity => new Tenant(
                 entity.TenantId,
                 entity.TenantName,
                 entity.TenantCode,
                 (Status)entity.TenantStatusId
             ))
-        ];
+            .ToList();
+
+        return tenants;
     }
 }

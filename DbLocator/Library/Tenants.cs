@@ -2,14 +2,15 @@ using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.Tenants;
 using Microsoft.EntityFrameworkCore;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace DbLocator.Library;
 
-internal class Tenants(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class Tenants(IDbContextFactory<DbLocatorContext> dbContextFactory, FusionCache cache)
 {
     private readonly AddTenant _addTenant = new(dbContextFactory);
-    private readonly DeleteTenant _deleteTenant = new(dbContextFactory);
-    private readonly GetTenants _getTenants = new(dbContextFactory);
+    private readonly DeleteTenant _deleteTenant = new(dbContextFactory, cache);
+    private readonly GetTenants _getTenants = new(dbContextFactory, cache);
     private readonly UpdateTenant _updateTenant = new(dbContextFactory);
 
     internal async Task<int> AddTenant(string tenantName)
