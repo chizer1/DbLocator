@@ -5,6 +5,7 @@ using DbLocator.Library;
 using DbLocator.Utilities;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 [assembly: InternalsVisibleTo("DbLocatorTests")]
 
@@ -63,7 +64,45 @@ public class Locator
         _databaseUsers = new DatabaseUsers(dbContextFactory, encryption);
         _databaseServers = new DatabaseServers(dbContextFactory);
         _databaseTypes = new DatabaseTypes(dbContextFactory);
-        _tenants = new Tenants(dbContextFactory);
+        _tenants = new Tenants(dbContextFactory, null);
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Locator"/> class with the specified connection string, encryption key, and distributed cache.
+    /// This constructor sets up the database context, applies migrations, and initializes the various services.
+    /// </summary>
+    /// <param name="dbLocatorConnectionString">The connection string for the DbLocator database.</param>
+    /// <param name="encryptionKey">The encryption key for encrypting and decrypting sensitive data.</param>
+    /// <param name="distributedCache">The distributed cache for caching data.</param>
+    /// <exception cref="ArgumentException">Thrown when the connection string is null or whitespace.</exception>
+    public Locator(
+        string dbLocatorConnectionString,
+        string encryptionKey,
+        IDistributedCache distributedCache
+    )
+    {
+        if (string.IsNullOrWhiteSpace(dbLocatorConnectionString))
+            throw new ArgumentException("DbLocator connection string is required.");
+
+        using (
+            var dbLocator = new DbLocatorContext(
+                new DbContextOptionsBuilder<DbLocatorContext>()
+                    .UseSqlServer(dbLocatorConnectionString)
+                    .Options
+            )
+        )
+        {
+            dbLocator.Database.Migrate();
+        }
+
+        var dbContextFactory = DbContextFactory.CreateDbContextFactory(dbLocatorConnectionString);
+
+        var encryption = new Encryption(encryptionKey);
+        _connections = new Connections(dbContextFactory, encryption);
+        _databases = new Databases(dbContextFactory, encryption);
+        _databaseServers = new DatabaseServers(dbContextFactory);
+        _databaseTypes = new DatabaseTypes(dbContextFactory);
+        _tenants = new Tenants(dbContextFactory, distributedCache);
     }
 
     #region Tenants
