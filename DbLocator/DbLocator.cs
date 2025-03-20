@@ -300,7 +300,6 @@ public class Locator
     /// <param name="DatabaseId"></param>
     /// <param name="UserName"></param>
     /// <param name="UserPassword"></param>
-    /// <param name="UserRoles"></param>
     /// <param name="CreateUser"></param>
     /// <returns>DatabaseUserId</returns>
 
@@ -308,17 +307,10 @@ public class Locator
         int DatabaseId,
         string UserName,
         string UserPassword,
-        IEnumerable<DatabaseRole> UserRoles,
         bool CreateUser
     )
     {
-        return await _databaseUsers.AddDatabaseUser(
-            DatabaseId,
-            UserName,
-            UserPassword,
-            UserRoles,
-            CreateUser
-        );
+        return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName, UserPassword, CreateUser);
     }
 
     /// <summary>
@@ -326,45 +318,12 @@ public class Locator
     /// </summary>
     /// <param name="DatabaseId"></param>
     /// <param name="UserName"></param>
-    /// <param name="UserPasswordFactory"></param>
-    /// <param name="UserRoles"></param>
     /// <param name="CreateUser"></param>
     /// <returns>DatabaseUserId</returns>
 
-    public async Task<int> AddDatabaseUser(
-        int DatabaseId,
-        string UserName,
-        Func<string> UserPasswordFactory,
-        IEnumerable<DatabaseRole> UserRoles,
-        bool CreateUser
-    )
+    public async Task<int> AddDatabaseUser(int DatabaseId, string UserName, bool CreateUser)
     {
-        return await _databaseUsers.AddDatabaseUser(
-            DatabaseId,
-            UserName,
-            UserPasswordFactory,
-            UserRoles,
-            CreateUser
-        );
-    }
-
-    /// <summary>
-    /// Add database user
-    /// </summary>
-    /// <param name="DatabaseId"></param>
-    /// <param name="UserName"></param>
-    /// <param name="UserRoles"></param>
-    /// <param name="CreateUser"></param>
-    /// <returns>DatabaseUserId</returns>
-
-    public async Task<int> AddDatabaseUser(
-        int DatabaseId,
-        string UserName,
-        IEnumerable<DatabaseRole> UserRoles,
-        bool CreateUser
-    )
-    {
-        return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName, UserRoles, CreateUser);
+        return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName, CreateUser);
     }
 
     /// <summary>
@@ -373,17 +332,11 @@ public class Locator
     /// <param name="DatabaseId"></param>
     /// <param name="UserName"></param>
     /// <param name="UserPassword"></param>
-    /// <param name="UserRoles"></param>
     /// <returns>DatabaseUserId</returns>
 
-    public async Task<int> AddDatabaseUser(
-        int DatabaseId,
-        string UserName,
-        string UserPassword,
-        IEnumerable<DatabaseRole> UserRoles
-    )
+    public async Task<int> AddDatabaseUser(int DatabaseId, string UserName, string UserPassword)
     {
-        return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName, UserPassword, UserRoles);
+        return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName, UserPassword);
     }
 
     /// <summary>
@@ -391,40 +344,11 @@ public class Locator
     /// </summary>
     /// <param name="DatabaseId"></param>
     /// <param name="UserName"></param>
-    /// <param name="UserPasswordFactory"></param>
-    /// <param name="UserRoles"></param>
     /// <returns>DatabaseUserId</returns>
 
-    public async Task<int> AddDatabaseUser(
-        int DatabaseId,
-        string UserName,
-        Func<string> UserPasswordFactory,
-        IEnumerable<DatabaseRole> UserRoles
-    )
+    public async Task<int> AddDatabaseUser(int DatabaseId, string UserName)
     {
-        return await _databaseUsers.AddDatabaseUser(
-            DatabaseId,
-            UserName,
-            UserPasswordFactory,
-            UserRoles
-        );
-    }
-
-    /// <summary>
-    /// Add database user
-    /// </summary>
-    /// <param name="DatabaseId"></param>
-    /// <param name="UserName"></param>
-    /// <param name="UserRoles"></param>
-    /// <returns>DatabaseUserId</returns>
-
-    public async Task<int> AddDatabaseUser(
-        int DatabaseId,
-        string UserName,
-        IEnumerable<DatabaseRole> UserRoles
-    )
-    {
-        return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName, UserRoles);
+        return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName);
     }
 
     /// <summary>
@@ -442,7 +366,6 @@ public class Locator
     /// <param name="DatabaseUserId"></param>
     /// <param name="DatabaseUserName"></param>
     /// <param name="DatabaseUserPassword"></param>
-    /// <param name="UserRoles"></param>
     /// <param name="UpdateDatabase"></param>
     /// <returns></returns>
 
@@ -450,7 +373,6 @@ public class Locator
         int DatabaseUserId,
         string DatabaseUserName,
         string DatabaseUserPassword,
-        IEnumerable<DatabaseRole> UserRoles,
         bool UpdateDatabase
     )
     {
@@ -458,7 +380,6 @@ public class Locator
             DatabaseUserId,
             DatabaseUserName,
             DatabaseUserPassword,
-            UserRoles,
             UpdateDatabase
         );
     }
@@ -468,50 +389,16 @@ public class Locator
     /// </summary>
     /// <param name="DatabaseUserId"></param>
     /// <param name="DatabaseUserName"></param>
-    /// <param name="DatabaseUserPasswordFactory"></param>
-    /// <param name="UserRoles"></param>
     /// <param name="UpdateDatabase"></param>
     /// <returns></returns>
 
     public async Task UpdateDatabaseUser(
         int DatabaseUserId,
         string DatabaseUserName,
-        Func<string> DatabaseUserPasswordFactory,
-        IEnumerable<DatabaseRole> UserRoles,
         bool UpdateDatabase
     )
     {
-        await _databaseUsers.UpdateDatabaseUser(
-            DatabaseUserId,
-            DatabaseUserName,
-            DatabaseUserPasswordFactory,
-            UserRoles,
-            UpdateDatabase
-        );
-    }
-
-    /// <summary>
-    /// Update database user
-    /// </summary>
-    /// <param name="DatabaseUserId"></param>
-    /// <param name="DatabaseUserName"></param>
-    /// <param name="UserRoles"></param>
-    /// <param name="UpdateDatabase"></param>
-    /// <returns></returns>
-
-    public async Task UpdateDatabaseUser(
-        int DatabaseUserId,
-        string DatabaseUserName,
-        IEnumerable<DatabaseRole> UserRoles,
-        bool UpdateDatabase
-    )
-    {
-        await _databaseUsers.UpdateDatabaseUser(
-            DatabaseUserId,
-            DatabaseUserName,
-            UserRoles,
-            UpdateDatabase
-        );
+        await _databaseUsers.UpdateDatabaseUser(DatabaseUserId, DatabaseUserName, UpdateDatabase);
     }
 
     /// <summary>
@@ -520,21 +407,18 @@ public class Locator
     /// <param name="DatabaseUserId"></param>
     /// <param name="DatabaseUserName"></param>
     /// <param name="DatabaseUserPassword"></param>
-    /// <param name="UserRoles"></param>
     /// <returns></returns>
 
     public async Task UpdateDatabaseUser(
         int DatabaseUserId,
         string DatabaseUserName,
-        string DatabaseUserPassword,
-        IEnumerable<DatabaseRole> UserRoles
+        string DatabaseUserPassword
     )
     {
         await _databaseUsers.UpdateDatabaseUser(
             DatabaseUserId,
             DatabaseUserName,
-            DatabaseUserPassword,
-            UserRoles
+            DatabaseUserPassword
         );
     }
 
@@ -543,40 +427,11 @@ public class Locator
     /// </summary>
     /// <param name="DatabaseUserId"></param>
     /// <param name="DatabaseUserName"></param>
-    /// <param name="DatabaseUserPasswordFactory"></param>
-    /// <param name="UserRoles"></param>
     /// <returns></returns>
 
-    public async Task UpdateDatabaseUser(
-        int DatabaseUserId,
-        string DatabaseUserName,
-        Func<string> DatabaseUserPasswordFactory,
-        IEnumerable<DatabaseRole> UserRoles
-    )
+    public async Task UpdateDatabaseUser(int DatabaseUserId, string DatabaseUserName)
     {
-        await _databaseUsers.UpdateDatabaseUser(
-            DatabaseUserId,
-            DatabaseUserName,
-            DatabaseUserPasswordFactory,
-            UserRoles
-        );
-    }
-
-    /// <summary>
-    /// Update database user
-    /// </summary>
-    /// <param name="DatabaseUserId"></param>
-    /// <param name="DatabaseUserName"></param>
-    /// <param name="UserRoles"></param>
-    /// <returns></returns>
-
-    public async Task UpdateDatabaseUser(
-        int DatabaseUserId,
-        string DatabaseUserName,
-        IEnumerable<DatabaseRole> UserRoles
-    )
-    {
-        await _databaseUsers.UpdateDatabaseUser(DatabaseUserId, DatabaseUserName, UserRoles);
+        await _databaseUsers.UpdateDatabaseUser(DatabaseUserId, DatabaseUserName);
     }
 
     # endregion

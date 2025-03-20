@@ -20,80 +20,34 @@ internal class DatabaseUsers(
         int DatabaseId,
         string UserName,
         string UserPassword,
-        IEnumerable<DatabaseRole> UserRoles,
         bool CreateUser
     )
     {
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(DatabaseId, UserName, UserPassword, UserRoles, CreateUser)
+            new AddDatabaseUserCommand(DatabaseId, UserName, UserPassword, CreateUser)
         );
     }
 
-    // Allow library users to provide a factory for generating user passwords
-    internal async Task<int> AddDatabaseUser(
-        int DatabaseId,
-        string UserName,
-        Func<string> UserPasswordFactory,
-        IEnumerable<DatabaseRole> UserRoles,
-        bool CreateUser
-    )
-    {
-        var UserPassword = UserPasswordFactory();
-
-        return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(DatabaseId, UserName, UserPassword, UserRoles, CreateUser)
-        );
-    }
-
-    internal async Task<int> AddDatabaseUser(
-        int DatabaseId,
-        string UserName,
-        IEnumerable<DatabaseRole> UserRoles,
-        bool CreateUser
-    )
+    internal async Task<int> AddDatabaseUser(int DatabaseId, string UserName, bool CreateUser)
     {
         var UserPassword = PasswordGenerator.GenerateRandomPassword(25);
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(DatabaseId, UserName, UserPassword, UserRoles, CreateUser)
+            new AddDatabaseUserCommand(DatabaseId, UserName, UserPassword, CreateUser)
         );
     }
 
-    internal async Task<int> AddDatabaseUser(
-        int DatabaseId,
-        string UserName,
-        string UserPassword,
-        IEnumerable<DatabaseRole> UserRoles
-    )
+    internal async Task<int> AddDatabaseUser(int DatabaseId, string UserName, string UserPassword)
     {
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(DatabaseId, UserName, UserPassword, UserRoles, false)
+            new AddDatabaseUserCommand(DatabaseId, UserName, UserPassword, false)
         );
     }
 
-    // Allow library users to provide a factory for generating user passwords
-    internal async Task<int> AddDatabaseUser(
-        int DatabaseId,
-        string UserName,
-        Func<string> UserPasswordFactory,
-        IEnumerable<DatabaseRole> UserRoles
-    )
-    {
-        var UserPassword = UserPasswordFactory();
-
-        return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(DatabaseId, UserName, UserPassword, UserRoles, false)
-        );
-    }
-
-    internal async Task<int> AddDatabaseUser(
-        int DatabaseId,
-        string UserName,
-        IEnumerable<DatabaseRole> UserRoles
-    )
+    internal async Task<int> AddDatabaseUser(int DatabaseId, string UserName)
     {
         var UserPassword = PasswordGenerator.GenerateRandomPassword(25);
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(DatabaseId, UserName, UserPassword, UserRoles, false)
+            new AddDatabaseUserCommand(DatabaseId, UserName, UserPassword, false)
         );
     }
 
@@ -118,7 +72,6 @@ internal class DatabaseUsers(
         int DatabaseUserId,
         string DatabaseUserName,
         string DatabaseUserPassword,
-        IEnumerable<DatabaseRole> UserRoles,
         bool UpdateDatabase
     )
     {
@@ -127,7 +80,6 @@ internal class DatabaseUsers(
                 DatabaseUserId,
                 DatabaseUserName,
                 DatabaseUserPassword,
-                UserRoles,
                 UpdateDatabase
             )
         );
@@ -136,27 +88,6 @@ internal class DatabaseUsers(
     internal async Task UpdateDatabaseUser(
         int DatabaseUserId,
         string DatabaseUserName,
-        Func<string> DatabaseUserPasswordFactory,
-        IEnumerable<DatabaseRole> UserRoles,
-        bool UpdateDatabase
-    )
-    {
-        var DatabaseUserPassword = DatabaseUserPasswordFactory();
-        await _updateDatabaseUser.Handle(
-            new UpdateDatabaseUserCommand(
-                DatabaseUserId,
-                DatabaseUserName,
-                DatabaseUserPassword,
-                UserRoles,
-                UpdateDatabase
-            )
-        );
-    }
-
-    internal async Task UpdateDatabaseUser(
-        int DatabaseUserId,
-        string DatabaseUserName,
-        IEnumerable<DatabaseRole> UserRoles,
         bool UpdateDatabase
     )
     {
@@ -166,7 +97,6 @@ internal class DatabaseUsers(
                 DatabaseUserId,
                 DatabaseUserName,
                 DatabaseUserPassword,
-                UserRoles,
                 UpdateDatabase
             )
         );
@@ -175,8 +105,7 @@ internal class DatabaseUsers(
     internal async Task UpdateDatabaseUser(
         int DatabaseUserId,
         string DatabaseUserName,
-        string DatabaseUserPassword,
-        IEnumerable<DatabaseRole> UserRoles
+        string DatabaseUserPassword
     )
     {
         await _updateDatabaseUser.Handle(
@@ -184,36 +113,12 @@ internal class DatabaseUsers(
                 DatabaseUserId,
                 DatabaseUserName,
                 DatabaseUserPassword,
-                UserRoles,
                 false
             )
         );
     }
 
-    internal async Task UpdateDatabaseUser(
-        int DatabaseUserId,
-        string DatabaseUserName,
-        Func<string> DatabaseUserPasswordFactory,
-        IEnumerable<DatabaseRole> UserRoles
-    )
-    {
-        var DatabaseUserPassword = DatabaseUserPasswordFactory();
-        await _updateDatabaseUser.Handle(
-            new UpdateDatabaseUserCommand(
-                DatabaseUserId,
-                DatabaseUserName,
-                DatabaseUserPassword,
-                UserRoles,
-                false
-            )
-        );
-    }
-
-    internal async Task UpdateDatabaseUser(
-        int DatabaseUserId,
-        string DatabaseUserName,
-        IEnumerable<DatabaseRole> UserRoles
-    )
+    internal async Task UpdateDatabaseUser(int DatabaseUserId, string DatabaseUserName)
     {
         var DatabaseUserPassword = PasswordGenerator.GenerateRandomPassword(25);
         await _updateDatabaseUser.Handle(
@@ -221,7 +126,6 @@ internal class DatabaseUsers(
                 DatabaseUserId,
                 DatabaseUserName,
                 DatabaseUserPassword,
-                UserRoles,
                 false
             )
         );

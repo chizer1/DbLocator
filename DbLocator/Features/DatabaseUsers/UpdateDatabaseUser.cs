@@ -10,7 +10,6 @@ internal record UpdateDatabaseUserCommand(
     int DatabaseUserId,
     string DatabaseUserName,
     string DatabaseUserPassword,
-    IEnumerable<DatabaseRole> UserRoles,
     bool UpdateDatabase = false
 );
 
@@ -79,15 +78,15 @@ internal class UpdateDatabaseUser(
             databaseUserEntity.UserPassword = encryption.Encrypt(command.DatabaseUserPassword);
         }
 
-        if (command.UserRoles != null)
-        {
-            var databaseRoleEntities = await dbContext
-                .Set<DatabaseRoleEntity>()
-                .Where(dr => command.UserRoles.Contains((DatabaseRole)dr.DatabaseRoleId))
-                .ToListAsync();
+        // if (command.UserRoles != null)
+        // {
+        //     var databaseRoleEntities = await dbContext
+        //         .Set<DatabaseRoleEntity>()
+        //         .Where(dr => command.UserRoles.Contains((DatabaseRole)dr.DatabaseRoleId))
+        //         .ToListAsync();
 
-            databaseUserEntity.UserRoles = databaseRoleEntities;
-        }
+        //     databaseUserEntity.UserRoles = databaseRoleEntities;
+        // }
 
         dbContext.Update(databaseUserEntity);
         await dbContext.SaveChangesAsync();
@@ -116,24 +115,24 @@ internal class UpdateDatabaseUser(
             );
         }
 
-        var dropRoles = oldDatabaseRoles.Except(command.UserRoles).ToList();
-        var addRoles = command.UserRoles.Except(oldDatabaseRoles).ToList();
+        // var dropRoles = oldDatabaseRoles.Except(command.UserRoles).ToList();
+        // var addRoles = command.UserRoles.Except(oldDatabaseRoles).ToList();
 
-        foreach (var role in dropRoles)
-        {
-            var roleName = Enum.GetName(role).ToLower();
-            commands.Add(
-                $"use {database.DatabaseName}; exec sp_droprolemember 'db_{roleName}', '{command.DatabaseUserName}'"
-            );
-        }
+        // foreach (var role in dropRoles)
+        // {
+        //     var roleName = Enum.GetName(role).ToLower();
+        //     commands.Add(
+        //         $"use {database.DatabaseName}; exec sp_droprolemember 'db_{roleName}', '{command.DatabaseUserName}'"
+        //     );
+        // }
 
-        foreach (var role in addRoles)
-        {
-            var roleName = Enum.GetName(role).ToLower();
-            commands.Add(
-                $"use {database.DatabaseName}; exec sp_addrolemember 'db_{roleName}', '{command.DatabaseUserName}'"
-            );
-        }
+        // foreach (var role in addRoles)
+        // {
+        //     var roleName = Enum.GetName(role).ToLower();
+        //     commands.Add(
+        //         $"use {database.DatabaseName}; exec sp_addrolemember 'db_{roleName}', '{command.DatabaseUserName}'"
+        //     );
+        // }
 
         if (
             oldDatabasePassword != command.DatabaseUserPassword

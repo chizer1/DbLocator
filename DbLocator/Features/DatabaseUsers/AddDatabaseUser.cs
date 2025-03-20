@@ -11,7 +11,6 @@ internal record AddDatabaseUserCommand(
     int DatabaseId,
     string UserName,
     string UserPassword,
-    IEnumerable<DatabaseRole> UserRoles,
     bool CreateUser
 );
 
@@ -20,7 +19,6 @@ internal sealed class AddDatabaseUserCommandValidator : AbstractValidator<AddDat
     internal AddDatabaseUserCommandValidator()
     {
         RuleFor(x => x.DatabaseId).NotEmpty().WithMessage("Database Id is required");
-        RuleFor(x => x.UserRoles).NotEmpty().WithMessage("At least one DatabaseRole is required");
 
         RuleFor(x => x.UserName)
             .MaximumLength(50)
@@ -64,17 +62,11 @@ internal class AddDatabaseUser(
             throw new KeyNotFoundException($"Database Id '{command.DatabaseId}' not found.");
         }
 
-        var databaseRoleEntities = await dbContext
-            .Set<DatabaseRoleEntity>()
-            .Where(dr => command.UserRoles.Contains((DatabaseRole)dr.DatabaseRoleId))
-            .ToListAsync();
-
         var databaseUser = new DatabaseUserEntity()
         {
             DatabaseId = command.DatabaseId,
             UserName = command.UserName,
-            UserPassword = encryption.Encrypt(command.UserPassword),
-            UserRoles = databaseRoleEntities
+            UserPassword = encryption.Encrypt(command.UserPassword)
         };
 
         await dbContext.Set<DatabaseUserEntity>().AddAsync(databaseUser);
@@ -104,13 +96,13 @@ internal class AddDatabaseUser(
             $"use {database.DatabaseName}; create user {command.UserName} for login {command.UserName}"
         };
 
-        foreach (var role in command.UserRoles)
-        {
-            var roleName = Enum.GetName(role).ToLower();
-            commands.Add(
-                $"use {database.DatabaseName}; exec sp_addrolemember 'db_{roleName}', '{command.UserName}'"
-            );
-        }
+        // foreach (var role in command.UserRoles)
+        // {
+        //     var roleName = Enum.GetName(role).ToLower();
+        //     commands.Add(
+        //         $"use {database.DatabaseName}; exec sp_addrolemember 'db_{roleName}', '{command.UserName}'"
+        //     );
+        // }
 
         for (var i = 0; i < commands.Count; i++)
         {
