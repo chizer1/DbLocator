@@ -62,6 +62,20 @@ internal class AddDatabaseUser(
             throw new KeyNotFoundException($"Database Id '{command.DatabaseId}' not found.");
         }
 
+        if (
+            (
+                await dbContext
+                    .Set<DatabaseUserEntity>()
+                    .Where(u => u.UserName == command.UserName)
+                    .AnyAsync()
+            )
+        )
+        {
+            throw new InvalidOperationException(
+                $"DatabaseUser with name '{command.UserName}' already exists."
+            );
+        }
+
         var databaseUser = new DatabaseUserEntity()
         {
             DatabaseId = command.DatabaseId,

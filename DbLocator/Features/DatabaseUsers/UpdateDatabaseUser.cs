@@ -8,8 +8,8 @@ namespace DbLocator.Features.DatabaseUsers;
 
 internal record UpdateDatabaseUserCommand(
     int DatabaseUserId,
-    string DatabaseUserName,
-    string DatabaseUserPassword,
+    string UserName,
+    string UserPassword,
     bool UpdateDatabase = false
 );
 
@@ -20,13 +20,13 @@ internal sealed class UpdateDatabaseUserCommandValidator
     {
         RuleFor(x => x.DatabaseUserId).NotNull().WithMessage("DatabaseUser Id is required.");
 
-        RuleFor(x => x.DatabaseUserName)
+        RuleFor(x => x.UserName)
             .MaximumLength(50)
             .WithMessage("DatabaseUserName cannot be more than 50 characters.")
             .Matches(@"^[a-zA-Z0-9_]+$")
             .WithMessage("DatabaseUserName can only contain letters, numbers, and underscores.");
 
-        RuleFor(x => x.DatabaseUserPassword)
+        RuleFor(x => x.UserPassword)
             .MinimumLength(8)
             .WithMessage("DatabaseUserPassword must be at least 8 characters long.")
             .Matches(@"[A-Z]")
@@ -62,20 +62,35 @@ internal class UpdateDatabaseUser(
                 $"DatabaseUser Id '{command.DatabaseUserId}' not found."
             );
 
+        if (
+            (
+                await dbContext
+                    .Set<DatabaseUserEntity>()
+                    .Where(u => u.UserName == command.UserName)
+                    .AnyAsync()
+            )
+            && databaseUserEntity.UserName != command.UserName
+        )
+        {
+            throw new InvalidOperationException(
+                $"DatabaseUser with name '{command.UserName}' already exists."
+            );
+        }
+
         var oldDatabaseUserName = databaseUserEntity.UserName;
         var oldDatabasePassword = encryption.Decrypt(databaseUserEntity.UserPassword);
         var oldDatabaseRoles = databaseUserEntity
             .UserRoles.Select(dr => (DatabaseRole)dr.DatabaseRoleId)
             .ToList();
 
-        if (!string.IsNullOrEmpty(command.DatabaseUserName))
+        if (!string.IsNullOrEmpty(command.UserName))
         {
-            databaseUserEntity.UserName = command.DatabaseUserName;
+            databaseUserEntity.UserName = command.UserName;
         }
 
-        if (!string.IsNullOrEmpty(command.DatabaseUserPassword))
+        if (!string.IsNullOrEmpty(command.UserPassword))
         {
-            databaseUserEntity.UserPassword = encryption.Encrypt(command.DatabaseUserPassword);
+            databaseUserEntity.UserPassword = encryption.Encrypt(command.UserPassword);
         }
 
         // if (command.UserRoles != null)
@@ -102,17 +117,12 @@ internal class UpdateDatabaseUser(
             .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseUserEntity.DatabaseId);
 
         var commands = new List<string>();
-        if (
-            oldDatabaseUserName != command.DatabaseUserName
-            && !string.IsNullOrEmpty(command.DatabaseUserName)
-        )
+        if (oldDatabaseUserName != command.UserName && !string.IsNullOrEmpty(command.UserName))
         {
             commands.Add(
-                $"use {database.DatabaseName}; alter user {oldDatabaseUserName} with name = {command.DatabaseUserName}"
+                $"use {database.DatabaseName}; alter user {oldDatabaseUserName} with name = {command.UserName}"
             );
-            commands.Add(
-                $"alter login {oldDatabaseUserName} with name = '{command.DatabaseUserName}'"
-            );
+            commands.Add($"alter login {oldDatabaseUserName} with name = '{command.UserName}'");
         }
 
         // var dropRoles = oldDatabaseRoles.Except(command.UserRoles).ToList();
@@ -135,12 +145,12 @@ internal class UpdateDatabaseUser(
         // }
 
         if (
-            oldDatabasePassword != command.DatabaseUserPassword
-            && !string.IsNullOrEmpty(command.DatabaseUserPassword)
+            oldDatabasePassword != command.UserPassword
+            && !string.IsNullOrEmpty(command.UserPassword)
         )
         {
             commands.Add(
-                $"alter login {command.DatabaseUserName} with password = '{command.DatabaseUserPassword}'"
+                $"alter login {command.UserName} with password = '{command.UserPassword}'"
             );
         }
 
