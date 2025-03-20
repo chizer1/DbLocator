@@ -26,59 +26,57 @@ internal class GetTenants(
         await using var dbContext = dbContextFactory.CreateDbContext();
         const string cacheKey = "tenants";
 
-        var cachedData = await cache.GetAsync(cacheKey);
-        if (cachedData != null)
+        if (cache != null)
         {
-            Console.WriteLine("Cache hit!");
-            try
+            var cachedData = await cache.GetAsync(cacheKey);
+            if (cachedData != null)
             {
-                var json = Encoding.UTF8.GetString(cachedData);
-                Console.WriteLine($"Cache data: {json}");
-
-                var tenantEntities = JsonSerializer.Deserialize<List<TenantEntity>>(
-                    json,
-                    new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
-                );
-
-                if (tenantEntities != null)
-                    return MapToTenants(tenantEntities);
-            }
-            catch (JsonException ex)
-            {
-                Console.WriteLine($"Cache deserialization failed: {ex.Message}");
-            }
-        }
-
-        // Fetch from database if cache miss
-        Console.WriteLine("Cache miss. Fetching from DB...");
-        var tenantEntitiesFromDb = await dbContext.Set<TenantEntity>().ToListAsync();
-
-        if (tenantEntitiesFromDb.Count > 0)
-        {
-            var serializedJson = JsonSerializer.Serialize(
-                tenantEntitiesFromDb,
-                new JsonSerializerOptions
+                try
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    WriteIndented = true
+                    var json = Encoding.UTF8.GetString(cachedData);
+
+                    var tenantEntities = JsonSerializer.Deserialize<List<TenantEntity>>(
+                        json,
+                        new JsonSerializerOptions
+                        {
+                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                        }
+                    );
+
+                    if (tenantEntities != null)
+                        return Mapper(tenantEntities);
                 }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine($"Cache deserialization failed: {ex.Message}");
+                }
+            }
+
+            var tenantEntitiesFromDb = await dbContext.Set<TenantEntity>().ToListAsync();
+            var jsonToCache = JsonSerializer.Serialize(
+                tenantEntitiesFromDb,
+                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
             );
-            Console.WriteLine($"Storing in cache: {serializedJson}");
 
             await cache.SetAsync(
                 cacheKey,
-                Encoding.UTF8.GetBytes(serializedJson),
+                Encoding.UTF8.GetBytes(jsonToCache),
                 new DistributedCacheEntryOptions
                 {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(8)
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
                 }
             );
-        }
 
-        return MapToTenants(tenantEntitiesFromDb);
+            return Mapper(tenantEntitiesFromDb);
+        }
+        else
+        {
+            var tenantEntitiesFromDb = await dbContext.Set<TenantEntity>().ToListAsync();
+            return Mapper(tenantEntitiesFromDb);
+        }
     }
 
-    private static List<Tenant> MapToTenants(List<TenantEntity> tenantEntities)
+    private static List<Tenant> Mapper(List<TenantEntity> tenantEntities)
     {
         return
         [
