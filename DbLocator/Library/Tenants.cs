@@ -2,15 +2,19 @@ using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.Tenants;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Library;
 
-internal class Tenants(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class Tenants(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
-    private readonly AddTenant _addTenant = new(dbContextFactory);
-    private readonly DeleteTenant _deleteTenant = new(dbContextFactory);
-    private readonly GetTenants _getTenants = new(dbContextFactory);
-    private readonly UpdateTenant _updateTenant = new(dbContextFactory);
+    private readonly AddTenant _addTenant = new(dbContextFactory, cache);
+    private readonly DeleteTenant _deleteTenant = new(dbContextFactory, cache);
+    private readonly GetTenants _getTenants = new(dbContextFactory, cache);
+    private readonly UpdateTenant _updateTenant = new(dbContextFactory, cache);
 
     internal async Task<int> AddTenant(string tenantName)
     {

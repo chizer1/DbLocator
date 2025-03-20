@@ -1,6 +1,7 @@
 using DbLocator.Db;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Tenants;
 
@@ -14,7 +15,10 @@ internal sealed class DeleteTenantCommandValidator : AbstractValidator<DeleteTen
     }
 }
 
-internal class DeleteTenant(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class DeleteTenant(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
     internal async Task Handle(DeleteTenantCommand command)
     {
@@ -35,5 +39,7 @@ internal class DeleteTenant(IDbContextFactory<DbLocatorContext> dbContextFactory
 
         dbContext.Set<TenantEntity>().Remove(tenant);
         await dbContext.SaveChangesAsync();
+
+        cache?.Remove("tenants");
     }
 }

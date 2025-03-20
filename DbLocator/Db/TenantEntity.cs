@@ -2,13 +2,13 @@
 
 internal class TenantEntity
 {
-    internal int TenantId { get; set; }
+    public int TenantId { get; set; }
 
-    internal string TenantName { get; set; }
+    public string TenantName { get; set; }
 
-    internal string TenantCode { get; set; }
+    public string TenantCode { get; set; }
 
-    internal byte TenantStatusId { get; set; }
+    public byte TenantStatusId { get; set; }
 
-    internal virtual ICollection<ConnectionEntity> Connections { get; set; } = [];
+    public virtual ICollection<ConnectionEntity> Connections { get; set; } = [];
 }
