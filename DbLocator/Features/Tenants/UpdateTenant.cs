@@ -2,6 +2,7 @@ using DbLocator.Db;
 using DbLocator.Domain;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Tenants;
 
@@ -30,7 +31,10 @@ internal sealed class UpdateTenantCommandValidator : AbstractValidator<UpdateTen
     }
 }
 
-internal class UpdateTenant(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class UpdateTenant(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
     internal async Task Handle(UpdateTenantCommand command)
     {
@@ -55,5 +59,7 @@ internal class UpdateTenant(IDbContextFactory<DbLocatorContext> dbContextFactory
 
         dbContext.Set<TenantEntity>().Update(tenant);
         await dbContext.SaveChangesAsync();
+
+        cache?.Remove("tenants");
     }
 }

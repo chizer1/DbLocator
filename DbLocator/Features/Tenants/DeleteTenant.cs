@@ -1,7 +1,7 @@
 using DbLocator.Db;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using ZiggyCreatures.Caching.Fusion;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Tenants;
 
@@ -15,7 +15,10 @@ internal sealed class DeleteTenantCommandValidator : AbstractValidator<DeleteTen
     }
 }
 
-internal class DeleteTenant(IDbContextFactory<DbLocatorContext> dbContextFactory, FusionCache cache)
+internal class DeleteTenant(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
     internal async Task Handle(DeleteTenantCommand command)
     {

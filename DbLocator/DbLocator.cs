@@ -6,7 +6,6 @@ using DbLocator.Utilities;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using ZiggyCreatures.Caching.Fusion;
 
 [assembly: InternalsVisibleTo("DbLocatorTests")]
 
@@ -96,15 +95,12 @@ public class Locator
 
         var dbContextFactory = DbContextFactory.CreateDbContextFactory(dbLocatorConnectionString);
 
-        var fusionCache = new FusionCache(new FusionCacheOptions());
-        fusionCache.SetupDistributedCache(distributedCache);
-
         var encryption = new Encryption(encryptionKey);
         _connections = new Connections(dbContextFactory, encryption);
         _databases = new Databases(dbContextFactory, encryption);
         _databaseServers = new DatabaseServers(dbContextFactory);
         _databaseTypes = new DatabaseTypes(dbContextFactory);
-        _tenants = new Tenants(dbContextFactory, fusionCache);
+        _tenants = new Tenants(dbContextFactory, distributedCache);
     }
 
     #region Tenants

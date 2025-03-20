@@ -19,7 +19,6 @@
     <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.2" />
     <None Include="../README.md" Pack="true" PackagePath="" />
-    <PackageReference Include="ZiggyCreatures.FusionCache" Version="2.1.0" />
   </ItemGroup>
   
 </Project>
