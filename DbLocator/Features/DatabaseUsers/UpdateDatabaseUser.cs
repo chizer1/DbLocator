@@ -130,10 +130,10 @@ internal class UpdateDatabaseUser(
 
         // foreach (var role in dropRoles)
         // {
-        //     var roleName = Enum.GetName(role).ToLower();
-        //     commands.Add(
-        //         $"use {database.DatabaseName}; exec sp_droprolemember 'db_{roleName}', '{command.DatabaseUserName}'"
-        //     );
+        // var roleName = Enum.GetName(role).ToLower();
+        // commands.Add(
+        //     $"use {database.DatabaseName}; exec sp_droprolemember 'db_{roleName}', '{command.DatabaseUserName}'"
+        // );
         // }
 
         // foreach (var role in addRoles)

@@ -11,6 +11,10 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
 
     public virtual DbSet<DatabaseUserEntity> DatabaseUsers { get; set; }
 
+    public virtual DbSet<DatabaseUserRoleEntity> DatabaseUserRoles { get; set; }
+
+    public virtual DbSet<DatabaseRoleEntity> DatabaseRoles { get; set; }
+
     public virtual DbSet<DatabaseServerEntity> DatabaseServers { get; set; }
 
     public virtual DbSet<DatabaseTypeEntity> DatabaseTypes { get; set; }
@@ -60,23 +64,11 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
             entity.Property(e => e.DatabaseRoleName).HasMaxLength(50).IsUnicode(false);
 
             entity
-                .HasMany((e) => e.Users)
-                .WithMany((p) => p.UserRoles)
-                //.UsingEntity<DatabaseUserRoleEntity>();
-                .UsingEntity(
-                    "DatabaseUserRole",
-                    l =>
-                        l.HasOne(typeof(DatabaseUserEntity))
-                            .WithMany()
-                            .HasForeignKey("DatabaseUserID")
-                            .HasPrincipalKey(nameof(DatabaseUserEntity.DatabaseUserId)),
-                    r =>
-                        r.HasOne(typeof(DatabaseRoleEntity))
-                            .WithMany()
-                            .HasForeignKey("DatabaseRoleID")
-                            .HasPrincipalKey(nameof(DatabaseRoleEntity.DatabaseRoleId)),
-                    j => j.HasKey("DatabaseUserID", "DatabaseRoleID")
-                );
+                .HasMany(e => e.Users)
+                .WithOne(p => p.Role)
+                .HasForeignKey(d => d.DatabaseRoleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DatabaseUserRole_DatabaseRole");
         });
 
         modelBuilder.Entity<DatabaseUserEntity>(entity =>
@@ -100,30 +92,40 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
                 .HasConstraintName("FK_DatabaseUser_DatabaseId");
 
             entity
-                .HasMany((e) => e.UserRoles)
-                .WithMany((p) => p.Users)
-                //.UsingEntity<DatabaseUserRoleEntity>();
-                .UsingEntity(
-                    "DatabaseUserRole",
-                    l =>
-                        l.HasOne(typeof(DatabaseUserEntity))
-                            .WithMany()
-                            .HasForeignKey("DatabaseUserID")
-                            .HasPrincipalKey(nameof(DatabaseUserEntity.DatabaseUserId)),
-                    r =>
-                        r.HasOne(typeof(DatabaseRoleEntity))
-                            .WithMany()
-                            .HasForeignKey("DatabaseRoleID")
-                            .HasPrincipalKey(nameof(DatabaseRoleEntity.DatabaseRoleId)),
-                    j => j.HasKey("DatabaseUserID", "DatabaseRoleID")
-                );
-            // .(m =>
-            // {
-            //     m.MapLeftKey("DatabaseUserID");
-            //     m.MapRightKey("DatabaseRoleID");
-            //     m.ToTable("DatabaseUserRole");
-            // });
-            ;
+                .HasMany(d => d.UserRoles)
+                .WithOne(p => p.User)
+                .HasForeignKey(d => d.DatabaseUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DatabaseUserRole_DatabaseUser");
+        });
+
+        modelBuilder.Entity<DatabaseUserRoleEntity>(entity =>
+        {
+            entity.ToTable("DatabaseUserRole");
+
+            entity
+                .HasKey(e => new { e.DatabaseUserId, e.DatabaseRoleId })
+                .HasName("PK_DatabaseUserRole");
+
+            entity.HasIndex(e => e.DatabaseRoleId, "IX_DatabaseUserRole_DatabaseRoleID");
+
+            entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseUserID");
+            entity.Property(e => e.DatabaseRoleId).HasColumnName("DatabaseRoleID");
+
+            // Add foreign key constraints for DatabaseUser and DatabaseRole
+            entity
+                .HasOne(d => d.User)
+                .WithMany(p => p.UserRoles)
+                .HasForeignKey(d => d.DatabaseUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DatabaseUserRole_DatabaseUser");
+
+            entity
+                .HasOne(d => d.Role)
+                .WithMany(p => p.Users)
+                .HasForeignKey(d => d.DatabaseRoleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DatabaseUserRole_DatabaseRole");
         });
 
         modelBuilder.Entity<DatabaseEntity>(entity =>

@@ -20,6 +20,7 @@ public class Locator
     private readonly Connections _connections;
     private readonly Databases _databases;
     private readonly DatabaseUsers _databaseUsers;
+    private readonly DatabaseUserRoles _databaseUserRoles;
     private readonly DatabaseServers _databaseServers;
     private readonly DatabaseTypes _databaseTypes;
     private readonly Tenants _tenants;
@@ -41,31 +42,7 @@ public class Locator
     /// <param name="encryptionKey">The encryption key for encrypting and decrypting sensitive data.</param>
     /// <exception cref="ArgumentException">Thrown when the connection string is null or whitespace.</exception>
     public Locator(string dbLocatorConnectionString, string encryptionKey)
-    {
-        if (string.IsNullOrWhiteSpace(dbLocatorConnectionString))
-            throw new ArgumentException("DbLocator connection string is required.");
-
-        using (
-            var dbLocator = new DbLocatorContext(
-                new DbContextOptionsBuilder<DbLocatorContext>()
-                    .UseSqlServer(dbLocatorConnectionString)
-                    .Options
-            )
-        )
-        {
-            dbLocator.Database.Migrate();
-        }
-
-        var dbContextFactory = DbContextFactory.CreateDbContextFactory(dbLocatorConnectionString);
-
-        var encryption = new Encryption(encryptionKey);
-        _connections = new Connections(dbContextFactory, encryption);
-        _databases = new Databases(dbContextFactory);
-        _databaseUsers = new DatabaseUsers(dbContextFactory, encryption);
-        _databaseServers = new DatabaseServers(dbContextFactory);
-        _databaseTypes = new DatabaseTypes(dbContextFactory);
-        _tenants = new Tenants(dbContextFactory, null);
-    }
+        : this(dbLocatorConnectionString, encryptionKey, null) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Locator"/> class with the specified connection string, encryption key, and distributed cache.
@@ -101,6 +78,8 @@ public class Locator
         _connections = new Connections(dbContextFactory, encryption);
         _databases = new Databases(dbContextFactory);
         _databaseServers = new DatabaseServers(dbContextFactory);
+        _databaseUsers = new DatabaseUsers(dbContextFactory, encryption);
+        _databaseUserRoles = new DatabaseUserRoles(dbContextFactory);
         _databaseTypes = new DatabaseTypes(dbContextFactory);
         _tenants = new Tenants(dbContextFactory, distributedCache);
     }
@@ -435,6 +414,68 @@ public class Locator
     }
 
     # endregion
+
+    #region DatabaseUserRoles
+
+    /// <summary>
+    /// Add database user role
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="UserRole"></param>
+    /// <param name="UpdateUser"></param>
+    /// <returns></returns>
+    public async Task AddDatabaseUserRole(
+        int DatabaseUserId,
+        DatabaseRole UserRole,
+        bool UpdateUser
+    )
+    {
+        await _databaseUserRoles.AddDatabaseUserRole(DatabaseUserId, UserRole, UpdateUser);
+    }
+
+    /// <summary>
+    /// Add database user role
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="UserRole"></param>
+    /// <returns></returns>
+    public async Task AddDatabaseUserRole(int DatabaseUserId, DatabaseRole UserRole)
+    {
+        await _databaseUserRoles.AddDatabaseUserRole(DatabaseUserId, UserRole);
+    }
+
+    /// <summary>
+    /// Delete database user role
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="UserRole"></param>
+    /// <param name="DeleteDatabaseUserRole"></param>
+    /// <returns></returns>
+    public async Task DeleteDatabaseUserRole(
+        int DatabaseUserId,
+        DatabaseRole UserRole,
+        bool DeleteDatabaseUserRole
+    )
+    {
+        await _databaseUserRoles.DeleteDatabaseUserRole(
+            DatabaseUserId,
+            UserRole,
+            DeleteDatabaseUserRole
+        );
+    }
+
+    /// <summary>
+    /// Delete database user role
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="UserRole"></param>
+    /// <returns></returns>
+    public async Task DeleteDatabaseUserRole(int DatabaseUserId, DatabaseRole UserRole)
+    {
+        await _databaseUserRoles.DeleteDatabaseUserRole(DatabaseUserId, UserRole);
+    }
+
+    #endregion
 
     #region Databases
 

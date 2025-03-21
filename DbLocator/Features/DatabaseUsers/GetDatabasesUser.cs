@@ -31,7 +31,7 @@ internal class GetDatabaseUsers(IDbContextFactory<DbLocatorContext> dbContextFac
                 d.DatabaseUserId,
                 d.UserName,
                 d.DatabaseId,
-                d.UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId).ToArray()
+                [.. d.UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)]
             ))
         ];
     }

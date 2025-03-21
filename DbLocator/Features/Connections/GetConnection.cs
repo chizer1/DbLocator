@@ -182,15 +182,14 @@ internal class GetConnection(
     )
     {
         roleList ??= [DatabaseRole.DataReader, DatabaseRole.DataWriter];
-        var user = await CreateDatabaseUser(database, dbContext, encryption, roleList);
+        var user = await GetDatabaseUser(database, dbContext, roleList);
 
         return user;
     }
 
-    private static async Task<DatabaseUserEntity> CreateDatabaseUser(
+    private static async Task<DatabaseUserEntity> GetDatabaseUser(
         DatabaseEntity database,
         DbLocatorContext dbContext,
-        Encryption encryption,
         DatabaseRole[] roleList
     )
     {
@@ -201,82 +200,12 @@ internal class GetConnection(
             .Where(u => u.DatabaseId == database.DatabaseId)
             .ToListAsync();
 
-        roles = roles.OrderBy(t => t);
-        var user = users.FirstOrDefault(u =>
-            u.UserRoles.Select(r => r.DatabaseRoleId).OrderBy(t => t).SequenceEqual(roles)
-        );
-
-        if (user != null)
-        {
-            return user;
-        }
-
-        var password = Guid.NewGuid().ToString();
-        var username = $"DbLocatorUser_{database.DatabaseName}_{string.Join('_', roles)}";
-        var userRoles = await dbContext
-            .Set<DatabaseRoleEntity>()
-            .Where(r => roles.Contains(r.DatabaseRoleId))
-            .ToListAsync();
-
-        user = new DatabaseUserEntity
-        {
-            DatabaseId = database.DatabaseId,
-            UserName = username,
-            UserPassword = encryption.Encrypt(password),
-            UserRoles = userRoles
-        };
-
-        await dbContext.Set<DatabaseUserEntity>().AddAsync(user);
-        await dbContext.SaveChangesAsync();
-
-        var commands = new List<string>
-        {
-            $"create login {username} with password = '{password}'",
-            $"use {database.DatabaseName}; create user {username} for login {username}"
-        };
-
-        foreach (var role in roleList)
-        {
-            var roleName = Enum.GetName(role).ToLower();
-            commands.Add(
-                $"use {database.DatabaseName}; exec sp_addrolemember 'db_{roleName}', '{username}'"
+        // Find a user that matches all the roles
+        return users.FirstOrDefault(u =>
+                !roles.Except(u.UserRoles.Select(ur => ur.DatabaseRoleId)).Any()
+            )
+            ?? throw new InvalidOperationException(
+                $"No suitable database user found for database '{database.DatabaseName}' with roles {string.Join(", ", roleList)}."
             );
-        }
-
-        try
-        {
-            var databaseServer = await dbContext
-                .Set<DatabaseServerEntity>()
-                .FirstOrDefaultAsync(ds => ds.DatabaseServerId == database.DatabaseServerId);
-
-            for (var i = 0; i < commands.Count; i++)
-            {
-                var commandText = commands[i];
-                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-
-                if (databaseServer.IsLinkedServer)
-                {
-                    commandText =
-                        $"exec('{commandText.Replace("'", "''")}') at {databaseServer.DatabaseServerHostName};";
-                }
-
-                cmd.CommandText = commandText;
-                await dbContext.Database.OpenConnectionAsync();
-                await cmd.ExecuteNonQueryAsync();
-            }
-        }
-        catch (SqlException)
-        {
-            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-            cmd.CommandText = "use [DbLocator]";
-            await dbContext.Database.OpenConnectionAsync();
-            await cmd.ExecuteNonQueryAsync();
-
-            dbContext.Set<DatabaseUserEntity>().Remove(user);
-            await dbContext.SaveChangesAsync();
-            throw;
-        }
-
-        return user;
     }
 }
