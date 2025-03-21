@@ -11,10 +11,10 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task AddMultipleDatabaseTypesAndSearchByKeyWord()
     {
-        var databaseTypeName1 = "Client";
+        var databaseTypeName1 = TestHelpers.GetRandomString();
         var databaseTypeId1 = await _dbLocator.AddDatabaseType(databaseTypeName1);
 
-        var databaseTypeName2 = "Forms";
+        var databaseTypeName2 = TestHelpers.GetRandomString();
         var databaseTypeId2 = await _dbLocator.AddDatabaseType(databaseTypeName2);
 
         var databaseTypes = (await _dbLocator.GetDatabaseTypes())
@@ -28,7 +28,7 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task AddAndDeleteDatabaseType()
     {
-        var databaseTypeName = "Logistics";
+        var databaseTypeName = TestHelpers.GetRandomString();
         var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
 
         await _dbLocator.DeleteDatabaseType(databaseTypeId);
@@ -42,10 +42,10 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task AddAndUpdateDatabaseType()
     {
-        var databaseTypeName1 = "BI";
+        var databaseTypeName1 = TestHelpers.GetRandomString();
         var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName1);
 
-        var databaseTypeName2 = "Accounting";
+        var databaseTypeName2 = TestHelpers.GetRandomString();
         await _dbLocator.UpdateDatabaseType(databaseTypeId, databaseTypeName2);
 
         var oldDatabaseTypes = (await _dbLocator.GetDatabaseTypes())

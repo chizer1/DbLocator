@@ -2,14 +2,36 @@
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace DbLocator.Migrations
 {
     /// <inheritdoc />
-    internal partial class InitialDB : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "DatabaseRole",
+                columns: table => new
+                {
+                    DatabaseRoleID = table
+                        .Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DatabaseRoleName = table.Column<string>(
+                        type: "varchar(50)",
+                        unicode: false,
+                        maxLength: 50,
+                        nullable: true
+                    )
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DatabaseRole", x => x.DatabaseRoleID);
+                }
+            );
+
             migrationBuilder.CreateTable(
                 name: "DatabaseServer",
                 columns: table => new
@@ -29,13 +51,13 @@ namespace DbLocator.Migrations
                         maxLength: 50,
                         nullable: true
                     ),
-                    DatabaseServerFullyQualifiedDomainName = table.Column<string>(
+                    DatabaseServerIPAddress = table.Column<string>(
                         type: "varchar(50)",
                         unicode: false,
                         maxLength: 50,
                         nullable: true
                     ),
-                    DatabaseServerIPAddress = table.Column<string>(
+                    DatabaseServerFullyQualifiedDomainName = table.Column<string>(
                         type: "varchar(50)",
                         unicode: false,
                         maxLength: 50,
@@ -109,22 +131,10 @@ namespace DbLocator.Migrations
                         maxLength: 50,
                         nullable: false
                     ),
-                    DatabaseUser = table.Column<string>(
-                        type: "varchar(50)",
-                        unicode: false,
-                        maxLength: 50,
-                        nullable: true
-                    ),
-                    DatabaseUserPassword = table.Column<string>(
-                        type: "varchar(50)",
-                        unicode: false,
-                        maxLength: 50,
-                        nullable: true
-                    ),
                     DatabaseServerID = table.Column<int>(type: "int", nullable: false),
                     DatabaseTypeID = table.Column<byte>(type: "tinyint", nullable: false),
                     DatabaseStatusID = table.Column<byte>(type: "tinyint", nullable: false),
-                    UseTrustedConnection = table.Column<bool>(type: "bit", nullable: true)
+                    UseTrustedConnection = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -172,6 +182,84 @@ namespace DbLocator.Migrations
                 }
             );
 
+            migrationBuilder.CreateTable(
+                name: "DatabaseUser",
+                columns: table => new
+                {
+                    DatabaseUserID = table
+                        .Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DatabaseID = table.Column<int>(type: "int", nullable: false),
+                    UserName = table.Column<string>(
+                        type: "varchar(50)",
+                        unicode: false,
+                        maxLength: 50,
+                        nullable: true
+                    ),
+                    UserPassword = table.Column<string>(
+                        type: "varchar(50)",
+                        unicode: false,
+                        maxLength: 50,
+                        nullable: true
+                    )
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DatabaseUser", x => x.DatabaseUserID);
+                    table.ForeignKey(
+                        name: "FK_DatabaseUser_DatabaseId",
+                        column: x => x.DatabaseID,
+                        principalTable: "Database",
+                        principalColumn: "DatabaseID"
+                    );
+                }
+            );
+
+            migrationBuilder.CreateTable(
+                name: "DatabaseUserRole",
+                columns: table => new
+                {
+                    DatabaseRoleID = table.Column<int>(type: "int", nullable: false),
+                    DatabaseUserID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey(
+                        "PK_DatabaseUserRole",
+                        x => new { x.DatabaseUserID, x.DatabaseRoleID }
+                    );
+                    table.ForeignKey(
+                        name: "FK_DatabaseUserRole_DatabaseRole",
+                        column: x => x.DatabaseRoleID,
+                        principalTable: "DatabaseRole",
+                        principalColumn: "DatabaseRoleID"
+                    );
+                    table.ForeignKey(
+                        name: "FK_DatabaseUserRole_DatabaseUser",
+                        column: x => x.DatabaseUserID,
+                        principalTable: "DatabaseUser",
+                        principalColumn: "DatabaseUserID"
+                    );
+                }
+            );
+
+            migrationBuilder.InsertData(
+                table: "DatabaseRole",
+                columns: new[] { "DatabaseRoleID", "DatabaseRoleName" },
+                values: new object[,]
+                {
+                    { 1, "Owner" },
+                    { 2, "SecurityAdmin" },
+                    { 3, "AccessAdmin" },
+                    { 4, "BackupOperator" },
+                    { 5, "DdlAdmin" },
+                    { 6, "DataWriter" },
+                    { 7, "DataReader" },
+                    { 8, "DenyDataWriter" },
+                    { 9, "DenyDataReader" }
+                }
+            );
+
             migrationBuilder.CreateIndex(
                 name: "IX_Connection_DatabaseID",
                 table: "Connection",
@@ -195,6 +283,18 @@ namespace DbLocator.Migrations
                 table: "Database",
                 column: "DatabaseTypeID"
             );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DatabaseUser_DatabaseID",
+                table: "DatabaseUser",
+                column: "DatabaseID"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DatabaseUserRole_DatabaseRoleID",
+                table: "DatabaseUserRole",
+                column: "DatabaseRoleID"
+            );
         }
 
         /// <inheritdoc />
@@ -202,9 +302,15 @@ namespace DbLocator.Migrations
         {
             migrationBuilder.DropTable(name: "Connection");
 
-            migrationBuilder.DropTable(name: "Database");
+            migrationBuilder.DropTable(name: "DatabaseUserRole");
 
             migrationBuilder.DropTable(name: "Tenant");
+
+            migrationBuilder.DropTable(name: "DatabaseRole");
+
+            migrationBuilder.DropTable(name: "DatabaseUser");
+
+            migrationBuilder.DropTable(name: "Database");
 
             migrationBuilder.DropTable(name: "DatabaseServer");
 

@@ -27,22 +27,32 @@ internal class Connections(
         await _deleteConnection.Handle(new DeleteConnectionCommand(connectionId));
     }
 
-    internal async Task<SqlConnection> GetConnection(int tenantId, int databaseTypeId)
+    internal async Task<SqlConnection> GetConnection(
+        int tenantId,
+        int databaseTypeId,
+        DatabaseRole[] roles
+    )
     {
         return await _getConnection.Handle(
-            new GetConnectionQuery(tenantId, databaseTypeId, null, null)
+            new GetConnectionQuery(tenantId, databaseTypeId, null, null, roles)
         );
     }
 
-    internal async Task<SqlConnection> GetConnection(int connectionId)
-    {
-        return await _getConnection.Handle(new GetConnectionQuery(null, null, connectionId, null));
-    }
-
-    internal async Task<SqlConnection> GetConnection(string tenantCode, int databaseTypeId)
+    internal async Task<SqlConnection> GetConnection(int connectionId, DatabaseRole[] roles)
     {
         return await _getConnection.Handle(
-            new GetConnectionQuery(null, databaseTypeId, null, tenantCode)
+            new GetConnectionQuery(null, null, connectionId, null, roles)
+        );
+    }
+
+    internal async Task<SqlConnection> GetConnection(
+        string tenantCode,
+        int databaseTypeId,
+        DatabaseRole[] roles
+    )
+    {
+        return await _getConnection.Handle(
+            new GetConnectionQuery(null, databaseTypeId, null, tenantCode, roles)
         );
     }
 

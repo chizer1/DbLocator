@@ -19,6 +19,8 @@ public class Locator
 {
     private readonly Connections _connections;
     private readonly Databases _databases;
+    private readonly DatabaseUsers _databaseUsers;
+    private readonly DatabaseUserRoles _databaseUserRoles;
     private readonly DatabaseServers _databaseServers;
     private readonly DatabaseTypes _databaseTypes;
     private readonly Tenants _tenants;
@@ -40,30 +42,7 @@ public class Locator
     /// <param name="encryptionKey">The encryption key for encrypting and decrypting sensitive data.</param>
     /// <exception cref="ArgumentException">Thrown when the connection string is null or whitespace.</exception>
     public Locator(string dbLocatorConnectionString, string encryptionKey)
-    {
-        if (string.IsNullOrWhiteSpace(dbLocatorConnectionString))
-            throw new ArgumentException("DbLocator connection string is required.");
-
-        using (
-            var dbLocator = new DbLocatorContext(
-                new DbContextOptionsBuilder<DbLocatorContext>()
-                    .UseSqlServer(dbLocatorConnectionString)
-                    .Options
-            )
-        )
-        {
-            dbLocator.Database.Migrate();
-        }
-
-        var dbContextFactory = DbContextFactory.CreateDbContextFactory(dbLocatorConnectionString);
-
-        var encryption = new Encryption(encryptionKey);
-        _connections = new Connections(dbContextFactory, encryption);
-        _databases = new Databases(dbContextFactory, encryption);
-        _databaseServers = new DatabaseServers(dbContextFactory);
-        _databaseTypes = new DatabaseTypes(dbContextFactory);
-        _tenants = new Tenants(dbContextFactory, null);
-    }
+        : this(dbLocatorConnectionString, encryptionKey, null) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Locator"/> class with the specified connection string, encryption key, and distributed cache.
@@ -97,8 +76,10 @@ public class Locator
 
         var encryption = new Encryption(encryptionKey);
         _connections = new Connections(dbContextFactory, encryption);
-        _databases = new Databases(dbContextFactory, encryption);
+        _databases = new Databases(dbContextFactory);
         _databaseServers = new DatabaseServers(dbContextFactory);
+        _databaseUsers = new DatabaseUsers(dbContextFactory, encryption);
+        _databaseUserRoles = new DatabaseUserRoles(dbContextFactory);
         _databaseTypes = new DatabaseTypes(dbContextFactory);
         _tenants = new Tenants(dbContextFactory, distributedCache);
     }
@@ -217,10 +198,11 @@ public class Locator
     /// Get SQL connection
     /// </summary>
     /// <param name="connectionId"></param>
+    /// <param name="roles"></param>
     /// <returns>SqlConnection</returns>
-    public async Task<SqlConnection> GetConnection(int connectionId)
+    public async Task<SqlConnection> GetConnection(int connectionId, DatabaseRole[] roles = null)
     {
-        return await _connections.GetConnection(connectionId);
+        return await _connections.GetConnection(connectionId, roles);
     }
 
     /// <summary>
@@ -228,11 +210,16 @@ public class Locator
     /// </summary>
     /// <param name="tenantId"></param>
     /// <param name="databaseTypeId"></param>
+    /// <param name="roles"></param>
     /// <returns>SqlConnection</returns>
     /// <returns></returns>
-    public async Task<SqlConnection> GetConnection(int tenantId, int databaseTypeId)
+    public async Task<SqlConnection> GetConnection(
+        int tenantId,
+        int databaseTypeId,
+        DatabaseRole[] roles = null
+    )
     {
-        return await _connections.GetConnection(tenantId, databaseTypeId);
+        return await _connections.GetConnection(tenantId, databaseTypeId, roles);
     }
 
     /// <summary>
@@ -240,10 +227,15 @@ public class Locator
     /// </summary>
     /// <param name="tenantCode"></param>
     /// <param name="databaseTypeId"></param>
+    /// <param name="roles"></param>
     /// <returns>SqlConnection</returns>
-    public async Task<SqlConnection> GetConnection(string tenantCode, int databaseTypeId)
+    public async Task<SqlConnection> GetConnection(
+        string tenantCode,
+        int databaseTypeId,
+        DatabaseRole[] roles = null
+    )
     {
-        return await _connections.GetConnection(tenantCode, databaseTypeId);
+        return await _connections.GetConnection(tenantCode, databaseTypeId, roles);
     }
 
     /// <summary>
@@ -279,22 +271,224 @@ public class Locator
 
     #endregion
 
+    #region DatabaseUsers
+
+    /// <summary>
+    /// Add database user
+    /// </summary>
+    /// <param name="DatabaseId"></param>
+    /// <param name="UserName"></param>
+    /// <param name="UserPassword"></param>
+    /// <param name="CreateUser"></param>
+    /// <returns>DatabaseUserId</returns>
+
+    public async Task<int> AddDatabaseUser(
+        int DatabaseId,
+        string UserName,
+        string UserPassword,
+        bool CreateUser
+    )
+    {
+        return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName, UserPassword, CreateUser);
+    }
+
+    /// <summary>
+    /// Add database user
+    /// </summary>
+    /// <param name="DatabaseId"></param>
+    /// <param name="UserName"></param>
+    /// <param name="CreateUser"></param>
+    /// <returns>DatabaseUserId</returns>
+
+    public async Task<int> AddDatabaseUser(int DatabaseId, string UserName, bool CreateUser)
+    {
+        return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName, CreateUser);
+    }
+
+    /// <summary>
+    /// Add database user
+    /// </summary>
+    /// <param name="DatabaseId"></param>
+    /// <param name="UserName"></param>
+    /// <param name="UserPassword"></param>
+    /// <returns>DatabaseUserId</returns>
+
+    public async Task<int> AddDatabaseUser(int DatabaseId, string UserName, string UserPassword)
+    {
+        return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName, UserPassword);
+    }
+
+    /// <summary>
+    /// Add database user
+    /// </summary>
+    /// <param name="DatabaseId"></param>
+    /// <param name="UserName"></param>
+    /// <returns>DatabaseUserId</returns>
+
+    public async Task<int> AddDatabaseUser(int DatabaseId, string UserName)
+    {
+        return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName);
+    }
+
+    /// <summary>
+    /// Get database users
+    /// </summary>
+    /// <returns>List of database users</returns>
+    public async Task<List<DatabaseUser>> GetDatabaseUsers()
+    {
+        return await _databaseUsers.GetDatabaseUsers();
+    }
+
+    /// <summary>
+    /// Update database user
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="DatabaseUserName"></param>
+    /// <param name="DatabaseUserPassword"></param>
+    /// <param name="UpdateDatabase"></param>
+    /// <returns></returns>
+
+    public async Task UpdateDatabaseUser(
+        int DatabaseUserId,
+        string DatabaseUserName,
+        string DatabaseUserPassword,
+        bool UpdateDatabase
+    )
+    {
+        await _databaseUsers.UpdateDatabaseUser(
+            DatabaseUserId,
+            DatabaseUserName,
+            DatabaseUserPassword,
+            UpdateDatabase
+        );
+    }
+
+    /// <summary>
+    /// Update database user
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="DatabaseUserName"></param>
+    /// <param name="UpdateDatabase"></param>
+    /// <returns></returns>
+
+    public async Task UpdateDatabaseUser(
+        int DatabaseUserId,
+        string DatabaseUserName,
+        bool UpdateDatabase
+    )
+    {
+        await _databaseUsers.UpdateDatabaseUser(DatabaseUserId, DatabaseUserName, UpdateDatabase);
+    }
+
+    /// <summary>
+    /// Update database user
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="DatabaseUserName"></param>
+    /// <param name="DatabaseUserPassword"></param>
+    /// <returns></returns>
+
+    public async Task UpdateDatabaseUser(
+        int DatabaseUserId,
+        string DatabaseUserName,
+        string DatabaseUserPassword
+    )
+    {
+        await _databaseUsers.UpdateDatabaseUser(
+            DatabaseUserId,
+            DatabaseUserName,
+            DatabaseUserPassword
+        );
+    }
+
+    /// <summary>
+    /// Update database user
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="DatabaseUserName"></param>
+    /// <returns></returns>
+
+    public async Task UpdateDatabaseUser(int DatabaseUserId, string DatabaseUserName)
+    {
+        await _databaseUsers.UpdateDatabaseUser(DatabaseUserId, DatabaseUserName);
+    }
+
+    # endregion
+
+    #region DatabaseUserRoles
+
+    /// <summary>
+    /// Add database user role
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="UserRole"></param>
+    /// <param name="UpdateUser"></param>
+    /// <returns></returns>
+    public async Task AddDatabaseUserRole(
+        int DatabaseUserId,
+        DatabaseRole UserRole,
+        bool UpdateUser
+    )
+    {
+        await _databaseUserRoles.AddDatabaseUserRole(DatabaseUserId, UserRole, UpdateUser);
+    }
+
+    /// <summary>
+    /// Add database user role
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="UserRole"></param>
+    /// <returns></returns>
+    public async Task AddDatabaseUserRole(int DatabaseUserId, DatabaseRole UserRole)
+    {
+        await _databaseUserRoles.AddDatabaseUserRole(DatabaseUserId, UserRole);
+    }
+
+    /// <summary>
+    /// Delete database user role
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="UserRole"></param>
+    /// <param name="DeleteDatabaseUserRole"></param>
+    /// <returns></returns>
+    public async Task DeleteDatabaseUserRole(
+        int DatabaseUserId,
+        DatabaseRole UserRole,
+        bool DeleteDatabaseUserRole
+    )
+    {
+        await _databaseUserRoles.DeleteDatabaseUserRole(
+            DatabaseUserId,
+            UserRole,
+            DeleteDatabaseUserRole
+        );
+    }
+
+    /// <summary>
+    /// Delete database user role
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="UserRole"></param>
+    /// <returns></returns>
+    public async Task DeleteDatabaseUserRole(int DatabaseUserId, DatabaseRole UserRole)
+    {
+        await _databaseUserRoles.DeleteDatabaseUserRole(DatabaseUserId, UserRole);
+    }
+
+    #endregion
+
     #region Databases
 
     /// <summary>
     /// Add database
     /// </summary>
     /// <param name="databaseName"></param>
-    /// <param name="databaseUser"></param>
-    /// <param name="databasePassword"></param>
     /// <param name="databaseServerId"></param>
     /// <param name="databaseTypeId"></param>
     /// <param name="databaseStatus"></param>
     /// <returns>DatabaseId</returns>
     public async Task<int> AddDatabase(
         string databaseName,
-        string databaseUser,
-        string databasePassword,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
@@ -302,8 +496,6 @@ public class Locator
     {
         return await _databases.AddDatabase(
             databaseName,
-            databaseUser,
-            databasePassword,
             databaseServerId,
             databaseTypeId,
             databaseStatus
@@ -340,74 +532,20 @@ public class Locator
     /// Add database
     /// </summary>
     /// <param name="databaseName"></param>
-    /// <param name="databaseUser"></param>
-    /// <param name="databasePassword"></param>
     /// <param name="databaseServerId"></param>
     /// <param name="databaseTypeId"></param>
     /// <returns>DatabaseId</returns>
     public async Task<int> AddDatabase(
         string databaseName,
-        string databaseUser,
-        string databasePassword,
         int databaseServerId,
         byte databaseTypeId
     )
     {
         return await _databases.AddDatabase(
             databaseName,
-            databaseUser,
-            databasePassword,
             databaseServerId,
             databaseTypeId,
             Status.Active
-        );
-    }
-
-    /// <summary>
-    /// Add database
-    /// </summary>
-    /// <param name="databaseName"></param>
-    /// <param name="databaseServerId"></param>
-    /// <param name="databaseTypeId"></param>
-    /// <returns>DatabaseId</returns>
-    public async Task<int> AddDatabase(
-        string databaseName,
-        int databaseServerId,
-        byte databaseTypeId
-    )
-    {
-        return await _databases.AddDatabase(databaseName, databaseServerId, databaseTypeId);
-    }
-
-    /// <summary>
-    /// Add database
-    /// </summary>
-    /// <param name="databaseName"></param>
-    /// <param name="databaseUser"></param>
-    /// <param name="databaseUserPassword"></param>
-    /// <param name="databaseServerId"></param>
-    /// <param name="databaseTypeId"></param>
-    /// <param name="databaseStatus"></param>
-    /// <param name="createDatabase"></param>
-    /// <returns>DatabaseId</returns>
-    public async Task<int> AddDatabase(
-        string databaseName,
-        string databaseUser,
-        string databaseUserPassword,
-        int databaseServerId,
-        byte databaseTypeId,
-        Status databaseStatus,
-        bool createDatabase
-    )
-    {
-        return await _databases.AddDatabase(
-            databaseName,
-            databaseUser,
-            databaseUserPassword,
-            databaseServerId,
-            databaseTypeId,
-            databaseStatus,
-            createDatabase
         );
     }
 

@@ -35,7 +35,6 @@ internal class GetConnections(IDbContextFactory<DbLocatorContext> dbContextFacto
                     ? new Database(
                         connectionEntity.Database.DatabaseId,
                         connectionEntity.Database.DatabaseName,
-                        connectionEntity.Database.DatabaseUser,
                         connectionEntity.Database.DatabaseType != null
                             ? new DatabaseType(
                                 connectionEntity.Database.DatabaseType.DatabaseTypeId,

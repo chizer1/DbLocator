@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DbLocator.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Db;
 
@@ -7,6 +8,12 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
     public virtual DbSet<ConnectionEntity> Connections { get; set; }
 
     public virtual DbSet<DatabaseEntity> Databases { get; set; }
+
+    public virtual DbSet<DatabaseUserEntity> DatabaseUsers { get; set; }
+
+    public virtual DbSet<DatabaseUserRoleEntity> DatabaseUserRoles { get; set; }
+
+    public virtual DbSet<DatabaseRoleEntity> DatabaseRoles { get; set; }
 
     public virtual DbSet<DatabaseServerEntity> DatabaseServers { get; set; }
 
@@ -47,6 +54,80 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
                 .HasConstraintName("FK_Connection_Tenant");
         });
 
+        modelBuilder.Entity<DatabaseRoleEntity>(entity =>
+        {
+            entity.ToTable("DatabaseRole");
+
+            entity.HasKey(e => e.DatabaseRoleId).HasName("PK_DatabaseRole");
+
+            entity.Property(e => e.DatabaseRoleId).HasColumnName("DatabaseRoleID");
+            entity.Property(e => e.DatabaseRoleName).HasMaxLength(50).IsUnicode(false);
+
+            entity
+                .HasMany(e => e.Users)
+                .WithOne(p => p.Role)
+                .HasForeignKey(d => d.DatabaseRoleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DatabaseUserRole_DatabaseRole");
+        });
+
+        modelBuilder.Entity<DatabaseUserEntity>(entity =>
+        {
+            entity.ToTable("DatabaseUser");
+
+            entity.HasKey(e => e.DatabaseUserId).HasName("PK_DatabaseUser");
+
+            entity.HasIndex(e => e.DatabaseId, "IX_DatabaseUser_DatabaseID");
+
+            entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseUserID");
+            entity.Property(e => e.DatabaseId).HasColumnName("DatabaseID");
+            entity.Property(e => e.UserName).HasMaxLength(50).IsUnicode(false);
+            entity.Property(e => e.UserPassword).HasMaxLength(50).IsUnicode(false);
+
+            entity
+                .HasOne(d => d.Database)
+                .WithMany(p => p.DatabaseUsers)
+                .HasForeignKey(d => d.DatabaseId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DatabaseUser_DatabaseId");
+
+            entity
+                .HasMany(d => d.UserRoles)
+                .WithOne(p => p.User)
+                .HasForeignKey(d => d.DatabaseUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DatabaseUserRole_DatabaseUser");
+        });
+
+        modelBuilder.Entity<DatabaseUserRoleEntity>(entity =>
+        {
+            entity.ToTable("DatabaseUserRole");
+
+            entity
+                .HasKey(e => new { e.DatabaseUserId, e.DatabaseRoleId })
+                .HasName("PK_DatabaseUserRole");
+
+            entity.HasIndex(e => e.DatabaseRoleId, "IX_DatabaseUserRole_DatabaseRoleID");
+
+            entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseUserID");
+            entity.Property(e => e.DatabaseRoleId).HasColumnName("DatabaseRoleID");
+
+            // Add foreign key constraints for DatabaseUser and DatabaseRole
+            entity
+                .HasOne(d => d.User)
+                .WithMany(p => p.UserRoles)
+                .HasForeignKey(d => d.DatabaseUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DatabaseUserRole_DatabaseUser");
+
+            entity
+                .HasOne(d => d.Role)
+                .WithMany(p => p.Users)
+                .HasForeignKey(d => d.DatabaseRoleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DatabaseUserRole_DatabaseRole");
+        });
+
         modelBuilder.Entity<DatabaseEntity>(entity =>
         {
             entity.ToTable("Database");
@@ -62,8 +143,6 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
             entity.Property(e => e.DatabaseServerId).HasColumnName("DatabaseServerID");
             entity.Property(e => e.DatabaseStatusId).HasColumnName("DatabaseStatusID");
             entity.Property(e => e.DatabaseTypeId).HasColumnName("DatabaseTypeID");
-            entity.Property(e => e.DatabaseUser).HasMaxLength(50).IsUnicode(false);
-            entity.Property(e => e.DatabaseUserPassword).HasMaxLength(50).IsUnicode(false);
 
             entity
                 .HasOne(d => d.DatabaseServer)
@@ -133,5 +212,19 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
             entity.Property(e => e.TenantName).IsRequired().HasMaxLength(50).IsUnicode(false);
             entity.Property(e => e.TenantStatusId).HasColumnName("TenantStatusID");
         });
+
+        // DATA SEED
+        foreach (var e in Enum.GetValues(typeof(DatabaseRole)).Cast<DatabaseRole>())
+        {
+            modelBuilder
+                .Entity<DatabaseRoleEntity>()
+                .HasData(
+                    new DatabaseRoleEntity
+                    {
+                        DatabaseRoleId = (int)e,
+                        DatabaseRoleName = e.ToString()
+                    }
+                );
+        }
     }
 }

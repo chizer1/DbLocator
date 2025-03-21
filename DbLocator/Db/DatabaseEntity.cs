@@ -6,10 +6,6 @@ internal class DatabaseEntity
 
     internal string DatabaseName { get; set; }
 
-    internal string DatabaseUser { get; set; }
-
-    internal string DatabaseUserPassword { get; set; }
-
     internal int DatabaseServerId { get; set; }
 
     internal byte DatabaseTypeId { get; set; }
@@ -19,6 +15,8 @@ internal class DatabaseEntity
     internal bool UseTrustedConnection { get; set; }
 
     internal virtual ICollection<ConnectionEntity> Connections { get; set; } = [];
+
+    internal virtual ICollection<DatabaseUserEntity> DatabaseUsers { get; set; } = [];
 
     internal virtual DatabaseServerEntity DatabaseServer { get; set; }
 

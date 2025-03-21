@@ -1,4 +1,5 @@
 using DbLocator.Db;
+using DbLocator.Domain;
 using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.Data.SqlClient;
@@ -10,7 +11,8 @@ internal record GetConnectionQuery(
     int? TenantId,
     int? DatabaseTypeId,
     int? ConnectionId,
-    string TenantCode
+    string TenantCode,
+    DatabaseRole[] Roles = null
 );
 
 internal sealed class GetConnectionQueryValidator : AbstractValidator<GetConnectionQuery>
@@ -32,7 +34,12 @@ internal class GetConnection(
         var connectionEntity = await GetConnectionEntityAsync(dbContext, query);
         var database = await GetDatabaseEntityAsync(dbContext, connectionEntity.DatabaseId);
 
-        var connectionString = BuildConnectionString(database, encrypytion);
+        var connectionString = await BuildConnectionString(
+            database,
+            encrypytion,
+            dbContext,
+            query.Roles
+        );
 
         return new SqlConnection(connectionString);
     }
@@ -132,7 +139,12 @@ internal class GetConnection(
             ?? throw new KeyNotFoundException($"Database with Id {databaseId} not found.");
     }
 
-    private static string BuildConnectionString(DatabaseEntity database, Encryption encrypytion)
+    private static async Task<string> BuildConnectionString(
+        DatabaseEntity database,
+        Encryption encrypytion,
+        DbLocatorContext dbContext,
+        DatabaseRole[] roles = null
+    )
     {
         // try to connect using the fully qualified domain name, if not available try the ip address
         // then try the host name
@@ -154,10 +166,46 @@ internal class GetConnection(
         }
         else
         {
-            connectionStringBuilder.UserID = database.DatabaseUser;
-            connectionStringBuilder.Password = encrypytion.Decrypt(database.DatabaseUserPassword);
+            var user = await GetDatabaseUser(database, dbContext, encrypytion, roles);
+            connectionStringBuilder.UserID = user.UserName;
+            connectionStringBuilder.Password = encrypytion.Decrypt(user.UserPassword);
         }
 
         return connectionStringBuilder.ConnectionString;
+    }
+
+    private static async Task<DatabaseUserEntity> GetDatabaseUser(
+        DatabaseEntity database,
+        DbLocatorContext dbContext,
+        Encryption encryption,
+        DatabaseRole[] roleList = null
+    )
+    {
+        roleList ??= [DatabaseRole.DataReader, DatabaseRole.DataWriter];
+        var user = await GetDatabaseUser(database, dbContext, roleList);
+
+        return user;
+    }
+
+    private static async Task<DatabaseUserEntity> GetDatabaseUser(
+        DatabaseEntity database,
+        DbLocatorContext dbContext,
+        DatabaseRole[] roleList
+    )
+    {
+        var roles = roleList.Select(r => (int)r);
+        var users = await dbContext
+            .Set<DatabaseUserEntity>()
+            .Include(u => u.UserRoles)
+            .Where(u => u.DatabaseId == database.DatabaseId)
+            .ToListAsync();
+
+        // Find a user that matches all the roles
+        return users.FirstOrDefault(u =>
+                !roles.Except(u.UserRoles.Select(ur => ur.DatabaseRoleId)).Any()
+            )
+            ?? throw new InvalidOperationException(
+                $"No suitable database user found for database '{database.DatabaseName}' with roles {string.Join(", ", roleList)}."
+            );
     }
 }

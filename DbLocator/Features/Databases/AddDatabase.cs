@@ -8,8 +8,6 @@ namespace DbLocator.Features.Databases;
 
 internal record AddDatabaseCommand(
     string DatabaseName,
-    string DatabaseUser,
-    string DatabaseUserPassword,
     int DatabaseServerId,
     byte DatabaseTypeId,
     Status DatabaseStatus,
@@ -32,32 +30,12 @@ internal sealed class AddDatabaseCommandValidator : AbstractValidator<AddDatabas
         RuleFor(x => x.DatabaseServerId).NotEmpty().WithMessage("Database Server Id is required.");
         RuleFor(x => x.DatabaseTypeId).NotEmpty().WithMessage("Database Type Id is required.");
         RuleFor(x => x.DatabaseStatus).IsInEnum().WithMessage("Database Status is required.");
-
-        RuleFor(x => x.DatabaseUser)
-            .MaximumLength(50)
-            .WithMessage("Database User cannot be more than 50 characters.")
-            .Matches(@"^[a-zA-Z0-9_]+$")
-            .WithMessage("Database User can only contain letters, numbers, and underscores.");
-
-        RuleFor(x => x.DatabaseUserPassword)
-            .MinimumLength(8)
-            .WithMessage("Database User Password must be at least 8 characters long.")
-            .Matches(@"[A-Z]")
-            .WithMessage("Database User Password must contain at least one uppercase letter.")
-            .Matches(@"[a-z]")
-            .WithMessage("Database User Password must contain at least one lowercase letter.")
-            .Matches(@"[0-9]")
-            .WithMessage("Database User Password must contain at least one number.")
-            .Matches(@"[\W_]")
-            .WithMessage("Database User Password must contain at least one special character.")
-            .MaximumLength(50)
-            .WithMessage("Database User Password cannot be more than 50 characters.");
     }
 }
 
 internal class AddDatabase(
-    IDbContextFactory<DbLocatorContext> dbContextFactory,
-    Encryption encryption
+    IDbContextFactory<DbLocatorContext> dbContextFactory //,
+//Encryption encryption
 )
 {
     internal async Task<int> Handle(AddDatabaseCommand command)
@@ -87,10 +65,10 @@ internal class AddDatabase(
         var database = new DatabaseEntity
         {
             DatabaseName = command.DatabaseName,
-            DatabaseUser = command.UseTrustedConnection ? null : command.DatabaseUser,
-            DatabaseUserPassword = command.UseTrustedConnection
-                ? null
-                : encryption.Encrypt(command.DatabaseUserPassword),
+            // DatabaseUser = command.UseTrustedConnection ? null : command.DatabaseUser,
+            // DatabaseUserPassword = command.UseTrustedConnection
+            //     ? null
+            //     : encryption.Encrypt(command.DatabaseUserPassword),
             DatabaseServerId = command.DatabaseServerId,
             DatabaseTypeId = command.DatabaseTypeId,
             DatabaseStatusId = (byte)command.DatabaseStatus,
@@ -113,30 +91,10 @@ internal class AddDatabase(
                 commands.Add(
                     $"exec('create database {command.DatabaseName}') at {databaseServer.DatabaseServerHostName};"
                 );
-
-                if (!command.UseTrustedConnection)
-                {
-                    commands.Add(
-                        $"exec('create login {command.DatabaseUser} with password = ''{command.DatabaseUserPassword}''') at {databaseServer.DatabaseServerHostName};"
-                    );
-                    commands.Add(
-                        $"exec('use {command.DatabaseName}; create user {command.DatabaseUser} for login {command.DatabaseUser}') at {databaseServer.DatabaseServerHostName};"
-                    );
-                }
             }
             else
             {
                 commands.Add($"create database {command.DatabaseName}");
-
-                if (!command.UseTrustedConnection)
-                {
-                    commands.Add(
-                        $"create login {command.DatabaseUser} with password = '{command.DatabaseUserPassword}'"
-                    );
-                    commands.Add(
-                        $"use {command.DatabaseName}; create user {command.DatabaseUser} for login {command.DatabaseUser}"
-                    );
-                }
             }
 
             foreach (var commandText in commands)

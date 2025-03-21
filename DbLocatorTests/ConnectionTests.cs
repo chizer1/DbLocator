@@ -1,6 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using DbLocator;
 using DbLocator.Domain;
 using DbLocatorTests.Fixtures;
+using Microsoft.Data.SqlClient;
 
 namespace DbLocatorTests;
 
@@ -8,39 +11,33 @@ namespace DbLocatorTests;
 public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
 {
     private readonly Locator _dbLocator = dbLocatorFixture.DbLocator;
+    private readonly int _databaseServerId = dbLocatorFixture.LocalhostServerId;
 
     [Fact]
     public async Task AddConnection()
     {
-        var tenantName = "Tenant2";
+        var connectionId = await GetConnectionId();
+
+        var connections = await _dbLocator.GetConnections();
+        Assert.Contains(connections, cn => cn.Id == connectionId);
+    }
+
+    private async Task<int> GetConnectionId()
+    {
+        var tenantName = TestHelpers.GetRandomString();
         var tenantId = await _dbLocator.AddTenant(tenantName);
 
-        var databaseTypeName = "DatabaseType2";
+        var databaseTypeName = TestHelpers.GetRandomString();
         var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
 
-        var databaseServerName = "DBServer2";
-        var databaseServerIpAddress = "127.0.0.1";
-        var databaseServerId = await _dbLocator.AddDatabaseServer(
-            databaseServerName,
-            databaseServerIpAddress,
-            null,
-            null,
-            false
-        );
-
-        var databaseName = "Database2";
+        var databaseName = TestHelpers.GetRandomString();
         var databaseId = await _dbLocator.AddDatabase(
             databaseName,
-            "database2_user",
-            "WvP26JM%6QP92y&PV",
-            databaseServerId,
+            _databaseServerId,
             databaseTypeId,
             Status.Active
         );
 
-        var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
-
-        var connections = await _dbLocator.GetConnections();
-        Assert.Contains(connections, cn => cn.Id == connectionId);
+        return await _dbLocator.AddConnection(tenantId, databaseId);
     }
 }
