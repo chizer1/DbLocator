@@ -110,8 +110,6 @@ internal class Databases(
     internal async Task UpdateDatabase(
         int databaseId,
         string databaseName,
-        string databaseUser,
-        string databaseUserPassword,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
@@ -121,8 +119,6 @@ internal class Databases(
             new UpdateDatabaseCommand(
                 databaseId,
                 databaseName,
-                databaseUser,
-                databaseUserPassword,
                 databaseServerId,
                 databaseTypeId,
                 databaseStatus,
@@ -134,91 +130,35 @@ internal class Databases(
     internal async Task UpdateDatabase(int databaseId, int databaseServerId)
     {
         await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(
-                databaseId,
-                null,
-                null,
-                null,
-                databaseServerId,
-                null,
-                null,
-                null
-            )
-        );
-    }
-
-    internal async Task UpdateDatabase(
-        int databaseId,
-        string databaseUser,
-        string databaseUserPassword
-    )
-    {
-        await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(
-                databaseId,
-                null,
-                databaseUser,
-                databaseUserPassword,
-                null,
-                null,
-                null,
-                null
-            )
+            new UpdateDatabaseCommand(databaseId, null, databaseServerId, null, null, null)
         );
     }
 
     internal async Task UpdateDatabase(int databaseId, byte databaseTypeId)
     {
         await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(
-                databaseId,
-                null,
-                null,
-                null,
-                null,
-                databaseTypeId,
-                null,
-                null
-            )
+            new UpdateDatabaseCommand(databaseId, null, null, databaseTypeId, null, null)
         );
     }
 
     internal async Task UpdateDatabase(int databaseId, string databaseName)
     {
         await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(databaseId, databaseName, null, null, null, null, null, null)
+            new UpdateDatabaseCommand(databaseId, databaseName, null, null, null, null)
         );
     }
 
     internal async Task UpdateDatabase(int databaseId, Status databaseStatus)
     {
         await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(
-                databaseId,
-                null,
-                null,
-                null,
-                null,
-                null,
-                databaseStatus,
-                null
-            )
+            new UpdateDatabaseCommand(databaseId, null, null, null, databaseStatus, null)
         );
     }
 
     internal async Task UpdateDatabase(int databaseId, bool useTrustedConnection)
     {
         await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(
-                databaseId,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                useTrustedConnection
-            )
+            new UpdateDatabaseCommand(databaseId, null, null, null, null, useTrustedConnection)
         );
     }
 }

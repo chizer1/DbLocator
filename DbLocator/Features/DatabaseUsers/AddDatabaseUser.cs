@@ -110,14 +110,6 @@ internal class AddDatabaseUser(
             $"use {database.DatabaseName}; create user {command.UserName} for login {command.UserName}"
         };
 
-        // foreach (var role in command.UserRoles)
-        // {
-        //     var roleName = Enum.GetName(role).ToLower();
-        //     commands.Add(
-        //         $"use {database.DatabaseName}; exec sp_addrolemember 'db_{roleName}', '{command.UserName}'"
-        //     );
-        // }
-
         for (var i = 0; i < commands.Count; i++)
         {
             var commandText = commands[i];

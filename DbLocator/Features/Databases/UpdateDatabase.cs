@@ -9,8 +9,6 @@ namespace DbLocator.Features.Databases;
 internal record UpdateDatabaseCommand(
     int DatabaseId,
     string DatabaseName,
-    string DatabaseUser,
-    string DatabaseUserPassword,
     int? DatabaseServerId,
     byte? DatabaseTypeId,
     Status? DatabaseStatus,
@@ -28,26 +26,6 @@ internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateD
             .WithMessage("Database Name cannot be more than 50 characters.")
             .Matches(@"^[a-zA-Z0-9_]+$")
             .WithMessage("Database Name can only contain letters, numbers, and underscores.");
-
-        RuleFor(x => x.DatabaseUser)
-            .MaximumLength(50)
-            .WithMessage("Database User cannot be more than 50 characters.")
-            .Matches(@"^[a-zA-Z0-9_]+$")
-            .WithMessage("Database User can only contain letters, numbers, and underscores.");
-
-        RuleFor(x => x.DatabaseUserPassword)
-            .MinimumLength(8)
-            .WithMessage("Database User Password must be at least 8 characters long.")
-            .Matches(@"[A-Z]")
-            .WithMessage("Database User Password must contain at least one uppercase letter.")
-            .Matches(@"[a-z]")
-            .WithMessage("Database User Password must contain at least one lowercase letter.")
-            .Matches(@"[0-9]")
-            .WithMessage("Database User Password must contain at least one number.")
-            .Matches(@"[\W_]")
-            .WithMessage("Database User Password must contain at least one special character.")
-            .MaximumLength(50)
-            .WithMessage("Database User Password cannot be more than 50 characters.");
     }
 }
 
@@ -88,16 +66,9 @@ internal class UpdateDatabase(IDbContextFactory<DbLocatorContext> dbContextFacto
             );
 
         var oldDatabaseName = databaseEntity.DatabaseName;
-        // var oldDatabaseUser = databaseEntity.DatabaseUser;
 
         if (!string.IsNullOrEmpty(command.DatabaseName))
             databaseEntity.DatabaseName = command.DatabaseName;
-
-        // if (!string.IsNullOrEmpty(command.DatabaseUserPassword))
-        //     databaseEntity.DatabaseUserPassword = encryption.Encrypt(command.DatabaseUserPassword);
-
-        // if (!string.IsNullOrEmpty(command.DatabaseUser))
-        //     databaseEntity.DatabaseUser = command.DatabaseUser;
 
         if (command.DatabaseServerId.HasValue)
             databaseEntity.DatabaseServerId = command.DatabaseServerId.Value;
@@ -117,16 +88,6 @@ internal class UpdateDatabase(IDbContextFactory<DbLocatorContext> dbContextFacto
         var commands = new List<string>();
         if (oldDatabaseName != command.DatabaseName && !string.IsNullOrEmpty(command.DatabaseName))
             commands.Add($"alter database {oldDatabaseName} modify name = {command.DatabaseName}");
-
-        // if (oldDatabaseUser != command.DatabaseUser && !string.IsNullOrEmpty(command.DatabaseUser))
-        //     commands.Add(
-        //         $"use {command.DatabaseName}; alter user {oldDatabaseUser} with name = {command.DatabaseUser}"
-        //     );
-
-        if (command.DatabaseUserPassword != null)
-            commands.Add(
-                $"alter login {command.DatabaseUser} with password = '{command.DatabaseUserPassword}'"
-            );
 
         foreach (var commandText in commands)
         {
