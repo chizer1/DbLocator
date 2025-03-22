@@ -413,6 +413,27 @@ public class Locator
         await _databaseUsers.UpdateDatabaseUser(DatabaseUserId, DatabaseUserName);
     }
 
+    /// <summary>
+    /// Delete database user
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <param name="DeleteDatabaseUser"></param>
+    /// <returns></returns>
+    public async Task DeleteDatabaseUser(int DatabaseUserId, bool DeleteDatabaseUser)
+    {
+        await _databaseUsers.DeleteDatabaseUser(DatabaseUserId, DeleteDatabaseUser);
+    }
+
+    /// <summary>
+    /// Delete database user
+    /// </summary>
+    /// <param name="DatabaseUserId"></param>
+    /// <returns></returns>
+    public async Task DeleteDatabaseUser(int DatabaseUserId)
+    {
+        await _databaseUsers.DeleteDatabaseUser(DatabaseUserId);
+    }
+
     # endregion
 
     #region DatabaseUserRoles
@@ -586,8 +607,6 @@ public class Locator
     /// </summary>
     /// <param name="databaseId"></param>
     /// <param name="databaseName"></param>
-    /// <param name="databaseUser"></param>
-    /// <param name="databaseUserPassword"></param>
     /// <param name="databaseServerId"></param>
     /// <param name="databaseTypeId"></param>
     /// <param name="databaseStatus"></param>
@@ -595,8 +614,6 @@ public class Locator
     public async Task UpdateDatabase(
         int databaseId,
         string databaseName,
-        string databaseUser,
-        string databaseUserPassword,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
@@ -605,8 +622,6 @@ public class Locator
         await _databases.UpdateDatabase(
             databaseId,
             databaseName,
-            databaseUser,
-            databaseUserPassword,
             databaseServerId,
             databaseTypeId,
             databaseStatus
@@ -644,22 +659,6 @@ public class Locator
     public async Task UpdateDatabase(int databaseId, string databaseName)
     {
         await _databases.UpdateDatabase(databaseId, databaseName);
-    }
-
-    /// <summary>
-    /// Update database
-    /// </summary>
-    /// <param name="databaseId"></param>
-    /// <param name="databaseUser"></param>
-    /// <param name="databaseUserPassword"></param>
-    /// <returns></returns>
-    public async Task UpdateDatabase(
-        int databaseId,
-        string databaseUser,
-        string databaseUserPassword
-    )
-    {
-        await _databases.UpdateDatabase(databaseId, databaseUser, databaseUserPassword);
     }
 
     /// <summary>

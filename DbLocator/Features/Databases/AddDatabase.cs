@@ -65,10 +65,6 @@ internal class AddDatabase(
         var database = new DatabaseEntity
         {
             DatabaseName = command.DatabaseName,
-            // DatabaseUser = command.UseTrustedConnection ? null : command.DatabaseUser,
-            // DatabaseUserPassword = command.UseTrustedConnection
-            //     ? null
-            //     : encryption.Encrypt(command.DatabaseUserPassword),
             DatabaseServerId = command.DatabaseServerId,
             DatabaseTypeId = command.DatabaseTypeId,
             DatabaseStatusId = (byte)command.DatabaseStatus,
