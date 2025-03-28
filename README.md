@@ -1,15 +1,17 @@
 # DbLocator
 
-The purpose of this library is to simplify database interactions for applications managing multi-tenant environments with multiple database connections.
+DbLocator is a library designed to simplify database interactions for multi-tenant applications by managing and cataloging multiple database connections.  
 
-What it can do:
-1. Supports horizontal scaling by distributing tenant databases across multiple servers.
-2. Instead of manually managing SQL connections, the class provides a structured way to retrieve and create database connections dynamically based on tenant and database type.
-3. Each tenant might require multiple databases, each serving a distinct functional purpose. Instead of a single database handling all tenant data, the system can provision separate logical databases tailored to different workloads.
+## Features  
+- Dynamically retrieves and creates database connections.
+- Allows tenants to have multiple databases, each serving distinct functional purposes.  
+- Implements database-level role management for SQL Server, enabling fine-grained control over built-in database roles such as read/write privileges.
+- Supports horizontal scaling by distributing tenant databases across multiple servers.  
 
-What it can't do:
-1. It does not handle user roles, permissions, or access control at the SQL Server level. 
-2. Since the library focuses on managing database connections rather than the content of tenant databases, it inherently does not handle schema definitions, modifications, or data structure enforcement.
+## Limitations  
+- Does not manage schema definitions, modifications, or data structure enforcement.  
+- Does not automate SQL Server instance setup.  
+- Does not handle DBA tasks such as backups or database migrations.  
 
 ```
                          +--------------+
@@ -39,24 +41,34 @@ What it can't do:
 ## How to run
 
 ### 1. Add package to your .Net project
-`dotnet add package DbLocator`
+Package is available on nuget.org (https://www.nuget.org/packages/DbLocator)
+```csharp
+dotnet add package DbLocator
+```
 
 ### 2. SQL Server setup
 You will need an instance of SQL Server running. For local development, you can either:
-  - Use the SQL Server image in this repository by running `docker compose up` from the root. This requires Docker Desktop to be installed (https://docs.docker.com/get-started/get-docker/)
+  - Use the SQL Server Docker image in this repository by running `docker compose up` from the root. This requires Docker Desktop to be installed (https://docs.docker.com/get-started/get-docker/)
   - Install SQL Server directly on your machine (https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
   - Spin up a new SQL Server instance in the cloud. **Note**: This library may not play nicely with Azure SQL as this library has code that relies on traditional SQL Server logins which Azure SQL doesn't support.
 
 ### 3. Initialization 
 
-After installing the DbLocator package and setting up SQL Server, you can start using the library. The main class of the library is `Locator`, which can be initialized like this:
+After installing the DbLocator package and setting up SQL Server, you can start using the library. The main class of the library is `Locator`, which can be initialized in several ways:
 
 ```csharp
-Locator dbLocator = new("{YourConnectionString}");
-// ConnectionString if using Docker image from this repo:
-// "Server=localhost;Database=DbLocator;User Id=sa;Password=1StrongPwd!!;Encrypt=True;TrustServerCertificate=True;"
+Locator dbLocator = new("YourConnectionString");
+
+Locator dbLocator = new("YourConnectionString", "EncryptionKey");
+
+// full example for caching omitted for brevity
+IDistributedCache cache = builder
+    .Services.BuildServiceProvider()
+    .GetRequiredService<IDistributedCache>();
+
+Locator dbLocator = new("YourConnectionString", "EncryptionKey", cache);
 ```
-In a real world scenario, you wouldn't want to connect an sysadmin login to this library for security purposes (Principle of Least Privilege).
+In a real world scenario, you probably wouldn't want to connect an sysadmin login to this library for security purposes (Principle of Least Privilege).
 You would want to create a login with these server level roles:
 1. **dbcreator**: If you want to create databases from this library
 2. **securityadmin**: If you want to create logins from this library.
@@ -76,7 +88,10 @@ var databaseTypeId = await dbLocator.AddDatabaseType("Client");
 // using hostname to connect to server (localhost if using docker image from repo)
 var databaseServerId = await dbLocator.AddDatabaseServer("Docker SQL Server", null, "localhost", null, false); 
 
-var databaseId = await dbLocator.AddDatabase("Acme_Client", "acme_client_user", databaseServerId, databaseTypeId, Status.Active);
+var databaseId = await dbLocator.AddDatabase("Acme_Client", databaseServerId, databaseTypeId, Status.Active, true);
+
+// if using a trusted connection, specifying a user is not required
+var databaseUserId = await dbLocator.AddDatabaseUser(databaseId, "acme_client_user", "acme_client_user_password", true);
 
 var connectionId = await dbLocator.AddConnection(tenantId, databaseId);
 
@@ -84,7 +99,7 @@ var connectionId = await dbLocator.AddConnection(tenantId, databaseId);
 SqlConnection connection1 = await dbLocator.GetConnection(connectionId);
 SqlConnection connection2 = await dbLocator.GetConnection(tenantId, databaseTypeId);
 SqlConnection connection3 = await dbLocator.GetConnection(tenantCode, databaseTypeId);
-
+SqlConnection connection4 = await dbLocator.GetConnection(tenantCode, databaseTypeId, new[] { DatabaseRole.DataReader });
 ```
 
 ### 5. Linked Servers
