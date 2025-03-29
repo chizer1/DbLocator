@@ -32,7 +32,7 @@ public class Locator
     /// <param name="dbLocatorConnectionString">The connection string for the DbLocator database.</param>
     /// <exception cref="ArgumentException">Thrown when the connection string is null or whitespace.</exception>
     public Locator(string dbLocatorConnectionString)
-        : this(dbLocatorConnectionString, null) { }
+        : this(dbLocatorConnectionString, (string)null) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Locator"/> class with the specified connection string and encryption key.
@@ -43,6 +43,16 @@ public class Locator
     /// <exception cref="ArgumentException">Thrown when the connection string is null or whitespace.</exception>
     public Locator(string dbLocatorConnectionString, string encryptionKey)
         : this(dbLocatorConnectionString, encryptionKey, null) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Locator"/> class with the specified connection string and distributed cache.
+    /// This constructor sets up the database context, applies migrations, and initializes the various services.
+    /// </summary>
+    /// <param name="dbLocatorConnectionString">The connection string for the DbLocator database.</param>
+    /// <param name="distributedCache">The distributed cache for caching data.</param>
+    /// <exception cref="ArgumentException">Thrown when the connection string is null or whitespace.</exception>
+    public Locator(string dbLocatorConnectionString, IDistributedCache distributedCache)
+        : this(dbLocatorConnectionString, null, distributedCache) { }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Locator"/> class with the specified connection string, encryption key, and distributed cache.
@@ -75,12 +85,12 @@ public class Locator
         var dbContextFactory = DbContextFactory.CreateDbContextFactory(dbLocatorConnectionString);
 
         var encryption = new Encryption(encryptionKey);
-        _connections = new Connections(dbContextFactory, encryption);
-        _databases = new Databases(dbContextFactory);
-        _databaseServers = new DatabaseServers(dbContextFactory);
-        _databaseUsers = new DatabaseUsers(dbContextFactory, encryption);
+        _connections = new Connections(dbContextFactory, encryption, distributedCache);
+        _databases = new Databases(dbContextFactory, distributedCache);
+        _databaseServers = new DatabaseServers(dbContextFactory, distributedCache);
+        _databaseUsers = new DatabaseUsers(dbContextFactory, encryption, distributedCache);
         _databaseUserRoles = new DatabaseUserRoles(dbContextFactory);
-        _databaseTypes = new DatabaseTypes(dbContextFactory);
+        _databaseTypes = new DatabaseTypes(dbContextFactory, distributedCache);
         _tenants = new Tenants(dbContextFactory, distributedCache);
     }
 

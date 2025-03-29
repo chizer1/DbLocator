@@ -3,6 +3,7 @@ using DbLocator.Domain;
 using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseUsers;
 
@@ -44,7 +45,8 @@ internal sealed class UpdateDatabaseUserCommandValidator
 
 internal class UpdateDatabaseUser(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    Encryption encryption
+    Encryption encryption,
+    IDistributedCache cache
 )
 {
     internal async Task Handle(UpdateDatabaseUserCommand command)
@@ -140,5 +142,7 @@ internal class UpdateDatabaseUser(
             await dbContext.Database.OpenConnectionAsync();
             await cmd.ExecuteNonQueryAsync();
         }
+
+        cache?.Remove("databaseUsers");
     }
 }

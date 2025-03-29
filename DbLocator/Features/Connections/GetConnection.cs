@@ -4,6 +4,7 @@ using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Connections;
 
@@ -22,7 +23,8 @@ internal sealed class GetConnectionQueryValidator : AbstractValidator<GetConnect
 
 internal class GetConnection(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    Encryption encrypytion
+    Encryption encrypytion,
+    IDistributedCache cache
 )
 {
     internal async Task<SqlConnection> Handle(GetConnectionQuery query)
@@ -30,6 +32,12 @@ internal class GetConnection(
         await new GetConnectionQueryValidator().ValidateAndThrowAsync(query);
 
         await using var dbContext = dbContextFactory.CreateDbContext();
+
+        var cacheKey = $"connection:{query}";
+        var cachedConnectionString = await cache.GetStringAsync(cacheKey);
+
+        if (!string.IsNullOrEmpty(cachedConnectionString))
+            return new SqlConnection(cachedConnectionString);
 
         var connectionEntity = await GetConnectionEntityAsync(dbContext, query);
         var database = await GetDatabaseEntityAsync(dbContext, connectionEntity.DatabaseId);
@@ -40,6 +48,8 @@ internal class GetConnection(
             dbContext,
             query.Roles
         );
+
+        await cache.SetStringAsync(cacheKey, connectionString);
 
         return new SqlConnection(connectionString);
     }

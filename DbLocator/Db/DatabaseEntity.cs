@@ -2,23 +2,14 @@
 
 internal class DatabaseEntity
 {
-    internal int DatabaseId { get; set; }
-
-    internal string DatabaseName { get; set; }
-
-    internal int DatabaseServerId { get; set; }
-
-    internal byte DatabaseTypeId { get; set; }
-
-    internal byte DatabaseStatusId { get; set; }
-
-    internal bool UseTrustedConnection { get; set; }
-
-    internal virtual ICollection<ConnectionEntity> Connections { get; set; } = [];
-
-    internal virtual ICollection<DatabaseUserEntity> DatabaseUsers { get; set; } = [];
-
-    internal virtual DatabaseServerEntity DatabaseServer { get; set; }
-
-    internal virtual DatabaseTypeEntity DatabaseType { get; set; }
+    public int DatabaseId { get; set; }
+    public string DatabaseName { get; set; }
+    public int DatabaseServerId { get; set; }
+    public byte DatabaseTypeId { get; set; }
+    public byte DatabaseStatusId { get; set; }
+    public bool UseTrustedConnection { get; set; }
+    public virtual ICollection<ConnectionEntity> Connections { get; set; } = [];
+    public virtual ICollection<DatabaseUserEntity> DatabaseUsers { get; set; } = [];
+    public virtual DatabaseServerEntity DatabaseServer { get; set; }
+    public virtual DatabaseTypeEntity DatabaseType { get; set; }
 }

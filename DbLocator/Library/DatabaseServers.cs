@@ -2,15 +2,19 @@ using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.DatabaseServers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Library;
 
-internal class DatabaseServers(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class DatabaseServers(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
-    private readonly AddDatabaseServer _addDatabaseServer = new(dbContextFactory);
-    private readonly DeleteDatabaseServer _deleteDatabaseServer = new(dbContextFactory);
-    private readonly GetDatabaseServers _getDatabaseServers = new(dbContextFactory);
-    private readonly UpdateDatabaseServer _updateDatabaseServer = new(dbContextFactory);
+    private readonly AddDatabaseServer _addDatabaseServer = new(dbContextFactory, cache);
+    private readonly DeleteDatabaseServer _deleteDatabaseServer = new(dbContextFactory, cache);
+    private readonly GetDatabaseServers _getDatabaseServers = new(dbContextFactory, cache);
+    private readonly UpdateDatabaseServer _updateDatabaseServer = new(dbContextFactory, cache);
 
     internal async Task<int> AddDatabaseServer(
         string databaseServerName,

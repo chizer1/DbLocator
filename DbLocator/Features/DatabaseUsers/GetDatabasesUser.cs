@@ -1,7 +1,9 @@
+using System.Text.Json;
 using DbLocator.Db;
 using DbLocator.Domain;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseUsers;
 
@@ -12,11 +14,20 @@ internal sealed class GetDatabaseUsersQueryValidator : AbstractValidator<GetData
     internal GetDatabaseUsersQueryValidator() { }
 }
 
-internal class GetDatabaseUsers(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class GetDatabaseUsers(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
     public async Task<List<DatabaseUser>> Handle(GetDatabaseUsersQuery query)
     {
         await new GetDatabaseUsersQueryValidator().ValidateAndThrowAsync(query);
+
+        var cacheKey = "databaseUsers";
+        var cachedData = await cache.GetStringAsync(cacheKey);
+
+        if (!string.IsNullOrEmpty(cachedData))
+            return JsonSerializer.Deserialize<List<DatabaseUser>>(cachedData);
 
         await using var dbContext = dbContextFactory.CreateDbContext();
 
@@ -25,14 +36,18 @@ internal class GetDatabaseUsers(IDbContextFactory<DbLocatorContext> dbContextFac
             .Include(d => d.UserRoles)
             .ToListAsync();
 
-        return
-        [
-            .. databaseUserEntities.Select(d => new DatabaseUser(
+        var databaseUsers = databaseUserEntities
+            .Select(d => new DatabaseUser(
                 d.DatabaseUserId,
                 d.UserName,
                 d.DatabaseId,
-                [.. d.UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)]
+                d.UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId).ToList()
             ))
-        ];
+            .ToList();
+
+        var serializedData = JsonSerializer.Serialize(databaseUsers);
+        await cache.SetStringAsync(cacheKey, serializedData);
+
+        return databaseUsers;
     }
 }

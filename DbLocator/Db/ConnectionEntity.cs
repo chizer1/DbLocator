@@ -2,13 +2,9 @@
 
 internal class ConnectionEntity
 {
-    internal int ConnectionId { get; set; }
-
-    internal int TenantId { get; set; }
-
-    internal int DatabaseId { get; set; }
-
-    internal virtual DatabaseEntity Database { get; set; }
-
-    internal virtual TenantEntity Tenant { get; set; }
+    public int ConnectionId { get; set; }
+    public int TenantId { get; set; }
+    public int DatabaseId { get; set; }
+    public virtual DatabaseEntity Database { get; set; }
+    public virtual TenantEntity Tenant { get; set; }
 }

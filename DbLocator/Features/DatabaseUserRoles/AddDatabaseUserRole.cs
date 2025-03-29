@@ -1,8 +1,6 @@
 using DbLocator.Db;
 using DbLocator.Domain;
-using DbLocator.Utilities;
 using FluentValidation;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseUserRoles;

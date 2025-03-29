@@ -1,9 +1,8 @@
 using DbLocator.Db;
-using DbLocator.Domain;
 using DbLocator.Utilities;
 using FluentValidation;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseUsers;
 
@@ -44,7 +43,8 @@ internal sealed class AddDatabaseUserCommandValidator : AbstractValidator<AddDat
 
 internal class AddDatabaseUser(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    Encryption encryption
+    Encryption encryption,
+    IDistributedCache cache
 )
 {
     internal async Task<int> Handle(AddDatabaseUserCommand command)
@@ -90,6 +90,8 @@ internal class AddDatabaseUser(
         {
             await CreateDatabaseUser(dbContext, command);
         }
+
+        cache?.Remove("databaseUsers");
 
         return databaseUser.DatabaseUserId;
     }

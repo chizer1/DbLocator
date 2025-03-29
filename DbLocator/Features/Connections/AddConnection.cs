@@ -1,6 +1,7 @@
 using DbLocator.Db;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Connections;
 
@@ -15,7 +16,10 @@ internal sealed class AddConnectionCommandValidator : AbstractValidator<AddConne
     }
 }
 
-internal class AddConnection(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class AddConnection(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
     internal async Task<int> Handle(AddConnectionCommand command)
     {
@@ -33,6 +37,8 @@ internal class AddConnection(IDbContextFactory<DbLocatorContext> dbContextFactor
 
         await dbContext.Set<ConnectionEntity>().AddAsync(connection);
         await dbContext.SaveChangesAsync();
+
+        cache?.Remove("connections");
 
         return connection.ConnectionId;
     }

@@ -4,18 +4,20 @@ using DbLocator.Features.Connections;
 using DbLocator.Utilities;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Library;
 
 internal class Connections(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    Encryption encryption
+    Encryption encryption,
+    IDistributedCache cache
 )
 {
-    private readonly AddConnection _addConnection = new(dbContextFactory);
-    private readonly DeleteConnection _deleteConnection = new(dbContextFactory);
-    private readonly GetConnection _getConnection = new(dbContextFactory, encryption);
-    private readonly GetConnections _getConnections = new(dbContextFactory);
+    private readonly AddConnection _addConnection = new(dbContextFactory, cache);
+    private readonly DeleteConnection _deleteConnection = new(dbContextFactory, cache);
+    private readonly GetConnection _getConnection = new(dbContextFactory, encryption, cache);
+    private readonly GetConnections _getConnections = new(dbContextFactory, cache);
 
     internal async Task<int> AddConnection(int tenantId, int databaseId)
     {

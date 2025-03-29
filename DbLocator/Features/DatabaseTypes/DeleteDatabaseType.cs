@@ -1,6 +1,7 @@
 using DbLocator.Db;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseTypes;
 
@@ -15,7 +16,10 @@ internal sealed class DeleteDatabaseTypeCommandValidator
     }
 }
 
-internal class DeleteDatabaseType(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class DeleteDatabaseType(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
     internal async Task Handle(DeleteDatabaseTypeCommand command)
     {
@@ -42,5 +46,7 @@ internal class DeleteDatabaseType(IDbContextFactory<DbLocatorContext> dbContextF
 
         dbContext.Remove(databaseType);
         await dbContext.SaveChangesAsync();
+
+        cache?.Remove("databaseTypes");
     }
 }

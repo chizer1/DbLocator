@@ -1,7 +1,9 @@
+using System.Text.Json;
 using DbLocator.Db;
 using DbLocator.Domain;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Databases;
 
@@ -12,11 +14,20 @@ internal sealed class GetDatabasesQueryValidator : AbstractValidator<GetDatabase
     internal GetDatabasesQueryValidator() { }
 }
 
-internal class GetDatabases(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class GetDatabases(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
     public async Task<List<Database>> Handle(GetDatabasesQuery query)
     {
         await new GetDatabasesQueryValidator().ValidateAndThrowAsync(query);
+
+        var cacheKey = "databases";
+        var cachedDatabases = await cache.GetStringAsync(cacheKey);
+
+        if (!string.IsNullOrEmpty(cachedDatabases))
+            return JsonSerializer.Deserialize<List<Database>>(cachedDatabases);
 
         await using var dbContext = dbContextFactory.CreateDbContext();
 
@@ -26,12 +37,10 @@ internal class GetDatabases(IDbContextFactory<DbLocatorContext> dbContextFactory
             .Include(d => d.DatabaseType)
             .ToListAsync();
 
-        return
-        [
-            .. databaseEntities.Select(d => new Database(
+        var databases = databaseEntities
+            .Select(d => new Database(
                 d.DatabaseId,
                 d.DatabaseName,
-                //d.DatabaseUser,
                 new DatabaseType(d.DatabaseType.DatabaseTypeId, d.DatabaseType.DatabaseTypeName),
                 new DatabaseServer(
                     d.DatabaseServer.DatabaseServerId,
@@ -44,6 +53,11 @@ internal class GetDatabases(IDbContextFactory<DbLocatorContext> dbContextFactory
                 (Status)d.DatabaseStatusId,
                 d.UseTrustedConnection
             ))
-        ];
+            .ToList();
+
+        var serializedDatabases = JsonSerializer.Serialize(databases);
+        await cache.SetStringAsync(cacheKey, serializedDatabases);
+
+        return databases;
     }
 }

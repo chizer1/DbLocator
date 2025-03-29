@@ -1,7 +1,9 @@
+using System.Text.Json;
 using DbLocator.Db;
 using DbLocator.Domain;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Connections;
 
@@ -12,11 +14,20 @@ internal sealed class GetConnectionsQueryValidator : AbstractValidator<GetConnec
     internal GetConnectionsQueryValidator() { }
 }
 
-internal class GetConnections(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class GetConnections(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
     internal async Task<List<Connection>> Handle(GetConnectionsQuery query)
     {
         await new GetConnectionsQueryValidator().ValidateAndThrowAsync(query);
+
+        var cacheKey = "connections";
+        var cachedConnections = await cache.GetStringAsync(cacheKey);
+
+        if (!string.IsNullOrEmpty(cachedConnections))
+            return JsonSerializer.Deserialize<List<Connection>>(cachedConnections);
 
         await using var dbContext = dbContextFactory.CreateDbContext();
 
@@ -27,9 +38,8 @@ internal class GetConnections(IDbContextFactory<DbLocatorContext> dbContextFacto
             .Include(c => c.Tenant)
             .ToListAsync();
 
-        return
-        [
-            .. connectionEntities.Select(connectionEntity => new Connection(
+        var connections = connectionEntities
+            .Select(connectionEntity => new Connection(
                 connectionEntity.ConnectionId,
                 connectionEntity.Database != null
                     ? new Database(
@@ -67,6 +77,11 @@ internal class GetConnections(IDbContextFactory<DbLocatorContext> dbContextFacto
                     )
                     : null
             ))
-        ];
+            .ToList();
+
+        var serializedConnections = JsonSerializer.Serialize(connections);
+        await cache.SetStringAsync(cacheKey, serializedConnections);
+
+        return connections;
     }
 }

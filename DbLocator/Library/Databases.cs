@@ -1,20 +1,20 @@
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.Databases;
-using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Library;
 
 internal class Databases(
-    IDbContextFactory<DbLocatorContext> dbContextFactory //,
-//Encryption encryption
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
 )
 {
-    private readonly AddDatabase _addDatabase = new(dbContextFactory);
-    private readonly DeleteDatabase _deleteDatabase = new(dbContextFactory);
-    private readonly GetDatabases _getDatabases = new(dbContextFactory);
-    private readonly UpdateDatabase _updateDatabase = new(dbContextFactory);
+    private readonly AddDatabase _addDatabase = new(dbContextFactory, cache);
+    private readonly DeleteDatabase _deleteDatabase = new(dbContextFactory, cache);
+    private readonly GetDatabases _getDatabases = new(dbContextFactory, cache);
+    private readonly UpdateDatabase _updateDatabase = new(dbContextFactory, cache);
 
     internal async Task<int> AddDatabase(
         string databaseName,

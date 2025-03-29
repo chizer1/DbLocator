@@ -1,7 +1,9 @@
+using System.Text.Json;
 using DbLocator.Db;
 using DbLocator.Domain;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseTypes;
 
@@ -12,7 +14,10 @@ internal sealed class GetDatabaseTypesQueryValidator : AbstractValidator<GetData
     internal GetDatabaseTypesQueryValidator() { }
 }
 
-internal class GetDatabaseTypes(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class GetDatabaseTypes(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
     internal async Task<List<DatabaseType>> Handle(GetDatabaseTypesQuery query)
     {
@@ -20,14 +25,20 @@ internal class GetDatabaseTypes(IDbContextFactory<DbLocatorContext> dbContextFac
 
         await using var dbContext = dbContextFactory.CreateDbContext();
 
-        var databaseTypeEntities = await dbContext.Set<DatabaseTypeEntity>().ToListAsync();
+        var cacheKey = "databaseTypes";
+        var cachedData = await cache.GetStringAsync(cacheKey);
 
-        return
-        [
-            .. databaseTypeEntities.Select(entity => new DatabaseType(
-                entity.DatabaseTypeId,
-                entity.DatabaseTypeName
-            ))
-        ];
+        if (!string.IsNullOrEmpty(cachedData))
+            return JsonSerializer.Deserialize<List<DatabaseType>>(cachedData);
+
+        var databaseTypeEntities = await dbContext.Set<DatabaseTypeEntity>().ToListAsync();
+        var databaseTypes = databaseTypeEntities
+            .Select(entity => new DatabaseType(entity.DatabaseTypeId, entity.DatabaseTypeName))
+            .ToList();
+
+        var serializedData = JsonSerializer.Serialize(databaseTypes);
+        await cache.SetStringAsync(cacheKey, serializedData);
+
+        return databaseTypes;
     }
 }
