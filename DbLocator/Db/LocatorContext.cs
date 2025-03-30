@@ -109,10 +109,11 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
 
             entity.HasIndex(e => e.DatabaseRoleId, "IX_DatabaseUserRole_DatabaseRoleID");
 
+            entity.Property(e => e.DatabaseUserRoleId);
+
             entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseUserID");
             entity.Property(e => e.DatabaseRoleId).HasColumnName("DatabaseRoleID");
 
-            // Add foreign key constraints for DatabaseUser and DatabaseRole
             entity
                 .HasOne(d => d.User)
                 .WithMany(p => p.UserRoles)

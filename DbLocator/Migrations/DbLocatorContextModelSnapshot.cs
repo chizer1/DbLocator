@@ -251,14 +251,17 @@ namespace DbLocator.Migrations
             modelBuilder.Entity("DbLocator.Db.DatabaseUserRoleEntity", b =>
                 {
                     b.Property<int>("DatabaseUserId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("DatabaseUserID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DatabaseUserId"));
 
                     b.Property<int>("DatabaseRoleId")
                         .HasColumnType("int")
                         .HasColumnName("DatabaseRoleID");
 
-                    b.HasKey("DatabaseUserId", "DatabaseRoleId")
+                    b.HasKey("DatabaseUserId")
                         .HasName("PK_DatabaseUserRole");
 
                     b.HasIndex(new[] { "DatabaseRoleId" }, "IX_DatabaseUserRole_DatabaseRoleID");

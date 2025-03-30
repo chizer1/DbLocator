@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using DbLocator.Domain;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -219,13 +220,16 @@ namespace DbLocator.Migrations
                 name: "DatabaseUserRole",
                 columns: table => new
                 {
+                    DatabaseUserRoleID = table
+                        .Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     DatabaseRoleID = table.Column<int>(type: "int", nullable: false),
                     DatabaseUserID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey(
-                        "PK_DatabaseUserRole",
+                        "PK_DatabaseUserRoleID",
                         x => new { x.DatabaseUserID, x.DatabaseRoleID }
                     );
                     table.ForeignKey(
@@ -245,7 +249,7 @@ namespace DbLocator.Migrations
 
             migrationBuilder.InsertData(
                 table: "DatabaseRole",
-                columns: new[] { "DatabaseRoleID", "DatabaseRoleName" },
+                columns: ["DatabaseRoleID", "DatabaseRoleName"],
                 values: new object[,]
                 {
                     { 1, "Owner" },
