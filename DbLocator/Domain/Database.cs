@@ -5,7 +5,6 @@ namespace DbLocator.Domain;
 /// </summary>
 /// <param name="id">The database ID.</param>
 /// <param name="name">The name of the database.</param>
-/// <!--<param name="user">The database user</param>-->
 /// <param name="type">The type of the database.</param>
 /// <param name="server">The Database server.</param>
 /// <param name="status">The status of the database.</param>
@@ -28,11 +27,6 @@ public class Database(
     /// Gets the name of the database.
     /// </summary>
     public string Name { get; init; } = name;
-
-    // <summary>
-    // Gets the database user
-    // </summary>
-    //public string User { get; init; } = user;
 
     /// <summary>
     /// Gets or sets the database type.

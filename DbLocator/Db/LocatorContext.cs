@@ -103,14 +103,11 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
         {
             entity.ToTable("DatabaseUserRole");
 
-            entity
-                .HasKey(e => new { e.DatabaseUserId, e.DatabaseRoleId })
-                .HasName("PK_DatabaseUserRole");
+            entity.HasKey(e => e.DatabaseUserRoleId).HasName("PK_DatabaseUserRole");
 
             entity.HasIndex(e => e.DatabaseRoleId, "IX_DatabaseUserRole_DatabaseRoleID");
 
-            entity.Property(e => e.DatabaseUserRoleId);
-
+            entity.Property(e => e.DatabaseUserRoleId).ValueGeneratedOnAdd();
             entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseUserID");
             entity.Property(e => e.DatabaseRoleId).HasColumnName("DatabaseRoleID");
 

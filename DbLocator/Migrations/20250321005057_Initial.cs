@@ -228,10 +228,7 @@ namespace DbLocator.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey(
-                        "PK_DatabaseUserRoleID",
-                        x => new { x.DatabaseUserID, x.DatabaseRoleID }
-                    );
+                    table.PrimaryKey("PK_DatabaseUserRole", x => x.DatabaseUserRoleID);
                     table.ForeignKey(
                         name: "FK_DatabaseUserRole_DatabaseRole",
                         column: x => x.DatabaseRoleID,

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using DbLocator.Db;
 using DbLocator.Domain;
 using FluentValidation;
@@ -26,9 +27,7 @@ internal class GetDatabaseServers(
         var cachedData = await cache.GetStringAsync(cacheKey);
 
         if (!string.IsNullOrEmpty(cachedData))
-        {
-            return System.Text.Json.JsonSerializer.Deserialize<List<DatabaseServer>>(cachedData);
-        }
+            return JsonSerializer.Deserialize<List<DatabaseServer>>(cachedData);
 
         await using var dbContext = dbContextFactory.CreateDbContext();
 
@@ -45,7 +44,7 @@ internal class GetDatabaseServers(
             ))
             .ToList();
 
-        var serializedData = System.Text.Json.JsonSerializer.Serialize(databaseServers);
+        var serializedData = JsonSerializer.Serialize(databaseServers);
         await cache.SetStringAsync(cacheKey, serializedData);
 
         return databaseServers;
