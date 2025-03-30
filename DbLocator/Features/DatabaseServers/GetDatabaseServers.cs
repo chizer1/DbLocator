@@ -24,17 +24,47 @@ internal class GetDatabaseServers(
         await new GetDatabaseServersQueryValidator().ValidateAndThrowAsync(query);
 
         var cacheKey = "databaseServers";
-        var cachedData = await cache.GetStringAsync(cacheKey);
+        var cachedData = await GetCachedData(cacheKey);
 
         if (!string.IsNullOrEmpty(cachedData))
-            return JsonSerializer.Deserialize<List<DatabaseServer>>(cachedData);
+            return DeserializeCachedData(cachedData);
 
+        var databaseServers = await GetDatabaseServersFromDatabase(dbContextFactory);
+        await CacheData(cacheKey, databaseServers);
+
+        return databaseServers;
+    }
+
+    private async Task<string> GetCachedData(string cacheKey)
+    {
+        return cache != null ? await cache.GetStringAsync(cacheKey) : null;
+    }
+
+    private static List<DatabaseServer> DeserializeCachedData(string cachedData)
+    {
+        return JsonSerializer.Deserialize<List<DatabaseServer>>(cachedData) ?? [];
+    }
+
+    private async Task CacheData(string cacheKey, List<DatabaseServer> databaseServers)
+    {
+        if (cache != null)
+        {
+            var serializedData = JsonSerializer.Serialize(databaseServers);
+            await cache.SetStringAsync(cacheKey, serializedData);
+        }
+    }
+
+    private static async Task<List<DatabaseServer>> GetDatabaseServersFromDatabase(
+        IDbContextFactory<DbLocatorContext> dbContextFactory
+    )
+    {
         await using var dbContext = dbContextFactory.CreateDbContext();
 
         var databaseServerEntities = await dbContext.Set<DatabaseServerEntity>().ToListAsync();
 
-        var databaseServers = databaseServerEntities
-            .Select(ds => new DatabaseServer(
+        return
+        [
+            .. databaseServerEntities.Select(ds => new DatabaseServer(
                 ds.DatabaseServerId,
                 ds.DatabaseServerName,
                 ds.DatabaseServerIpaddress,
@@ -42,11 +72,6 @@ internal class GetDatabaseServers(
                 ds.DatabaseServerFullyQualifiedDomainName,
                 ds.IsLinkedServer
             ))
-            .ToList();
-
-        var serializedData = JsonSerializer.Serialize(databaseServers);
-        await cache.SetStringAsync(cacheKey, serializedData);
-
-        return databaseServers;
+        ];
     }
 }

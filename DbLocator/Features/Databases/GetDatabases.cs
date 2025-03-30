@@ -24,11 +24,40 @@ internal class GetDatabases(
         await new GetDatabasesQueryValidator().ValidateAndThrowAsync(query);
 
         var cacheKey = "databases";
-        var cachedDatabases = await cache.GetStringAsync(cacheKey);
+        var cachedData = await GetCachedData(cacheKey);
 
-        if (!string.IsNullOrEmpty(cachedDatabases))
-            return JsonSerializer.Deserialize<List<Database>>(cachedDatabases);
+        if (!string.IsNullOrEmpty(cachedData))
+            return DeserializeCachedData(cachedData);
 
+        var databases = await GetDatabasesFromDatabase(dbContextFactory);
+        await CacheData(cacheKey, databases);
+
+        return databases;
+    }
+
+    private async Task<string> GetCachedData(string cacheKey)
+    {
+        return cache != null ? await cache.GetStringAsync(cacheKey) : null;
+    }
+
+    private static List<Database> DeserializeCachedData(string cachedData)
+    {
+        return JsonSerializer.Deserialize<List<Database>>(cachedData) ?? [];
+    }
+
+    private async Task CacheData(string cacheKey, List<Database> databases)
+    {
+        if (cache != null)
+        {
+            var serializedData = JsonSerializer.Serialize(databases);
+            await cache.SetStringAsync(cacheKey, serializedData);
+        }
+    }
+
+    private static async Task<List<Database>> GetDatabasesFromDatabase(
+        IDbContextFactory<DbLocatorContext> dbContextFactory
+    )
+    {
         await using var dbContext = dbContextFactory.CreateDbContext();
 
         var databaseEntities = await dbContext
@@ -37,8 +66,9 @@ internal class GetDatabases(
             .Include(d => d.DatabaseType)
             .ToListAsync();
 
-        var databases = databaseEntities
-            .Select(d => new Database(
+        return
+        [
+            .. databaseEntities.Select(d => new Database(
                 d.DatabaseId,
                 d.DatabaseName,
                 new DatabaseType(d.DatabaseType.DatabaseTypeId, d.DatabaseType.DatabaseTypeName),
@@ -53,11 +83,6 @@ internal class GetDatabases(
                 (Status)d.DatabaseStatusId,
                 d.UseTrustedConnection
             ))
-            .ToList();
-
-        var serializedDatabases = JsonSerializer.Serialize(databases);
-        await cache.SetStringAsync(cacheKey, serializedDatabases);
-
-        return databases;
+        ];
     }
 }

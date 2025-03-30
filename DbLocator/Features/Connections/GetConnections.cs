@@ -24,11 +24,40 @@ internal class GetConnections(
         await new GetConnectionsQueryValidator().ValidateAndThrowAsync(query);
 
         var cacheKey = "connections";
-        var cachedConnections = await cache.GetStringAsync(cacheKey);
+        var cachedData = await GetCachedData(cacheKey);
 
-        if (!string.IsNullOrEmpty(cachedConnections))
-            return JsonSerializer.Deserialize<List<Connection>>(cachedConnections);
+        if (!string.IsNullOrEmpty(cachedData))
+            return DeserializeCachedData(cachedData);
 
+        var connections = await GetConnectionsFromDatabase(dbContextFactory);
+        await CacheData(cacheKey, connections);
+
+        return connections;
+    }
+
+    private async Task<string> GetCachedData(string cacheKey)
+    {
+        return cache != null ? await cache.GetStringAsync(cacheKey) : null;
+    }
+
+    private static List<Connection> DeserializeCachedData(string cachedData)
+    {
+        return JsonSerializer.Deserialize<List<Connection>>(cachedData) ?? new List<Connection>();
+    }
+
+    private async Task CacheData(string cacheKey, List<Connection> connections)
+    {
+        if (cache != null)
+        {
+            var serializedData = JsonSerializer.Serialize(connections);
+            await cache.SetStringAsync(cacheKey, serializedData);
+        }
+    }
+
+    private static async Task<List<Connection>> GetConnectionsFromDatabase(
+        IDbContextFactory<DbLocatorContext> dbContextFactory
+    )
+    {
         await using var dbContext = dbContextFactory.CreateDbContext();
 
         var connectionEntities = await dbContext
@@ -38,8 +67,9 @@ internal class GetConnections(
             .Include(c => c.Tenant)
             .ToListAsync();
 
-        var connections = connectionEntities
-            .Select(connectionEntity => new Connection(
+        return
+        [
+            .. connectionEntities.Select(connectionEntity => new Connection(
                 connectionEntity.ConnectionId,
                 connectionEntity.Database != null
                     ? new Database(
@@ -77,11 +107,6 @@ internal class GetConnections(
                     )
                     : null
             ))
-            .ToList();
-
-        var serializedConnections = JsonSerializer.Serialize(connections);
-        await cache.SetStringAsync(cacheKey, serializedConnections);
-
-        return connections;
+        ];
     }
 }

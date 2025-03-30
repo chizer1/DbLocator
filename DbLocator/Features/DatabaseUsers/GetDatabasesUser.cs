@@ -24,29 +24,69 @@ internal class GetDatabaseUsers(
         await new GetDatabaseUsersQueryValidator().ValidateAndThrowAsync(query);
 
         var cacheKey = "databaseUsers";
-        var cachedData = await cache.GetStringAsync(cacheKey);
+        var cachedData = await GetCachedData(cacheKey);
 
         if (!string.IsNullOrEmpty(cachedData))
-            return JsonSerializer.Deserialize<List<DatabaseUser>>(cachedData);
+            return DeserializeCachedData(cachedData);
 
+        var databaseUsers = await GetDatabaseUsersFromDatabase(dbContextFactory);
+        await CacheData(cacheKey, databaseUsers);
+
+        return databaseUsers;
+    }
+
+    private async Task<string> GetCachedData(string cacheKey)
+    {
+        return cache != null ? await cache.GetStringAsync(cacheKey) : null;
+    }
+
+    private static List<DatabaseUser> DeserializeCachedData(string cachedData)
+    {
+        return JsonSerializer.Deserialize<List<DatabaseUser>>(cachedData) ?? [];
+    }
+
+    private async Task CacheData(string cacheKey, List<DatabaseUser> databaseUsers)
+    {
+        if (cache != null)
+        {
+            var serializedData = JsonSerializer.Serialize(databaseUsers);
+            await cache.SetStringAsync(cacheKey, serializedData);
+        }
+    }
+
+    private static async Task<List<DatabaseUser>> GetDatabaseUsersFromDatabase(
+        IDbContextFactory<DbLocatorContext> dbContextFactory
+    )
+    {
         await using var dbContext = dbContextFactory.CreateDbContext();
 
-        var databaseUserEntities = await dbContext
-            .Set<DatabaseUserEntity>()
-            .Include(d => d.UserRoles)
-            .ToListAsync();
+        var databaseUserEntities = await dbContext.Set<DatabaseUserEntity>().ToListAsync();
 
         var databaseUsers = databaseUserEntities
             .Select(d => new DatabaseUser(
                 d.DatabaseUserId,
                 d.UserName,
-                d.DatabaseId,
-                d.UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId).ToList()
+                new Database(
+                    d.Database!.DatabaseId,
+                    d.Database.DatabaseName,
+                    new DatabaseType(
+                        d.Database.DatabaseType!.DatabaseTypeId,
+                        d.Database.DatabaseType.DatabaseTypeName
+                    ),
+                    new DatabaseServer(
+                        d.Database.DatabaseServer!.DatabaseServerId,
+                        d.Database.DatabaseServer.DatabaseServerName,
+                        d.Database.DatabaseServer.DatabaseServerIpaddress,
+                        d.Database.DatabaseServer.DatabaseServerHostName,
+                        d.Database.DatabaseServer.DatabaseServerFullyQualifiedDomainName,
+                        d.Database.DatabaseServer.IsLinkedServer
+                    ),
+                    (Status)d.Database.DatabaseStatusId,
+                    d.Database.UseTrustedConnection
+                ),
+                [.. d.UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)]
             ))
             .ToList();
-
-        var serializedData = JsonSerializer.Serialize(databaseUsers);
-        await cache.SetStringAsync(cacheKey, serializedData);
 
         return databaseUsers;
     }

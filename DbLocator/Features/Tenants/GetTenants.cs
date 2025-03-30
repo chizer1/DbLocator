@@ -23,14 +23,46 @@ internal class GetTenants(
     internal async Task<List<Tenant>> Handle(GetTenantsQuery query)
     {
         await new GetTenantsQueryValidator().ValidateAndThrowAsync(query);
-        const string cacheKey = "tenants";
 
-        var cachedData = await cache.GetStringAsync(cacheKey);
+        var cacheKey = "tenants";
+        var cachedData = await GetCachedData(cacheKey);
+
         if (!string.IsNullOrEmpty(cachedData))
-            return JsonSerializer.Deserialize<List<Tenant>>(cachedData);
+            return DeserializeCachedData(cachedData);
 
+        var tenants = await GetTenantsFromDatabase(dbContextFactory);
+        await CacheData(cacheKey, tenants);
+
+        return tenants;
+    }
+
+    private async Task<string> GetCachedData(string cacheKey)
+    {
+        return cache != null ? await cache.GetStringAsync(cacheKey) : null;
+    }
+
+    private static List<Tenant> DeserializeCachedData(string cachedData)
+    {
+        return JsonSerializer.Deserialize<List<Tenant>>(cachedData) ?? new List<Tenant>();
+    }
+
+    private async Task CacheData(string cacheKey, List<Tenant> tenants)
+    {
+        if (cache != null)
+        {
+            var serializedData = JsonSerializer.Serialize(tenants);
+            await cache.SetStringAsync(cacheKey, serializedData);
+        }
+    }
+
+    private static async Task<List<Tenant>> GetTenantsFromDatabase(
+        IDbContextFactory<DbLocatorContext> dbContextFactory
+    )
+    {
         await using var dbContext = dbContextFactory.CreateDbContext();
+
         var tenantEntities = await dbContext.Set<TenantEntity>().ToListAsync();
+
         var tenants = tenantEntities
             .Select(entity => new Tenant(
                 entity.TenantId,
@@ -39,9 +71,6 @@ internal class GetTenants(
                 (Status)entity.TenantStatusId
             ))
             .ToList();
-
-        var serializedData = JsonSerializer.Serialize(tenants);
-        await cache.SetStringAsync(cacheKey, serializedData);
 
         return tenants;
     }
