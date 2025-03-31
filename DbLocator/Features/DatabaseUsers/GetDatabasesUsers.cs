@@ -60,30 +60,43 @@ internal class GetDatabaseUsers(
     {
         await using var dbContext = dbContextFactory.CreateDbContext();
 
-        var databaseUserEntities = await dbContext.Set<DatabaseUserEntity>().ToListAsync();
+        var databaseUserEntities = await dbContext
+            .Set<DatabaseUserEntity>()
+            .Include(c => c.Database)
+            .ThenInclude(d => d.DatabaseServer)
+            .Include(c => c.Database)
+            .ThenInclude(d => d.DatabaseType)
+            .Include(d => d.UserRoles)
+            .ToListAsync();
 
         var databaseUsers = databaseUserEntities
             .Select(d => new DatabaseUser(
                 d.DatabaseUserId,
                 d.UserName,
-                new Database(
-                    d.Database!.DatabaseId,
-                    d.Database.DatabaseName,
-                    new DatabaseType(
-                        d.Database.DatabaseType!.DatabaseTypeId,
-                        d.Database.DatabaseType.DatabaseTypeName
-                    ),
-                    new DatabaseServer(
-                        d.Database.DatabaseServer!.DatabaseServerId,
-                        d.Database.DatabaseServer.DatabaseServerName,
-                        d.Database.DatabaseServer.DatabaseServerIpaddress,
-                        d.Database.DatabaseServer.DatabaseServerHostName,
-                        d.Database.DatabaseServer.DatabaseServerFullyQualifiedDomainName,
-                        d.Database.DatabaseServer.IsLinkedServer
-                    ),
-                    (Status)d.Database.DatabaseStatusId,
-                    d.Database.UseTrustedConnection
-                ),
+                d.Database != null
+                    ? new Database(
+                        d.Database.DatabaseId,
+                        d.Database.DatabaseName,
+                        d.Database.DatabaseType != null
+                            ? new DatabaseType(
+                                d.Database.DatabaseType.DatabaseTypeId,
+                                d.Database.DatabaseType.DatabaseTypeName
+                            )
+                            : null!,
+                        d.Database.DatabaseServer != null
+                            ? new DatabaseServer(
+                                d.Database.DatabaseServer.DatabaseServerId,
+                                d.Database.DatabaseServer.DatabaseServerName,
+                                d.Database.DatabaseServer.DatabaseServerIpaddress,
+                                d.Database.DatabaseServer.DatabaseServerHostName,
+                                d.Database.DatabaseServer.DatabaseServerFullyQualifiedDomainName,
+                                d.Database.DatabaseServer.IsLinkedServer
+                            )
+                            : null!,
+                        (Status)d.Database.DatabaseStatusId,
+                        d.Database.UseTrustedConnection
+                    )
+                    : null!,
                 [.. d.UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)]
             ))
             .ToList();
