@@ -3,51 +3,54 @@ using DbLocator.Domain;
 using DbLocator.Features.DatabaseUsers;
 using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Library;
 
 internal class DatabaseUsers(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    Encryption encryption
+    Encryption encryption,
+    IDistributedCache cache
 )
 {
-    private readonly AddDatabaseUser _addDatabaseUser = new(dbContextFactory, encryption);
-    private readonly DeleteDatabaseUser _deleteDatabaseUser = new(dbContextFactory);
-    private readonly GetDatabaseUsers _getDatabaseUsers = new(dbContextFactory);
-    private readonly UpdateDatabaseUser _updateDatabaseUser = new(dbContextFactory, encryption);
+    private readonly AddDatabaseUser _addDatabaseUser = new(dbContextFactory, encryption, cache);
+    private readonly DeleteDatabaseUser _deleteDatabaseUser = new(dbContextFactory, cache);
+    private readonly GetDatabaseUsers _getDatabaseUsers = new(dbContextFactory, cache);
+    private readonly UpdateDatabaseUser _updateDatabaseUser =
+        new(dbContextFactory, encryption, cache);
 
     internal async Task<int> AddDatabaseUser(
-        int DatabaseId,
-        string UserName,
-        string UserPassword,
-        bool CreateUser
+        int databaseId,
+        string userName,
+        string userPassword,
+        bool createUser
     )
     {
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(DatabaseId, UserName, UserPassword, CreateUser)
+            new AddDatabaseUserCommand(databaseId, userName, userPassword, createUser)
         );
     }
 
-    internal async Task<int> AddDatabaseUser(int DatabaseId, string UserName, bool CreateUser)
+    internal async Task<int> AddDatabaseUser(int databaseId, string userName, bool createUser)
     {
-        var UserPassword = PasswordGenerator.GenerateRandomPassword(25);
+        var userPassword = PasswordGenerator.GenerateRandomPassword(25);
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(DatabaseId, UserName, UserPassword, CreateUser)
+            new AddDatabaseUserCommand(databaseId, userName, userPassword, createUser)
         );
     }
 
-    internal async Task<int> AddDatabaseUser(int DatabaseId, string UserName, string UserPassword)
+    internal async Task<int> AddDatabaseUser(int databaseId, string userName, string userPassword)
     {
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(DatabaseId, UserName, UserPassword, false)
+            new AddDatabaseUserCommand(databaseId, userName, userPassword, false)
         );
     }
 
-    internal async Task<int> AddDatabaseUser(int DatabaseId, string UserName)
+    internal async Task<int> AddDatabaseUser(int databaseId, string userName)
     {
-        var UserPassword = PasswordGenerator.GenerateRandomPassword(25);
+        var userPassword = PasswordGenerator.GenerateRandomPassword(25);
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(DatabaseId, UserName, UserPassword, false)
+            new AddDatabaseUserCommand(databaseId, userName, userPassword, false)
         );
     }
 

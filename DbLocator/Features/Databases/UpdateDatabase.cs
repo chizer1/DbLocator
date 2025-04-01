@@ -1,8 +1,8 @@
 using DbLocator.Db;
 using DbLocator.Domain;
-using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Databases;
 
@@ -29,7 +29,10 @@ internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateD
     }
 }
 
-internal class UpdateDatabase(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class UpdateDatabase(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
     internal async Task Handle(UpdateDatabaseCommand command)
     {
@@ -96,5 +99,7 @@ internal class UpdateDatabase(IDbContextFactory<DbLocatorContext> dbContextFacto
             await dbContext.Database.OpenConnectionAsync();
             await cmd.ExecuteNonQueryAsync();
         }
+
+        cache?.Remove("databases");
     }
 }

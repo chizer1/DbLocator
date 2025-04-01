@@ -2,8 +2,7 @@ namespace DbLocator.Db;
 
 internal class DatabaseRoleEntity
 {
-    internal int DatabaseRoleId { get; set; }
-    internal string DatabaseRoleName { get; set; }
-
-    internal virtual ICollection<DatabaseUserRoleEntity> Users { get; set; } = [];
+    public int DatabaseRoleId { get; set; }
+    public string DatabaseRoleName { get; set; }
+    public virtual ICollection<DatabaseUserRoleEntity> Users { get; set; } = [];
 }

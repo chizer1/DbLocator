@@ -1,6 +1,7 @@
 using DbLocator.Db;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseTypes;
 
@@ -20,7 +21,10 @@ internal sealed class UpdateDatabaseTypeCommandValidator
     }
 }
 
-internal class UpdateDatabaseType(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class UpdateDatabaseType(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
     internal async Task Handle(UpdateDatabaseTypeCommand command)
     {
@@ -41,5 +45,7 @@ internal class UpdateDatabaseType(IDbContextFactory<DbLocatorContext> dbContextF
 
         dbContext.Update(databaseType);
         await dbContext.SaveChangesAsync();
+
+        cache?.Remove("databaseTypes");
     }
 }

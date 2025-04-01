@@ -1,8 +1,8 @@
 using DbLocator.Db;
 using DbLocator.Domain;
-using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Databases;
 
@@ -34,8 +34,8 @@ internal sealed class AddDatabaseCommandValidator : AbstractValidator<AddDatabas
 }
 
 internal class AddDatabase(
-    IDbContextFactory<DbLocatorContext> dbContextFactory //,
-//Encryption encryption
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
 )
 {
     internal async Task<int> Handle(AddDatabaseCommand command)
@@ -101,6 +101,8 @@ internal class AddDatabase(
                 await cmd.ExecuteNonQueryAsync();
             }
         }
+
+        cache?.Remove("databases");
 
         return database.DatabaseId;
     }

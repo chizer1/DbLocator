@@ -1,8 +1,6 @@
 using DbLocator.Db;
 using DbLocator.Domain;
-using DbLocator.Utilities;
 using FluentValidation;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseUserRoles;
@@ -24,7 +22,7 @@ internal sealed class AddDatabaseUserRoleCommandValidator
 
 internal class AddDatabaseUserRole(IDbContextFactory<DbLocatorContext> dbContextFactory)
 {
-    internal async Task Handle(AddDatabaseUserRoleCommand command)
+    internal async Task<int> Handle(AddDatabaseUserRoleCommand command)
     {
         await new AddDatabaseUserRoleCommandValidator().ValidateAndThrowAsync(command);
 
@@ -43,10 +41,11 @@ internal class AddDatabaseUserRole(IDbContextFactory<DbLocatorContext> dbContext
         var existingRole = user.UserRoles.FirstOrDefault(ur =>
             ur.DatabaseRoleId == (int)command.UserRole
         );
+
         if (existingRole != null)
-        {
-            return;
-        }
+            throw new InvalidOperationException(
+                $"User '{user.UserName}' already has role '{command.UserRole}'."
+            );
 
         var databaseUserRole = new DatabaseUserRoleEntity()
         {
@@ -58,9 +57,9 @@ internal class AddDatabaseUserRole(IDbContextFactory<DbLocatorContext> dbContext
         await dbContext.SaveChangesAsync();
 
         if (command.UpdateUser)
-        {
             await CreateDatabaseUserRole(dbContext, user, command);
-        }
+
+        return databaseUserRole.DatabaseUserRoleId;
     }
 
     private static async Task CreateDatabaseUserRole(

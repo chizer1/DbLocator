@@ -1,6 +1,7 @@
 using DbLocator.Db;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseUsers
 {
@@ -15,7 +16,10 @@ namespace DbLocator.Features.DatabaseUsers
         }
     }
 
-    internal class DeleteDatabaseUser(IDbContextFactory<DbLocatorContext> dbContextFactory)
+    internal class DeleteDatabaseUser(
+        IDbContextFactory<DbLocatorContext> dbContextFactory,
+        IDistributedCache cache
+    )
     {
         internal async Task Handle(DeleteDatabaseUserCommand command)
         {
@@ -40,6 +44,8 @@ namespace DbLocator.Features.DatabaseUsers
 
             dbContext.Set<DatabaseUserEntity>().Remove(databaseUserEntity);
             await dbContext.SaveChangesAsync();
+
+            cache?.Remove("databaseUsers");
 
             if (!command.DeleteDatabaseUser)
             {

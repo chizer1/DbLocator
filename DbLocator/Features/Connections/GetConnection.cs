@@ -4,6 +4,7 @@ using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Connections;
 
@@ -22,26 +23,45 @@ internal sealed class GetConnectionQueryValidator : AbstractValidator<GetConnect
 
 internal class GetConnection(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    Encryption encrypytion
+    Encryption encrypytion,
+    IDistributedCache cache
 )
 {
-    internal async Task<SqlConnection> Handle(GetConnectionQuery query)
+    public async Task<SqlConnection> Handle(GetConnectionQuery query)
     {
         await new GetConnectionQueryValidator().ValidateAndThrowAsync(query);
 
+        var cacheKey = $"connection:{query}"; // todo, unvalidate if something changes the connection string
+        var cachedData = await GetCachedData(cacheKey);
+
+        if (!string.IsNullOrEmpty(cachedData))
+            return new SqlConnection(cachedData);
+
+        var connectionString = await GetConnectionStringFromDatabase(query);
+        await CacheData(cacheKey, connectionString);
+
+        return new SqlConnection(connectionString);
+    }
+
+    private async Task<string> GetCachedData(string cacheKey)
+    {
+        return cache != null ? await cache.GetStringAsync(cacheKey) : null;
+    }
+
+    private async Task CacheData(string cacheKey, string connectionString)
+    {
+        if (cache != null)
+            await cache.SetStringAsync(cacheKey, connectionString);
+    }
+
+    private async Task<string> GetConnectionStringFromDatabase(GetConnectionQuery query)
+    {
         await using var dbContext = dbContextFactory.CreateDbContext();
 
         var connectionEntity = await GetConnectionEntityAsync(dbContext, query);
         var database = await GetDatabaseEntityAsync(dbContext, connectionEntity.DatabaseId);
 
-        var connectionString = await BuildConnectionString(
-            database,
-            encrypytion,
-            dbContext,
-            query.Roles
-        );
-
-        return new SqlConnection(connectionString);
+        return await BuildConnectionString(database, encrypytion, dbContext, query.Roles);
     }
 
     private static async Task<ConnectionEntity> GetConnectionEntityAsync(
@@ -146,8 +166,6 @@ internal class GetConnection(
         DatabaseRole[] roles = null
     )
     {
-        // try to connect using the fully qualified domain name, if not available try the ip address
-        // then try the host name
         var dataSource =
             database.DatabaseServer.DatabaseServerFullyQualifiedDomainName
             ?? database.DatabaseServer.DatabaseServerIpaddress
@@ -166,7 +184,7 @@ internal class GetConnection(
         }
         else
         {
-            var user = await GetDatabaseUser(database, dbContext, encrypytion, roles);
+            var user = await GetDatabaseUser(database, dbContext, roles);
             connectionStringBuilder.UserID = user.UserName;
             connectionStringBuilder.Password = encrypytion.Decrypt(user.UserPassword);
         }
@@ -177,23 +195,14 @@ internal class GetConnection(
     private static async Task<DatabaseUserEntity> GetDatabaseUser(
         DatabaseEntity database,
         DbLocatorContext dbContext,
-        Encryption encryption,
-        DatabaseRole[] roleList = null
-    )
-    {
-        roleList ??= [DatabaseRole.DataReader, DatabaseRole.DataWriter];
-        var user = await GetDatabaseUser(database, dbContext, roleList);
-
-        return user;
-    }
-
-    private static async Task<DatabaseUserEntity> GetDatabaseUser(
-        DatabaseEntity database,
-        DbLocatorContext dbContext,
         DatabaseRole[] roleList
     )
     {
-        var roles = roleList.Select(r => (int)r);
+        var roles =
+            roleList?.Length > 0
+                ? roleList.Select(r => (int)r)
+                : [(int)DatabaseRole.DataReader, (int)DatabaseRole.DataWriter];
+
         var users = await dbContext
             .Set<DatabaseUserEntity>()
             .Include(u => u.UserRoles)

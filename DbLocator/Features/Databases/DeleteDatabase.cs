@@ -1,6 +1,7 @@
 using DbLocator.Db;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Databases
 {
@@ -14,7 +15,10 @@ namespace DbLocator.Features.Databases
         }
     }
 
-    internal class DeleteDatabase(IDbContextFactory<DbLocatorContext> dbContextFactory)
+    internal class DeleteDatabase(
+        IDbContextFactory<DbLocatorContext> dbContextFactory,
+        IDistributedCache cache
+    )
     {
         internal async Task Handle(DeleteDatabaseCommand command)
         {
@@ -50,6 +54,8 @@ namespace DbLocator.Features.Databases
                     await cmd.ExecuteNonQueryAsync();
                 }
             }
+
+            cache?.Remove("databases");
         }
     }
 }

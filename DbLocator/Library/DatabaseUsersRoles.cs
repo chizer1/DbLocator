@@ -1,7 +1,6 @@
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.DatabaseUserRoles;
-using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Library;
@@ -12,20 +11,20 @@ internal class DatabaseUserRoles(IDbContextFactory<DbLocatorContext> dbContextFa
     private readonly DeleteDatabaseUserRole _deleteDatabaseUserRole = new(dbContextFactory);
 
     internal async Task AddDatabaseUserRole(
-        int DatabaseUserId,
-        DatabaseRole UserRole,
-        bool UpdateUser
+        int databaseUserId,
+        DatabaseRole userRole,
+        bool updateUser
     )
     {
         await _addDatabaseUserRole.Handle(
-            new AddDatabaseUserRoleCommand(DatabaseUserId, UserRole, UpdateUser)
+            new AddDatabaseUserRoleCommand(databaseUserId, userRole, updateUser)
         );
     }
 
-    internal async Task AddDatabaseUserRole(int DatabaseUserId, DatabaseRole UserRole)
+    internal async Task AddDatabaseUserRole(int databaseUserId, DatabaseRole userRole)
     {
         await _addDatabaseUserRole.Handle(
-            new AddDatabaseUserRoleCommand(DatabaseUserId, UserRole, false)
+            new AddDatabaseUserRoleCommand(databaseUserId, userRole, false)
         );
     }
 

@@ -1,6 +1,7 @@
 using DbLocator.Db;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseTypes;
 
@@ -18,7 +19,10 @@ internal sealed class AddDatabaseTypeCommandValidator : AbstractValidator<AddDat
     }
 }
 
-internal class AddDatabaseType(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class AddDatabaseType(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
     internal async Task<byte> Handle(AddDatabaseTypeCommand command)
     {
@@ -38,6 +42,8 @@ internal class AddDatabaseType(IDbContextFactory<DbLocatorContext> dbContextFact
         var databaseType = new DatabaseTypeEntity { DatabaseTypeName = command.DatabaseTypeName };
         dbContext.Add(databaseType);
         await dbContext.SaveChangesAsync();
+
+        cache?.Remove("databaseTypes");
 
         return databaseType.DatabaseTypeId;
     }

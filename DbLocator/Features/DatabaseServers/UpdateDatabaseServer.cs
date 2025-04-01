@@ -1,6 +1,7 @@
 using DbLocator.Db;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseServers;
 
@@ -43,7 +44,10 @@ internal sealed class UpdateDatabaseServerCommandValidator
     }
 }
 
-internal class UpdateDatabaseServer(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class UpdateDatabaseServer(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    IDistributedCache cache
+)
 {
     internal async Task Handle(UpdateDatabaseServerCommand command)
     {
@@ -73,6 +77,8 @@ internal class UpdateDatabaseServer(IDbContextFactory<DbLocatorContext> dbContex
 
         dbContext.Update(databaseServer);
         await dbContext.SaveChangesAsync();
+
+        cache?.Remove("databaseServers");
     }
 
     private static void Validate(UpdateDatabaseServerCommand command)
