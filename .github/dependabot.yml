@@ -1,0 +1,9 @@
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/DbLocator"
+    schedule:
+      interval: "monthly"
+      day: "monday" 
+      time: "08:00"
+      timezone: "America/Chicago"
