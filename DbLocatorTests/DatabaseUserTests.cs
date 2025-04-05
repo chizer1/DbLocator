@@ -1,9 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 using DbLocator;
 using DbLocator.Domain;
 using DbLocatorTests.Fixtures;
-using Microsoft.Data.SqlClient;
 
 namespace DbLocatorTests;
 

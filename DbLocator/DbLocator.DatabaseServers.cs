@@ -1,78 +1,110 @@
 using DbLocator.Domain;
 
-namespace DbLocator;
-
-public partial class Locator
+namespace DbLocator
 {
-    /// <summary>
-    ///Add database server, need to provide at least one of the following fields: Database Server Host Name, Database Server Fully Qualified Domain Name, Database Server IP Address.
-    /// </summary>
-    /// <param name="databaseServerName"></param>
-    /// <param name="databaseServerIpAddress"></param>
-    /// <param name="databaseServerHostName"></param>
-    /// <param name="databaseServerFullyQualifiedDomainName"></param>
-    /// <param name="isLinkedServer"></param>
-    /// <returns>DatabaseServerId</returns>
-    public async Task<int> AddDatabaseServer(
-        string databaseServerName,
-        string databaseServerIpAddress,
-        string databaseServerHostName,
-        string databaseServerFullyQualifiedDomainName,
-        bool isLinkedServer
-    )
+    public partial class Locator
     {
-        return await _databaseServers.AddDatabaseServer(
-            databaseServerName,
-            isLinkedServer,
-            databaseServerIpAddress,
-            databaseServerHostName,
-            databaseServerFullyQualifiedDomainName
-        );
-    }
+        /// <summary>
+        /// Adds a new database server. At least one of the following fields must be provided:
+        /// Database Server Host Name, Database Server Fully Qualified Domain Name, or Database Server IP Address.
+        /// </summary>
+        /// <param name="databaseServerName">
+        /// The name of the database server.
+        /// </param>
+        /// <param name="databaseServerIpAddress">
+        /// The IP address of the database server.
+        /// </param>
+        /// <param name="databaseServerHostName">
+        /// The host name of the database server.
+        /// </param>
+        /// <param name="databaseServerFullyQualifiedDomainName">
+        /// The fully qualified domain name (FQDN) of the database server.
+        /// </param>
+        /// <param name="isLinkedServer">
+        /// Indicates whether this server is linked to another server (e.g., the DbLocator database server).
+        /// </param>
+        /// <returns>
+        /// The ID of the newly added database server.
+        /// </returns>
+        public async Task<int> AddDatabaseServer(
+            string databaseServerName,
+            string databaseServerIpAddress,
+            string databaseServerHostName,
+            string databaseServerFullyQualifiedDomainName,
+            bool isLinkedServer
+        )
+        {
+            return await _databaseServers.AddDatabaseServer(
+                databaseServerName,
+                isLinkedServer,
+                databaseServerIpAddress,
+                databaseServerHostName,
+                databaseServerFullyQualifiedDomainName
+            );
+        }
 
-    /// <summary>
-    ///Get database servers
-    /// </summary>
-    /// <returns>List of database servers</returns>
-    /// <returns></returns>
-    public async Task<List<DatabaseServer>> GetDatabaseServers()
-    {
-        return await _databaseServers.GetDatabaseServers();
-    }
+        /// <summary>
+        /// Retrieves a list of all available database servers.
+        /// </summary>
+        /// <returns>
+        /// A list of <see cref="DatabaseServer"/> representing the available database servers.
+        /// </returns>
+        public async Task<List<DatabaseServer>> GetDatabaseServers()
+        {
+            return await _databaseServers.GetDatabaseServers();
+        }
 
-    /// <summary>
-    ///Update database server, need to provide at least one of the following fields: Database Server Host Name, Database Server Fully Qualified Domain Name, Database Server IP Address.
-    /// </summary>
-    /// <param name="databaseServerId"></param>
-    /// <param name="databaseServerName"></param>
-    /// <param name="databaseServerIpAddress"></param>
-    /// <param name="databaseServerHostName"></param>
-    /// <param name="databaseServerFullyQualifiedDomainName"></param>
-    /// <returns></returns>
-    public async Task UpdateDatabaseServer(
-        int databaseServerId,
-        string databaseServerName,
-        string databaseServerIpAddress,
-        string databaseServerHostName,
-        string databaseServerFullyQualifiedDomainName
-    )
-    {
-        await _databaseServers.UpdateDatabaseServer(
-            databaseServerId,
-            databaseServerName,
-            databaseServerIpAddress,
-            databaseServerHostName,
-            databaseServerFullyQualifiedDomainName
-        );
-    }
+        /// <summary>
+        /// Updates an existing database server. At least one of the following fields must be provided:
+        /// Database Server Host Name, Database Server Fully Qualified Domain Name, or Database Server IP Address.
+        /// </summary>
+        /// <param name="databaseServerId">
+        /// The ID of the database server to be updated.
+        /// </param>
+        /// <param name="databaseServerName">
+        /// The new name for the database server.
+        /// </param>
+        /// <param name="databaseServerIpAddress">
+        /// The new IP address for the database server.
+        /// </param>
+        /// <param name="databaseServerHostName">
+        /// The new host name for the database server.
+        /// </param>
+        /// <param name="databaseServerFullyQualifiedDomainName">
+        /// The new fully qualified domain name (FQDN) for the database server.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous operation.
+        /// </returns>
+        public async Task UpdateDatabaseServer(
+            int databaseServerId,
+            string databaseServerName,
+            string databaseServerIpAddress,
+            string databaseServerHostName,
+            string databaseServerFullyQualifiedDomainName
+        )
+        {
+            await _databaseServers.UpdateDatabaseServer(
+                databaseServerId,
+                databaseServerName,
+                databaseServerIpAddress,
+                databaseServerHostName,
+                databaseServerFullyQualifiedDomainName
+            );
+        }
 
-    /// <summary>
-    ///Delete database server
-    /// </summary>
-    /// <param name="databaseServerId"></param>
-    /// <returns></returns>
-    public async Task DeleteDatabaseServer(int databaseServerId)
-    {
-        await _databaseServers.DeleteDatabaseServer(databaseServerId);
+        /// <summary>
+        /// Deletes a specified database server.
+        /// </summary>
+        /// <param name="databaseServerId">
+        /// The ID of the database server to be deleted.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous operation.
+        /// </returns>
+        public async Task DeleteDatabaseServer(int databaseServerId)
+        {
+            await _databaseServers.DeleteDatabaseServer(databaseServerId);
+        }
     }
 }
