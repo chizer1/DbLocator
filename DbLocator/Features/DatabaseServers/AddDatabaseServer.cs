@@ -1,7 +1,7 @@
 using DbLocator.Db;
+using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseServers;
 
@@ -44,7 +44,7 @@ internal sealed class AddDatabaseServerCommandValidator
 
 internal class AddDatabaseServer(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    IDistributedCache cache
+    DbLocatorCache cache
 )
 {
     private readonly IDbContextFactory<DbLocatorContext> _dbContextFactory = dbContextFactory;

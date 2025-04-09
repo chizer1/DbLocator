@@ -1,7 +1,7 @@
 using DbLocator.Db;
+using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseUsers
 {
@@ -18,7 +18,7 @@ namespace DbLocator.Features.DatabaseUsers
 
     internal class DeleteDatabaseUser(
         IDbContextFactory<DbLocatorContext> dbContextFactory,
-        IDistributedCache cache
+        DbLocatorCache cache
     )
     {
         internal async Task Handle(DeleteDatabaseUserCommand command)

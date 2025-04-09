@@ -1,9 +1,9 @@
 using System.Text.Json;
 using DbLocator.Db;
 using DbLocator.Domain;
+using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Connections;
 
@@ -16,7 +16,7 @@ internal sealed class GetConnectionsQueryValidator : AbstractValidator<GetConnec
 
 internal class GetConnections(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    IDistributedCache cache
+    DbLocatorCache cache
 )
 {
     internal async Task<List<Connection>> Handle(GetConnectionsQuery query)
@@ -37,7 +37,7 @@ internal class GetConnections(
 
     private async Task<string> GetCachedData(string cacheKey)
     {
-        return cache != null ? await cache.GetStringAsync(cacheKey) : null;
+        return cache != null ? await cache.GetCachedData<string>(cacheKey) : null;
     }
 
     private static List<Connection> DeserializeCachedData(string cachedData)
@@ -50,7 +50,7 @@ internal class GetConnections(
         if (cache != null)
         {
             var serializedData = JsonSerializer.Serialize(connections);
-            await cache.SetStringAsync(cacheKey, serializedData);
+            await cache.CacheData(cacheKey, serializedData);
         }
     }
 

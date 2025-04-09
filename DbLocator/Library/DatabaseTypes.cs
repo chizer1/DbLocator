@@ -1,14 +1,14 @@
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.DatabaseTypes;
+using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Library;
 
 internal class DatabaseTypes(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    IDistributedCache cache
+    DbLocatorCache cache
 )
 {
     private readonly AddDatabaseType _addDatabaseType = new(dbContextFactory, cache);

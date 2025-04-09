@@ -1,15 +1,12 @@
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.Databases;
+using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Library;
 
-internal class Databases(
-    IDbContextFactory<DbLocatorContext> dbContextFactory,
-    IDistributedCache cache
-)
+internal class Databases(IDbContextFactory<DbLocatorContext> dbContextFactory, DbLocatorCache cache)
 {
     private readonly AddDatabase _addDatabase = new(dbContextFactory, cache);
     private readonly DeleteDatabase _deleteDatabase = new(dbContextFactory, cache);

@@ -1,7 +1,7 @@
 using DbLocator.Db;
+using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Databases
 {
@@ -17,7 +17,7 @@ namespace DbLocator.Features.Databases
 
     internal class DeleteDatabase(
         IDbContextFactory<DbLocatorContext> dbContextFactory,
-        IDistributedCache cache
+        DbLocatorCache cache
     )
     {
         internal async Task Handle(DeleteDatabaseCommand command)

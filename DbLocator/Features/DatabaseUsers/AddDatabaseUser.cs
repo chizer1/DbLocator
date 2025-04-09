@@ -2,7 +2,6 @@ using DbLocator.Db;
 using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseUsers;
 
@@ -44,7 +43,7 @@ internal sealed class AddDatabaseUserCommandValidator : AbstractValidator<AddDat
 internal class AddDatabaseUser(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     Encryption encryption,
-    IDistributedCache cache
+    DbLocatorCache cache
 )
 {
     internal async Task<int> Handle(AddDatabaseUserCommand command)
