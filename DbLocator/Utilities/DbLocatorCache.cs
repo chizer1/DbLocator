@@ -1,4 +1,5 @@
 using System.Text.Json;
+using DbLocator.Domain;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Utilities;
@@ -54,7 +55,15 @@ internal class DbLocatorCache(IDistributedCache cache)
         await _cache.RemoveAsync(cacheKey);
     }
 
-    internal async Task TryClearConnectionStringFromCache(string connectionCacheKeyPiece)
+    // Note, if this is ran with no specified parameters,
+    // it will clear all connection strings from the cache
+    internal async Task TryClearConnectionStringFromCache(
+        int? TenantId = null,
+        int? DatabaseTypeId = null,
+        int? ConnectionId = null,
+        string TenantCode = null,
+        DatabaseRole[] Roles = null
+    )
     {
         if (_cache == null)
         {
@@ -64,10 +73,32 @@ internal class DbLocatorCache(IDistributedCache cache)
         var cacheKeys = await GetCachedData<List<string>>("connectionCacheKeys") ?? [];
         foreach (var cacheKey in cacheKeys)
         {
-            if (cacheKey.Contains(connectionCacheKeyPiece))
+            if (TenantId != null && !cacheKey.Contains($"TenantId:{TenantId}"))
             {
-                await _cache.RemoveAsync(cacheKey);
+                continue;
             }
+
+            if (DatabaseTypeId != null && !cacheKey.Contains($"DatabaseTypeId:{DatabaseTypeId}"))
+            {
+                continue;
+            }
+
+            if (ConnectionId != null && !cacheKey.Contains($"ConnectionId:{ConnectionId}"))
+            {
+                continue;
+            }
+
+            if (TenantCode != null && !cacheKey.Contains($"TenantCode:{TenantCode}"))
+            {
+                continue;
+            }
+
+            if (Roles != null && !cacheKey.Contains($"Roles:{string.Join(",", Roles)}"))
+            {
+                continue;
+            }
+
+            await _cache.RemoveAsync(cacheKey);
         }
     }
 }

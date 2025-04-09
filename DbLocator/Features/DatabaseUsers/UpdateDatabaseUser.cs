@@ -143,5 +143,10 @@ internal class UpdateDatabaseUser(
         }
 
         cache?.Remove("databaseUsers");
+
+        var roles = databaseUserEntity
+            .UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)
+            .ToArray();
+        cache?.TryClearConnectionStringFromCache(Roles: roles);
     }
 }

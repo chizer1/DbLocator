@@ -1,4 +1,5 @@
 using DbLocator.Db;
+using DbLocator.Domain;
 using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -46,6 +47,11 @@ namespace DbLocator.Features.DatabaseUsers
             await dbContext.SaveChangesAsync();
 
             cache?.Remove("databaseUsers");
+
+            var roles = databaseUserEntity
+                .UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)
+                .ToArray();
+            cache?.TryClearConnectionStringFromCache(Roles: roles);
 
             if (!command.DeleteDatabaseUser)
             {

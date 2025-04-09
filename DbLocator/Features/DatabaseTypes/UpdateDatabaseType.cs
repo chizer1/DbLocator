@@ -47,5 +47,6 @@ internal class UpdateDatabaseType(
         await dbContext.SaveChangesAsync();
 
         cache?.Remove("databaseTypes");
+        cache?.TryClearConnectionStringFromCache(DatabaseTypeId: databaseType.DatabaseTypeId);
     }
 }
