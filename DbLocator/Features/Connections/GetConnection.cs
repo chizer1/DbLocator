@@ -32,7 +32,7 @@ internal class GetConnection(
 
         // Override the default toString so I can control it
         var queryString =
-            @$"TenandId:{query.TenantId},
+            @$"TenantId:{query.TenantId},
             DatabaseTypeId:{query.DatabaseTypeId},
             ConnectionId:{query.ConnectionId},
             TenantCode:{query.TenantCode}
