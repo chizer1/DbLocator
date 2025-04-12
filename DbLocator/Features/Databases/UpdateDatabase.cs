@@ -88,12 +88,13 @@ internal class UpdateDatabase(
         dbContext.Update(databaseEntity);
         await dbContext.SaveChangesAsync();
 
-        var commands = new List<string>();
         if (oldDatabaseName != command.DatabaseName && !string.IsNullOrEmpty(command.DatabaseName))
-            commands.Add($"alter database {oldDatabaseName} modify name = {command.DatabaseName}");
-
-        foreach (var commandText in commands)
         {
+            var oldDbName = Sql.SanitizeSqlIdentifier(oldDatabaseName);
+            var newDbName = Sql.SanitizeSqlIdentifier(command.DatabaseName);
+
+            var commandText = $"alter database [{oldDbName}] modify name = [{newDbName}]";
+
             using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
             cmd.CommandText = commandText;
             await dbContext.Database.OpenConnectionAsync();

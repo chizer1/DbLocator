@@ -68,32 +68,32 @@ internal class AddDatabaseUserRole(IDbContextFactory<DbLocatorContext> dbContext
         AddDatabaseUserRoleCommand command
     )
     {
-        var database = await dbContext
-            .Set<DatabaseEntity>()
-            .Include(d => d.DatabaseServer)
-            .FirstOrDefaultAsync(ds => ds.DatabaseId == user.DatabaseId);
+        var database =
+            await dbContext
+                .Set<DatabaseEntity>()
+                .Include(d => d.DatabaseServer)
+                .FirstOrDefaultAsync(ds => ds.DatabaseId == user.DatabaseId)
+            ?? throw new InvalidOperationException("Database not found.");
 
-        var roleName = Enum.GetName(command.UserRole).ToLower();
+        var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
+        var userName = Sql.EscapeForDynamicSql(Sql.SanitizeSqlIdentifier(user.UserName));
+        var roleName = $"db_{Enum.GetName(command.UserRole).ToLower()}";
+        roleName = Sql.EscapeForDynamicSql(Sql.SanitizeSqlIdentifier(roleName));
 
-        var commands = new List<string>
+        var commandText = $"use [{dbName}]; exec sp_addrolemember '{roleName}', '{userName}';";
+
+        if (database.DatabaseServer.IsLinkedServer)
         {
-            $"use {database.DatabaseName}; exec sp_addrolemember 'db_{roleName}', '{user.UserName}'"
-        };
-
-        for (var i = 0; i < commands.Count; i++)
-        {
-            var commandText = commands[i];
-            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-
-            if (database.DatabaseServer.IsLinkedServer)
-            {
-                commandText =
-                    $"exec('{commandText.Replace("'", "''")}') at {database.DatabaseServer.DatabaseServerHostName};";
-            }
-
-            cmd.CommandText = commandText;
-            await dbContext.Database.OpenConnectionAsync();
-            await cmd.ExecuteNonQueryAsync();
+            var linkedServer = Sql.SanitizeSqlIdentifier(
+                database.DatabaseServer.DatabaseServerHostName
+            );
+            commandText = $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServer}];";
         }
+
+        using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+        cmd.CommandText = commandText;
+
+        await dbContext.Database.OpenConnectionAsync();
+        await cmd.ExecuteNonQueryAsync();
     }
 }

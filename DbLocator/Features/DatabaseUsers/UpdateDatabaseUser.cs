@@ -85,35 +85,38 @@ internal class UpdateDatabaseUser(
             .ToList();
 
         if (!string.IsNullOrEmpty(command.UserName))
-        {
             databaseUserEntity.UserName = command.UserName;
-        }
 
         if (!string.IsNullOrEmpty(command.UserPassword))
-        {
             databaseUserEntity.UserPassword = encryption.Encrypt(command.UserPassword);
-        }
 
         dbContext.Update(databaseUserEntity);
         await dbContext.SaveChangesAsync();
 
         if (!command.UpdateDatabase)
-        {
             return;
-        }
 
-        var database = await dbContext
-            .Set<DatabaseEntity>()
-            .Include(d => d.DatabaseServer)
-            .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseUserEntity.DatabaseId);
+        var database =
+            await dbContext
+                .Set<DatabaseEntity>()
+                .Include(d => d.DatabaseServer)
+                .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseUserEntity.DatabaseId)
+            ?? throw new InvalidOperationException("Database not found.");
 
         var commands = new List<string>();
+
         if (oldDatabaseUserName != command.UserName && !string.IsNullOrEmpty(command.UserName))
         {
+            var sanitizedOldUserName = Sql.SanitizeSqlIdentifier(oldDatabaseUserName);
+            var sanitizedNewUserName = Sql.SanitizeSqlIdentifier(command.UserName);
+            var sanitizedDbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
+
             commands.Add(
-                $"use {database.DatabaseName}; alter user {oldDatabaseUserName} with name = {command.UserName}"
+                $"use [{sanitizedDbName}]; alter user [{sanitizedOldUserName}] with name = [{sanitizedNewUserName}]"
             );
-            commands.Add($"alter login {oldDatabaseUserName} with name = '{command.UserName}'");
+            commands.Add(
+                $"alter login [{sanitizedOldUserName}] with name = '{sanitizedNewUserName}'"
+            );
         }
 
         if (
@@ -121,8 +124,11 @@ internal class UpdateDatabaseUser(
             && !string.IsNullOrEmpty(command.UserPassword)
         )
         {
+            var sanitizedUserName = Sql.SanitizeSqlIdentifier(command.UserName);
+            var sanitizedPassword = Sql.EscapeForDynamicSql(command.UserPassword);
+
             commands.Add(
-                $"alter login {command.UserName} with password = '{command.UserPassword}'"
+                $"alter login [{sanitizedUserName}] with password = '{sanitizedPassword}'"
             );
         }
 
@@ -133,8 +139,11 @@ internal class UpdateDatabaseUser(
 
             if (database.DatabaseServer.IsLinkedServer)
             {
+                var linkedServerHost = Sql.SanitizeSqlIdentifier(
+                    database.DatabaseServer.DatabaseServerHostName
+                );
                 commandText =
-                    $"exec('{commandText.Replace("'", "''")}') at {database.DatabaseServer.DatabaseServerHostName};";
+                    $"exec(''{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServerHost}];";
             }
 
             cmd.CommandText = commandText;
