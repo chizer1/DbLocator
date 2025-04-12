@@ -35,22 +35,21 @@ namespace DbLocator.Features.Databases
                     .Set<ConnectionEntity>()
                     .AnyAsync(c => c.DatabaseId == command.DatabaseId)
             )
+            {
                 throw new InvalidOperationException(
                     "Database is being used in Connection table, please remove the connection first if you want to delete this database."
                 );
+            }
 
             dbContext.Set<DatabaseEntity>().Remove(databaseEntity);
             await dbContext.SaveChangesAsync();
 
             if (command.DeleteDatabase == true)
+            {
                 await DeleteDatabaseAsync(dbContext, databaseEntity);
+            }
 
             cache?.Remove("databases");
-
-            // TODO: Make this more specific
-            cache?.TryClearConnectionStringFromCache(
-                DatabaseTypeId: (int)databaseEntity.DatabaseTypeId
-            );
         }
 
         private static async Task DeleteDatabaseAsync(
