@@ -144,7 +144,7 @@ internal class UpdateDatabaseUser(
                     database.DatabaseServer.DatabaseServerHostName
                 );
                 commandText =
-                    $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServerHost}];";
+                    $"exec(''{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServerHost}];";
             }
 
             cmd.CommandText = commandText;

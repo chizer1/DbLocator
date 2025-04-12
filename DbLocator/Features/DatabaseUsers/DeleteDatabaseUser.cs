@@ -88,7 +88,7 @@ namespace DbLocator.Features.DatabaseUsers
                         database.DatabaseServer.DatabaseServerHostName
                     );
                     commandText =
-                        $"exec({Sql.EscapeForDynamicSql(commandText)}') at [{linkedServer}];";
+                        $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServer}];";
                 }
 
                 using var cmd = dbContext.Database.GetDbConnection().CreateCommand();

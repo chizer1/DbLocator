@@ -87,9 +87,7 @@ internal class AddDatabaseUser(
         await dbContext.SaveChangesAsync();
 
         if (command.CreateUser)
-        {
             await CreateDatabaseUser(dbContext, command);
-        }
 
         cache?.Remove("databaseUsers");
 
@@ -109,12 +107,12 @@ internal class AddDatabaseUser(
             ?? throw new InvalidOperationException("Database not found.");
 
         var userName = Sql.EscapeForDynamicSql(Sql.SanitizeSqlIdentifier(command.UserName));
-        var userPassword = Sql.EscapeForDynamicSql(command.UserPassword); // Passwords may contain special characters?
+        var userPassword = Sql.EscapeForDynamicSql(command.UserPassword);
         var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
 
         var commands = new List<string>
         {
-            $"create login [{userName}] with password = {userPassword}'",
+            $"create login [{userName}] with password = '{userPassword}'",
             $"use [{dbName}]; create user [{userName}] for login [{userName}]"
         };
 
@@ -128,7 +126,7 @@ internal class AddDatabaseUser(
                     database.DatabaseServer.DatabaseServerHostName
                 );
                 commandText =
-                    $"exec({Sql.EscapeForDynamicSql(commandText)}') at [{linkedServer}];";
+                    $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServer}];";
             }
 
             using var cmd = dbContext.Database.GetDbConnection().CreateCommand();

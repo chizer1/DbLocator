@@ -43,37 +43,39 @@ namespace DbLocator.Features.Databases
             await dbContext.SaveChangesAsync();
 
             if (command.DeleteDatabase == true)
-            {
-                var dbName = Sql.SanitizeSqlIdentifier(databaseEntity.DatabaseName);
-                var rawCommand = $"drop database [{dbName}]";
-
-                var databaseServer = await dbContext
-                    .Set<DatabaseServerEntity>()
-                    .FirstOrDefaultAsync(ds =>
-                        ds.DatabaseServerId == databaseEntity.DatabaseServerId
-                    );
-
-                string commandText;
-                if (databaseServer?.IsLinkedServer == true)
-                {
-                    var linkedServer = Sql.SanitizeSqlIdentifier(
-                        databaseServer.DatabaseServerHostName
-                    );
-                    var escapedCommand = Sql.EscapeForDynamicSql(rawCommand);
-                    commandText = $"exec({escapedCommand}') at [{linkedServer}];";
-                }
-                else
-                {
-                    commandText = rawCommand;
-                }
-
-                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-                cmd.CommandText = commandText;
-                await dbContext.Database.OpenConnectionAsync();
-                await cmd.ExecuteNonQueryAsync();
-            }
+                await DeleteDatabaseAsync(dbContext, databaseEntity);
 
             cache?.Remove("databases");
+        }
+
+        private static async Task DeleteDatabaseAsync(
+            DbLocatorContext dbContext,
+            DatabaseEntity databaseEntity
+        )
+        {
+            var databaseName = Sql.SanitizeSqlIdentifier(databaseEntity.DatabaseName);
+            var rawCommand = $"drop database [{databaseName}]";
+
+            var databaseServer = await dbContext
+                .Set<DatabaseServerEntity>()
+                .FirstOrDefaultAsync(ds => ds.DatabaseServerId == databaseEntity.DatabaseServerId);
+
+            string commandText;
+            if (databaseServer?.IsLinkedServer == true)
+            {
+                var linkedServer = Sql.SanitizeSqlIdentifier(databaseServer.DatabaseServerHostName);
+                var escapedCommand = Sql.EscapeForDynamicSql(rawCommand);
+                commandText = $"exec('{escapedCommand}') at [{linkedServer}];";
+            }
+            else
+            {
+                commandText = rawCommand;
+            }
+
+            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+            cmd.CommandText = commandText;
+            await dbContext.Database.OpenConnectionAsync();
+            await cmd.ExecuteNonQueryAsync();
         }
     }
 }

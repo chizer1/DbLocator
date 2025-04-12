@@ -80,14 +80,14 @@ internal class AddDatabaseUserRole(IDbContextFactory<DbLocatorContext> dbContext
         var roleName = $"db_{Enum.GetName(command.UserRole).ToLower()}";
         roleName = Sql.EscapeForDynamicSql(Sql.SanitizeSqlIdentifier(roleName));
 
-        var commandText = $"use [{dbName}]; exec sp_addrolemember {roleName}', {userName}';";
+        var commandText = $"use [{dbName}]; exec sp_addrolemember '{roleName}', '{userName}';";
 
         if (database.DatabaseServer.IsLinkedServer)
         {
             var linkedServer = Sql.SanitizeSqlIdentifier(
                 database.DatabaseServer.DatabaseServerHostName
             );
-            commandText = $"exec({Sql.EscapeForDynamicSql(commandText)}') at [{linkedServer}];";
+            commandText = $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServer}];";
         }
 
         using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
