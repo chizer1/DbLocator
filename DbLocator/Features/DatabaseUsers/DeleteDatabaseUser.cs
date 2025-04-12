@@ -60,29 +60,40 @@ namespace DbLocator.Features.DatabaseUsers
             DatabaseUserEntity databaseUserEntity
         )
         {
-            var database = await dbContext
-                .Set<DatabaseEntity>()
-                .Include(d => d.DatabaseServer)
-                .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseUserEntity.DatabaseId);
+            var database =
+                await dbContext
+                    .Set<DatabaseEntity>()
+                    .Include(d => d.DatabaseServer)
+                    .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseUserEntity.DatabaseId)
+                ?? throw new InvalidOperationException("Database not found.");
+
+            var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
+            var userName = Sql.EscapeForDynamicSql(
+                Sql.SanitizeSqlIdentifier(databaseUserEntity.UserName)
+            );
 
             var commands = new List<string>
             {
-                $"use {database.DatabaseName}; drop user {databaseUserEntity.UserName}",
-                $"drop login {databaseUserEntity.UserName}"
+                $"use [{dbName}]; drop user [{userName}]",
+                $"drop login [{userName}]"
             };
 
-            for (var i = 0; i < commands.Count; i++)
+            foreach (var rawCommand in commands)
             {
-                var commandText = commands[i];
-                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+                var commandText = rawCommand;
 
                 if (database.DatabaseServer.IsLinkedServer)
                 {
+                    var linkedServer = Sql.SanitizeSqlIdentifier(
+                        database.DatabaseServer.DatabaseServerHostName
+                    );
                     commandText =
-                        $"exec('{commandText.Replace("'", "''")}') at {database.DatabaseServer.DatabaseServerHostName};";
+                        $"exec({Sql.EscapeForDynamicSql(commandText)}') at [{linkedServer}];";
                 }
 
+                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
                 cmd.CommandText = commandText;
+
                 await dbContext.Database.OpenConnectionAsync();
                 await cmd.ExecuteNonQueryAsync();
             }

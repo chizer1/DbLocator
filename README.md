@@ -50,7 +50,7 @@ dotnet add package DbLocator
 You will need an instance of SQL Server running. For local development, you can either:
   - Use the SQL Server Docker image in this repository by running `docker compose up` from the root. This requires Docker Desktop to be installed (https://docs.docker.com/get-started/get-docker/)
   - Install SQL Server directly on your machine (https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
-  - Spin up a new SQL Server instance in the cloud. **Note**: This library may not play nicely with Azure SQL as this library has code that relies on traditional SQL Server logins which Azure SQL doesn't support.
+  - Spin up a new SQL Server instance in the cloud. **Note**: This library may not play nicely with Azure SQL as this library has code that relies on traditional SQL Server logins which Azure SQL doest support.
 
 ### 3. Initialization 
 
@@ -68,11 +68,11 @@ IDistributedCache cache = builder
 
 Locator dbLocator = new("YourConnectionString", "EncryptionKey", cache);
 ```
-In a real world scenario, you probably wouldn't want to connect an sysadmin login to this library for security purposes (Principle of Least Privilege).
+In a real world scenario, you probably wouldt want to connect an sysadmin login to this library for security purposes (Principle of Least Privilege).
 You would want to create a login with these server level roles:
 1. **dbcreator**: If you want to create databases from this library
 2. **securityadmin**: If you want to create logins from this library.
-3. No server level roles, if you don't want to autocreate databases or logins and just map to existing ones. 
+3. No server level roles, if you dot want to autocreate databases or logins and just map to existing ones. 
 
 After initializing the Locator object and running your application, it will automatically create the DbLocator database and you can start using its methods.
 

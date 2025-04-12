@@ -64,36 +64,37 @@ namespace DbLocator.Features.DatabaseUserRoles
             DatabaseUserRoleEntity databaseUserRoleEntity
         )
         {
-            var user = await dbContext
-                .Set<DatabaseUserEntity>()
-                .Include(u => u.Database)
-                .Include(u => u.Database.DatabaseServer)
-                .FirstOrDefaultAsync(du =>
-                    du.DatabaseUserId == databaseUserRoleEntity.DatabaseUserId
-                );
+            var user =
+                await dbContext
+                    .Set<DatabaseUserEntity>()
+                    .Include(u => u.Database)
+                    .Include(u => u.Database.DatabaseServer)
+                    .FirstOrDefaultAsync(du =>
+                        du.DatabaseUserId == databaseUserRoleEntity.DatabaseUserId
+                    ) ?? throw new InvalidOperationException("User not found.");
 
             var roleName = Enum.GetName((DatabaseRole)databaseUserRoleEntity.DatabaseRoleId)
                 .ToLower();
-            var commands = new List<string>()
+
+            var dbName = Sql.SanitizeSqlIdentifier(user.Database.DatabaseName);
+            var userName = Sql.SanitizeSqlIdentifier(user.UserName);
+
+            var commandText =
+                $"use [{dbName}]; exec sp_droprolemember 'db_{roleName}', '{userName}'";
+            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+
+            if (user.Database.DatabaseServer.IsLinkedServer)
             {
-                $"use {user.Database.DatabaseName}; exec sp_droprolemember 'db_{roleName}', '{user.UserName}'"
-            };
-
-            for (var i = 0; i < commands.Count; i++)
-            {
-                var commandText = commands[i];
-                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-
-                if (user.Database.DatabaseServer.IsLinkedServer)
-                {
-                    commandText =
-                        $"exec('{commandText.Replace("'", "''")}') at {user.Database.DatabaseServer.DatabaseServerHostName};";
-                }
-
-                cmd.CommandText = commandText;
-                await dbContext.Database.OpenConnectionAsync();
-                await cmd.ExecuteNonQueryAsync();
+                var linkedServerHost = Sql.SanitizeSqlIdentifier(
+                    user.Database.DatabaseServer.DatabaseServerHostName
+                );
+                commandText =
+                    $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServerHost}];";
             }
+
+            cmd.CommandText = commandText;
+            await dbContext.Database.OpenConnectionAsync();
+            await cmd.ExecuteNonQueryAsync();
         }
     }
 }

@@ -49,18 +49,22 @@ internal class AddDatabase(
                 .Set<DatabaseServerEntity>()
                 .AnyAsync(ds => ds.DatabaseServerId == command.DatabaseServerId)
         )
+        {
             throw new KeyNotFoundException(
                 $"Database Server Id '{command.DatabaseServerId}' not found."
             );
+        }
 
         if (
             !await dbContext
                 .Set<DatabaseTypeEntity>()
                 .AnyAsync(dt => dt.DatabaseTypeId == command.DatabaseTypeId)
         )
+        {
             throw new KeyNotFoundException(
                 $"Database Type Id '{command.DatabaseTypeId}' not found."
             );
+        }
 
         var database = new DatabaseEntity
         {
@@ -76,30 +80,32 @@ internal class AddDatabase(
 
         if (command.CreateDatabase)
         {
-            var databaseServer = await dbContext
-                .Set<DatabaseServerEntity>()
-                .FirstOrDefaultAsync(ds => ds.DatabaseServerId == command.DatabaseServerId);
+            var databaseServer =
+                await dbContext
+                    .Set<DatabaseServerEntity>()
+                    .FirstOrDefaultAsync(ds => ds.DatabaseServerId == command.DatabaseServerId)
+                ?? throw new KeyNotFoundException("Database server not found.");
 
-            var commands = new List<string>();
+            var dbName = Sql.SanitizeSqlIdentifier(command.DatabaseName);
+            string commandText;
+
+            var rawCommand = $"create database [{dbName}]";
 
             if (databaseServer.IsLinkedServer)
             {
-                commands.Add(
-                    $"exec('create database {command.DatabaseName}') at {databaseServer.DatabaseServerHostName};"
-                );
+                var linkedServer = Sql.SanitizeSqlIdentifier(databaseServer.DatabaseServerHostName);
+                var escapedCommand = Sql.EscapeForDynamicSql(rawCommand);
+                commandText = $"exec({escapedCommand}') at [{linkedServer}];";
             }
             else
             {
-                commands.Add($"create database {command.DatabaseName}");
+                commandText = rawCommand;
             }
 
-            foreach (var commandText in commands)
-            {
-                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-                cmd.CommandText = commandText;
-                await dbContext.Database.OpenConnectionAsync();
-                await cmd.ExecuteNonQueryAsync();
-            }
+            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+            cmd.CommandText = commandText;
+            await dbContext.Database.OpenConnectionAsync();
+            await cmd.ExecuteNonQueryAsync();
         }
 
         cache?.Remove("databases");

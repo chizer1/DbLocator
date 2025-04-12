@@ -44,15 +44,33 @@ namespace DbLocator.Features.Databases
 
             if (command.DeleteDatabase == true)
             {
-                var commands = new List<string> { $"drop database {databaseEntity.DatabaseName}" };
+                var dbName = Sql.SanitizeSqlIdentifier(databaseEntity.DatabaseName);
+                var rawCommand = $"drop database [{dbName}]";
 
-                foreach (var commandText in commands)
+                var databaseServer = await dbContext
+                    .Set<DatabaseServerEntity>()
+                    .FirstOrDefaultAsync(ds =>
+                        ds.DatabaseServerId == databaseEntity.DatabaseServerId
+                    );
+
+                string commandText;
+                if (databaseServer?.IsLinkedServer == true)
                 {
-                    using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-                    cmd.CommandText = commandText;
-                    await dbContext.Database.OpenConnectionAsync();
-                    await cmd.ExecuteNonQueryAsync();
+                    var linkedServer = Sql.SanitizeSqlIdentifier(
+                        databaseServer.DatabaseServerHostName
+                    );
+                    var escapedCommand = Sql.EscapeForDynamicSql(rawCommand);
+                    commandText = $"exec({escapedCommand}') at [{linkedServer}];";
                 }
+                else
+                {
+                    commandText = rawCommand;
+                }
+
+                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+                cmd.CommandText = commandText;
+                await dbContext.Database.OpenConnectionAsync();
+                await cmd.ExecuteNonQueryAsync();
             }
 
             cache?.Remove("databases");
