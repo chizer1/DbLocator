@@ -102,5 +102,8 @@ internal class UpdateDatabase(
         }
 
         cache?.Remove("databases");
+
+        // TODO: Make this more specific
+        cache?.TryClearConnectionStringFromCache(DatabaseTypeId: databaseEntity.DatabaseTypeId);
     }
 }
