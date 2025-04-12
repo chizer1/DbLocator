@@ -45,6 +45,25 @@ namespace DbLocator.Features.Databases
             await dbContext.SaveChangesAsync();
 
             if (command.DeleteDatabase == true)
+                await DeleteDatabaseAsync(dbContext, databaseEntity);
+
+            cache?.Remove("databases");
+        }
+
+        private static async Task DeleteDatabaseAsync(
+            DbLocatorContext dbContext,
+            DatabaseEntity databaseEntity
+        )
+        {
+            var databaseName = Sql.SanitizeSqlIdentifier(databaseEntity.DatabaseName);
+            var rawCommand = $"drop database [{databaseName}]";
+
+            var databaseServer = await dbContext
+                .Set<DatabaseServerEntity>()
+                .FirstOrDefaultAsync(ds => ds.DatabaseServerId == databaseEntity.DatabaseServerId);
+
+            string commandText;
+            if (databaseServer?.IsLinkedServer == true)
             {
                 await DeleteDatabaseAsync(dbContext, databaseEntity);
             }
