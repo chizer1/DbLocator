@@ -53,7 +53,7 @@ public partial class Locator
         _databases = new Databases(dbContextFactory, dbLocatorCache);
         _databaseServers = new DatabaseServers(dbContextFactory, dbLocatorCache);
         _databaseUsers = new DatabaseUsers(dbContextFactory, encryption, dbLocatorCache);
-        _databaseUserRoles = new DatabaseUserRoles(dbContextFactory);
+        _databaseUserRoles = new DatabaseUserRoles(dbContextFactory, dbLocatorCache);
         _databaseTypes = new DatabaseTypes(dbContextFactory, dbLocatorCache);
         _tenants = new Tenants(dbContextFactory, dbLocatorCache);
     }

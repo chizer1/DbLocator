@@ -41,6 +41,7 @@ internal class DeleteTenant(
         await dbContext.SaveChangesAsync();
 
         cache?.Remove("tenants");
+        cache?.Remove("connections");
         cache?.TryClearConnectionStringFromCache(TenantCode: tenant.TenantCode);
         cache?.TryClearConnectionStringFromCache(TenantId: tenant.TenantId);
     }

@@ -37,29 +37,18 @@ internal class GetConnection(
             ConnectionId:{query.ConnectionId},
             TenantCode:{query.TenantCode}
             Roles:{string.Join(",", query.Roles)}";
-        var cacheKey = $"connection:{queryString}";
-        var cachedData = await GetCachedData(cacheKey);
 
+        var cacheKey = $"connection:{queryString}";
+        var cachedData = await cache?.GetCachedData<string>(cacheKey);
         if (!string.IsNullOrEmpty(cachedData))
+        {
             return new SqlConnection(cachedData);
+        }
 
         var connectionString = await GetConnectionStringFromDatabase(query);
-        await CacheData(cacheKey, connectionString);
+        await cache?.CacheConnectionString(cacheKey, connectionString);
 
         return new SqlConnection(connectionString);
-    }
-
-    private async Task<string> GetCachedData(string cacheKey)
-    {
-        return cache != null ? await cache.GetCachedData<string>(cacheKey) : null;
-    }
-
-    private async Task CacheData(string cacheKey, string connectionString)
-    {
-        if (cache != null)
-        {
-            await cache.CacheData(cacheKey, connectionString);
-        }
     }
 
     private async Task<string> GetConnectionStringFromDatabase(GetConnectionQuery query)

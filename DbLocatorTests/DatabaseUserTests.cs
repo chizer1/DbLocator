@@ -1,5 +1,6 @@
 using DbLocator;
 using DbLocator.Domain;
+using DbLocator.Utilities;
 using DbLocatorTests.Fixtures;
 
 namespace DbLocatorTests;
@@ -8,6 +9,7 @@ namespace DbLocatorTests;
 public class DatabaseUserTests(DbLocatorFixture dbLocatorFixture)
 {
     private readonly Locator _dbLocator = dbLocatorFixture.DbLocator;
+    private readonly DbLocatorCache _cache = dbLocatorFixture.LocatorCache;
     private readonly int _databaseServerId = dbLocatorFixture.LocalhostServerId;
 
     [Fact]
@@ -106,5 +108,37 @@ public class DatabaseUserTests(DbLocatorFixture dbLocatorFixture)
         await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.GetConnection(connectionId, [DatabaseRole.DataWriter])
         );
+    }
+
+    [Fact]
+    public async Task VerifyDatabaseUsersAreCached()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerId,
+            databaseTypeId,
+            Status.Active
+        );
+
+        var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
+        var dbUserId = await _dbLocator.AddDatabaseUser(
+            databaseId,
+            TestHelpers.GetRandomString(),
+            true
+        );
+
+        var databaseUsers = await _dbLocator.GetDatabaseUsers();
+        Assert.Contains(databaseUsers, db => db.Id == dbUserId);
+
+        var cachedDatabaseUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
+        Assert.NotNull(cachedDatabaseUsers);
+        Assert.Contains(cachedDatabaseUsers, db => db.Id == dbUserId);
     }
 }

@@ -24,34 +24,16 @@ internal class GetTenants(
         await new GetTenantsQueryValidator().ValidateAndThrowAsync(query);
 
         var cacheKey = "tenants";
-        var cachedData = await GetCachedData(cacheKey);
-
-        if (!string.IsNullOrEmpty(cachedData))
-            return DeserializeCachedData(cachedData);
+        var cachedData = await cache?.GetCachedData<List<Tenant>>(cacheKey);
+        if (cachedData != null)
+        {
+            return cachedData;
+        }
 
         var tenants = await GetTenantsFromDatabase(dbContextFactory);
-        await CacheData(cacheKey, tenants);
+        await cache?.CacheData(cacheKey, tenants);
 
         return tenants;
-    }
-
-    private async Task<string> GetCachedData(string cacheKey)
-    {
-        return cache != null ? await cache.GetCachedData<string>(cacheKey) : null;
-    }
-
-    private static List<Tenant> DeserializeCachedData(string cachedData)
-    {
-        return JsonSerializer.Deserialize<List<Tenant>>(cachedData) ?? new List<Tenant>();
-    }
-
-    private async Task CacheData(string cacheKey, List<Tenant> tenants)
-    {
-        if (cache != null)
-        {
-            var serializedData = JsonSerializer.Serialize(tenants);
-            await cache.CacheData(cacheKey, serializedData);
-        }
     }
 
     private static async Task<List<Tenant>> GetTenantsFromDatabase(

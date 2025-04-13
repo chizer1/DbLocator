@@ -1,11 +1,17 @@
 using DbLocator;
 using DbLocator.Db;
+using DbLocator.Utilities;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Options;
 
 namespace DbLocatorTests.Fixtures;
 
 public class DbLocatorFixture : IDisposable, IAsyncLifetime
 {
     public Locator DbLocator { get; private set; }
+    internal DbLocatorCache LocatorCache { get; private set; }
     public int LocalhostServerId { get; private set; }
 
     private const string connString =
@@ -13,7 +19,10 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
 
     public DbLocatorFixture()
     {
-        DbLocator = new Locator(connString);
+        var options = Options.Create<MemoryDistributedCacheOptions>(new());
+        var memCache = new MemoryDistributedCache(options, NullLoggerFactory.Instance);
+        LocatorCache = new DbLocatorCache(memCache);
+        DbLocator = new Locator(connString, null, memCache);
     }
 
     public void Dispose() { }

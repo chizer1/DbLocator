@@ -48,6 +48,7 @@ namespace DbLocator.Features.Databases
                 await DeleteDatabaseAsync(dbContext, databaseEntity);
 
             cache?.Remove("databases");
+            cache?.Remove("connections");
 
             // TODO: Make this more specific
             cache?.TryClearConnectionStringFromCache(DatabaseTypeId: databaseEntity.DatabaseTypeId);
