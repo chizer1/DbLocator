@@ -1,9 +1,9 @@
 using System.Text.Json;
 using DbLocator.Db;
 using DbLocator.Domain;
+using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Databases;
 
@@ -16,7 +16,7 @@ internal sealed class GetDatabasesQueryValidator : AbstractValidator<GetDatabase
 
 internal class GetDatabases(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    IDistributedCache cache
+    DbLocatorCache cache
 )
 {
     public async Task<List<Database>> Handle(GetDatabasesQuery query)
@@ -24,34 +24,16 @@ internal class GetDatabases(
         await new GetDatabasesQueryValidator().ValidateAndThrowAsync(query);
 
         var cacheKey = "databases";
-        var cachedData = await GetCachedData(cacheKey);
-
-        if (!string.IsNullOrEmpty(cachedData))
-            return DeserializeCachedData(cachedData);
+        var cachedData = await cache?.GetCachedData<List<Database>>(cacheKey);
+        if (cachedData != null)
+        {
+            return cachedData;
+        }
 
         var databases = await GetDatabasesFromDatabase(dbContextFactory);
-        await CacheData(cacheKey, databases);
+        await cache?.CacheData(cacheKey, databases);
 
         return databases;
-    }
-
-    private async Task<string> GetCachedData(string cacheKey)
-    {
-        return cache != null ? await cache.GetStringAsync(cacheKey) : null;
-    }
-
-    private static List<Database> DeserializeCachedData(string cachedData)
-    {
-        return JsonSerializer.Deserialize<List<Database>>(cachedData) ?? [];
-    }
-
-    private async Task CacheData(string cacheKey, List<Database> databases)
-    {
-        if (cache != null)
-        {
-            var serializedData = JsonSerializer.Serialize(databases);
-            await cache.SetStringAsync(cacheKey, serializedData);
-        }
     }
 
     private static async Task<List<Database>> GetDatabasesFromDatabase(

@@ -1,9 +1,9 @@
 using System.Text.Json;
 using DbLocator.Db;
 using DbLocator.Domain;
+using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseServers;
 
@@ -16,7 +16,7 @@ internal sealed class GetDatabaseServersQueryValidator : AbstractValidator<GetDa
 
 internal class GetDatabaseServers(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    IDistributedCache cache
+    DbLocatorCache cache
 )
 {
     internal async Task<List<DatabaseServer>> Handle(GetDatabaseServersQuery query)
@@ -24,34 +24,16 @@ internal class GetDatabaseServers(
         await new GetDatabaseServersQueryValidator().ValidateAndThrowAsync(query);
 
         var cacheKey = "databaseServers";
-        var cachedData = await GetCachedData(cacheKey);
-
-        if (!string.IsNullOrEmpty(cachedData))
-            return DeserializeCachedData(cachedData);
+        var cachedData = await cache?.GetCachedData<List<DatabaseServer>>(cacheKey);
+        if (cachedData != null)
+        {
+            return cachedData;
+        }
 
         var databaseServers = await GetDatabaseServersFromDatabase(dbContextFactory);
-        await CacheData(cacheKey, databaseServers);
+        await cache?.CacheData(cacheKey, databaseServers);
 
         return databaseServers;
-    }
-
-    private async Task<string> GetCachedData(string cacheKey)
-    {
-        return cache != null ? await cache.GetStringAsync(cacheKey) : null;
-    }
-
-    private static List<DatabaseServer> DeserializeCachedData(string cachedData)
-    {
-        return JsonSerializer.Deserialize<List<DatabaseServer>>(cachedData) ?? [];
-    }
-
-    private async Task CacheData(string cacheKey, List<DatabaseServer> databaseServers)
-    {
-        if (cache != null)
-        {
-            var serializedData = JsonSerializer.Serialize(databaseServers);
-            await cache.SetStringAsync(cacheKey, serializedData);
-        }
     }
 
     private static async Task<List<DatabaseServer>> GetDatabaseServersFromDatabase(

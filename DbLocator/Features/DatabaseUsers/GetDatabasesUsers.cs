@@ -1,9 +1,9 @@
 using System.Text.Json;
 using DbLocator.Db;
 using DbLocator.Domain;
+using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseUsers;
 
@@ -16,7 +16,7 @@ internal sealed class GetDatabaseUsersQueryValidator : AbstractValidator<GetData
 
 internal class GetDatabaseUsers(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    IDistributedCache cache
+    DbLocatorCache cache
 )
 {
     public async Task<List<DatabaseUser>> Handle(GetDatabaseUsersQuery query)
@@ -24,34 +24,17 @@ internal class GetDatabaseUsers(
         await new GetDatabaseUsersQueryValidator().ValidateAndThrowAsync(query);
 
         var cacheKey = "databaseUsers";
-        var cachedData = await GetCachedData(cacheKey);
 
-        if (!string.IsNullOrEmpty(cachedData))
-            return DeserializeCachedData(cachedData);
+        var cachedData = await cache?.GetCachedData<List<DatabaseUser>>(cacheKey);
+        if (cachedData != null)
+        {
+            return cachedData;
+        }
 
         var databaseUsers = await GetDatabaseUsersFromDatabase(dbContextFactory);
-        await CacheData(cacheKey, databaseUsers);
+        await cache?.CacheData(cacheKey, databaseUsers);
 
         return databaseUsers;
-    }
-
-    private async Task<string> GetCachedData(string cacheKey)
-    {
-        return cache != null ? await cache.GetStringAsync(cacheKey) : null;
-    }
-
-    private static List<DatabaseUser> DeserializeCachedData(string cachedData)
-    {
-        return JsonSerializer.Deserialize<List<DatabaseUser>>(cachedData) ?? [];
-    }
-
-    private async Task CacheData(string cacheKey, List<DatabaseUser> databaseUsers)
-    {
-        if (cache != null)
-        {
-            var serializedData = JsonSerializer.Serialize(databaseUsers);
-            await cache.SetStringAsync(cacheKey, serializedData);
-        }
     }
 
     private static async Task<List<DatabaseUser>> GetDatabaseUsersFromDatabase(

@@ -1,8 +1,8 @@
 using DbLocator.Db;
 using DbLocator.Domain;
+using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Databases;
 
@@ -35,7 +35,7 @@ internal sealed class AddDatabaseCommandValidator : AbstractValidator<AddDatabas
 
 internal class AddDatabase(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    IDistributedCache cache
+    DbLocatorCache cache
 )
 {
     internal async Task<int> Handle(AddDatabaseCommand command)

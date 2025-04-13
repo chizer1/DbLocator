@@ -1,15 +1,12 @@
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.Tenants;
+using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Library;
 
-internal class Tenants(
-    IDbContextFactory<DbLocatorContext> dbContextFactory,
-    IDistributedCache cache
-)
+internal class Tenants(IDbContextFactory<DbLocatorContext> dbContextFactory, DbLocatorCache cache)
 {
     private readonly AddTenant _addTenant = new(dbContextFactory, cache);
     private readonly DeleteTenant _deleteTenant = new(dbContextFactory, cache);

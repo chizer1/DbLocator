@@ -1,14 +1,14 @@
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.DatabaseServers;
+using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Library;
 
 internal class DatabaseServers(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    IDistributedCache cache
+    DbLocatorCache cache
 )
 {
     private readonly AddDatabaseServer _addDatabaseServer = new(dbContextFactory, cache);

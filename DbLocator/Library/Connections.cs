@@ -4,14 +4,13 @@ using DbLocator.Features.Connections;
 using DbLocator.Utilities;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Library;
 
 internal class Connections(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     Encryption encryption,
-    IDistributedCache cache
+    DbLocatorCache cache
 )
 {
     private readonly AddConnection _addConnection = new(dbContextFactory, cache);

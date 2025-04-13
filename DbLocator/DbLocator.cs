@@ -47,13 +47,15 @@ public partial class Locator
         var dbContextFactory = DbContextFactory.CreateDbContextFactory(dbLocatorConnectionString);
         var encryption = new Encryption(encryptionKey);
 
-        _connections = new Connections(dbContextFactory, encryption, distributedCache);
-        _databases = new Databases(dbContextFactory, distributedCache);
-        _databaseServers = new DatabaseServers(dbContextFactory, distributedCache);
-        _databaseUsers = new DatabaseUsers(dbContextFactory, encryption, distributedCache);
-        _databaseUserRoles = new DatabaseUserRoles(dbContextFactory);
-        _databaseTypes = new DatabaseTypes(dbContextFactory, distributedCache);
-        _tenants = new Tenants(dbContextFactory, distributedCache);
+        var dbLocatorCache = new DbLocatorCache(distributedCache);
+
+        _connections = new Connections(dbContextFactory, encryption, dbLocatorCache);
+        _databases = new Databases(dbContextFactory, dbLocatorCache);
+        _databaseServers = new DatabaseServers(dbContextFactory, dbLocatorCache);
+        _databaseUsers = new DatabaseUsers(dbContextFactory, encryption, dbLocatorCache);
+        _databaseUserRoles = new DatabaseUserRoles(dbContextFactory, dbLocatorCache);
+        _databaseTypes = new DatabaseTypes(dbContextFactory, dbLocatorCache);
+        _tenants = new Tenants(dbContextFactory, dbLocatorCache);
     }
 
     /// <summary>

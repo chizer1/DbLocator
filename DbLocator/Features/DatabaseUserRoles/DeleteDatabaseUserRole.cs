@@ -1,5 +1,6 @@
 using DbLocator.Db;
 using DbLocator.Domain;
+using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,7 +25,10 @@ namespace DbLocator.Features.DatabaseUserRoles
         }
     }
 
-    internal class DeleteDatabaseUserRole(IDbContextFactory<DbLocatorContext> dbContextFactory)
+    internal class DeleteDatabaseUserRole(
+        IDbContextFactory<DbLocatorContext> dbContextFactory,
+        DbLocatorCache cache
+    )
     {
         internal async Task Handle(DeleteDatabaseUserRoleCommand command)
         {
@@ -51,6 +55,7 @@ namespace DbLocator.Features.DatabaseUserRoles
             dbContext.Set<DatabaseUserRoleEntity>().Remove(databaseUserRoleEntity);
             await dbContext.SaveChangesAsync();
 
+            cache?.TryClearConnectionStringFromCache(Roles: [command.UserRole]);
             if (!command.DeleteDatabaseUserRole)
             {
                 return;

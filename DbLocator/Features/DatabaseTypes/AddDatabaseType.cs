@@ -1,7 +1,7 @@
 using DbLocator.Db;
+using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.DatabaseTypes;
 
@@ -21,7 +21,7 @@ internal sealed class AddDatabaseTypeCommandValidator : AbstractValidator<AddDat
 
 internal class AddDatabaseType(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    IDistributedCache cache
+    DbLocatorCache cache
 )
 {
     internal async Task<byte> Handle(AddDatabaseTypeCommand command)

@@ -1,14 +1,18 @@
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.DatabaseUserRoles;
+using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Library;
 
-internal class DatabaseUserRoles(IDbContextFactory<DbLocatorContext> dbContextFactory)
+internal class DatabaseUserRoles(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    DbLocatorCache cache
+)
 {
     private readonly AddDatabaseUserRole _addDatabaseUserRole = new(dbContextFactory);
-    private readonly DeleteDatabaseUserRole _deleteDatabaseUserRole = new(dbContextFactory);
+    private readonly DeleteDatabaseUserRole _deleteDatabaseUserRole = new(dbContextFactory, cache);
 
     internal async Task AddDatabaseUserRole(
         int databaseUserId,

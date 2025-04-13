@@ -1,4 +1,6 @@
 using DbLocator;
+using DbLocator.Domain;
+using DbLocator.Utilities;
 using DbLocatorTests.Fixtures;
 
 namespace DbLocatorTests;
@@ -7,6 +9,7 @@ namespace DbLocatorTests;
 public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
 {
     private readonly Locator _dbLocator = dbLocatorFixture.DbLocator;
+    private readonly DbLocatorCache _cache = dbLocatorFixture.LocatorCache;
 
     [Fact]
     public async Task AddMultipleDatabaseTypesAndSearchByKeyWord()
@@ -57,5 +60,19 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
             .Where(x => x.Name == databaseTypeName2)
             .ToList();
         Assert.Single(newDatabaseTypes);
+    }
+
+    [Fact]
+    public async Task VerifyDatabaseTypesAreCached()
+    {
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+
+        var databaseTypes = await _dbLocator.GetDatabaseTypes();
+        Assert.Contains(databaseTypes, db => db.Name == databaseTypeName);
+
+        var cachedDatabaseTypes = await _cache.GetCachedData<List<DatabaseType>>("databaseTypes");
+        Assert.NotNull(cachedDatabaseTypes);
+        Assert.Contains(cachedDatabaseTypes, db => db.Name == databaseTypeName);
     }
 }

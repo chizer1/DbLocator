@@ -1,7 +1,7 @@
 using DbLocator.Db;
+using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Databases
 {
@@ -17,7 +17,7 @@ namespace DbLocator.Features.Databases
 
     internal class DeleteDatabase(
         IDbContextFactory<DbLocatorContext> dbContextFactory,
-        IDistributedCache cache
+        DbLocatorCache cache
     )
     {
         internal async Task Handle(DeleteDatabaseCommand command)
@@ -35,9 +35,11 @@ namespace DbLocator.Features.Databases
                     .Set<ConnectionEntity>()
                     .AnyAsync(c => c.DatabaseId == command.DatabaseId)
             )
+            {
                 throw new InvalidOperationException(
                     "Database is being used in Connection table, please remove the connection first if you want to delete this database."
                 );
+            }
 
             dbContext.Set<DatabaseEntity>().Remove(databaseEntity);
             await dbContext.SaveChangesAsync();
@@ -46,6 +48,10 @@ namespace DbLocator.Features.Databases
                 await DeleteDatabaseAsync(dbContext, databaseEntity);
 
             cache?.Remove("databases");
+            cache?.Remove("connections");
+
+            // TODO: Make this more specific
+            cache?.TryClearConnectionStringFromCache(DatabaseTypeId: databaseEntity.DatabaseTypeId);
         }
 
         private static async Task DeleteDatabaseAsync(

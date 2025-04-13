@@ -1,5 +1,6 @@
 using DbLocator;
 using DbLocator.Domain;
+using DbLocator.Utilities;
 using DbLocatorTests.Fixtures;
 
 namespace DbLocatorTests;
@@ -8,6 +9,7 @@ namespace DbLocatorTests;
 public class DatabaseTests
 {
     private readonly Locator _dbLocator;
+    private readonly DbLocatorCache _cache;
     private readonly int _databaseServerID;
     private readonly byte _databaseTypeId;
 
@@ -15,6 +17,7 @@ public class DatabaseTests
     {
         _dbLocator = dbLocatorFixture.DbLocator;
         _databaseServerID = dbLocatorFixture.LocalhostServerId;
+        _cache = dbLocatorFixture.LocatorCache;
         _databaseTypeId = _dbLocator.AddDatabaseType(TestHelpers.GetRandomString()).Result;
     }
 
@@ -41,5 +44,19 @@ public class DatabaseTests
         var databases = (await _dbLocator.GetDatabases()).ToList();
         Assert.Contains(databases, db => db.Name == database1.Name);
         Assert.Contains(databases, db => db.Name == database2.Name);
+    }
+
+    [Fact]
+    public async Task VerifyDatabasesAreCached()
+    {
+        var dbName = TestHelpers.GetRandomString();
+        var database = await AddDatabaseAsync(dbName);
+
+        var databases = await _dbLocator.GetDatabases();
+        Assert.Contains(databases, db => db.Name == database.Name);
+
+        var cachedDatabases = await _cache.GetCachedData<List<Database>>("databases");
+        Assert.NotNull(cachedDatabases);
+        Assert.Contains(cachedDatabases, db => db.Name == database.Name);
     }
 }

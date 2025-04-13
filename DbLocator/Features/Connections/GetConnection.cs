@@ -4,7 +4,6 @@ using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Features.Connections;
 
@@ -24,34 +23,32 @@ internal sealed class GetConnectionQueryValidator : AbstractValidator<GetConnect
 internal class GetConnection(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     Encryption encrypytion,
-    IDistributedCache cache
+    DbLocatorCache cache
 )
 {
     public async Task<SqlConnection> Handle(GetConnectionQuery query)
     {
         await new GetConnectionQueryValidator().ValidateAndThrowAsync(query);
 
-        var cacheKey = $"connection:{query}"; // todo, unvalidate if something changes the connection string
-        var cachedData = await GetCachedData(cacheKey);
+        // Override the default toString so I can control it
+        var queryString =
+            @$"TenantId:{query.TenantId},
+            DatabaseTypeId:{query.DatabaseTypeId},
+            ConnectionId:{query.ConnectionId},
+            TenantCode:{query.TenantCode}
+            Roles:{string.Join(",", query.Roles)}";
 
+        var cacheKey = $"connection:{queryString}";
+        var cachedData = await cache?.GetCachedData<string>(cacheKey);
         if (!string.IsNullOrEmpty(cachedData))
+        {
             return new SqlConnection(cachedData);
+        }
 
         var connectionString = await GetConnectionStringFromDatabase(query);
-        await CacheData(cacheKey, connectionString);
+        await cache?.CacheConnectionString(cacheKey, connectionString);
 
         return new SqlConnection(connectionString);
-    }
-
-    private async Task<string> GetCachedData(string cacheKey)
-    {
-        return cache != null ? await cache.GetStringAsync(cacheKey) : null;
-    }
-
-    private async Task CacheData(string cacheKey, string connectionString)
-    {
-        if (cache != null)
-            await cache.SetStringAsync(cacheKey, connectionString);
     }
 
     private async Task<string> GetConnectionStringFromDatabase(GetConnectionQuery query)

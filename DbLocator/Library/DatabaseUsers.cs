@@ -3,14 +3,13 @@ using DbLocator.Domain;
 using DbLocator.Features.DatabaseUsers;
 using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Library;
 
 internal class DatabaseUsers(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     Encryption encryption,
-    IDistributedCache cache
+    DbLocatorCache cache
 )
 {
     private readonly AddDatabaseUser _addDatabaseUser = new(dbContextFactory, encryption, cache);
