@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DbLocator.Features.DatabaseUsers;
 
 internal record AddDatabaseUserCommand(
-    int DatabaseId,
+    List<int> DatabaseIds,
     string UserName,
     string UserPassword,
     bool CreateUser
@@ -16,7 +16,7 @@ internal sealed class AddDatabaseUserCommandValidator : AbstractValidator<AddDat
 {
     internal AddDatabaseUserCommandValidator()
     {
-        RuleFor(x => x.DatabaseId).NotEmpty().WithMessage("Database Id is required");
+        RuleFor(x => x.DatabaseIds).NotEmpty().WithMessage("At least one Database Id is required.");
 
         RuleFor(x => x.UserName)
             .MaximumLength(50)
@@ -52,23 +52,20 @@ internal class AddDatabaseUser(
 
         await using var dbContext = dbContextFactory.CreateDbContext();
 
-        if (
-            !await dbContext
-                .Set<DatabaseEntity>()
-                .AnyAsync(ds => ds.DatabaseId == command.DatabaseId)
-        )
+        var nonExistentDatabaseIds = command
+            .DatabaseIds.Where(id =>
+                !dbContext.Set<DatabaseEntity>().Any(ds => ds.DatabaseId == id)
+            )
+            .ToList();
+
+        if (nonExistentDatabaseIds.Any())
         {
-            throw new KeyNotFoundException($"Database Id '{command.DatabaseId}' not found.");
+            throw new KeyNotFoundException(
+                $"The following Database Ids were not found: {string.Join(", ", nonExistentDatabaseIds)}"
+            );
         }
 
-        if (
-            (
-                await dbContext
-                    .Set<DatabaseUserEntity>()
-                    .Where(u => u.UserName == command.UserName)
-                    .AnyAsync()
-            )
-        )
+        if (await dbContext.Set<DatabaseUserEntity>().AnyAsync(u => u.UserName == command.UserName))
         {
             throw new InvalidOperationException(
                 $"DatabaseUser with name '{command.UserName}' already exists."
@@ -77,7 +74,6 @@ internal class AddDatabaseUser(
 
         var databaseUser = new DatabaseUserEntity()
         {
-            DatabaseId = command.DatabaseId,
             UserName = command.UserName,
             UserPassword = encryption.Encrypt(command.UserPassword)
         };
@@ -85,33 +81,55 @@ internal class AddDatabaseUser(
         await dbContext.Set<DatabaseUserEntity>().AddAsync(databaseUser);
         await dbContext.SaveChangesAsync();
 
-        if (command.CreateUser)
-            await CreateDatabaseUser(dbContext, command);
+        var databaseUserId = databaseUser.DatabaseUserId;
+        foreach (var databaseId in command.DatabaseIds)
+        {
+            var databaseUserDatabase = new DatabaseUserDatabaseEntity()
+            {
+                DatabaseUserId = databaseUserId,
+                DatabaseId = databaseId
+            };
+
+            await dbContext.Set<DatabaseUserDatabaseEntity>().AddAsync(databaseUserDatabase);
+
+            if (command.CreateUser)
+            {
+                // create login and user in the database server
+                await CreateDatabaseUser(
+                    dbContext,
+                    databaseId,
+                    command.UserName,
+                    command.UserPassword
+                );
+            }
+        }
 
         cache?.Remove("databaseUsers");
 
-        return databaseUser.DatabaseUserId;
+        return databaseUserId;
     }
 
     private static async Task CreateDatabaseUser(
         DbLocatorContext dbContext,
-        AddDatabaseUserCommand command
+        int databaseId,
+        string userName,
+        string userPassword
     )
     {
         var database =
             await dbContext
                 .Set<DatabaseEntity>()
                 .Include(d => d.DatabaseServer)
-                .FirstOrDefaultAsync(ds => ds.DatabaseId == command.DatabaseId)
+                .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseId)
             ?? throw new InvalidOperationException("Database not found.");
 
-        var userName = Sql.EscapeForDynamicSql(Sql.SanitizeSqlIdentifier(command.UserName));
-        var userPassword = Sql.EscapeForDynamicSql(command.UserPassword);
+        var uName = Sql.EscapeForDynamicSql(Sql.SanitizeSqlIdentifier(userName));
+        var uPassword = Sql.EscapeForDynamicSql(userPassword);
         var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
 
         var commands = new List<string>
         {
-            $"create login [{userName}] with password = '{userPassword}'",
+            $"create login [{userName}] with password = '{userPassword}'", // todo: login only needs to be created once then loop databases
             $"use [{dbName}]; create user [{userName}] for login [{userName}]"
         };
 

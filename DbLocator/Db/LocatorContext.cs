@@ -71,25 +71,34 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
                 .HasConstraintName("FK_DatabaseUserRole_DatabaseRole");
         });
 
+        modelBuilder.Entity<DatabaseUserDatabaseEntity>(entity =>
+        {
+            entity.ToTable("DatabaseUserDatabase");
+
+            entity.HasKey(e => e.DatabaseUserDatabaseId).HasName("PK_DatabaseUserDatabase");
+
+            entity.Property(e => e.DatabaseUserDatabaseId).HasColumnName("DatabaseUserDatabaseID");
+            entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseUserID");
+            entity.Property(e => e.DatabaseId).HasColumnName("DatabaseID");
+
+            entity
+                .HasOne(d => d.Database)
+                .WithMany(p => p.Users)
+                .HasForeignKey(d => d.DatabaseId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DatabaseUserDatabase_Database");
+        });
+
         modelBuilder.Entity<DatabaseUserEntity>(entity =>
         {
             entity.ToTable("DatabaseUser");
 
             entity.HasKey(e => e.DatabaseUserId).HasName("PK_DatabaseUser");
 
-            entity.HasIndex(e => e.DatabaseId, "IX_DatabaseUser_DatabaseID");
-
             entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseUserID");
-            entity.Property(e => e.DatabaseId).HasColumnName("DatabaseID");
+
             entity.Property(e => e.UserName).HasMaxLength(50).IsUnicode(false);
             entity.Property(e => e.UserPassword).HasMaxLength(50).IsUnicode(false);
-
-            entity
-                .HasOne(d => d.Database)
-                .WithMany(p => p.DatabaseUsers)
-                .HasForeignKey(d => d.DatabaseId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_DatabaseUser_DatabaseId");
 
             entity
                 .HasMany(d => d.UserRoles)

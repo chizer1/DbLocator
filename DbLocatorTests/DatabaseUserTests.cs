@@ -31,7 +31,7 @@ public class DatabaseUserTests(DbLocatorFixture dbLocatorFixture)
 
         var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
         var dbUserId = await _dbLocator.AddDatabaseUser(
-            databaseId,
+            [databaseId],
             TestHelpers.GetRandomString(),
             true
         );
@@ -97,7 +97,7 @@ public class DatabaseUserTests(DbLocatorFixture dbLocatorFixture)
 
         var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
         var dbUserId = await _dbLocator.AddDatabaseUser(
-            databaseId,
+            [databaseId],
             TestHelpers.GetRandomString(),
             true
         );
@@ -129,7 +129,7 @@ public class DatabaseUserTests(DbLocatorFixture dbLocatorFixture)
 
         var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
         var dbUserId = await _dbLocator.AddDatabaseUser(
-            databaseId,
+            [databaseId],
             TestHelpers.GetRandomString(),
             true
         );

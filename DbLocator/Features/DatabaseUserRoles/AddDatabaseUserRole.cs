@@ -68,12 +68,15 @@ internal class AddDatabaseUserRole(IDbContextFactory<DbLocatorContext> dbContext
         AddDatabaseUserRoleCommand command
     )
     {
-        var database =
+        var databaseUserDatabase =
             await dbContext
-                .Set<DatabaseEntity>()
-                .Include(d => d.DatabaseServer)
-                .FirstOrDefaultAsync(ds => ds.DatabaseId == user.DatabaseId)
+                .Set<DatabaseUserDatabaseEntity>()
+                .Include(dud => dud.Database)
+                .ThenInclude(d => d.DatabaseServer)
+                .FirstOrDefaultAsync(dud => dud.DatabaseUserId == user.DatabaseUserId)
             ?? throw new InvalidOperationException("Database not found.");
+
+        var database = databaseUserDatabase.Database;
 
         var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
         var userName = Sql.EscapeForDynamicSql(Sql.SanitizeSqlIdentifier(user.UserName));

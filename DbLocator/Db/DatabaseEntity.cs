@@ -12,4 +12,5 @@ internal class DatabaseEntity
     public virtual ICollection<DatabaseUserEntity> DatabaseUsers { get; set; } = [];
     public virtual DatabaseServerEntity DatabaseServer { get; set; }
     public virtual DatabaseTypeEntity DatabaseType { get; set; }
+    public ICollection<DatabaseUserDatabaseEntity> Users { get; set; } = [];
 }

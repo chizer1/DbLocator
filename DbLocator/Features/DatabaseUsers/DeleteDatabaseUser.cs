@@ -66,11 +66,18 @@ namespace DbLocator.Features.DatabaseUsers
             DatabaseUserEntity databaseUserEntity
         )
         {
+            var databaseUserDatabase =
+                await dbContext
+                    .Set<DatabaseUserDatabaseEntity>()
+                    .FirstOrDefaultAsync(dud =>
+                        dud.DatabaseUserId == databaseUserEntity.DatabaseUserId
+                    ) ?? throw new InvalidOperationException("DatabaseUserDatabase not found.");
+
             var database =
                 await dbContext
                     .Set<DatabaseEntity>()
                     .Include(d => d.DatabaseServer)
-                    .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseUserEntity.DatabaseId)
+                    .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseUserDatabase.DatabaseId)
                 ?? throw new InvalidOperationException("Database not found.");
 
             var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
