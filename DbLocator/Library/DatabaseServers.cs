@@ -28,8 +28,8 @@ internal class DatabaseServers(
             new AddDatabaseServerCommand(
                 databaseServerName,
                 databaseServerHostName,
-                databaseServerIpAddress,
                 databaseServerFullyQualifiedDomainName,
+                databaseServerIpAddress,
                 isLinkedServer
             )
         );

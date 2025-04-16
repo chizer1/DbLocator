@@ -228,8 +228,7 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
             entity.Property(e => e.TenantStatusId).HasColumnName("TenantStatusID");
         });
 
-        // DATA SEED
-        foreach (var e in Enum.GetValues(typeof(DatabaseRole)).Cast<DatabaseRole>())
+        foreach (var e in Enum.GetValues<DatabaseRole>().Cast<DatabaseRole>())
         {
             modelBuilder
                 .Entity<DatabaseRoleEntity>()

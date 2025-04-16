@@ -66,50 +66,42 @@ namespace DbLocator.Features.DatabaseUsers
             DatabaseUserEntity databaseUserEntity
         )
         {
-            var databaseUserDatabase =
-                await dbContext
-                    .Set<DatabaseUserDatabaseEntity>()
-                    .FirstOrDefaultAsync(dud =>
-                        dud.DatabaseUserId == databaseUserEntity.DatabaseUserId
-                    ) ?? throw new InvalidOperationException("DatabaseUserDatabase not found.");
+            var databases = await dbContext
+                .Set<DatabaseUserDatabaseEntity>()
+                .Where(dud => dud.DatabaseUserId == databaseUserEntity.DatabaseUserId)
+                .ToListAsync();
 
-            var database =
-                await dbContext
-                    .Set<DatabaseEntity>()
-                    .Include(d => d.DatabaseServer)
-                    .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseUserDatabase.DatabaseId)
-                ?? throw new InvalidOperationException("Database not found.");
-
-            var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
             var userName = Sql.EscapeForDynamicSql(
                 Sql.SanitizeSqlIdentifier(databaseUserEntity.UserName)
             );
 
-            var commands = new List<string>
+            foreach (var database in databases)
             {
-                $"use [{dbName}]; drop user [{userName}]",
-                $"drop login [{userName}]"
-            };
+                var dbName = Sql.SanitizeSqlIdentifier(database.Database.DatabaseName);
 
-            foreach (var rawCommand in commands)
-            {
-                var commandText = rawCommand;
+                var commandText = $"use [{dbName}]; drop user [{userName}]";
 
-                if (database.DatabaseServer.IsLinkedServer)
+                if (database.Database.DatabaseServer.IsLinkedServer)
                 {
                     var linkedServer = Sql.SanitizeSqlIdentifier(
-                        database.DatabaseServer.DatabaseServerHostName
+                        database.Database.DatabaseServer.DatabaseServerHostName
                     );
                     commandText =
                         $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServer}];";
                 }
 
-                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-                cmd.CommandText = commandText;
+                using var cmdd = dbContext.Database.GetDbConnection().CreateCommand();
+                cmdd.CommandText = commandText;
 
                 await dbContext.Database.OpenConnectionAsync();
-                await cmd.ExecuteNonQueryAsync();
+                await cmdd.ExecuteNonQueryAsync();
             }
+
+            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+            cmd.CommandText = $"drop login [{userName}]";
+
+            await dbContext.Database.OpenConnectionAsync();
+            await cmd.ExecuteNonQueryAsync();
         }
     }
 }

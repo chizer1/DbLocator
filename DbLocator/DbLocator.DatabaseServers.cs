@@ -37,8 +37,8 @@ namespace DbLocator
             return await _databaseServers.AddDatabaseServer(
                 databaseServerName,
                 isLinkedServer,
-                databaseServerIpAddress,
                 databaseServerHostName,
+                databaseServerIpAddress,
                 databaseServerFullyQualifiedDomainName
             );
         }

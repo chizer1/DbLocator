@@ -85,31 +85,28 @@ namespace DbLocator.Features.DatabaseUserRoles
             var roleName = Enum.GetName((DatabaseRole)databaseUserRoleEntity.DatabaseRoleId)
                 .ToLower();
 
-            var database =
-                user.Databases.FirstOrDefault()
-                ?? throw new InvalidOperationException(
-                    "No associated database found for the user."
-                );
-
-            var dbName = Sql.SanitizeSqlIdentifier(database.Database.DatabaseName);
-            var userName = Sql.SanitizeSqlIdentifier(user.UserName);
-
-            var commandText =
-                $"use [{dbName}]; exec sp_droprolemember 'db_{roleName}', '{userName}'";
-            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-
-            if (database.Database.DatabaseServer.IsLinkedServer)
+            var databases = user.Databases.Select(d => d.Database).ToList();
+            foreach (var database in databases)
             {
-                var linkedServerHost = Sql.SanitizeSqlIdentifier(
-                    database.Database.DatabaseServer.DatabaseServerHostName
-                );
-                commandText =
-                    $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServerHost}];";
-            }
+                var userName = Sql.SanitizeSqlIdentifier(user.UserName);
 
-            cmd.CommandText = commandText;
-            await dbContext.Database.OpenConnectionAsync();
-            await cmd.ExecuteNonQueryAsync();
+                var commandText =
+                    $"use [{database.DatabaseName}]; exec sp_droprolemember 'db_{roleName}', '{userName}'";
+                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+
+                if (database.DatabaseServer.IsLinkedServer)
+                {
+                    var linkedServerHost = Sql.SanitizeSqlIdentifier(
+                        database.DatabaseServer.DatabaseServerHostName
+                    );
+                    commandText =
+                        $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServerHost}];";
+                }
+
+                cmd.CommandText = commandText;
+                await dbContext.Database.OpenConnectionAsync();
+                await cmd.ExecuteNonQueryAsync();
+            }
         }
     }
 }
