@@ -13,6 +13,8 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
 
     public virtual DbSet<DatabaseUserRoleEntity> DatabaseUserRoles { get; set; }
 
+    public virtual DbSet<DatabaseUserDatabaseEntity> DatabaseUserDatabases { get; set; }
+
     public virtual DbSet<DatabaseRoleEntity> DatabaseRoles { get; set; }
 
     public virtual DbSet<DatabaseServerEntity> DatabaseServers { get; set; }
@@ -75,16 +77,22 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
         {
             entity.ToTable("DatabaseUserDatabase");
 
-            entity.HasKey(e => e.DatabaseUserDatabaseId).HasName("PK_DatabaseUserDatabase");
+            entity.HasKey(e => e.DatabaseUserDatabaseId);
 
-            entity.Property(e => e.DatabaseUserDatabaseId).HasColumnName("DatabaseUserDatabaseID");
             entity.Property(e => e.DatabaseUserId).HasColumnName("DatabaseUserID");
             entity.Property(e => e.DatabaseId).HasColumnName("DatabaseID");
 
             entity
-                .HasOne(d => d.Database)
-                .WithMany(p => p.Users)
-                .HasForeignKey(d => d.DatabaseId)
+                .HasOne(e => e.User)
+                .WithMany(u => u.Databases)
+                .HasForeignKey(e => e.DatabaseUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DatabaseUserDatabase_DatabaseUser");
+
+            entity
+                .HasOne(e => e.Database)
+                .WithMany(d => d.Users)
+                .HasForeignKey(e => e.DatabaseId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DatabaseUserDatabase_Database");
         });

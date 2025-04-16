@@ -217,6 +217,31 @@ namespace DbLocator.Migrations
                     b.ToTable("DatabaseType", (string)null);
                 });
 
+            modelBuilder.Entity("DbLocator.Db.DatabaseUserDatabaseEntity", b =>
+                {
+                    b.Property<int>("DatabaseUserDatabaseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DatabaseUserDatabaseId"));
+
+                    b.Property<int>("DatabaseId")
+                        .HasColumnType("int")
+                        .HasColumnName("DatabaseID");
+
+                    b.Property<int>("DatabaseUserId")
+                        .HasColumnType("int")
+                        .HasColumnName("DatabaseUserID");
+
+                    b.HasKey("DatabaseUserDatabaseId");
+
+                    b.HasIndex("DatabaseId");
+
+                    b.HasIndex("DatabaseUserId");
+
+                    b.ToTable("DatabaseUserDatabase", (string)null);
+                });
+
             modelBuilder.Entity("DbLocator.Db.DatabaseUserEntity", b =>
                 {
                     b.Property<int>("DatabaseUserId")
@@ -225,10 +250,6 @@ namespace DbLocator.Migrations
                         .HasColumnName("DatabaseUserID");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DatabaseUserId"));
-
-                    b.Property<int>("DatabaseId")
-                        .HasColumnType("int")
-                        .HasColumnName("DatabaseID");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(50)
@@ -242,8 +263,6 @@ namespace DbLocator.Migrations
 
                     b.HasKey("DatabaseUserId")
                         .HasName("PK_DatabaseUser");
-
-                    b.HasIndex(new[] { "DatabaseId" }, "IX_DatabaseUser_DatabaseID");
 
                     b.ToTable("DatabaseUser", (string)null);
                 });
@@ -342,15 +361,23 @@ namespace DbLocator.Migrations
                     b.Navigation("DatabaseType");
                 });
 
-            modelBuilder.Entity("DbLocator.Db.DatabaseUserEntity", b =>
+            modelBuilder.Entity("DbLocator.Db.DatabaseUserDatabaseEntity", b =>
                 {
                     b.HasOne("DbLocator.Db.DatabaseEntity", "Database")
-                        .WithMany("DatabaseUsers")
+                        .WithMany("Users")
                         .HasForeignKey("DatabaseId")
                         .IsRequired()
-                        .HasConstraintName("FK_DatabaseUser_DatabaseId");
+                        .HasConstraintName("FK_DatabaseUserDatabase_Database");
+
+                    b.HasOne("DbLocator.Db.DatabaseUserEntity", "User")
+                        .WithMany("Databases")
+                        .HasForeignKey("DatabaseUserId")
+                        .IsRequired()
+                        .HasConstraintName("FK_DatabaseUserDatabase_DatabaseUser");
 
                     b.Navigation("Database");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DbLocator.Db.DatabaseUserRoleEntity", b =>
@@ -376,7 +403,7 @@ namespace DbLocator.Migrations
                 {
                     b.Navigation("Connections");
 
-                    b.Navigation("DatabaseUsers");
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("DbLocator.Db.DatabaseRoleEntity", b =>
@@ -396,6 +423,8 @@ namespace DbLocator.Migrations
 
             modelBuilder.Entity("DbLocator.Db.DatabaseUserEntity", b =>
                 {
+                    b.Navigation("Databases");
+
                     b.Navigation("UserRoles");
                 });
 

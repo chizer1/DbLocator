@@ -45,40 +45,44 @@ internal class GetDatabaseUsers(
 
         var databaseUserEntities = await dbContext
             .Set<DatabaseUserEntity>()
-            .Include(c => c.Databases)
+            .Include(u => u.Databases)
+            .ThenInclude(ud => ud.Database)
             .ThenInclude(d => d.DatabaseServer)
-            .Include(d => d.UserRoles)
+            .Include(u => u.Databases)
+            .ThenInclude(ud => ud.Database)
+            .ThenInclude(d => d.DatabaseType)
+            .Include(u => u.UserRoles)
             .ToListAsync();
 
         var databaseUsers = databaseUserEntities
-            .Select(d => new DatabaseUser(
-                d.DatabaseUserId,
-                d.UserName,
-                [
-                    .. d.Databases.Select(db => new Database(
-                        db.DatabaseId,
-                        db.DatabaseName,
-                        db.DatabaseType != null
+            .Select(user => new DatabaseUser(
+                user.DatabaseUserId,
+                user.UserName,
+                user.Databases.Where(ud => ud.Database != null)
+                    .Select(ud => new Database(
+                        ud.Database.DatabaseId,
+                        ud.Database.DatabaseName,
+                        ud.Database.DatabaseType != null
                             ? new DatabaseType(
-                                db.DatabaseType.DatabaseTypeId,
-                                db.DatabaseType.DatabaseTypeName
+                                ud.Database.DatabaseType.DatabaseTypeId,
+                                ud.Database.DatabaseType.DatabaseTypeName
                             )
                             : null!,
-                        db.DatabaseServer != null
+                        ud.Database.DatabaseServer != null
                             ? new DatabaseServer(
-                                db.DatabaseServer.DatabaseServerId,
-                                db.DatabaseServer.DatabaseServerName,
-                                db.DatabaseServer.DatabaseServerIpaddress,
-                                db.DatabaseServer.DatabaseServerHostName,
-                                db.DatabaseServer.DatabaseServerFullyQualifiedDomainName,
-                                db.DatabaseServer.IsLinkedServer
+                                ud.Database.DatabaseServer.DatabaseServerId,
+                                ud.Database.DatabaseServer.DatabaseServerName,
+                                ud.Database.DatabaseServer.DatabaseServerIpaddress,
+                                ud.Database.DatabaseServer.DatabaseServerHostName,
+                                ud.Database.DatabaseServer.DatabaseServerFullyQualifiedDomainName,
+                                ud.Database.DatabaseServer.IsLinkedServer
                             )
                             : null!,
-                        (Status)db.DatabaseStatusId,
-                        db.UseTrustedConnection
+                        (Status)ud.Database.DatabaseStatusId,
+                        ud.Database.UseTrustedConnection
                     ))
-                ],
-                [.. d.UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)]
+                    .ToList(),
+                user.UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId).ToList()
             ))
             .ToList();
 

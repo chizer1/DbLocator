@@ -73,7 +73,8 @@ namespace DbLocator.Features.DatabaseUserRoles
                 await dbContext
                     .Set<DatabaseUserEntity>()
                     .Include(u => u.Databases)
-                    .ThenInclude(d => d.DatabaseServer)
+                    .ThenInclude(d => d.Database)
+                    .ThenInclude(db => db.DatabaseServer)
                     .FirstOrDefaultAsync(u =>
                         u.DatabaseUserId == databaseUserRoleEntity.DatabaseUserId
                     )
@@ -90,17 +91,17 @@ namespace DbLocator.Features.DatabaseUserRoles
                     "No associated database found for the user."
                 );
 
-            var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
+            var dbName = Sql.SanitizeSqlIdentifier(database.Database.DatabaseName);
             var userName = Sql.SanitizeSqlIdentifier(user.UserName);
 
             var commandText =
                 $"use [{dbName}]; exec sp_droprolemember 'db_{roleName}', '{userName}'";
             using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
 
-            if (database.DatabaseServer.IsLinkedServer)
+            if (database.Database.DatabaseServer.IsLinkedServer)
             {
                 var linkedServerHost = Sql.SanitizeSqlIdentifier(
-                    database.DatabaseServer.DatabaseServerHostName
+                    database.Database.DatabaseServer.DatabaseServerHostName
                 );
                 commandText =
                     $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServerHost}];";

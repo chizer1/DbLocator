@@ -91,6 +91,7 @@ internal class AddDatabaseUser(
             };
 
             await dbContext.Set<DatabaseUserDatabaseEntity>().AddAsync(databaseUserDatabase);
+            await dbContext.SaveChangesAsync();
 
             if (command.CreateUser)
             {

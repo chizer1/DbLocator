@@ -6,5 +6,5 @@ internal class DatabaseUserEntity
     public string UserName { get; set; }
     public string UserPassword { get; set; }
     public virtual ICollection<DatabaseUserRoleEntity> UserRoles { get; set; } = [];
-    public virtual ICollection<DatabaseEntity> Databases { get; set; } = [];
+    public virtual ICollection<DatabaseUserDatabaseEntity> Databases { get; set; } = [];
 }
