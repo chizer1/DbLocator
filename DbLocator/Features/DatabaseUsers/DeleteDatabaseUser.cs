@@ -89,44 +89,22 @@ namespace DbLocator.Features.DatabaseUsers
             DatabaseEntity database
         )
         {
-            var userName = Sql.EscapeForDynamicSql(
-                Sql.SanitizeSqlIdentifier(databaseUser.UserName)
-            );
+            var userName = Sql.SanitizeSqlIdentifier(databaseUser.UserName);
             var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
 
-            var commandText = $"USE [{dbName}]; DROP USER [{userName}]";
+            await Sql.ExecuteSqlCommandAsync(
+                dbContext,
+                $"use [{dbName}]; create user [{userName}] for login [{userName}]",
+                database.DatabaseServer.IsLinkedServer,
+                database.DatabaseServer.DatabaseServerHostName
+            );
 
-            if (database.DatabaseServer.IsLinkedServer)
-            {
-                var linkedServer = Sql.SanitizeSqlIdentifier(
-                    database.DatabaseServer.DatabaseServerHostName
-                );
-                commandText =
-                    $"EXEC('{Sql.EscapeForDynamicSql(commandText)}') AT [{linkedServer}];";
-            }
-
-            await ExecuteSqlCommandAsync(dbContext, commandText);
-
-            var dropLoginCommand =
-                $@"
-            IF EXISTS (SELECT * FROM sys.server_principals WHERE name = '{userName}')
-            BEGIN
-                DROP LOGIN [{userName}]
-            END";
-
-            await ExecuteSqlCommandAsync(dbContext, dropLoginCommand);
-        }
-
-        private static async Task ExecuteSqlCommandAsync(
-            DbLocatorContext dbContext,
-            string commandText
-        )
-        {
-            await using var command = dbContext.Database.GetDbConnection().CreateCommand();
-            command.CommandText = commandText;
-
-            await dbContext.Database.OpenConnectionAsync();
-            await command.ExecuteNonQueryAsync();
+            await Sql.ExecuteSqlCommandAsync(
+                dbContext,
+                $"if exists (select * from sys.server_principals where name = '{userName}') drop login [{userName}]",
+                database.DatabaseServer.IsLinkedServer,
+                database.DatabaseServer.DatabaseServerHostName
+            );
         }
     }
 }

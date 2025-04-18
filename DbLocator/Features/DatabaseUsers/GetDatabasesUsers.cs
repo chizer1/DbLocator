@@ -1,4 +1,3 @@
-using System.Text.Json;
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Utilities;
@@ -58,31 +57,35 @@ internal class GetDatabaseUsers(
             .Select(user => new DatabaseUser(
                 user.DatabaseUserId,
                 user.UserName,
-                user.Databases.Where(ud => ud.Database != null)
-                    .Select(ud => new Database(
-                        ud.Database.DatabaseId,
-                        ud.Database.DatabaseName,
-                        ud.Database.DatabaseType != null
-                            ? new DatabaseType(
-                                ud.Database.DatabaseType.DatabaseTypeId,
-                                ud.Database.DatabaseType.DatabaseTypeName
-                            )
-                            : null!,
-                        ud.Database.DatabaseServer != null
-                            ? new DatabaseServer(
-                                ud.Database.DatabaseServer.DatabaseServerId,
-                                ud.Database.DatabaseServer.DatabaseServerName,
-                                ud.Database.DatabaseServer.DatabaseServerIpaddress,
-                                ud.Database.DatabaseServer.DatabaseServerHostName,
-                                ud.Database.DatabaseServer.DatabaseServerFullyQualifiedDomainName,
-                                ud.Database.DatabaseServer.IsLinkedServer
-                            )
-                            : null!,
-                        (Status)ud.Database.DatabaseStatusId,
-                        ud.Database.UseTrustedConnection
-                    ))
-                    .ToList(),
-                user.UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId).ToList()
+                [
+                    .. user
+                        .Databases.Where(ud => ud.Database != null)
+                        .Select(ud => new Database(
+                            ud.Database.DatabaseId,
+                            ud.Database.DatabaseName,
+                            ud.Database.DatabaseType != null
+                                ? new DatabaseType(
+                                    ud.Database.DatabaseType.DatabaseTypeId,
+                                    ud.Database.DatabaseType.DatabaseTypeName
+                                )
+                                : null!,
+                            ud.Database.DatabaseServer != null
+                                ? new DatabaseServer(
+                                    ud.Database.DatabaseServer.DatabaseServerId,
+                                    ud.Database.DatabaseServer.DatabaseServerName,
+                                    ud.Database.DatabaseServer.DatabaseServerIpaddress,
+                                    ud.Database.DatabaseServer.DatabaseServerHostName,
+                                    ud.Database
+                                        .DatabaseServer
+                                        .DatabaseServerFullyQualifiedDomainName,
+                                    ud.Database.DatabaseServer.IsLinkedServer
+                                )
+                                : null!,
+                            (Status)ud.Database.DatabaseStatusId,
+                            ud.Database.UseTrustedConnection
+                        ))
+                ],
+                [.. user.UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)]
             ))
             .ToList();
 

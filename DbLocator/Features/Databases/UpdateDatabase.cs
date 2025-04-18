@@ -93,12 +93,12 @@ internal class UpdateDatabase(
             var oldDbName = Sql.SanitizeSqlIdentifier(oldDatabaseName);
             var newDbName = Sql.SanitizeSqlIdentifier(command.DatabaseName);
 
-            var commandText = $"alter database [{oldDbName}] modify name = [{newDbName}]";
-
-            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-            cmd.CommandText = commandText;
-            await dbContext.Database.OpenConnectionAsync();
-            await cmd.ExecuteNonQueryAsync();
+            await Sql.ExecuteSqlCommandAsync(
+                dbContext,
+                $"alter database [{oldDbName}] modify name = [{newDbName}]",
+                databaseEntity.DatabaseServer.IsLinkedServer,
+                databaseEntity.DatabaseServer.DatabaseServerHostName
+            );
         }
 
         cache?.Remove("databases");

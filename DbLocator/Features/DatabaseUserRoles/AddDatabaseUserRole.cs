@@ -79,26 +79,15 @@ internal class AddDatabaseUserRole(IDbContextFactory<DbLocatorContext> dbContext
         foreach (var database in databases)
         {
             var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
-            var userName = Sql.EscapeForDynamicSql(Sql.SanitizeSqlIdentifier(user.UserName));
-            var roleName = $"db_{Enum.GetName(command.UserRole).ToLower()}";
-            roleName = Sql.EscapeForDynamicSql(Sql.SanitizeSqlIdentifier(roleName));
+            var userName = Sql.SanitizeSqlIdentifier(user.UserName);
+            var roleName = Sql.SanitizeSqlIdentifier($"db_{command.UserRole.ToString().ToLower()}");
 
-            var commandText = $"use [{dbName}]; exec sp_addrolemember '{roleName}', '{userName}';";
-
-            if (database.DatabaseServer.IsLinkedServer)
-            {
-                var linkedServer = Sql.SanitizeSqlIdentifier(
-                    database.DatabaseServer.DatabaseServerHostName
-                );
-                commandText =
-                    $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServer}];";
-            }
-
-            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-            cmd.CommandText = commandText;
-
-            await dbContext.Database.OpenConnectionAsync();
-            await cmd.ExecuteNonQueryAsync();
+            await Sql.ExecuteSqlCommandAsync(
+                dbContext,
+                $"use [{dbName}]; exec sp_addrolemember '{roleName}', '{userName}';",
+                database.DatabaseServer.IsLinkedServer,
+                database.DatabaseServer.DatabaseServerHostName
+            );
         }
     }
 }

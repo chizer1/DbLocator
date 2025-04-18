@@ -60,28 +60,20 @@ namespace DbLocator.Features.Databases
         )
         {
             var databaseName = Sql.SanitizeSqlIdentifier(databaseEntity.DatabaseName);
-            var rawCommand = $"drop database [{databaseName}]";
 
-            var databaseServer = await dbContext
-                .Set<DatabaseServerEntity>()
-                .FirstOrDefaultAsync(ds => ds.DatabaseServerId == databaseEntity.DatabaseServerId);
+            var databaseServer =
+                await dbContext
+                    .Set<DatabaseServerEntity>()
+                    .FirstOrDefaultAsync(ds =>
+                        ds.DatabaseServerId == databaseEntity.DatabaseServerId
+                    ) ?? throw new InvalidOperationException("Database server not found.");
 
-            string commandText;
-            if (databaseServer?.IsLinkedServer == true)
-            {
-                var linkedServer = Sql.SanitizeSqlIdentifier(databaseServer.DatabaseServerHostName);
-                var escapedCommand = Sql.EscapeForDynamicSql(rawCommand);
-                commandText = $"exec('{escapedCommand}') at [{linkedServer}];";
-            }
-            else
-            {
-                commandText = rawCommand;
-            }
-
-            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-            cmd.CommandText = commandText;
-            await dbContext.Database.OpenConnectionAsync();
-            await cmd.ExecuteNonQueryAsync();
+            await Sql.ExecuteSqlCommandAsync(
+                dbContext,
+                $"drop database [{databaseName}]",
+                databaseServer.IsLinkedServer,
+                databaseServer.DatabaseServerHostName
+            );
         }
     }
 }

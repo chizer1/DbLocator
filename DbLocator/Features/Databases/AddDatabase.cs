@@ -98,24 +98,12 @@ internal class AddDatabase(
             ?? throw new KeyNotFoundException("Database server not found.");
 
         var databaseName = Sql.SanitizeSqlIdentifier(command.DatabaseName);
-        string commandText;
 
-        var rawCommand = $"create database [{databaseName}]";
-
-        if (databaseServer.IsLinkedServer)
-        {
-            var linkedServer = Sql.SanitizeSqlIdentifier(databaseServer.DatabaseServerHostName);
-            var escapedCommand = Sql.EscapeForDynamicSql(rawCommand);
-            commandText = $"exec('{escapedCommand}') at [{linkedServer}];";
-        }
-        else
-        {
-            commandText = rawCommand;
-        }
-
-        using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-        cmd.CommandText = commandText;
-        await dbContext.Database.OpenConnectionAsync();
-        await cmd.ExecuteNonQueryAsync();
+        await Sql.ExecuteSqlCommandAsync(
+            dbContext,
+            $"create database [{databaseName}]",
+            databaseServer.IsLinkedServer,
+            databaseServer.DatabaseServerHostName
+        );
     }
 }

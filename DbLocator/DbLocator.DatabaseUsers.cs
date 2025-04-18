@@ -122,6 +122,9 @@ namespace DbLocator
         /// <param name="databaseUserId">
         /// The ID of the database user to be updated.
         /// </param>
+        /// <param name="databaseIds">
+        /// The IDs of the databases to which the user belongs.
+        /// </param>
         /// <param name="databaseUserName">
         /// The new user name for the database user.
         /// </param>
@@ -136,6 +139,7 @@ namespace DbLocator
         /// </returns>
         public async Task UpdateDatabaseUser(
             int databaseUserId,
+            List<int> databaseIds,
             string databaseUserName,
             string databaseUserPassword,
             bool updateDatabase
@@ -143,6 +147,7 @@ namespace DbLocator
         {
             await _databaseUsers.UpdateDatabaseUser(
                 databaseUserId,
+                databaseIds,
                 databaseUserName,
                 databaseUserPassword,
                 updateDatabase
@@ -156,6 +161,9 @@ namespace DbLocator
         /// <param name="databaseUserId">
         /// The ID of the database user to be updated.
         /// </param>
+        /// <param name="databaseIds">
+        /// The IDs of the databases to which the user belongs.
+        /// </param>
         /// <param name="databaseUserName">
         /// The new user name for the database user.
         /// </param>
@@ -167,12 +175,14 @@ namespace DbLocator
         /// </returns>
         public async Task UpdateDatabaseUser(
             int databaseUserId,
+            List<int> databaseIds,
             string databaseUserName,
             bool updateDatabase
         )
         {
             await _databaseUsers.UpdateDatabaseUser(
                 databaseUserId,
+                databaseIds,
                 databaseUserName,
                 updateDatabase
             );
@@ -185,6 +195,9 @@ namespace DbLocator
         /// <param name="databaseUserId">
         /// The ID of the database user to be updated.
         /// </param>
+        /// <param name="databaseIds">
+        /// The IDs of the databases to which the user belongs.
+        /// </param>
         /// <param name="databaseUserName">
         /// The new user name for the database user.
         /// </param>
@@ -196,12 +209,14 @@ namespace DbLocator
         /// </returns>
         public async Task UpdateDatabaseUser(
             int databaseUserId,
+            List<int> databaseIds,
             string databaseUserName,
             string databaseUserPassword
         )
         {
             await _databaseUsers.UpdateDatabaseUser(
                 databaseUserId,
+                databaseIds,
                 databaseUserName,
                 databaseUserPassword
             );
@@ -213,15 +228,22 @@ namespace DbLocator
         /// <param name="databaseUserId">
         /// The ID of the database user to be updated.
         /// </param>
+        /// <param name="databaseIds">
+        /// The IDs of the databases to which the user belongs.
+        /// </param>
         /// <param name="databaseUserName">
         /// The new user name for the database user.
         /// </param>
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
-        public async Task UpdateDatabaseUser(int databaseUserId, string databaseUserName)
+        public async Task UpdateDatabaseUser(
+            int databaseUserId,
+            List<int> databaseIds,
+            string databaseUserName
+        )
         {
-            await _databaseUsers.UpdateDatabaseUser(databaseUserId, databaseUserName);
+            await _databaseUsers.UpdateDatabaseUser(databaseUserId, databaseIds, databaseUserName);
         }
 
         /// <summary>

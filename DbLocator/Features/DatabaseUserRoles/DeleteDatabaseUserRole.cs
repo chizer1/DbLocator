@@ -90,22 +90,12 @@ namespace DbLocator.Features.DatabaseUserRoles
             {
                 var userName = Sql.SanitizeSqlIdentifier(user.UserName);
 
-                var commandText =
-                    $"use [{database.DatabaseName}]; exec sp_droprolemember 'db_{roleName}', '{userName}'";
-                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-
-                if (database.DatabaseServer.IsLinkedServer)
-                {
-                    var linkedServerHost = Sql.SanitizeSqlIdentifier(
-                        database.DatabaseServer.DatabaseServerHostName
-                    );
-                    commandText =
-                        $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServerHost}];";
-                }
-
-                cmd.CommandText = commandText;
-                await dbContext.Database.OpenConnectionAsync();
-                await cmd.ExecuteNonQueryAsync();
+                await Sql.ExecuteSqlCommandAsync(
+                    dbContext,
+                    $"use [{database.DatabaseName}]; exec sp_droprolemember 'db_{roleName}', '{userName}'",
+                    database.DatabaseServer.IsLinkedServer,
+                    database.DatabaseServer.DatabaseServerHostName
+                );
             }
         }
     }

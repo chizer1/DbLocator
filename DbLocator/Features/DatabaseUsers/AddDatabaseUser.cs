@@ -95,27 +95,14 @@ internal class AddDatabaseUser(
             foreach (var databaseServer in databaseServers)
             {
                 if (processedServers.Contains(databaseServer.DatabaseServerId))
-                {
                     continue;
-                }
 
-                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-                if (databaseServer.IsLinkedServer)
-                {
-                    var linkedServer = Sql.SanitizeSqlIdentifier(
-                        databaseServer.DatabaseServerHostName
-                    );
-                    cmd.CommandText =
-                        $"exec('{Sql.EscapeForDynamicSql($"create login [{command.UserName}] with password = '{command.UserPassword}'")}') at [{linkedServer}];";
-                }
-                else
-                {
-                    cmd.CommandText =
-                        $"create login [{command.UserName}] with password = '{command.UserPassword}'";
-                }
-
-                await dbContext.Database.OpenConnectionAsync();
-                await cmd.ExecuteNonQueryAsync();
+                await Sql.ExecuteSqlCommandAsync(
+                    dbContext,
+                    $"create login [{command.UserName}] with password = '{command.UserPassword}'",
+                    databaseServer.IsLinkedServer,
+                    databaseServer.DatabaseServerHostName
+                );
 
                 processedServers.Add(databaseServer.DatabaseServerId);
             }
@@ -138,12 +125,7 @@ internal class AddDatabaseUser(
         {
             await using var scopedDbContext = await dbContextFactory.CreateDbContextAsync();
 
-            await CreateDatabaseUser(
-                scopedDbContext,
-                databaseId,
-                command.UserName,
-                command.UserPassword
-            );
+            await CreateDatabaseUser(scopedDbContext, databaseId, command.UserName);
         }
 
         cache?.Remove("databaseUsers");
@@ -154,8 +136,7 @@ internal class AddDatabaseUser(
     private static async Task CreateDatabaseUser(
         DbLocatorContext dbContext,
         int databaseId,
-        string userName,
-        string userPassword
+        string userName
     )
     {
         var database =
@@ -165,24 +146,14 @@ internal class AddDatabaseUser(
                 .FirstOrDefaultAsync(d => d.DatabaseId == databaseId)
             ?? throw new InvalidOperationException("Database not found.");
 
-        var uName = Sql.EscapeForDynamicSql(Sql.SanitizeSqlIdentifier(userName));
-        var uPassword = Sql.EscapeForDynamicSql(userPassword);
+        var uName = Sql.SanitizeSqlIdentifier(userName);
         var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
 
-        var commandText = $"use [{dbName}]; create user [{userName}] for login [{userName}]";
-
-        if (database.DatabaseServer.IsLinkedServer)
-        {
-            var linkedServer = Sql.SanitizeSqlIdentifier(
-                database.DatabaseServer.DatabaseServerHostName
-            );
-            commandText = $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServer}];";
-        }
-
-        await using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-        cmd.CommandText = commandText;
-
-        await dbContext.Database.OpenConnectionAsync();
-        await cmd.ExecuteNonQueryAsync();
+        await Sql.ExecuteSqlCommandAsync(
+            dbContext,
+            $"use [{dbName}]; create user [{uName}] for login [{uName}]",
+            database.DatabaseServer.IsLinkedServer,
+            database.DatabaseServer.DatabaseServerHostName
+        );
     }
 }

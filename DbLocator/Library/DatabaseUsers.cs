@@ -82,6 +82,7 @@ internal class DatabaseUsers(
 
     internal async Task UpdateDatabaseUser(
         int databaseUserId,
+        List<int> databaseIds,
         string databaseUserName,
         string databaseUserPassword,
         bool updateDatabase
@@ -90,6 +91,7 @@ internal class DatabaseUsers(
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
                 databaseUserId,
+                databaseIds,
                 databaseUserName,
                 databaseUserPassword,
                 updateDatabase
@@ -99,6 +101,7 @@ internal class DatabaseUsers(
 
     internal async Task UpdateDatabaseUser(
         int databaseUserId,
+        List<int> databaseIds,
         string databaseUserName,
         bool updateDatabase
     )
@@ -108,6 +111,7 @@ internal class DatabaseUsers(
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
                 databaseUserId,
+                databaseIds,
                 databaseUserName,
                 databaseUserPassword,
                 updateDatabase
@@ -117,6 +121,7 @@ internal class DatabaseUsers(
 
     internal async Task UpdateDatabaseUser(
         int databaseUserId,
+        List<int> databaseIds,
         string databaseUserName,
         string databaseUserPassword
     )
@@ -124,6 +129,7 @@ internal class DatabaseUsers(
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
                 databaseUserId,
+                databaseIds,
                 databaseUserName,
                 databaseUserPassword,
                 false
@@ -131,13 +137,18 @@ internal class DatabaseUsers(
         );
     }
 
-    internal async Task UpdateDatabaseUser(int databaseUserId, string databaseUserName)
+    internal async Task UpdateDatabaseUser(
+        int databaseUserId,
+        List<int> databaseIds,
+        string databaseUserName
+    )
     {
         var databaseUserPassword = PasswordGenerator.GenerateRandomPassword(25);
 
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
                 databaseUserId,
+                databaseIds,
                 databaseUserName,
                 databaseUserPassword,
                 false

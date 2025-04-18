@@ -157,7 +157,7 @@ internal class UpdateDatabaseUser(
             )
             {
                 var sanitizedUserName = Sql.SanitizeSqlIdentifier(command.UserName);
-                var sanitizedPassword = Sql.EscapeForDynamicSql(command.UserPassword);
+                var sanitizedPassword = command.UserPassword;
 
                 commands.Add(
                     $"alter login [{sanitizedUserName}] with password = '{sanitizedPassword}'"
@@ -166,21 +166,12 @@ internal class UpdateDatabaseUser(
 
             for (var i = 0; i < commands.Count; i++)
             {
-                var commandText = commands[i];
-                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-
-                if (database.DatabaseServer.IsLinkedServer)
-                {
-                    var linkedServerHost = Sql.SanitizeSqlIdentifier(
-                        database.DatabaseServer.DatabaseServerHostName
-                    );
-                    commandText =
-                        $"exec(''{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServerHost}];";
-                }
-
-                cmd.CommandText = commandText;
-                await dbContext.Database.OpenConnectionAsync();
-                await cmd.ExecuteNonQueryAsync();
+                await Sql.ExecuteSqlCommandAsync(
+                    dbContext,
+                    commands[i],
+                    database.DatabaseServer.IsLinkedServer,
+                    database.DatabaseServer.DatabaseServerHostName
+                );
             }
         }
 
