@@ -8,6 +8,7 @@ namespace DbLocator.Features.DatabaseUsers;
 
 internal record UpdateDatabaseUserCommand(
     int DatabaseUserId,
+    List<int> DatabaseIds,
     string UserName,
     string UserPassword,
     bool UpdateDatabase = false
@@ -101,8 +102,29 @@ internal class UpdateDatabaseUser(
             .Where(dud => dud.DatabaseUserId == databaseUserEntity.DatabaseUserId)
             .ToListAsync();
 
-        if (!databaseUserDatabases.Any())
-            throw new InvalidOperationException("No databases found for the DatabaseUser.");
+        // Handle adding/removing databases
+        var currentDatabaseIds = databaseUserDatabases.Select(d => d.DatabaseId).ToList();
+        var databasesToAdd = command.DatabaseIds.Except(currentDatabaseIds).ToList();
+        var databasesToRemove = currentDatabaseIds.Except(command.DatabaseIds).ToList();
+
+        foreach (var databaseId in databasesToAdd)
+        {
+            dbContext.Add(
+                new DatabaseUserDatabaseEntity
+                {
+                    DatabaseUserId = databaseUserEntity.DatabaseUserId,
+                    DatabaseId = databaseId
+                }
+            );
+        }
+
+        foreach (var databaseId in databasesToRemove)
+        {
+            var entityToRemove = databaseUserDatabases.First(d => d.DatabaseId == databaseId);
+            dbContext.Remove(entityToRemove);
+        }
+
+        await dbContext.SaveChangesAsync();
 
         var commands = new List<string>();
 

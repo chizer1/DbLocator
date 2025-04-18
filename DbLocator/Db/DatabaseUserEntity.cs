@@ -1,5 +1,8 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace DbLocator.Db;
 
+[Table("DatabaseUser")]
 internal class DatabaseUserEntity
 {
     public int DatabaseUserId { get; set; }

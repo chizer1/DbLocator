@@ -1,5 +1,8 @@
-﻿namespace DbLocator.Db;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
+namespace DbLocator.Db;
+
+[Table("Connection")]
 internal class ConnectionEntity
 {
     public int ConnectionId { get; set; }

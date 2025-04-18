@@ -83,35 +83,67 @@ internal class AddDatabaseUser(
 
         if (command.CreateUser)
         {
-            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-            cmd.CommandText =
-                $"create login [{command.UserName}] with password = '{command.UserPassword}'";
+            var databaseServers = await dbContext
+                .Set<DatabaseEntity>()
+                .Where(d => command.DatabaseIds.Contains(d.DatabaseId))
+                .Select(d => d.DatabaseServer)
+                .Distinct()
+                .ToListAsync();
 
-            await dbContext.Database.OpenConnectionAsync();
-            await cmd.ExecuteNonQueryAsync();
+            var processedServers = new HashSet<int>();
+
+            foreach (var databaseServer in databaseServers)
+            {
+                if (processedServers.Contains(databaseServer.DatabaseServerId))
+                {
+                    continue;
+                }
+
+                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+                if (databaseServer.IsLinkedServer)
+                {
+                    var linkedServer = Sql.SanitizeSqlIdentifier(
+                        databaseServer.DatabaseServerHostName
+                    );
+                    cmd.CommandText =
+                        $"exec('{Sql.EscapeForDynamicSql($"create login [{command.UserName}] with password = '{command.UserPassword}'")}') at [{linkedServer}];";
+                }
+                else
+                {
+                    cmd.CommandText =
+                        $"create login [{command.UserName}] with password = '{command.UserPassword}'";
+                }
+
+                await dbContext.Database.OpenConnectionAsync();
+                await cmd.ExecuteNonQueryAsync();
+
+                processedServers.Add(databaseServer.DatabaseServerId);
+            }
         }
 
         var databaseUserId = databaseUser.DatabaseUserId;
-        foreach (var databaseId in command.DatabaseIds)
-        {
-            var databaseUserDatabase = new DatabaseUserDatabaseEntity()
+
+        var databaseUserDatabases = command
+            .DatabaseIds.Select(databaseId => new DatabaseUserDatabaseEntity
             {
                 DatabaseUserId = databaseUserId,
                 DatabaseId = databaseId
-            };
+            })
+            .ToList();
 
-            await dbContext.Set<DatabaseUserDatabaseEntity>().AddAsync(databaseUserDatabase);
-            await dbContext.SaveChangesAsync();
+        await dbContext.Set<DatabaseUserDatabaseEntity>().AddRangeAsync(databaseUserDatabases);
+        await dbContext.SaveChangesAsync();
 
-            if (command.CreateUser)
-            {
-                await CreateDatabaseUser(
-                    dbContext,
-                    databaseId,
-                    command.UserName,
-                    command.UserPassword
-                );
-            }
+        foreach (var databaseId in command.DatabaseIds)
+        {
+            await using var scopedDbContext = await dbContextFactory.CreateDbContextAsync();
+
+            await CreateDatabaseUser(
+                scopedDbContext,
+                databaseId,
+                command.UserName,
+                command.UserPassword
+            );
         }
 
         cache?.Remove("databaseUsers");
@@ -130,7 +162,7 @@ internal class AddDatabaseUser(
             await dbContext
                 .Set<DatabaseEntity>()
                 .Include(d => d.DatabaseServer)
-                .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseId)
+                .FirstOrDefaultAsync(d => d.DatabaseId == databaseId)
             ?? throw new InvalidOperationException("Database not found.");
 
         var uName = Sql.EscapeForDynamicSql(Sql.SanitizeSqlIdentifier(userName));
@@ -147,7 +179,7 @@ internal class AddDatabaseUser(
             commandText = $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServer}];";
         }
 
-        using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
+        await using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
         cmd.CommandText = commandText;
 
         await dbContext.Database.OpenConnectionAsync();

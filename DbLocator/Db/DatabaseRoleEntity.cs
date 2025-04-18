@@ -1,5 +1,8 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace DbLocator.Db;
 
+[Table("DatabaseRole")]
 internal class DatabaseRoleEntity
 {
     public int DatabaseRoleId { get; set; }
