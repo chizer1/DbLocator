@@ -17,16 +17,21 @@ namespace DbLocator.Domain
     /// the user uses to authenticate with the database. This can be a system username
     /// or a display name for the user.
     /// </param>
-    /// <param name="Database">
-    /// The associated database with which the user has access. This property links
-    /// the user to a specific database, defining the scope of their permissions.
+    /// <param name="Databases">
+    /// The associated databases with which the user has access. This property links
+    /// the user to specific databases, defining the scope of their permissions.
     /// </param>
     /// <param name="Roles">
     /// A list of roles assigned to the user that define the permissions and access
     /// levels the user has within the database. These roles determine what actions
     /// the user can perform (e.g., read, write, admin, etc.) on the database.
     /// </param>
-    public class DatabaseUser(int Id, string Name, Database Database, List<DatabaseRole> Roles)
+    public class DatabaseUser(
+        int Id,
+        string Name,
+        List<Database> Databases,
+        List<DatabaseRole> Roles
+    )
     {
         /// <summary>
         /// Gets the unique identifier for the database user.
@@ -44,12 +49,12 @@ namespace DbLocator.Domain
         public string Name { get; init; } = Name;
 
         /// <summary>
-        /// Gets the associated database.
-        /// This property links the user to a specific database. It signifies that the
-        /// user has access to the given database and their roles are defined within
-        /// the context of that database.
+        /// Gets the associated databases.
+        /// This property links the user to specific databases. It signifies that the
+        /// user has access to given databases and their roles are defined within
+        /// the context of those databases.
         /// </summary>
-        public Database Database { get; init; } = Database;
+        public List<Database> Databases { get; init; } = Databases;
 
         /// <summary>
         /// Gets the list of roles assigned to the user.

@@ -1,4 +1,3 @@
-using System.Text.Json;
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Utilities;
@@ -45,42 +44,48 @@ internal class GetDatabaseUsers(
 
         var databaseUserEntities = await dbContext
             .Set<DatabaseUserEntity>()
-            .Include(c => c.Database)
+            .Include(u => u.Databases)
+            .ThenInclude(ud => ud.Database)
             .ThenInclude(d => d.DatabaseServer)
-            .Include(c => c.Database)
+            .Include(u => u.Databases)
+            .ThenInclude(ud => ud.Database)
             .ThenInclude(d => d.DatabaseType)
-            .Include(d => d.UserRoles)
+            .Include(u => u.UserRoles)
             .ToListAsync();
 
         var databaseUsers = databaseUserEntities
-            .Select(d => new DatabaseUser(
-                d.DatabaseUserId,
-                d.UserName,
-                d.Database != null
-                    ? new Database(
-                        d.Database.DatabaseId,
-                        d.Database.DatabaseName,
-                        d.Database.DatabaseType != null
-                            ? new DatabaseType(
-                                d.Database.DatabaseType.DatabaseTypeId,
-                                d.Database.DatabaseType.DatabaseTypeName
-                            )
-                            : null!,
-                        d.Database.DatabaseServer != null
-                            ? new DatabaseServer(
-                                d.Database.DatabaseServer.DatabaseServerId,
-                                d.Database.DatabaseServer.DatabaseServerName,
-                                d.Database.DatabaseServer.DatabaseServerIpaddress,
-                                d.Database.DatabaseServer.DatabaseServerHostName,
-                                d.Database.DatabaseServer.DatabaseServerFullyQualifiedDomainName,
-                                d.Database.DatabaseServer.IsLinkedServer
-                            )
-                            : null!,
-                        (Status)d.Database.DatabaseStatusId,
-                        d.Database.UseTrustedConnection
-                    )
-                    : null!,
-                [.. d.UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)]
+            .Select(user => new DatabaseUser(
+                user.DatabaseUserId,
+                user.UserName,
+                [
+                    .. user
+                        .Databases.Where(ud => ud.Database != null)
+                        .Select(ud => new Database(
+                            ud.Database.DatabaseId,
+                            ud.Database.DatabaseName,
+                            ud.Database.DatabaseType != null
+                                ? new DatabaseType(
+                                    ud.Database.DatabaseType.DatabaseTypeId,
+                                    ud.Database.DatabaseType.DatabaseTypeName
+                                )
+                                : null!,
+                            ud.Database.DatabaseServer != null
+                                ? new DatabaseServer(
+                                    ud.Database.DatabaseServer.DatabaseServerId,
+                                    ud.Database.DatabaseServer.DatabaseServerName,
+                                    ud.Database.DatabaseServer.DatabaseServerIpaddress,
+                                    ud.Database.DatabaseServer.DatabaseServerHostName,
+                                    ud.Database
+                                        .DatabaseServer
+                                        .DatabaseServerFullyQualifiedDomainName,
+                                    ud.Database.DatabaseServer.IsLinkedServer
+                                )
+                                : null!,
+                            (Status)ud.Database.DatabaseStatusId,
+                            ud.Database.UseTrustedConnection
+                        ))
+                ],
+                [.. user.UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)]
             ))
             .ToList();
 

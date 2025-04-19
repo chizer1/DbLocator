@@ -8,6 +8,7 @@ namespace DbLocator.Features.DatabaseUsers;
 
 internal record UpdateDatabaseUserCommand(
     int DatabaseUserId,
+    List<int> DatabaseIds,
     string UserName,
     string UserPassword,
     bool UpdateDatabase = false
@@ -96,59 +97,82 @@ internal class UpdateDatabaseUser(
         if (!command.UpdateDatabase)
             return;
 
-        var database =
-            await dbContext
-                .Set<DatabaseEntity>()
-                .Include(d => d.DatabaseServer)
-                .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseUserEntity.DatabaseId)
-            ?? throw new InvalidOperationException("Database not found.");
+        var databaseUserDatabases = await dbContext
+            .Set<DatabaseUserDatabaseEntity>()
+            .Where(dud => dud.DatabaseUserId == databaseUserEntity.DatabaseUserId)
+            .ToListAsync();
+
+        // Handle adding/removing databases
+        var currentDatabaseIds = databaseUserDatabases.Select(d => d.DatabaseId).ToList();
+        var databasesToAdd = command.DatabaseIds.Except(currentDatabaseIds).ToList();
+        var databasesToRemove = currentDatabaseIds.Except(command.DatabaseIds).ToList();
+
+        foreach (var databaseId in databasesToAdd)
+        {
+            dbContext.Add(
+                new DatabaseUserDatabaseEntity
+                {
+                    DatabaseUserId = databaseUserEntity.DatabaseUserId,
+                    DatabaseId = databaseId
+                }
+            );
+        }
+
+        foreach (var databaseId in databasesToRemove)
+        {
+            var entityToRemove = databaseUserDatabases.First(d => d.DatabaseId == databaseId);
+            dbContext.Remove(entityToRemove);
+        }
+
+        await dbContext.SaveChangesAsync();
 
         var commands = new List<string>();
 
-        if (oldDatabaseUserName != command.UserName && !string.IsNullOrEmpty(command.UserName))
+        foreach (var databaseUserDatabase in databaseUserDatabases)
         {
-            var sanitizedOldUserName = Sql.SanitizeSqlIdentifier(oldDatabaseUserName);
-            var sanitizedNewUserName = Sql.SanitizeSqlIdentifier(command.UserName);
-            var sanitizedDbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
+            var database =
+                await dbContext
+                    .Set<DatabaseEntity>()
+                    .Include(d => d.DatabaseServer)
+                    .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseUserDatabase.DatabaseId)
+                ?? throw new InvalidOperationException("Database not found.");
 
-            commands.Add(
-                $"use [{sanitizedDbName}]; alter user [{sanitizedOldUserName}] with name = [{sanitizedNewUserName}]"
-            );
-            commands.Add(
-                $"alter login [{sanitizedOldUserName}] with name = '{sanitizedNewUserName}'"
-            );
-        }
-
-        if (
-            oldDatabasePassword != command.UserPassword
-            && !string.IsNullOrEmpty(command.UserPassword)
-        )
-        {
-            var sanitizedUserName = Sql.SanitizeSqlIdentifier(command.UserName);
-            var sanitizedPassword = Sql.EscapeForDynamicSql(command.UserPassword);
-
-            commands.Add(
-                $"alter login [{sanitizedUserName}] with password = '{sanitizedPassword}'"
-            );
-        }
-
-        for (var i = 0; i < commands.Count; i++)
-        {
-            var commandText = commands[i];
-            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-
-            if (database.DatabaseServer.IsLinkedServer)
+            if (oldDatabaseUserName != command.UserName && !string.IsNullOrEmpty(command.UserName))
             {
-                var linkedServerHost = Sql.SanitizeSqlIdentifier(
-                    database.DatabaseServer.DatabaseServerHostName
+                var sanitizedOldUserName = Sql.SanitizeSqlIdentifier(oldDatabaseUserName);
+                var sanitizedNewUserName = Sql.SanitizeSqlIdentifier(command.UserName);
+                var sanitizedDbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
+
+                commands.Add(
+                    $"use [{sanitizedDbName}]; alter user [{sanitizedOldUserName}] with name = [{sanitizedNewUserName}]"
                 );
-                commandText =
-                    $"exec(''{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServerHost}];";
+                commands.Add(
+                    $"alter login [{sanitizedOldUserName}] with name = '{sanitizedNewUserName}'"
+                );
             }
 
-            cmd.CommandText = commandText;
-            await dbContext.Database.OpenConnectionAsync();
-            await cmd.ExecuteNonQueryAsync();
+            if (
+                oldDatabasePassword != command.UserPassword
+                && !string.IsNullOrEmpty(command.UserPassword)
+            )
+            {
+                var sanitizedUserName = Sql.SanitizeSqlIdentifier(command.UserName);
+                var sanitizedPassword = command.UserPassword;
+
+                commands.Add(
+                    $"alter login [{sanitizedUserName}] with password = '{sanitizedPassword}'"
+                );
+            }
+
+            for (var i = 0; i < commands.Count; i++)
+            {
+                await Sql.ExecuteSqlCommandAsync(
+                    dbContext,
+                    commands[i],
+                    database.DatabaseServer.IsLinkedServer,
+                    database.DatabaseServer.DatabaseServerHostName
+                );
+            }
         }
 
         cache?.Remove("databaseUsers");
@@ -156,6 +180,7 @@ internal class UpdateDatabaseUser(
         var roles = databaseUserEntity
             .UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)
             .ToArray();
+
         cache?.TryClearConnectionStringFromCache(Roles: roles);
     }
 }

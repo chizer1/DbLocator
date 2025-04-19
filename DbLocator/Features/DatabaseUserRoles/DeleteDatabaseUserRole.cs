@@ -72,34 +72,31 @@ namespace DbLocator.Features.DatabaseUserRoles
             var user =
                 await dbContext
                     .Set<DatabaseUserEntity>()
-                    .Include(u => u.Database)
-                    .Include(u => u.Database.DatabaseServer)
-                    .FirstOrDefaultAsync(du =>
-                        du.DatabaseUserId == databaseUserRoleEntity.DatabaseUserId
-                    ) ?? throw new InvalidOperationException("User not found.");
+                    .Include(u => u.Databases)
+                    .ThenInclude(d => d.Database)
+                    .ThenInclude(db => db.DatabaseServer)
+                    .FirstOrDefaultAsync(u =>
+                        u.DatabaseUserId == databaseUserRoleEntity.DatabaseUserId
+                    )
+                ?? throw new InvalidOperationException(
+                    $"DatabaseUser Id '{databaseUserRoleEntity.DatabaseUserId}' not found."
+                );
 
             var roleName = Enum.GetName((DatabaseRole)databaseUserRoleEntity.DatabaseRoleId)
                 .ToLower();
 
-            var dbName = Sql.SanitizeSqlIdentifier(user.Database.DatabaseName);
-            var userName = Sql.SanitizeSqlIdentifier(user.UserName);
-
-            var commandText =
-                $"use [{dbName}]; exec sp_droprolemember 'db_{roleName}', '{userName}'";
-            using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-
-            if (user.Database.DatabaseServer.IsLinkedServer)
+            var databases = user.Databases.Select(d => d.Database).ToList();
+            foreach (var database in databases)
             {
-                var linkedServerHost = Sql.SanitizeSqlIdentifier(
-                    user.Database.DatabaseServer.DatabaseServerHostName
-                );
-                commandText =
-                    $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServerHost}];";
-            }
+                var userName = Sql.SanitizeSqlIdentifier(user.UserName);
 
-            cmd.CommandText = commandText;
-            await dbContext.Database.OpenConnectionAsync();
-            await cmd.ExecuteNonQueryAsync();
+                await Sql.ExecuteSqlCommandAsync(
+                    dbContext,
+                    $"use [{database.DatabaseName}]; exec sp_droprolemember 'db_{roleName}', '{userName}'",
+                    database.DatabaseServer.IsLinkedServer,
+                    database.DatabaseServer.DatabaseServerHostName
+                );
+            }
         }
     }
 }

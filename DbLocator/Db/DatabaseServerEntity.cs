@@ -1,5 +1,8 @@
-﻿namespace DbLocator.Db;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
+namespace DbLocator.Db;
+
+[Table("DatabaseServer")]
 internal class DatabaseServerEntity
 {
     public int DatabaseServerId { get; set; }

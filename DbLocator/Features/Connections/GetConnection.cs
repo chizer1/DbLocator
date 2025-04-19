@@ -203,7 +203,14 @@ internal class GetConnection(
         var users = await dbContext
             .Set<DatabaseUserEntity>()
             .Include(u => u.UserRoles)
-            .Where(u => u.DatabaseId == database.DatabaseId)
+            .Where(u =>
+                dbContext
+                    .Set<DatabaseUserDatabaseEntity>()
+                    .Any(dud =>
+                        dud.DatabaseUserId == u.DatabaseUserId
+                        && dud.DatabaseId == database.DatabaseId
+                    )
+            )
             .ToListAsync();
 
         // Find a user that matches all the roles

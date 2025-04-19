@@ -1,5 +1,8 @@
-﻿namespace DbLocator.Db;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
+namespace DbLocator.Db;
+
+[Table("Tenant")]
 internal class TenantEntity
 {
     public int TenantId { get; set; }

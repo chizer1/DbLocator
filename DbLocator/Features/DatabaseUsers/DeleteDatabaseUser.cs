@@ -43,6 +43,35 @@ namespace DbLocator.Features.DatabaseUsers
                 );
             }
 
+            var databaseUserDatabases = await dbContext
+                .Set<DatabaseUserDatabaseEntity>()
+                .Where(dud => dud.DatabaseUserId == command.DatabaseUserId)
+                .ToListAsync();
+
+            if (command.DeleteDatabaseUser)
+            {
+                var databases = await dbContext
+                    .Set<DatabaseUserDatabaseEntity>()
+                    .Include(dud => dud.Database)
+                    .ThenInclude(db => db.DatabaseServer)
+                    .Where(dud => dud.DatabaseUserId == databaseUserEntity.DatabaseUserId)
+                    .ToListAsync();
+
+                foreach (var database in databases)
+                {
+                    await using var scopedDbContext = await dbContextFactory.CreateDbContextAsync();
+
+                    await DropDatabaseUserAsync(
+                        scopedDbContext,
+                        databaseUserEntity,
+                        database.Database
+                    );
+                }
+            }
+
+            dbContext.Set<DatabaseUserDatabaseEntity>().RemoveRange(databaseUserDatabases);
+            await dbContext.SaveChangesAsync();
+
             dbContext.Set<DatabaseUserEntity>().Remove(databaseUserEntity);
             await dbContext.SaveChangesAsync();
 
@@ -52,57 +81,30 @@ namespace DbLocator.Features.DatabaseUsers
                 .UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)
                 .ToArray();
             cache?.TryClearConnectionStringFromCache(Roles: roles);
-
-            if (!command.DeleteDatabaseUser)
-            {
-                return;
-            }
-
-            await DropDatabaseUser(dbContext, databaseUserEntity);
         }
 
-        private static async Task DropDatabaseUser(
+        private static async Task DropDatabaseUserAsync(
             DbLocatorContext dbContext,
-            DatabaseUserEntity databaseUserEntity
+            DatabaseUserEntity databaseUser,
+            DatabaseEntity database
         )
         {
-            var database =
-                await dbContext
-                    .Set<DatabaseEntity>()
-                    .Include(d => d.DatabaseServer)
-                    .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseUserEntity.DatabaseId)
-                ?? throw new InvalidOperationException("Database not found.");
-
+            var userName = Sql.SanitizeSqlIdentifier(databaseUser.UserName);
             var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
-            var userName = Sql.EscapeForDynamicSql(
-                Sql.SanitizeSqlIdentifier(databaseUserEntity.UserName)
+
+            await Sql.ExecuteSqlCommandAsync(
+                dbContext,
+                $"use [{dbName}]; create user [{userName}] for login [{userName}]",
+                database.DatabaseServer.IsLinkedServer,
+                database.DatabaseServer.DatabaseServerHostName
             );
 
-            var commands = new List<string>
-            {
-                $"use [{dbName}]; drop user [{userName}]",
-                $"drop login [{userName}]"
-            };
-
-            foreach (var rawCommand in commands)
-            {
-                var commandText = rawCommand;
-
-                if (database.DatabaseServer.IsLinkedServer)
-                {
-                    var linkedServer = Sql.SanitizeSqlIdentifier(
-                        database.DatabaseServer.DatabaseServerHostName
-                    );
-                    commandText =
-                        $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServer}];";
-                }
-
-                using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-                cmd.CommandText = commandText;
-
-                await dbContext.Database.OpenConnectionAsync();
-                await cmd.ExecuteNonQueryAsync();
-            }
+            await Sql.ExecuteSqlCommandAsync(
+                dbContext,
+                $"if exists (select * from sys.server_principals where name = '{userName}') drop login [{userName}]",
+                database.DatabaseServer.IsLinkedServer,
+                database.DatabaseServer.DatabaseServerHostName
+            );
         }
     }
 }

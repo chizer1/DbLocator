@@ -1,5 +1,4 @@
-﻿using DbLocator.Domain;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -8,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DbLocator.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -93,6 +92,32 @@ namespace DbLocator.Migrations
             );
 
             migrationBuilder.CreateTable(
+                name: "DatabaseUser",
+                columns: table => new
+                {
+                    DatabaseUserID = table
+                        .Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserName = table.Column<string>(
+                        type: "varchar(50)",
+                        unicode: false,
+                        maxLength: 50,
+                        nullable: true
+                    ),
+                    UserPassword = table.Column<string>(
+                        type: "varchar(50)",
+                        unicode: false,
+                        maxLength: 50,
+                        nullable: true
+                    )
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DatabaseUser", x => x.DatabaseUserID);
+                }
+            );
+
+            migrationBuilder.CreateTable(
                 name: "Tenant",
                 columns: table => new
                 {
@@ -156,6 +181,34 @@ namespace DbLocator.Migrations
             );
 
             migrationBuilder.CreateTable(
+                name: "DatabaseUserRole",
+                columns: table => new
+                {
+                    DatabaseUserRoleId = table
+                        .Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DatabaseRoleID = table.Column<int>(type: "int", nullable: false),
+                    DatabaseUserID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DatabaseUserRole", x => x.DatabaseUserRoleId);
+                    table.ForeignKey(
+                        name: "FK_DatabaseUserRole_DatabaseRole",
+                        column: x => x.DatabaseRoleID,
+                        principalTable: "DatabaseRole",
+                        principalColumn: "DatabaseRoleID"
+                    );
+                    table.ForeignKey(
+                        name: "FK_DatabaseUserRole_DatabaseUser",
+                        column: x => x.DatabaseUserID,
+                        principalTable: "DatabaseUser",
+                        principalColumn: "DatabaseUserID"
+                    );
+                }
+            );
+
+            migrationBuilder.CreateTable(
                 name: "Connection",
                 columns: table => new
                 {
@@ -184,59 +237,26 @@ namespace DbLocator.Migrations
             );
 
             migrationBuilder.CreateTable(
-                name: "DatabaseUser",
+                name: "DatabaseUserDatabase",
                 columns: table => new
                 {
-                    DatabaseUserID = table
+                    DatabaseUserDatabaseId = table
                         .Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DatabaseID = table.Column<int>(type: "int", nullable: false),
-                    UserName = table.Column<string>(
-                        type: "varchar(50)",
-                        unicode: false,
-                        maxLength: 50,
-                        nullable: true
-                    ),
-                    UserPassword = table.Column<string>(
-                        type: "varchar(50)",
-                        unicode: false,
-                        maxLength: 50,
-                        nullable: true
-                    )
+                    DatabaseUserID = table.Column<int>(type: "int", nullable: false),
+                    DatabaseID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DatabaseUser", x => x.DatabaseUserID);
+                    table.PrimaryKey("PK_DatabaseUserDatabase", x => x.DatabaseUserDatabaseId);
                     table.ForeignKey(
-                        name: "FK_DatabaseUser_DatabaseId",
+                        name: "FK_DatabaseUserDatabase_Database",
                         column: x => x.DatabaseID,
                         principalTable: "Database",
                         principalColumn: "DatabaseID"
                     );
-                }
-            );
-
-            migrationBuilder.CreateTable(
-                name: "DatabaseUserRole",
-                columns: table => new
-                {
-                    DatabaseUserRoleID = table
-                        .Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DatabaseRoleID = table.Column<int>(type: "int", nullable: false),
-                    DatabaseUserID = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DatabaseUserRole", x => x.DatabaseUserRoleID);
                     table.ForeignKey(
-                        name: "FK_DatabaseUserRole_DatabaseRole",
-                        column: x => x.DatabaseRoleID,
-                        principalTable: "DatabaseRole",
-                        principalColumn: "DatabaseRoleID"
-                    );
-                    table.ForeignKey(
-                        name: "FK_DatabaseUserRole_DatabaseUser",
+                        name: "FK_DatabaseUserDatabase_DatabaseUser",
                         column: x => x.DatabaseUserID,
                         principalTable: "DatabaseUser",
                         principalColumn: "DatabaseUserID"
@@ -246,7 +266,7 @@ namespace DbLocator.Migrations
 
             migrationBuilder.InsertData(
                 table: "DatabaseRole",
-                columns: ["DatabaseRoleID", "DatabaseRoleName"],
+                columns: new[] { "DatabaseRoleID", "DatabaseRoleName" },
                 values: new object[,]
                 {
                     { 1, "Owner" },
@@ -286,15 +306,27 @@ namespace DbLocator.Migrations
             );
 
             migrationBuilder.CreateIndex(
-                name: "IX_DatabaseUser_DatabaseID",
-                table: "DatabaseUser",
+                name: "IX_DatabaseUserDatabase_DatabaseID",
+                table: "DatabaseUserDatabase",
                 column: "DatabaseID"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DatabaseUserDatabase_DatabaseUserID",
+                table: "DatabaseUserDatabase",
+                column: "DatabaseUserID"
             );
 
             migrationBuilder.CreateIndex(
                 name: "IX_DatabaseUserRole_DatabaseRoleID",
                 table: "DatabaseUserRole",
                 column: "DatabaseRoleID"
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DatabaseUserRole_DatabaseUserID",
+                table: "DatabaseUserRole",
+                column: "DatabaseUserID"
             );
         }
 
@@ -303,15 +335,17 @@ namespace DbLocator.Migrations
         {
             migrationBuilder.DropTable(name: "Connection");
 
+            migrationBuilder.DropTable(name: "DatabaseUserDatabase");
+
             migrationBuilder.DropTable(name: "DatabaseUserRole");
 
             migrationBuilder.DropTable(name: "Tenant");
 
+            migrationBuilder.DropTable(name: "Database");
+
             migrationBuilder.DropTable(name: "DatabaseRole");
 
             migrationBuilder.DropTable(name: "DatabaseUser");
-
-            migrationBuilder.DropTable(name: "Database");
 
             migrationBuilder.DropTable(name: "DatabaseServer");
 

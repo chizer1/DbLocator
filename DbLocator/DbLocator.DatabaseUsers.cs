@@ -7,8 +7,8 @@ namespace DbLocator
         /// <summary>
         /// Adds a new database user with the specified database ID, user name, user password, and the option to create the user.
         /// </summary>
-        /// <param name="databaseId">
-        /// The ID of the database to which the user belongs.
+        /// <param name="databaseIds">
+        /// The IDs of the databases to which the user belongs.
         /// </param>
         /// <param name="userName">
         /// The user name for the new database user.
@@ -23,14 +23,14 @@ namespace DbLocator
         /// The ID of the newly created database user.
         /// </returns>
         public async Task<int> AddDatabaseUser(
-            int databaseId,
+            List<int> databaseIds,
             string userName,
             string userPassword,
             bool createUser
         )
         {
             return await _databaseUsers.AddDatabaseUser(
-                databaseId,
+                databaseIds,
                 userName,
                 userPassword,
                 createUser
@@ -41,8 +41,8 @@ namespace DbLocator
         /// Adds a new database user with the specified database ID, user name, and the option to create the user.
         /// The user password is not specified.
         /// </summary>
-        /// <param name="databaseId">
-        /// The ID of the database to which the user belongs.
+        /// <param name="databaseIds">
+        /// The IDs of the databases to which the user belongs.
         /// </param>
         /// <param name="userName">
         /// The user name for the new database user.
@@ -53,17 +53,21 @@ namespace DbLocator
         /// <returns>
         /// The ID of the newly created database user.
         /// </returns>
-        public async Task<int> AddDatabaseUser(int databaseId, string userName, bool createUser)
+        public async Task<int> AddDatabaseUser(
+            List<int> databaseIds,
+            string userName,
+            bool createUser
+        )
         {
-            return await _databaseUsers.AddDatabaseUser(databaseId, userName, createUser);
+            return await _databaseUsers.AddDatabaseUser(databaseIds, userName, createUser);
         }
 
         /// <summary>
         /// Adds a new database user with the specified database ID, user name, and user password.
         /// The option to create the user is not specified.
         /// </summary>
-        /// <param name="databaseId">
-        /// The ID of the database to which the user belongs.
+        /// <param name="databaseIds">
+        /// The IDs of the databases to which the user belongs.
         /// </param>
         /// <param name="userName">
         /// The user name for the new database user.
@@ -74,27 +78,31 @@ namespace DbLocator
         /// <returns>
         /// The ID of the newly created database user.
         /// </returns>
-        public async Task<int> AddDatabaseUser(int databaseId, string userName, string userPassword)
+        public async Task<int> AddDatabaseUser(
+            List<int> databaseIds,
+            string userName,
+            string userPassword
+        )
         {
-            return await _databaseUsers.AddDatabaseUser(databaseId, userName, userPassword);
+            return await _databaseUsers.AddDatabaseUser(databaseIds, userName, userPassword);
         }
 
         /// <summary>
         /// Adds a new database user with the specified database ID and user name.
         /// The user password and the option to create the user are not specified.
         /// </summary>
-        /// <param name="DatabaseId">
+        /// <param name="databaseIds">
         /// The ID of the database to which the user belongs.
         /// </param>
-        /// <param name="UserName">
+        /// <param name="userName">
         /// The user name for the new database user.
         /// </param>
         /// <returns>
         /// The ID of the newly created database user.
         /// </returns>
-        public async Task<int> AddDatabaseUser(int DatabaseId, string UserName)
+        public async Task<int> AddDatabaseUser(List<int> databaseIds, string userName)
         {
-            return await _databaseUsers.AddDatabaseUser(DatabaseId, UserName);
+            return await _databaseUsers.AddDatabaseUser(databaseIds, userName);
         }
 
         /// <summary>
@@ -114,6 +122,9 @@ namespace DbLocator
         /// <param name="databaseUserId">
         /// The ID of the database user to be updated.
         /// </param>
+        /// <param name="databaseIds">
+        /// The IDs of the databases to which the user belongs.
+        /// </param>
         /// <param name="databaseUserName">
         /// The new user name for the database user.
         /// </param>
@@ -128,6 +139,7 @@ namespace DbLocator
         /// </returns>
         public async Task UpdateDatabaseUser(
             int databaseUserId,
+            List<int> databaseIds,
             string databaseUserName,
             string databaseUserPassword,
             bool updateDatabase
@@ -135,6 +147,7 @@ namespace DbLocator
         {
             await _databaseUsers.UpdateDatabaseUser(
                 databaseUserId,
+                databaseIds,
                 databaseUserName,
                 databaseUserPassword,
                 updateDatabase
@@ -148,6 +161,9 @@ namespace DbLocator
         /// <param name="databaseUserId">
         /// The ID of the database user to be updated.
         /// </param>
+        /// <param name="databaseIds">
+        /// The IDs of the databases to which the user belongs.
+        /// </param>
         /// <param name="databaseUserName">
         /// The new user name for the database user.
         /// </param>
@@ -159,12 +175,14 @@ namespace DbLocator
         /// </returns>
         public async Task UpdateDatabaseUser(
             int databaseUserId,
+            List<int> databaseIds,
             string databaseUserName,
             bool updateDatabase
         )
         {
             await _databaseUsers.UpdateDatabaseUser(
                 databaseUserId,
+                databaseIds,
                 databaseUserName,
                 updateDatabase
             );
@@ -177,6 +195,9 @@ namespace DbLocator
         /// <param name="databaseUserId">
         /// The ID of the database user to be updated.
         /// </param>
+        /// <param name="databaseIds">
+        /// The IDs of the databases to which the user belongs.
+        /// </param>
         /// <param name="databaseUserName">
         /// The new user name for the database user.
         /// </param>
@@ -188,12 +209,14 @@ namespace DbLocator
         /// </returns>
         public async Task UpdateDatabaseUser(
             int databaseUserId,
+            List<int> databaseIds,
             string databaseUserName,
             string databaseUserPassword
         )
         {
             await _databaseUsers.UpdateDatabaseUser(
                 databaseUserId,
+                databaseIds,
                 databaseUserName,
                 databaseUserPassword
             );
@@ -205,15 +228,22 @@ namespace DbLocator
         /// <param name="databaseUserId">
         /// The ID of the database user to be updated.
         /// </param>
+        /// <param name="databaseIds">
+        /// The IDs of the databases to which the user belongs.
+        /// </param>
         /// <param name="databaseUserName">
         /// The new user name for the database user.
         /// </param>
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
-        public async Task UpdateDatabaseUser(int databaseUserId, string databaseUserName)
+        public async Task UpdateDatabaseUser(
+            int databaseUserId,
+            List<int> databaseIds,
+            string databaseUserName
+        )
         {
-            await _databaseUsers.UpdateDatabaseUser(databaseUserId, databaseUserName);
+            await _databaseUsers.UpdateDatabaseUser(databaseUserId, databaseIds, databaseUserName);
         }
 
         /// <summary>

@@ -19,37 +19,47 @@ internal class DatabaseUsers(
         new(dbContextFactory, encryption, cache);
 
     internal async Task<int> AddDatabaseUser(
-        int databaseId,
+        List<int> databaseIds,
         string userName,
         string userPassword,
         bool createUser
     )
     {
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(databaseId, userName, userPassword, createUser)
+            new AddDatabaseUserCommand(databaseIds, userName, userPassword, createUser)
         );
     }
 
-    internal async Task<int> AddDatabaseUser(int databaseId, string userName, bool createUser)
+    internal async Task<int> AddDatabaseUser(
+        List<int> databaseIds,
+        string userName,
+        bool createUser
+    )
     {
         var userPassword = PasswordGenerator.GenerateRandomPassword(25);
+
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(databaseId, userName, userPassword, createUser)
+            new AddDatabaseUserCommand(databaseIds, userName, userPassword, createUser)
         );
     }
 
-    internal async Task<int> AddDatabaseUser(int databaseId, string userName, string userPassword)
+    internal async Task<int> AddDatabaseUser(
+        List<int> databaseIds,
+        string userName,
+        string userPassword
+    )
     {
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(databaseId, userName, userPassword, false)
+            new AddDatabaseUserCommand(databaseIds, userName, userPassword, false)
         );
     }
 
-    internal async Task<int> AddDatabaseUser(int databaseId, string userName)
+    internal async Task<int> AddDatabaseUser(List<int> databaseIds, string userName)
     {
         var userPassword = PasswordGenerator.GenerateRandomPassword(25);
+
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(databaseId, userName, userPassword, false)
+            new AddDatabaseUserCommand(databaseIds, userName, userPassword, false)
         );
     }
 
@@ -71,63 +81,76 @@ internal class DatabaseUsers(
     }
 
     internal async Task UpdateDatabaseUser(
-        int DatabaseUserId,
-        string DatabaseUserName,
-        string DatabaseUserPassword,
-        bool UpdateDatabase
+        int databaseUserId,
+        List<int> databaseIds,
+        string databaseUserName,
+        string databaseUserPassword,
+        bool updateDatabase
     )
     {
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
-                DatabaseUserId,
-                DatabaseUserName,
-                DatabaseUserPassword,
-                UpdateDatabase
+                databaseUserId,
+                databaseIds,
+                databaseUserName,
+                databaseUserPassword,
+                updateDatabase
             )
         );
     }
 
     internal async Task UpdateDatabaseUser(
-        int DatabaseUserId,
-        string DatabaseUserName,
-        bool UpdateDatabase
+        int databaseUserId,
+        List<int> databaseIds,
+        string databaseUserName,
+        bool updateDatabase
     )
     {
-        var DatabaseUserPassword = PasswordGenerator.GenerateRandomPassword(25);
+        var databaseUserPassword = PasswordGenerator.GenerateRandomPassword(25);
+
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
-                DatabaseUserId,
-                DatabaseUserName,
-                DatabaseUserPassword,
-                UpdateDatabase
+                databaseUserId,
+                databaseIds,
+                databaseUserName,
+                databaseUserPassword,
+                updateDatabase
             )
         );
     }
 
     internal async Task UpdateDatabaseUser(
-        int DatabaseUserId,
-        string DatabaseUserName,
-        string DatabaseUserPassword
+        int databaseUserId,
+        List<int> databaseIds,
+        string databaseUserName,
+        string databaseUserPassword
     )
     {
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
-                DatabaseUserId,
-                DatabaseUserName,
-                DatabaseUserPassword,
+                databaseUserId,
+                databaseIds,
+                databaseUserName,
+                databaseUserPassword,
                 false
             )
         );
     }
 
-    internal async Task UpdateDatabaseUser(int DatabaseUserId, string DatabaseUserName)
+    internal async Task UpdateDatabaseUser(
+        int databaseUserId,
+        List<int> databaseIds,
+        string databaseUserName
+    )
     {
-        var DatabaseUserPassword = PasswordGenerator.GenerateRandomPassword(25);
+        var databaseUserPassword = PasswordGenerator.GenerateRandomPassword(25);
+
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
-                DatabaseUserId,
-                DatabaseUserName,
-                DatabaseUserPassword,
+                databaseUserId,
+                databaseIds,
+                databaseUserName,
+                databaseUserPassword,
                 false
             )
         );

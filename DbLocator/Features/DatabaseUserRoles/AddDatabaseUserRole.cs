@@ -68,32 +68,26 @@ internal class AddDatabaseUserRole(IDbContextFactory<DbLocatorContext> dbContext
         AddDatabaseUserRoleCommand command
     )
     {
-        var database =
-            await dbContext
-                .Set<DatabaseEntity>()
-                .Include(d => d.DatabaseServer)
-                .FirstOrDefaultAsync(ds => ds.DatabaseId == user.DatabaseId)
-            ?? throw new InvalidOperationException("Database not found.");
+        var databases = await dbContext
+            .Set<DatabaseUserDatabaseEntity>()
+            .Include(dud => dud.Database)
+            .Include(dud => dud.Database.DatabaseServer)
+            .Where(dud => dud.DatabaseUserId == user.DatabaseUserId)
+            .Select(dud => dud.Database)
+            .ToListAsync();
 
-        var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
-        var userName = Sql.EscapeForDynamicSql(Sql.SanitizeSqlIdentifier(user.UserName));
-        var roleName = $"db_{Enum.GetName(command.UserRole).ToLower()}";
-        roleName = Sql.EscapeForDynamicSql(Sql.SanitizeSqlIdentifier(roleName));
-
-        var commandText = $"use [{dbName}]; exec sp_addrolemember '{roleName}', '{userName}';";
-
-        if (database.DatabaseServer.IsLinkedServer)
+        foreach (var database in databases)
         {
-            var linkedServer = Sql.SanitizeSqlIdentifier(
+            var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
+            var userName = Sql.SanitizeSqlIdentifier(user.UserName);
+            var roleName = Sql.SanitizeSqlIdentifier($"db_{command.UserRole.ToString().ToLower()}");
+
+            await Sql.ExecuteSqlCommandAsync(
+                dbContext,
+                $"use [{dbName}]; exec sp_addrolemember '{roleName}', '{userName}';",
+                database.DatabaseServer.IsLinkedServer,
                 database.DatabaseServer.DatabaseServerHostName
             );
-            commandText = $"exec('{Sql.EscapeForDynamicSql(commandText)}') at [{linkedServer}];";
         }
-
-        using var cmd = dbContext.Database.GetDbConnection().CreateCommand();
-        cmd.CommandText = commandText;
-
-        await dbContext.Database.OpenConnectionAsync();
-        await cmd.ExecuteNonQueryAsync();
     }
 }
