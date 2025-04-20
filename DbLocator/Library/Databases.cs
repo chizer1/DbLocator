@@ -10,6 +10,7 @@ internal class Databases(IDbContextFactory<DbLocatorContext> dbContextFactory, D
 {
     private readonly AddDatabase _addDatabase = new(dbContextFactory, cache);
     private readonly DeleteDatabase _deleteDatabase = new(dbContextFactory, cache);
+    private readonly GetDatabase _getDatabase = new(dbContextFactory);
     private readonly GetDatabases _getDatabases = new(dbContextFactory, cache);
     private readonly UpdateDatabase _updateDatabase = new(dbContextFactory, cache);
 
@@ -102,6 +103,11 @@ internal class Databases(IDbContextFactory<DbLocatorContext> dbContextFactory, D
     internal async Task<List<Database>> GetDatabases()
     {
         return await _getDatabases.Handle(new GetDatabasesQuery());
+    }
+
+    internal async Task<Database> GetDatabase(int databaseId)
+    {
+        return await _getDatabase.Handle(new GetDatabaseQuery(databaseId));
     }
 
     internal async Task UpdateDatabase(

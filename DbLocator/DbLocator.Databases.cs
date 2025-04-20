@@ -138,6 +138,20 @@ namespace DbLocator
         }
 
         /// <summary>
+        /// Retrieves a database by its ID.
+        /// </summary>
+        /// <param name="databaseId">
+        /// The ID of the database to be retrieved.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Database"/> object representing the database.
+        /// </returns>
+        public async Task<Database> GetDatabase(int databaseId)
+        {
+            return await _databases.GetDatabase(databaseId);
+        }
+
+        /// <summary>
         /// Retrieves a list of all available databases.
         /// </summary>
         /// <returns>
