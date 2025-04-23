@@ -11,6 +11,7 @@ internal class Tenants(IDbContextFactory<DbLocatorContext> dbContextFactory, DbL
     private readonly AddTenant _addTenant = new(dbContextFactory, cache);
     private readonly DeleteTenant _deleteTenant = new(dbContextFactory, cache);
     private readonly GetTenants _getTenants = new(dbContextFactory, cache);
+    private readonly GetTenant _getTenant = new(dbContextFactory, cache);
     private readonly UpdateTenant _updateTenant = new(dbContextFactory, cache);
 
     internal async Task<int> AddTenant(string tenantName)
@@ -36,6 +37,11 @@ internal class Tenants(IDbContextFactory<DbLocatorContext> dbContextFactory, DbL
     internal async Task<List<Tenant>> GetTenants()
     {
         return await _getTenants.Handle(new GetTenantsQuery());
+    }
+
+    internal async Task<Tenant> GetTenant(int tenantId)
+    {
+        return await _getTenant.Handle(new GetTenantQuery { TenantId = tenantId });
     }
 
     internal async Task UpdateTenant(int tenantId, Status tenantStatus)
