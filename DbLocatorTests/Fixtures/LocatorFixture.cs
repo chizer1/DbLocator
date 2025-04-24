@@ -42,8 +42,9 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
                 await connection.CloseAsync();
 
                 var localHostServers = await DbLocator.GetDatabaseServers();
-                var localHostServer = localHostServers.FirstOrDefault(server => 
-                    server.HostName == "localhost");
+                var localHostServer = localHostServers.FirstOrDefault(server =>
+                    server.HostName == "localhost"
+                );
 
                 if (localHostServer != null)
                 {
@@ -73,7 +74,9 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
                 }
                 else
                 {
-                    throw new TimeoutException("Failed to initialize database server after multiple attempts");
+                    throw new TimeoutException(
+                        "Failed to initialize database server after multiple attempts"
+                    );
                 }
             }
         }

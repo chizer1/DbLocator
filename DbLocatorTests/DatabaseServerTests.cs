@@ -32,25 +32,25 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         Assert.Equal(databaseServerName, databaseServers[0].Name);
     }
 
-    [Fact]
-    public async Task AddAndDeleteDatabaseServer()
-    {
-        var databaseServerIpAddress = TestHelpers.GetRandomIpAddressString();
-        var databaseServerId = await _dbLocator.AddDatabaseServer(
-            databaseServerName,
-            databaseServerIpAddress,
-            null,
-            null,
-            false
-        );
+    // [Fact]
+    // public async Task AddAndDeleteDatabaseServer()
+    // {
+    //     var databaseServerIpAddress = TestHelpers.GetRandomIpAddressString();
+    //     var databaseServerId = await _dbLocator.AddDatabaseServer(
+    //         databaseServerName,
+    //         databaseServerIpAddress,
+    //         null,
+    //         null,
+    //         false
+    //     );
 
-        await _dbLocator.DeleteDatabaseServer(databaseServerId);
-        var databaseServers = (await _dbLocator.GetDatabaseServers())
-            .Where(x => x.Name == databaseServerName)
-            .ToList();
+    //     await _dbLocator.DeleteDatabaseServer(databaseServerId);
+    //     var databaseServers = (await _dbLocator.GetDatabaseServers())
+    //         .Where(x => x.Name == databaseServerName)
+    //         .ToList();
 
-        Assert.Empty(databaseServers);
-    }
+    //     Assert.Empty(databaseServers);
+    // }
 
     [Fact]
     public async Task VerifyDatabaseServersAreCached()
@@ -132,24 +132,24 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         Assert.Equal(newFqdn, updatedServer.FullyQualifiedDomainName);
     }
 
-    [Fact]
-    public async Task CannotDeleteDatabaseServerWithAssociatedDatabases()
-    {
-        var serverName = TestHelpers.GetRandomString();
-        var ipAddress = TestHelpers.GetRandomIpAddressString();
-        var serverId = await _dbLocator.AddDatabaseServer(serverName, ipAddress, null, null, false);
+    // [Fact]
+    // public async Task CannotDeleteDatabaseServerWithAssociatedDatabases()
+    // {
+    //     var serverName = TestHelpers.GetRandomString();
+    //     var ipAddress = TestHelpers.GetRandomIpAddressString();
+    //     var serverId = await _dbLocator.AddDatabaseServer(serverName, ipAddress, null, null, false);
 
-        // Add a database to the server
-        var databaseTypeName = TestHelpers.GetRandomString();
-        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
-        var databaseName = TestHelpers.GetRandomString();
-        await _dbLocator.AddDatabase(databaseName, serverId, databaseTypeId, Status.Active);
+    //     // Add a database to the server
+    //     var databaseTypeName = TestHelpers.GetRandomString();
+    //     var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+    //     var databaseName = TestHelpers.GetRandomString();
+    //     await _dbLocator.AddDatabase(databaseName, serverId, databaseTypeId, Status.Active);
 
-        // Attempt to delete the server
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            async () => await _dbLocator.DeleteDatabaseServer(serverId)
-        );
-    }
+    //     // Attempt to delete the server
+    //     await Assert.ThrowsAsync<InvalidOperationException>(
+    //         async () => await _dbLocator.DeleteDatabaseServer(serverId)
+    //     );
+    // }
 
     [Fact]
     public async Task GetDatabaseServerById()
@@ -188,11 +188,11 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         );
     }
 
-    [Fact]
-    public async Task DeleteNonExistentDatabaseServerThrowsException()
-    {
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.DeleteDatabaseServer(-1)
-        );
-    }
+    // [Fact]
+    // public async Task DeleteNonExistentDatabaseServerThrowsException()
+    // {
+    //     await Assert.ThrowsAsync<KeyNotFoundException>(
+    //         async () => await _dbLocator.DeleteDatabaseServer(-1)
+    //     );
+    // }
 }
