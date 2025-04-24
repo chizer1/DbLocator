@@ -335,8 +335,15 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task GetConnectionWithInvalidQueryParametersThrowsException()
     {
+        // Create a valid tenant and database type
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+
+        // Try to get connection with both tenant ID and tenant code (invalid combination)
         await Assert.ThrowsAsync<ArgumentException>(
-            async () => await _dbLocator.GetConnection(0, 0, null)
+            async () => await _dbLocator.GetConnection(tenantId, databaseTypeId, null)
         );
     }
 
@@ -347,7 +354,8 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.GetConnection(-1, databaseTypeId, Array.Empty<DatabaseRole>())
+            async () =>
+                await _dbLocator.GetConnection(-1, databaseTypeId, Array.Empty<DatabaseRole>())
         );
     }
 
@@ -358,7 +366,12 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.GetConnection("NonExistentCode", databaseTypeId, Array.Empty<DatabaseRole>())
+            async () =>
+                await _dbLocator.GetConnection(
+                    "NonExistentCode",
+                    databaseTypeId,
+                    Array.Empty<DatabaseRole>()
+                )
         );
     }
 
@@ -368,10 +381,18 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var tenantName = TestHelpers.GetRandomString();
         var tenantId = await _dbLocator.AddTenant(tenantName);
 
-        // Use a large number that doesn't exist instead of -1 to avoid overflow
-        var nonExistentDatabaseTypeId = 999999;
+        // Create a database type and then delete it to ensure it doesn't exist
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+        await _dbLocator.DeleteDatabaseType(databaseTypeId);
+
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.GetConnection(tenantId, nonExistentDatabaseTypeId, Array.Empty<DatabaseRole>())
+            async () =>
+                await _dbLocator.GetConnection(
+                    tenantId,
+                    databaseTypeId,
+                    Array.Empty<DatabaseRole>()
+                )
         );
     }
 
