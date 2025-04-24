@@ -287,7 +287,8 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         Assert.NotNull(firstConnection);
 
         // Clear the cache to ensure we're testing the caching mechanism
-        var queryString = @$"TenantId:{tenantId},
+        var queryString =
+            @$"TenantId:{tenantId},
             DatabaseTypeId:{databaseTypeId},
             ConnectionId:,
             TenantCode:

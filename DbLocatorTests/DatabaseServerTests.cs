@@ -1,8 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using DbLocator;
+using DbLocator.Db;
 using DbLocator.Domain;
+using DbLocator.Features.DatabaseServers;
 using DbLocator.Utilities;
 using DbLocatorTests.Fixtures;
+using Microsoft.EntityFrameworkCore;
+using Xunit;
 
 namespace DbLocatorTests;
 
@@ -284,5 +288,153 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         // Verify server is deleted
         var servers = await _dbLocator.GetDatabaseServers();
         Assert.DoesNotContain(servers, s => s.Id == serverId);
+    }
+
+    [Fact]
+    public async Task AddDatabaseServer_WithNoHostNameFqdnOrIp_ThrowsInvalidOperationException()
+    {
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.AddDatabaseServer(databaseServerName, "", "", "", false)
+        );
+
+        Assert.Contains("At least one of the following fields must be provided", exception.Message);
+    }
+
+    [Fact]
+    public async Task AddDatabaseServer_WithDuplicateServerName_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var existingServerName = TestHelpers.GetRandomString();
+        await _dbLocator.AddDatabaseServer(existingServerName, "192.168.1.1", "", "", false);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await _dbLocator.AddDatabaseServer(existingServerName, "192.168.1.2", "", "", false)
+        );
+
+        Assert.Contains(
+            $"Database Server Name '{existingServerName}' already exists",
+            exception.Message
+        );
+    }
+
+    [Fact]
+    public async Task AddDatabaseServer_WithDuplicateHostName_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var duplicateHostName = "duplicate-host";
+        await _dbLocator.AddDatabaseServer(
+            TestHelpers.GetRandomString(),
+            "",
+            duplicateHostName,
+            "",
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await _dbLocator.AddDatabaseServer(
+                    TestHelpers.GetRandomString(),
+                    "",
+                    duplicateHostName,
+                    "",
+                    false
+                )
+        );
+
+        Assert.Contains(
+            $"Database Server Host Name '{duplicateHostName}' already exists",
+            exception.Message
+        );
+    }
+
+    [Fact]
+    public async Task AddDatabaseServer_WithDuplicateFqdn_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var duplicateFqdn = "server1.example.com";
+        await _dbLocator.AddDatabaseServer(
+            TestHelpers.GetRandomString(),
+            "",
+            "",
+            duplicateFqdn,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await _dbLocator.AddDatabaseServer(
+                    TestHelpers.GetRandomString(),
+                    "",
+                    "",
+                    duplicateFqdn,
+                    false
+                )
+        );
+
+        Assert.Contains(
+            $"Database Server Fully Qualified Domain Name '{duplicateFqdn}' already exists",
+            exception.Message
+        );
+    }
+
+    [Fact]
+    public async Task AddDatabaseServer_WithDuplicateIpAddress_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var duplicateIp = "192.168.1.1";
+        await _dbLocator.AddDatabaseServer(
+            TestHelpers.GetRandomString(),
+            duplicateIp,
+            "",
+            "",
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await _dbLocator.AddDatabaseServer(
+                    TestHelpers.GetRandomString(),
+                    duplicateIp,
+                    "",
+                    "",
+                    false
+                )
+        );
+
+        Assert.Contains(
+            $"Database Server IP Address '{duplicateIp}' already exists",
+            exception.Message
+        );
+    }
+
+    [Fact]
+    public async Task GetDatabaseServer_ReturnsCachedData()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var serverId = await _dbLocator.AddDatabaseServer(serverName, ipAddress, null, null, false);
+
+        // Get server to populate cache
+        var server = await _dbLocator.GetDatabaseServer(serverId);
+        Assert.NotNull(server);
+
+        // Delete server from database to ensure we're getting from cache
+        await _dbLocator.DeleteDatabaseServer(serverId);
+
+        // Act
+        var cachedServer = await _dbLocator.GetDatabaseServer(serverId);
+
+        // Assert
+        Assert.NotNull(cachedServer);
+        Assert.Equal(serverId, cachedServer.Id);
+        Assert.Equal(serverName, cachedServer.Name);
+        Assert.Equal(ipAddress, cachedServer.IpAddress);
     }
 }
