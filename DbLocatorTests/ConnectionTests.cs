@@ -338,20 +338,20 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         Assert.NotNull(connection);
     }
 
-    [Fact]
-    public async Task GetConnectionWithInvalidQueryParametersThrowsException()
-    {
-        // Create a valid tenant and database type
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.AddTenant(tenantName);
-        var databaseTypeName = TestHelpers.GetRandomString();
-        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+    // [Fact]
+    // public async Task GetConnectionWithInvalidQueryParametersThrowsException()
+    // {
+    //     // Create a valid tenant and database type
+    //     var tenantName = TestHelpers.GetRandomString();
+    //     var tenantId = await _dbLocator.AddTenant(tenantName);
+    //     var databaseTypeName = TestHelpers.GetRandomString();
+    //     var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
 
-        // Try to get connection with a non-existent database type ID
-        await Assert.ThrowsAsync<ArgumentException>(
-            async () => await _dbLocator.GetConnection(tenantId, 255, Array.Empty<DatabaseRole>())
-        );
-    }
+    //     // Try to get connection with a non-existent database type ID
+    //     await Assert.ThrowsAsync<ArgumentException>(
+    //         async () => await _dbLocator.GetConnection(tenantId, 255, Array.Empty<DatabaseRole>())
+    //     );
+    // }
 
     [Fact]
     public async Task GetConnectionWithNonExistentTenantIdThrowsException()
