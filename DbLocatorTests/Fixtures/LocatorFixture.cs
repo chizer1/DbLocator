@@ -1,7 +1,6 @@
-using Microsoft.Data.SqlClient;
 using DbLocator;
-using DbLocator.Db;
 using DbLocator.Utilities;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -40,41 +39,26 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
             try
             {
                 // First try to connect to the database
-                using var connection = new Microsoft.Data.SqlClient.SqlConnection(connString);
+                using var connection = new SqlConnection(connString);
                 await connection.OpenAsync();
                 await connection.CloseAsync();
 
-                // If connection succeeded, proceed with server setup
-                var localHostServers = await DbLocator.GetDatabaseServers();
-                var localHostServer = localHostServers.FirstOrDefault(server =>
-                    server.HostName == "localhost"
+                var localHostServer = await DbLocator.AddDatabaseServer(
+                    "localhost",
+                    null,
+                    "localhost",
+                    null,
+                    false
                 );
 
-                if (localHostServer != null)
-                {
-                    LocalhostServerId = localHostServer.Id;
-                    serverReady = true;
-                }
-                else
-                {
-                    var databaseServerName = TestHelpers.GetRandomString();
-                    var databaseServerHostName = "localhost";
-                    LocalhostServerId = await DbLocator.AddDatabaseServer(
-                        databaseServerName,
-                        databaseServerHostName,
-                        null,
-                        null,
-                        false
-                    );
-                    serverReady = true;
-                }
+                serverReady = true;
             }
             catch (Exception)
             {
                 attempt++;
                 if (attempt < maxAttempts)
                 {
-                    await Task.Delay(2000); // Increased from 1s to 2s
+                    await Task.Delay(2000);
                 }
                 else
                 {
