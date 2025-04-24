@@ -221,7 +221,12 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var databaseTypeName = TestHelpers.GetRandomString();
         var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
         var databaseName = TestHelpers.GetRandomString();
-        var databaseId = await _dbLocator.AddDatabase(databaseName, _databaseServerId, databaseTypeId, Status.Active);
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerId,
+            databaseTypeId,
+            Status.Active
+        );
 
         // Try to add connection with non-existent tenant
         var nonExistentTenantId = -1;
@@ -246,6 +251,112 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         );
 
         Assert.Contains($"Database with ID {nonExistentDatabaseId} not found", exception.Message);
+    }
+
+    [Fact]
+    public async Task GetConnectionWithCachedConnectionString()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerId,
+            databaseTypeId,
+            Status.Active
+        );
+
+        var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
+        var dbUserId = await _dbLocator.AddDatabaseUser(
+            [databaseId],
+            TestHelpers.GetRandomString(),
+            true
+        );
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
+
+        // First call to populate cache
+        var firstConnection = await _dbLocator.GetConnection(
+            tenantId,
+            databaseTypeId,
+            [DatabaseRole.DataReader]
+        );
+        Assert.NotNull(firstConnection);
+
+        // Second call should use cached connection string
+        var secondConnection = await _dbLocator.GetConnection(
+            tenantId,
+            databaseTypeId,
+            [DatabaseRole.DataReader]
+        );
+        Assert.NotNull(secondConnection);
+    }
+
+    [Fact]
+    public async Task GetConnectionWithTrustedConnection()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerId,
+            databaseTypeId,
+            Status.Active,
+            true
+        );
+
+        var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
+        var connection = await _dbLocator.GetConnection(tenantId, databaseTypeId);
+        Assert.NotNull(connection);
+    }
+
+    [Fact]
+    public async Task GetConnectionWithInvalidQueryParametersThrowsException()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(
+            async () => await _dbLocator.GetConnection(null, null, null, null)
+        );
+    }
+
+    [Fact]
+    public async Task GetConnectionWithNonExistentTenantIdThrowsException()
+    {
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.GetConnection(-1, databaseTypeId)
+        );
+    }
+
+    [Fact]
+    public async Task GetConnectionWithNonExistentTenantCodeThrowsException()
+    {
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.GetConnection("NonExistentCode", databaseTypeId)
+        );
+    }
+
+    [Fact]
+    public async Task GetConnectionWithNonExistentDatabaseTypeThrowsException()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.GetConnection(tenantId, -1)
+        );
     }
 
     private async Task<int> GetConnectionId()
