@@ -1,3 +1,4 @@
+using Microsoft.Data.SqlClient;
 using DbLocator;
 using DbLocator.Db;
 using DbLocator.Utilities;
@@ -30,7 +31,7 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
     public async Task InitializeAsync()
     {
         // Wait for the database server to be ready
-        var maxAttempts = 10;
+        var maxAttempts = 30; // Increased from 10 to 30
         var attempt = 0;
         var serverReady = false;
 
@@ -38,6 +39,12 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
         {
             try
             {
+                // First try to connect to the database
+                using var connection = new Microsoft.Data.SqlClient.SqlConnection(connString);
+                await connection.OpenAsync();
+                await connection.CloseAsync();
+
+                // If connection succeeded, proceed with server setup
                 var localHostServers = await DbLocator.GetDatabaseServers();
                 var localHostServer = localHostServers.FirstOrDefault(server =>
                     server.HostName == "localhost"
@@ -67,7 +74,7 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
                 attempt++;
                 if (attempt < maxAttempts)
                 {
-                    await Task.Delay(1000); // Wait 1 second before retrying
+                    await Task.Delay(2000); // Increased from 1s to 2s
                 }
                 else
                 {
