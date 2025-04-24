@@ -29,8 +29,7 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        // Wait for the database server to be ready
-        var maxAttempts = 30; // Increased from 10 to 30
+        var maxAttempts = 30;
         var attempt = 0;
         var serverReady = false;
 
@@ -38,20 +37,32 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
         {
             try
             {
-                // First try to connect to the database
                 using var connection = new SqlConnection(connString);
                 await connection.OpenAsync();
                 await connection.CloseAsync();
 
-                var localHostServer = await DbLocator.AddDatabaseServer(
-                    "localhost",
-                    null,
-                    "localhost",
-                    null,
-                    false
-                );
+                var localHostServers = await DbLocator.GetDatabaseServers();
+                var localHostServer = localHostServers.FirstOrDefault(server => 
+                    server.HostName == "localhost");
 
-                serverReady = true;
+                if (localHostServer != null)
+                {
+                    LocalhostServerId = localHostServer.Id;
+                    serverReady = true;
+                }
+                else
+                {
+                    var databaseServerName = TestHelpers.GetRandomString();
+                    var databaseServerHostName = "localhost";
+                    LocalhostServerId = await DbLocator.AddDatabaseServer(
+                        databaseServerName,
+                        databaseServerHostName,
+                        null,
+                        null,
+                        false
+                    );
+                    serverReady = true;
+                }
             }
             catch (Exception)
             {
@@ -62,9 +73,7 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
                 }
                 else
                 {
-                    throw new TimeoutException(
-                        "Failed to initialize database server after multiple attempts"
-                    );
+                    throw new TimeoutException("Failed to initialize database server after multiple attempts");
                 }
             }
         }
