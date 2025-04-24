@@ -295,7 +295,7 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
     {
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            async () => await _dbLocator.AddDatabaseServer(databaseServerName, "", "", "", false)
+            async () => await _dbLocator.AddDatabaseServer("TestServer", "", "", "", false)
         );
 
         Assert.Contains("At least one of the following fields must be provided", exception.Message);
@@ -305,112 +305,56 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
     public async Task AddDatabaseServer_WithDuplicateServerName_ThrowsInvalidOperationException()
     {
         // Arrange
-        var existingServerName = TestHelpers.GetRandomString();
-        await _dbLocator.AddDatabaseServer(existingServerName, "192.168.1.1", "", "", false);
+        var existingServer = await _dbLocator.AddDatabaseServer("TestServer", "test-server", "test-server.example.com", "192.168.1.1", false);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            async () =>
-                await _dbLocator.AddDatabaseServer(existingServerName, "192.168.1.2", "", "", false)
+            async () => await _dbLocator.AddDatabaseServer("TestServer", "test-server2", "test-server2.example.com", "192.168.1.2", false)
         );
 
-        Assert.Contains(
-            $"Database Server Name '{existingServerName}' already exists",
-            exception.Message
-        );
+        Assert.Contains("A database server with the same name already exists", exception.Message);
     }
 
     [Fact]
     public async Task AddDatabaseServer_WithDuplicateHostName_ThrowsInvalidOperationException()
     {
         // Arrange
-        var duplicateHostName = "duplicate-host";
-        await _dbLocator.AddDatabaseServer(
-            TestHelpers.GetRandomString(),
-            "",
-            duplicateHostName,
-            "",
-            false
-        );
+        var existingServer = await _dbLocator.AddDatabaseServer("TestServer1", "test-server", "test-server1.example.com", "192.168.1.1", false);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            async () =>
-                await _dbLocator.AddDatabaseServer(
-                    TestHelpers.GetRandomString(),
-                    "",
-                    duplicateHostName,
-                    "",
-                    false
-                )
+            async () => await _dbLocator.AddDatabaseServer("TestServer2", "test-server", "test-server2.example.com", "192.168.1.2", false)
         );
 
-        Assert.Contains(
-            $"Database Server Host Name '{duplicateHostName}' already exists",
-            exception.Message
-        );
+        Assert.Contains("A database server with the same hostname already exists", exception.Message);
     }
 
     [Fact]
     public async Task AddDatabaseServer_WithDuplicateFqdn_ThrowsInvalidOperationException()
     {
         // Arrange
-        var duplicateFqdn = "server1.example.com";
-        await _dbLocator.AddDatabaseServer(
-            TestHelpers.GetRandomString(),
-            "",
-            "",
-            duplicateFqdn,
-            false
-        );
+        var existingServer = await _dbLocator.AddDatabaseServer("TestServer1", "test-server1", "test-server.example.com", "192.168.1.1", false);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            async () =>
-                await _dbLocator.AddDatabaseServer(
-                    TestHelpers.GetRandomString(),
-                    "",
-                    "",
-                    duplicateFqdn,
-                    false
-                )
+            async () => await _dbLocator.AddDatabaseServer("TestServer2", "test-server2", "test-server.example.com", "192.168.1.2", false)
         );
 
-        Assert.Contains(
-            $"Database Server Fully Qualified Domain Name '{duplicateFqdn}' already exists",
-            exception.Message
-        );
+        Assert.Contains("A database server with the same FQDN already exists", exception.Message);
     }
 
     [Fact]
     public async Task AddDatabaseServer_WithDuplicateIpAddress_ThrowsInvalidOperationException()
     {
         // Arrange
-        var duplicateIp = "192.168.1.1";
-        await _dbLocator.AddDatabaseServer(
-            TestHelpers.GetRandomString(),
-            duplicateIp,
-            "",
-            "",
-            false
-        );
+        var existingServer = await _dbLocator.AddDatabaseServer("TestServer1", "test-server1", "test-server1.example.com", "192.168.1.1", false);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            async () =>
-                await _dbLocator.AddDatabaseServer(
-                    TestHelpers.GetRandomString(),
-                    duplicateIp,
-                    "",
-                    "",
-                    false
-                )
+            async () => await _dbLocator.AddDatabaseServer("TestServer2", "test-server2", "test-server2.example.com", "192.168.1.1", false)
         );
 
-        Assert.Contains(
-            $"Database Server IP Address '{duplicateIp}' already exists",
-            exception.Message
-        );
+        Assert.Contains("A database server with the same IP address already exists", exception.Message);
     }
 
     [Fact]
