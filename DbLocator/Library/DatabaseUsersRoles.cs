@@ -12,7 +12,6 @@ internal class DatabaseUserRoles(
 )
 {
     private readonly AddDatabaseUserRole _addDatabaseUserRole = new(dbContextFactory);
-    private readonly GetDatabaseUserRoles _getDatabaseUserRoles = new(dbContextFactory, cache);
     private readonly DeleteDatabaseUserRole _deleteDatabaseUserRole = new(dbContextFactory, cache);
 
     internal async Task AddDatabaseUserRole(
@@ -32,12 +31,7 @@ internal class DatabaseUserRoles(
             new AddDatabaseUserRoleCommand(databaseUserId, userRole, false)
         );
     }
-
-    internal async Task<List<DatabaseUserRole>> GetDatabaseUserRoles()
-    {
-        return await _getDatabaseUserRoles.Handle(new GetDatabaseUserRolesQuery());
-    }
-
+    
     internal async Task DeleteDatabaseUserRole(int databaseUserId, DatabaseRole userRole)
     {
         await _deleteDatabaseUserRole.Handle(

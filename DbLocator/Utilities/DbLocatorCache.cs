@@ -4,50 +4,48 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Utilities;
 
-internal class DbLocatorCache(IDistributedCache cache) : IDbLocatorCache
+internal class DbLocatorCache(IDistributedCache cache)
 {
-    private readonly IDistributedCache _cache = cache;
-
-    public async Task<T> GetCachedData<T>(string cacheKey)
+    internal async Task<T> GetCachedData<T>(string cacheKey)
     {
-        if (_cache == null)
+        if (cache == null)
         {
             return default;
         }
 
-        var cachedData = _cache != null ? await _cache.GetStringAsync(cacheKey) : null;
+        var cachedData = cache != null ? await cache.GetStringAsync(cacheKey) : null;
         return cachedData != null ? JsonSerializer.Deserialize<T>(cachedData) : default;
     }
 
-    public async Task CacheData(string cacheKey, object data)
+    internal async Task CacheData(string cacheKey, object data)
     {
-        if (_cache == null)
+        if (cache == null)
         {
             return;
         }
 
         var serializedData = JsonSerializer.Serialize(data);
-        await _cache.SetStringAsync(cacheKey, serializedData);
+        await cache.SetStringAsync(cacheKey, serializedData);
     }
 
-    public async Task Remove(string cacheKey)
+    internal async Task Remove(string cacheKey)
     {
-        if (_cache == null)
+        if (cache == null)
         {
             return;
         }
 
-        await _cache.RemoveAsync(cacheKey);
+        await cache.RemoveAsync(cacheKey);
     }
 
     internal async Task CacheConnectionString(string cacheKey, string connectionString)
     {
-        if (_cache == null)
+        if (cache == null)
         {
             return;
         }
 
-        await _cache.SetStringAsync(cacheKey, connectionString);
+        await cache.SetStringAsync(cacheKey, connectionString);
 
         // Add cacheKey to cached dictionary
         var cacheKeys = await GetCachedData<List<string>>("connectionCacheKeys") ?? [];
@@ -65,7 +63,7 @@ internal class DbLocatorCache(IDistributedCache cache) : IDbLocatorCache
         DatabaseRole[] Roles = null
     )
     {
-        if (_cache == null)
+        if (cache == null)
         {
             return;
         }
@@ -98,7 +96,7 @@ internal class DbLocatorCache(IDistributedCache cache) : IDbLocatorCache
                 continue;
             }
 
-            await _cache.RemoveAsync(cacheKey);
+            await cache.RemoveAsync(cacheKey);
         }
     }
 }
