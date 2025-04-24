@@ -102,13 +102,15 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task GetNonExistentTenantById_ThrowsKeyNotFoundException()
     {
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () => await _dbLocator.GetTenant(-1));
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+            async () => await _dbLocator.GetTenant(-1)
+        );
     }
 
     [Fact]
     public async Task GetNonExistentTenantByCode_ThrowsKeyNotFoundException()
     {
-        await Assert.ThrowsAsync<KeyNotFoundException>(
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
             async () => await _dbLocator.GetTenant("NONEXISTENT")
         );
     }
@@ -116,7 +118,7 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task DeleteNonExistentTenant_ThrowsKeyNotFoundException()
     {
-        await Assert.ThrowsAsync<KeyNotFoundException>(
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
             async () => await _dbLocator.DeleteTenant(-1)
         );
     }

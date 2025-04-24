@@ -169,7 +169,7 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task GetNonExistentDatabaseServerThrowsException()
     {
-        await Assert.ThrowsAsync<ValidationException>(
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
             async () => await _dbLocator.GetDatabaseServer(-1)
         );
     }

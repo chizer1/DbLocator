@@ -186,7 +186,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task GetNonExistentConnection_ThrowsKeyNotFoundException()
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(
+        await Assert.ThrowsAsync<KeyNotFoundException>(
             async () => await _dbLocator.GetConnection(-1, Array.Empty<DatabaseRole>())
         );
     }
