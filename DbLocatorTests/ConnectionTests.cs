@@ -16,6 +16,13 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task AddConnection()
     {
+        // Clean up any existing connections
+        var existingConnections = await _dbLocator.GetConnections();
+        foreach (var connection in existingConnections)
+        {
+            await _dbLocator.DeleteConnection(connection.Id);
+        }
+
         var connectionId = await GetConnectionId();
 
         var connections = await _dbLocator.GetConnections();
@@ -25,6 +32,13 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task VerifyConnectionsAreCached()
     {
+        // Clean up any existing connections
+        var existingConnections = await _dbLocator.GetConnections();
+        foreach (var connection in existingConnections)
+        {
+            await _dbLocator.DeleteConnection(connection.Id);
+        }
+
         var connectionId = await GetConnectionId();
 
         var connections = await _dbLocator.GetConnections();

@@ -31,7 +31,7 @@ internal class DatabaseUserRoles(
             new AddDatabaseUserRoleCommand(databaseUserId, userRole, false)
         );
     }
-    
+
     internal async Task DeleteDatabaseUserRole(int databaseUserId, DatabaseRole userRole)
     {
         await _deleteDatabaseUserRole.Handle(

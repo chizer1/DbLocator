@@ -29,26 +29,54 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        var localHostServers = await DbLocator.GetDatabaseServers();
-        var localHostServer = localHostServers.FirstOrDefault(server =>
-            server.HostName == "localhost"
-        );
+        // Wait for the database server to be ready
+        var maxAttempts = 10;
+        var attempt = 0;
+        var serverReady = false;
 
-        if (localHostServer != null)
+        while (!serverReady && attempt < maxAttempts)
         {
-            LocalhostServerId = localHostServer.Id;
-            return;
-        }
+            try
+            {
+                var localHostServers = await DbLocator.GetDatabaseServers();
+                var localHostServer = localHostServers.FirstOrDefault(server =>
+                    server.HostName == "localhost"
+                );
 
-        var databaseServerName = TestHelpers.GetRandomString();
-        var databaseServerHostName = "localhost";
-        LocalhostServerId = await DbLocator.AddDatabaseServer(
-            databaseServerName,
-            databaseServerHostName,
-            null,
-            null,
-            false
-        );
+                if (localHostServer != null)
+                {
+                    LocalhostServerId = localHostServer.Id;
+                    serverReady = true;
+                }
+                else
+                {
+                    var databaseServerName = TestHelpers.GetRandomString();
+                    var databaseServerHostName = "localhost";
+                    LocalhostServerId = await DbLocator.AddDatabaseServer(
+                        databaseServerName,
+                        databaseServerHostName,
+                        null,
+                        null,
+                        false
+                    );
+                    serverReady = true;
+                }
+            }
+            catch (Exception)
+            {
+                attempt++;
+                if (attempt < maxAttempts)
+                {
+                    await Task.Delay(1000); // Wait 1 second before retrying
+                }
+                else
+                {
+                    throw new TimeoutException(
+                        "Failed to initialize database server after multiple attempts"
+                    );
+                }
+            }
+        }
     }
 
     public async Task DisposeAsync()

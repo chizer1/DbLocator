@@ -38,6 +38,7 @@ internal sealed class AddDatabaseServerCommandValidator
         RuleFor(x => x.DatabaseServerIpAddress)
             .MaximumLength(50)
             .WithMessage("Database Server IP Address cannot be more than 50 characters.")
+            .When(x => !string.IsNullOrEmpty(x.DatabaseServerIpAddress))
             .Matches(
                 @"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
             )
