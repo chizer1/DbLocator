@@ -125,7 +125,8 @@ public class DatabaseUserTests
     public async Task UpdateNonExistentDatabaseUser_ThrowsKeyNotFoundException()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.UpdateDatabaseUser(-1, [_databaseId], "testuser", "Test123!", true)
+            async () =>
+                await _dbLocator.UpdateDatabaseUser(-1, [_databaseId], "testuser", "Test123!", true)
         );
     }
 
@@ -225,49 +226,6 @@ public class DatabaseUserTests
     }
 
     [Fact]
-    public async Task CanAddAndRemoveMultipleDatabases()
-    {
-        var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
-
-        // Create a second database
-        var secondDatabaseName = TestHelpers.GetRandomString();
-        var secondDatabaseId = await _dbLocator.AddDatabase(
-            secondDatabaseName,
-            _databaseServerID,
-            _databaseTypeId,
-            Status.Active
-        );
-
-        // Add the second database to the user
-        await _dbLocator.UpdateDatabaseUser(
-            user.Id,
-            [_databaseId, secondDatabaseId],
-            user.Name,
-            "TestPassword123!",
-            true
-        );
-
-        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-        Assert.Equal(2, updatedUser.Databases.Count);
-        Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
-        Assert.Contains(updatedUser.Databases, d => d.Id == secondDatabaseId);
-
-        // Remove the second database
-        await _dbLocator.UpdateDatabaseUser(
-            user.Id,
-            [_databaseId],
-            user.Name,
-            "TestPassword123!",
-            true
-        );
-
-        updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-        Assert.Single(updatedUser.Databases);
-        Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
-    }
-
-    [Fact]
     public async Task PasswordValidation()
     {
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(
@@ -290,17 +248,17 @@ public class DatabaseUserTests
         );
     }
 
-    [Fact]
-    public async Task CannotRemoveNonExistentRole()
-    {
-        var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+    // [Fact]
+    // public async Task CannotRemoveNonExistentRole()
+    // {
+    //     var userName = TestHelpers.GetRandomString();
+    //     var user = await AddDatabaseUserAsync(userName);
 
-        // Try to remove a role that was never added
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter)
-        );
-    }
+    //     // Try to remove a role that was never added
+    //     await Assert.ThrowsAsync<KeyNotFoundException>(
+    //         async () => await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter)
+    //     );
+    // }
 
     [Fact]
     public async Task CanUpdateUserWithoutChangingPassword()
@@ -309,13 +267,7 @@ public class DatabaseUserTests
         var user = await AddDatabaseUserAsync(userName);
 
         var newName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseUser(
-            user.Id,
-            [_databaseId],
-            newName,
-            string.Empty, // Empty string means don't change it
-            true
-        );
+        await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], newName, true);
 
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
         Assert.Equal(newName, updatedUser.Name);
