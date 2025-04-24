@@ -287,7 +287,13 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         Assert.NotNull(firstConnection);
 
         // Clear the cache to ensure we're testing the caching mechanism
-        _cache?.Remove("connections");
+        var queryString = @$"TenantId:{tenantId},
+            DatabaseTypeId:{databaseTypeId},
+            ConnectionId:,
+            TenantCode:
+            Roles:DataReader";
+        var cacheKey = $"connection:{queryString}";
+        _cache?.Remove(cacheKey);
 
         // Second call should use cached connection string
         var secondConnection = await _dbLocator.GetConnection(
@@ -341,9 +347,9 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var databaseTypeName = TestHelpers.GetRandomString();
         var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
 
-        // Try to get connection with both tenant ID and tenant code (invalid combination)
+        // Try to get connection with invalid database type ID
         await Assert.ThrowsAsync<ArgumentException>(
-            async () => await _dbLocator.GetConnection(tenantId, databaseTypeId, null)
+            async () => await _dbLocator.GetConnection(tenantId, -1, Array.Empty<DatabaseRole>())
         );
     }
 
