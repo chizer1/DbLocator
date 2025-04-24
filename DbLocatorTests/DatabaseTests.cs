@@ -122,15 +122,17 @@ public class DatabaseTests
     [Fact]
     public async Task UpdateNonExistentDatabase_ThrowsKeyNotFoundException()
     {
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () =>
-                await _dbLocator.UpdateDatabase(
-                    -1,
-                    "new-name",
-                    _databaseServerID,
-                    _databaseTypeId,
-                    Status.Active
-                )
+        // Arrange
+        var database = new Database
+        {
+            Id = -1,
+            Name = "TestDatabase",
+            ServerId = 1
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ValidationException>(
+            async () => await _dbLocator.UpdateDatabase(database)
         );
     }
 

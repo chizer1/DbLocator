@@ -168,7 +168,7 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task GetNonExistentDatabaseServerThrowsException()
     {
-        await Assert.ThrowsAsync<KeyNotFoundException>(
+        await Assert.ThrowsAsync<ValidationException>(
             async () => await _dbLocator.GetDatabaseServer(-1)
         );
     }
