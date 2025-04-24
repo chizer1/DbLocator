@@ -28,7 +28,7 @@ namespace DbLocator.Features.Databases
 
             var databaseEntity =
                 await dbContext.Set<DatabaseEntity>().FindAsync(command.DatabaseId)
-                ?? throw new InvalidOperationException("Database not found.");
+                ?? throw new KeyNotFoundException("Database not found.");
 
             if (
                 await dbContext
@@ -66,7 +66,7 @@ namespace DbLocator.Features.Databases
                     .Set<DatabaseServerEntity>()
                     .FirstOrDefaultAsync(ds =>
                         ds.DatabaseServerId == databaseEntity.DatabaseServerId
-                    ) ?? throw new InvalidOperationException("Database server not found.");
+                    ) ?? throw new KeyNotFoundException("Database server not found.");
 
             await Sql.ExecuteSqlCommandAsync(
                 dbContext,

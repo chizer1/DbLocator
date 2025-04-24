@@ -40,7 +40,19 @@ internal class UpdateDatabaseType(
                 $"Database Type Id '{command.DatabaseTypeId}' not found."
             );
 
-        databaseType.DatabaseTypeId = command.DatabaseTypeId;
+        // Check if the new name is already in use by another database type
+        if (
+            await dbContext
+                .Set<DatabaseTypeEntity>()
+                .AnyAsync(dt =>
+                    dt.DatabaseTypeName == command.DatabaseTypeName
+                    && dt.DatabaseTypeId != command.DatabaseTypeId
+                )
+        )
+            throw new InvalidOperationException(
+                $"Database Type '{command.DatabaseTypeName}' already exists."
+            );
+
         databaseType.DatabaseTypeName = command.DatabaseTypeName;
 
         dbContext.Update(databaseType);

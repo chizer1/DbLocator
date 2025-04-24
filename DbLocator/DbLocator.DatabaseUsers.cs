@@ -22,6 +22,12 @@ namespace DbLocator
         /// <returns>
         /// The ID of the newly created database user.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when any of the specified databases are not found.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the user name or password is invalid.
+        /// </exception>
         public async Task<int> AddDatabaseUser(
             List<int> databaseIds,
             string userName,
@@ -53,6 +59,12 @@ namespace DbLocator
         /// <returns>
         /// The ID of the newly created database user.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when any of the specified databases are not found.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the user name is invalid.
+        /// </exception>
         public async Task<int> AddDatabaseUser(
             List<int> databaseIds,
             string userName,
@@ -117,6 +129,23 @@ namespace DbLocator
         }
 
         /// <summary>
+        /// Retrieves a single database user by their ID.
+        /// </summary>
+        /// <param name="databaseUserId">
+        /// The ID of the database user to retrieve.
+        /// </param>
+        /// <returns>
+        /// A <see cref="DatabaseUser"/> object representing the database user with the specified ID.
+        /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when no database user is found with the given ID.
+        /// </exception>
+        public async Task<DatabaseUser> GetDatabaseUser(int databaseUserId)
+        {
+            return await _databaseUsers.GetDatabaseUser(databaseUserId);
+        }
+
+        /// <summary>
         /// Updates the details of an existing database user, including the user name, user password, and the option to update the database.
         /// </summary>
         /// <param name="databaseUserId">
@@ -137,6 +166,12 @@ namespace DbLocator
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database user or any of the databases are not found.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the new user name or password is invalid.
+        /// </exception>
         public async Task UpdateDatabaseUser(
             int databaseUserId,
             List<int> databaseIds,
@@ -173,6 +208,12 @@ namespace DbLocator
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database user or any of the databases are not found.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the new user name is invalid.
+        /// </exception>
         public async Task UpdateDatabaseUser(
             int databaseUserId,
             List<int> databaseIds,
@@ -259,6 +300,12 @@ namespace DbLocator
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database user is not found.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to delete a user that is in use.
+        /// </exception>
         public async Task DeleteDatabaseUser(int databaseUserId, bool deleteDatabaseUser)
         {
             await _databaseUsers.DeleteDatabaseUser(databaseUserId, deleteDatabaseUser);
@@ -273,6 +320,12 @@ namespace DbLocator
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database user is not found.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to delete a user that is in use.
+        /// </exception>
         public async Task DeleteDatabaseUser(int databaseUserId)
         {
             await _databaseUsers.DeleteDatabaseUser(databaseUserId);

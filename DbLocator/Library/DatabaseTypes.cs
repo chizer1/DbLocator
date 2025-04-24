@@ -14,6 +14,7 @@ internal class DatabaseTypes(
     private readonly AddDatabaseType _addDatabaseType = new(dbContextFactory, cache);
     private readonly DeleteDatabaseType _deleteDatabaseType = new(dbContextFactory, cache);
     private readonly GetDatabaseTypes _getDatabaseTypes = new(dbContextFactory, cache);
+    private readonly GetDatabaseType _getDatabaseType = new(dbContextFactory, cache);
     private readonly UpdateDatabaseType _updateDatabaseType = new(dbContextFactory, cache);
 
     internal async Task<byte> AddDatabaseType(string databaseTypeName)
@@ -29,6 +30,13 @@ internal class DatabaseTypes(
     internal async Task<List<DatabaseType>> GetDatabaseTypes()
     {
         return await _getDatabaseTypes.Handle(new GetDatabaseTypesQuery());
+    }
+
+    internal async Task<DatabaseType> GetDatabaseType(byte databaseTypeId)
+    {
+        return await _getDatabaseType.Handle(
+            new GetDatabaseTypeQuery { DatabaseTypeId = databaseTypeId }
+        );
     }
 
     internal async Task UpdateDatabaseType(byte databaseTypeId, string databaseTypeName)

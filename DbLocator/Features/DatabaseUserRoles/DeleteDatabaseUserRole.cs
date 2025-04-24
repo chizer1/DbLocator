@@ -38,7 +38,7 @@ namespace DbLocator.Features.DatabaseUserRoles
 
             var databaseUserEntity =
                 await dbContext.Set<DatabaseUserEntity>().FindAsync(command.DatabaseUserId)
-                ?? throw new InvalidOperationException("DatabaseUser not found.");
+                ?? throw new KeyNotFoundException("Database user not found.");
 
             var databaseUserRoleEntity = await dbContext
                 .Set<DatabaseUserRoleEntity>()
@@ -77,10 +77,7 @@ namespace DbLocator.Features.DatabaseUserRoles
                     .ThenInclude(db => db.DatabaseServer)
                     .FirstOrDefaultAsync(u =>
                         u.DatabaseUserId == databaseUserRoleEntity.DatabaseUserId
-                    )
-                ?? throw new InvalidOperationException(
-                    $"DatabaseUser Id '{databaseUserRoleEntity.DatabaseUserId}' not found."
-                );
+                    ) ?? throw new KeyNotFoundException("Database user not found.");
 
             var roleName = Enum.GetName((DatabaseRole)databaseUserRoleEntity.DatabaseRoleId)
                 .ToLower();

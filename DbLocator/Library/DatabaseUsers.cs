@@ -14,6 +14,7 @@ internal class DatabaseUsers(
 {
     private readonly AddDatabaseUser _addDatabaseUser = new(dbContextFactory, encryption, cache);
     private readonly DeleteDatabaseUser _deleteDatabaseUser = new(dbContextFactory, cache);
+    private readonly GetDatabaseUser _getDatabaseUser = new(dbContextFactory, cache);
     private readonly GetDatabaseUsers _getDatabaseUsers = new(dbContextFactory, cache);
     private readonly UpdateDatabaseUser _updateDatabaseUser =
         new(dbContextFactory, encryption, cache);
@@ -153,6 +154,13 @@ internal class DatabaseUsers(
                 databaseUserPassword,
                 false
             )
+        );
+    }
+
+    internal async Task<DatabaseUser> GetDatabaseUser(int databaseUserId)
+    {
+        return await _getDatabaseUser.Handle(
+            new GetDatabaseUserQuery { DatabaseUserId = databaseUserId }
         );
     }
 }

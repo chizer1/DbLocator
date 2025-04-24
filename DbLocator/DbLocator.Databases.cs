@@ -22,6 +22,12 @@ namespace DbLocator
         /// <returns>
         /// The ID of the newly added database.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database server or database type is not found.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the database name is invalid or when attempting to create a database with invalid parameters.
+        /// </exception>
         public async Task<int> AddDatabase(
             string databaseName,
             int databaseServerId,
@@ -58,6 +64,12 @@ namespace DbLocator
         /// <returns>
         /// The ID of the newly added database.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database server or database type is not found.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the database name is invalid or when attempting to create a database with invalid parameters.
+        /// </exception>
         public async Task<int> AddDatabase(
             string databaseName,
             int databaseServerId,
@@ -90,6 +102,12 @@ namespace DbLocator
         /// <returns>
         /// The ID of the newly added database.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database server or database type is not found.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the database name is invalid or when attempting to create a database with invalid parameters.
+        /// </exception>
         public async Task<int> AddDatabase(
             string databaseName,
             int databaseServerId,
@@ -122,6 +140,12 @@ namespace DbLocator
         /// <returns>
         /// The ID of the newly added database.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database server or database type is not found.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the database name is invalid or when attempting to create a database with invalid parameters.
+        /// </exception>
         public async Task<int> AddDatabase(
             string databaseName,
             int databaseServerId,
@@ -146,6 +170,9 @@ namespace DbLocator
         /// <returns>
         /// A <see cref="Database"/> object representing the database.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database is not found.
+        /// </exception>
         public async Task<Database> GetDatabase(int databaseId)
         {
             return await _databases.GetDatabase(databaseId);
@@ -183,6 +210,12 @@ namespace DbLocator
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database is not found.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to update a database with invalid parameters.
+        /// </exception>
         public async Task UpdateDatabase(
             int databaseId,
             string databaseName,
@@ -246,6 +279,12 @@ namespace DbLocator
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database is not found.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to update a database with invalid parameters.
+        /// </exception>
         public async Task UpdateDatabase(int databaseId, string databaseName)
         {
             await _databases.UpdateDatabase(databaseId, databaseName);
@@ -263,6 +302,12 @@ namespace DbLocator
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database is not found.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to update a database with invalid parameters.
+        /// </exception>
         public async Task UpdateDatabase(int databaseId, Status databaseStatus)
         {
             await _databases.UpdateDatabase(databaseId, databaseStatus);
@@ -280,6 +325,12 @@ namespace DbLocator
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database is not found.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to update a database with invalid parameters.
+        /// </exception>
         public async Task UpdateDatabase(int databaseId, bool useTrustedConnection)
         {
             await _databases.UpdateDatabase(databaseId, useTrustedConnection);
@@ -294,6 +345,12 @@ namespace DbLocator
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database is not found.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to delete a database that is in use.
+        /// </exception>
         public async Task DeleteDatabase(int databaseId)
         {
             await _databases.DeleteDatabase(databaseId);
@@ -311,6 +368,12 @@ namespace DbLocator
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database is not found.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to delete a database that is in use.
+        /// </exception>
         public async Task DeleteDatabase(int databaseId, bool deleteDatabase)
         {
             await _databases.DeleteDatabase(databaseId, deleteDatabase);

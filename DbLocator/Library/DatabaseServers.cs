@@ -14,6 +14,7 @@ internal class DatabaseServers(
     private readonly AddDatabaseServer _addDatabaseServer = new(dbContextFactory, cache);
     private readonly DeleteDatabaseServer _deleteDatabaseServer = new(dbContextFactory, cache);
     private readonly GetDatabaseServers _getDatabaseServers = new(dbContextFactory, cache);
+    private readonly GetDatabaseServer _getDatabaseServer = new(dbContextFactory, cache);
     private readonly UpdateDatabaseServer _updateDatabaseServer = new(dbContextFactory, cache);
 
     internal async Task<int> AddDatabaseServer(
@@ -43,6 +44,13 @@ internal class DatabaseServers(
     internal async Task<List<DatabaseServer>> GetDatabaseServers()
     {
         return await _getDatabaseServers.Handle(new GetDatabaseServersQuery());
+    }
+
+    internal async Task<DatabaseServer> GetDatabaseServer(int databaseServerId)
+    {
+        return await _getDatabaseServer.Handle(
+            new GetDatabaseServerQuery { DatabaseServerId = databaseServerId }
+        );
     }
 
     internal async Task UpdateDatabaseServer(

@@ -6,53 +6,51 @@ namespace DbLocator.Utilities;
 
 internal class DbLocatorCache(IDistributedCache cache)
 {
-    private readonly IDistributedCache _cache = cache;
-
     internal async Task<T> GetCachedData<T>(string cacheKey)
     {
-        if (_cache == null)
+        if (cache == null)
         {
             return default;
         }
 
-        var cachedData = _cache != null ? await _cache.GetStringAsync(cacheKey) : null;
+        var cachedData = cache != null ? await cache.GetStringAsync(cacheKey) : null;
         return cachedData != null ? JsonSerializer.Deserialize<T>(cachedData) : default;
     }
 
     internal async Task CacheData(string cacheKey, object data)
     {
-        if (_cache == null)
+        if (cache == null)
         {
             return;
         }
 
         var serializedData = JsonSerializer.Serialize(data);
-        await _cache.SetStringAsync(cacheKey, serializedData);
+        await cache.SetStringAsync(cacheKey, serializedData);
     }
 
-    internal async Task CacheConnectionString(string cacheKey, string connectionString)
+    internal async Task Remove(string cacheKey)
     {
-        if (_cache == null)
+        if (cache == null)
         {
             return;
         }
 
-        await _cache.SetStringAsync(cacheKey, connectionString);
+        await cache.RemoveAsync(cacheKey);
+    }
+
+    internal async Task CacheConnectionString(string cacheKey, string connectionString)
+    {
+        if (cache == null)
+        {
+            return;
+        }
+
+        await cache.SetStringAsync(cacheKey, connectionString);
 
         // Add cacheKey to cached dictionary
         var cacheKeys = await GetCachedData<List<string>>("connectionCacheKeys") ?? [];
         cacheKeys.Add(cacheKey);
         await CacheData("connectionCacheKeys", cacheKeys);
-    }
-
-    internal async Task Remove(string cacheKey)
-    {
-        if (_cache == null)
-        {
-            return;
-        }
-
-        await _cache.RemoveAsync(cacheKey);
     }
 
     // Note, if this is ran with no specified parameters,
@@ -65,7 +63,7 @@ internal class DbLocatorCache(IDistributedCache cache)
         DatabaseRole[] Roles = null
     )
     {
-        if (_cache == null)
+        if (cache == null)
         {
             return;
         }
@@ -98,7 +96,7 @@ internal class DbLocatorCache(IDistributedCache cache)
                 continue;
             }
 
-            await _cache.RemoveAsync(cacheKey);
+            await cache.RemoveAsync(cacheKey);
         }
     }
 }

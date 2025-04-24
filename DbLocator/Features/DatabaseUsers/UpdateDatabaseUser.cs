@@ -60,9 +60,7 @@ internal class UpdateDatabaseUser(
                 .Set<DatabaseUserEntity>()
                 .Include(du => du.UserRoles)
                 .FirstOrDefaultAsync(d => d.DatabaseUserId == command.DatabaseUserId)
-            ?? throw new InvalidOperationException(
-                $"DatabaseUser Id '{command.DatabaseUserId}' not found."
-            );
+            ?? throw new KeyNotFoundException("Database user not found.");
 
         if (
             (
@@ -135,7 +133,7 @@ internal class UpdateDatabaseUser(
                     .Set<DatabaseEntity>()
                     .Include(d => d.DatabaseServer)
                     .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseUserDatabase.DatabaseId)
-                ?? throw new InvalidOperationException("Database not found.");
+                ?? throw new KeyNotFoundException("Database not found.");
 
             if (oldDatabaseUserName != command.UserName && !string.IsNullOrEmpty(command.UserName))
             {

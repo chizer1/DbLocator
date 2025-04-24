@@ -17,6 +17,12 @@ namespace DbLocator
         /// <returns>
         /// A task representing the asynchronous operation, with a <see cref="SqlConnection"/> result.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified connection is not found.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown when invalid query parameters are provided.
+        /// </exception>
         public async Task<SqlConnection> GetConnection(
             int connectionId,
             DatabaseRole[] roles = null
@@ -40,6 +46,12 @@ namespace DbLocator
         /// <returns>
         /// A task representing the asynchronous operation, with a <see cref="SqlConnection"/> result.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified tenant or database type is not found.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown when invalid query parameters are provided.
+        /// </exception>
         public async Task<SqlConnection> GetConnection(
             int tenantId,
             int databaseTypeId,
@@ -64,6 +76,12 @@ namespace DbLocator
         /// <returns>
         /// A task representing the asynchronous operation, with a <see cref="SqlConnection"/> result.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified tenant or database type is not found.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown when invalid query parameters are provided.
+        /// </exception>
         public async Task<SqlConnection> GetConnection(
             string tenantCode,
             int databaseTypeId,
@@ -96,6 +114,12 @@ namespace DbLocator
         /// <returns>
         /// A task representing the asynchronous operation, with the ID of the newly added connection.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified tenant or database is not found.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to add a duplicate connection.
+        /// </exception>
         public async Task<int> AddConnection(int tenantId, int databaseId)
         {
             return await _connections.AddConnection(tenantId, databaseId);
@@ -110,6 +134,9 @@ namespace DbLocator
         /// <returns>
         /// A task representing the asynchronous operation.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified connection is not found.
+        /// </exception>
         public async Task DeleteConnection(int connectionId)
         {
             await _connections.DeleteConnection(connectionId);

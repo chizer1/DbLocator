@@ -30,7 +30,7 @@ namespace DbLocator.Features.DatabaseUsers
 
             var databaseUserEntity =
                 await dbContext.Set<DatabaseUserEntity>().FindAsync(command.DatabaseUserId)
-                ?? throw new InvalidOperationException("DatabaseUser not found.");
+                ?? throw new KeyNotFoundException("Database user not found.");
 
             if (
                 await dbContext

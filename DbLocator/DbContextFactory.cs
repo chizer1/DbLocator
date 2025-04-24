@@ -1,12 +1,11 @@
 using DbLocator.Db;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace DbLocator;
 
-internal class DbContextFactory : IDesignTimeDbContextFactory<DbLocatorContext>
+internal class DbContextFactory
 {
     public static IDbContextFactory<DbLocatorContext> CreateDbContextFactory(
         string connectionString
@@ -20,17 +19,5 @@ internal class DbContextFactory : IDesignTimeDbContextFactory<DbLocatorContext>
         );
 
         return new PooledDbContextFactory<DbLocatorContext>(optionsBuilder.Options);
-    }
-
-    public DbLocatorContext CreateDbContext(string[] args)
-    {
-        var optionsBuilder = new DbContextOptionsBuilder<DbLocatorContext>();
-        optionsBuilder.UseSqlServer();
-
-        optionsBuilder.ConfigureWarnings(warnings =>
-            warnings.Ignore(RelationalEventId.PendingModelChangesWarning)
-        );
-
-        return new DbLocatorContext(optionsBuilder.Options);
     }
 }
