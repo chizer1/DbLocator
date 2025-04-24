@@ -347,9 +347,9 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var databaseTypeName = TestHelpers.GetRandomString();
         var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
 
-        // Try to get connection with invalid database type ID
+        // Try to get connection with a non-existent database type ID
         await Assert.ThrowsAsync<ArgumentException>(
-            async () => await _dbLocator.GetConnection(tenantId, -1, Array.Empty<DatabaseRole>())
+            async () => await _dbLocator.GetConnection(tenantId, 255, Array.Empty<DatabaseRole>())
         );
     }
 
