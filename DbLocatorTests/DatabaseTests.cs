@@ -95,6 +95,7 @@ public class DatabaseTests
         );
 
         var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
+        Assert.NotNull(updatedDatabase);
         Assert.Equal(newName, updatedDatabase.Name);
         Assert.Equal(newDatabaseTypeId, updatedDatabase.Type.Id);
         Assert.Equal(Status.Inactive, updatedDatabase.Status);
