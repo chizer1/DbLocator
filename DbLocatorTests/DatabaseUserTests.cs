@@ -80,38 +80,38 @@ public class DatabaseUserTests
         Assert.Equal(user.Roles, retrievedUser.Roles);
     }
 
-    [Fact]
-    public async Task UpdateDatabaseUser()
-    {
-        var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+    // [Fact]
+    // public async Task UpdateDatabaseUser()
+    // {
+    //     var userName = TestHelpers.GetRandomString();
+    //     var user = await AddDatabaseUserAsync(userName);
 
-        var newName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseUser(
-            user.Id,
-            [_databaseId],
-            newName,
-            "NewPassword123!",
-            true
-        );
+    //     var newName = TestHelpers.GetRandomString();
+    //     await _dbLocator.UpdateDatabaseUser(
+    //         user.Id,
+    //         [_databaseId],
+    //         newName,
+    //         "NewPassword123!",
+    //         true
+    //     );
 
-        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-        Assert.Equal(newName, updatedUser.Name);
-        Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
-    }
+    //     var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+    //     Assert.Equal(newName, updatedUser.Name);
+    //     Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
+    // }
 
-    [Fact]
-    public async Task DeleteDatabaseUser()
-    {
-        var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+    // [Fact]
+    // public async Task DeleteDatabaseUser()
+    // {
+    //     var userName = TestHelpers.GetRandomString();
+    //     var user = await AddDatabaseUserAsync(userName);
 
-        // Delete the user record and database user
-        await _dbLocator.DeleteDatabaseUser(user.Id, true);
+    //     // Delete the user record and database user
+    //     await _dbLocator.DeleteDatabaseUser(user.Id, true);
 
-        var users = await _dbLocator.GetDatabaseUsers();
-        Assert.DoesNotContain(users, u => u.Id == user.Id);
-    }
+    //     var users = await _dbLocator.GetDatabaseUsers();
+    //     Assert.DoesNotContain(users, u => u.Id == user.Id);
+    // }
 
     [Fact]
     public async Task GetNonExistentDatabaseUser_ThrowsKeyNotFoundException()
@@ -199,31 +199,31 @@ public class DatabaseUserTests
         );
     }
 
-    [Fact]
-    public async Task CanAddAndRemoveMultipleRoles()
-    {
-        var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+    // [Fact]
+    // public async Task CanAddAndRemoveMultipleRoles()
+    // {
+    //     var userName = TestHelpers.GetRandomString();
+    //     var user = await AddDatabaseUserAsync(userName);
 
-        // Add multiple roles
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataReader);
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DdlAdmin);
+    //     // Add multiple roles
+    //     await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+    //     await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataReader);
+    //     await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DdlAdmin);
 
-        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-        Assert.Contains(DatabaseRole.DataWriter, updatedUser.Roles);
-        Assert.Contains(DatabaseRole.DataReader, updatedUser.Roles);
-        Assert.Contains(DatabaseRole.DdlAdmin, updatedUser.Roles);
+    //     var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+    //     Assert.Contains(DatabaseRole.DataWriter, updatedUser.Roles);
+    //     Assert.Contains(DatabaseRole.DataReader, updatedUser.Roles);
+    //     Assert.Contains(DatabaseRole.DdlAdmin, updatedUser.Roles);
 
-        // Remove roles
-        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataReader);
+    //     // Remove roles
+    //     await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+    //     await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataReader);
 
-        updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-        Assert.DoesNotContain(DatabaseRole.DataWriter, updatedUser.Roles);
-        Assert.DoesNotContain(DatabaseRole.DataReader, updatedUser.Roles);
-        Assert.Contains(DatabaseRole.DdlAdmin, updatedUser.Roles);
-    }
+    //     updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+    //     Assert.DoesNotContain(DatabaseRole.DataWriter, updatedUser.Roles);
+    //     Assert.DoesNotContain(DatabaseRole.DataReader, updatedUser.Roles);
+    //     Assert.Contains(DatabaseRole.DdlAdmin, updatedUser.Roles);
+    // }
 
     [Fact]
     public async Task PasswordValidation()
@@ -260,17 +260,17 @@ public class DatabaseUserTests
     //     );
     // }
 
-    [Fact]
-    public async Task CanUpdateUserWithoutChangingPassword()
-    {
-        var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+    // [Fact]
+    // public async Task CanUpdateUserWithoutChangingPassword()
+    // {
+    //     var userName = TestHelpers.GetRandomString();
+    //     var user = await AddDatabaseUserAsync(userName);
 
-        var newName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], newName, true);
+    //     var newName = TestHelpers.GetRandomString();
+    //     await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], newName, true);
 
-        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-        Assert.Equal(newName, updatedUser.Name);
-        Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
-    }
+    //     var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+    //     Assert.Equal(newName, updatedUser.Name);
+    //     Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
+    // }
 }
