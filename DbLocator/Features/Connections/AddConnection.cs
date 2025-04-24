@@ -50,20 +50,22 @@ internal class AddConnection(
             .AnyAsync(t => t.TenantId == command.TenantId);
 
         if (!tenantExists)
-            throw new KeyNotFoundException($"Tenant with Id '{command.TenantId}' not found.");
+            throw new KeyNotFoundException($"Tenant with ID {command.TenantId} not found.");
 
         var databaseExists = await dbContext
             .Set<DatabaseEntity>()
             .AnyAsync(d => d.DatabaseId == command.DatabaseId);
 
         if (!databaseExists)
-            throw new KeyNotFoundException($"Database with Id '{command.DatabaseId}' not found.");
+            throw new KeyNotFoundException($"Database with ID {command.DatabaseId} not found.");
 
         var connectionExists = await dbContext
             .Set<ConnectionEntity>()
             .AnyAsync(c => c.TenantId == command.TenantId && c.DatabaseId == command.DatabaseId);
 
         if (connectionExists)
-            throw new InvalidOperationException("Connection already exists.");
+            throw new ArgumentException(
+                $"Connection already exists for tenant ID {command.TenantId} and database ID {command.DatabaseId}."
+            );
     }
 }

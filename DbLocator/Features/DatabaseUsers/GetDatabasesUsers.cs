@@ -44,6 +44,7 @@ internal class GetDatabaseUsers(
 
         var databaseUserEntities = await dbContext
             .Set<DatabaseUserEntity>()
+            .AsNoTracking()
             .Include(u => u.Databases)
             .ThenInclude(ud => ud.Database)
             .ThenInclude(d => d.DatabaseServer)

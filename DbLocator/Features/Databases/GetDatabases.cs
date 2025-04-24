@@ -44,6 +44,7 @@ internal class GetDatabases(
 
         var databaseEntities = await dbContext
             .Set<DatabaseEntity>()
+            .AsNoTracking()
             .Include(d => d.DatabaseServer)
             .Include(d => d.DatabaseType)
             .ToListAsync();

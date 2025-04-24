@@ -4,11 +4,11 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Utilities;
 
-internal class DbLocatorCache(IDistributedCache cache)
+internal class DbLocatorCache(IDistributedCache cache) : IDbLocatorCache
 {
     private readonly IDistributedCache _cache = cache;
 
-    internal async Task<T> GetCachedData<T>(string cacheKey)
+    public async Task<T> GetCachedData<T>(string cacheKey)
     {
         if (_cache == null)
         {
@@ -19,7 +19,7 @@ internal class DbLocatorCache(IDistributedCache cache)
         return cachedData != null ? JsonSerializer.Deserialize<T>(cachedData) : default;
     }
 
-    internal async Task CacheData(string cacheKey, object data)
+    public async Task CacheData(string cacheKey, object data)
     {
         if (_cache == null)
         {
@@ -28,6 +28,16 @@ internal class DbLocatorCache(IDistributedCache cache)
 
         var serializedData = JsonSerializer.Serialize(data);
         await _cache.SetStringAsync(cacheKey, serializedData);
+    }
+
+    public async Task Remove(string cacheKey)
+    {
+        if (_cache == null)
+        {
+            return;
+        }
+
+        await _cache.RemoveAsync(cacheKey);
     }
 
     internal async Task CacheConnectionString(string cacheKey, string connectionString)
@@ -43,16 +53,6 @@ internal class DbLocatorCache(IDistributedCache cache)
         var cacheKeys = await GetCachedData<List<string>>("connectionCacheKeys") ?? [];
         cacheKeys.Add(cacheKey);
         await CacheData("connectionCacheKeys", cacheKeys);
-    }
-
-    internal async Task Remove(string cacheKey)
-    {
-        if (_cache == null)
-        {
-            return;
-        }
-
-        await _cache.RemoveAsync(cacheKey);
     }
 
     // Note, if this is ran with no specified parameters,

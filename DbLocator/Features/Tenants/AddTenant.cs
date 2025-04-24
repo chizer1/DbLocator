@@ -35,7 +35,7 @@ internal class AddTenant(IDbContextFactory<DbLocatorContext> dbContextFactory, D
         await using var dbContext = dbContextFactory.CreateDbContext();
 
         if (await dbContext.Set<TenantEntity>().AnyAsync(c => c.TenantName == command.TenantName))
-            throw new InvalidOperationException($"Tenant '{command.TenantName}' already exists.");
+            throw new ArgumentException($"Tenant '{command.TenantName}' already exists.");
 
         var tenant = new TenantEntity
         {

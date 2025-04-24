@@ -26,6 +26,9 @@ namespace DbLocator
         /// <returns>
         /// The ID of the newly added database server.
         /// </returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown when no valid server identifier (host name, FQDN, or IP address) is provided.
+        /// </exception>
         public async Task<int> AddDatabaseServer(
             string databaseServerName,
             string databaseServerIpAddress,
@@ -76,6 +79,12 @@ namespace DbLocator
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database server is not found.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown when no valid server identifier is provided for the update.
+        /// </exception>
         public async Task UpdateDatabaseServer(
             int databaseServerId,
             string databaseServerName,
@@ -102,9 +111,32 @@ namespace DbLocator
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the specified database server is not found.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when attempting to delete a server that has associated databases.
+        /// </exception>
         public async Task DeleteDatabaseServer(int databaseServerId)
         {
             await _databaseServers.DeleteDatabaseServer(databaseServerId);
+        }
+
+        /// <summary>
+        /// Retrieves a single database server by its ID.
+        /// </summary>
+        /// <param name="databaseServerId">
+        /// The ID of the database server to retrieve.
+        /// </param>
+        /// <returns>
+        /// A <see cref="DatabaseServer"/> object representing the database server with the specified ID.
+        /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when no database server is found with the given ID.
+        /// </exception>
+        public async Task<DatabaseServer> GetDatabaseServer(int databaseServerId)
+        {
+            return await _databaseServers.GetDatabaseServer(databaseServerId);
         }
     }
 }

@@ -42,7 +42,7 @@ internal class GetTenants(
     {
         await using var dbContext = dbContextFactory.CreateDbContext();
 
-        var tenantEntities = await dbContext.Set<TenantEntity>().ToListAsync();
+        var tenantEntities = await dbContext.Set<TenantEntity>().AsNoTracking().ToListAsync();
 
         var tenants = tenantEntities
             .Select(entity => new Tenant(

@@ -90,7 +90,7 @@ internal class GetConnection(
                     .Include(con => con.Database)
                     .FirstOrDefaultAsync(con => con.ConnectionId == query.ConnectionId)
                 ?? throw new KeyNotFoundException(
-                    $"Connection Id '{query.ConnectionId}' not found."
+                    $"Connection with ID {query.ConnectionId} not found."
                 );
         }
         else if (!string.IsNullOrEmpty(query.TenantCode) && query.DatabaseTypeId.HasValue)
@@ -120,7 +120,7 @@ internal class GetConnection(
             .Set<TenantEntity>()
             .AnyAsync(t => t.TenantId == tenantId);
         if (!tenantExists)
-            throw new KeyNotFoundException($"Tenant Id '{tenantId}' not found.");
+            throw new KeyNotFoundException($"Tenant with ID {tenantId} not found.");
     }
 
     private static async Task EnsureTenantExistsAsync(DbLocatorContext dbContext, string tenantCode)
@@ -141,7 +141,7 @@ internal class GetConnection(
             .Set<DatabaseTypeEntity>()
             .AnyAsync(dt => dt.DatabaseTypeId == databaseTypeId);
         if (!databaseTypeExists)
-            throw new KeyNotFoundException($"Database Type Id '{databaseTypeId}' not found.");
+            throw new KeyNotFoundException($"Database type with ID {databaseTypeId} not found.");
     }
 
     private static async Task<DatabaseEntity> GetDatabaseEntityAsync(
@@ -153,7 +153,7 @@ internal class GetConnection(
                 .Set<DatabaseEntity>()
                 .Include(d => d.DatabaseServer)
                 .FirstOrDefaultAsync(d => d.DatabaseId == databaseId)
-            ?? throw new KeyNotFoundException($"Database with Id {databaseId} not found.");
+            ?? throw new KeyNotFoundException($"Database with ID {databaseId} not found.");
     }
 
     private static async Task<string> BuildConnectionString(

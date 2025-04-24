@@ -144,7 +144,7 @@ internal class AddDatabaseUser(
                 .Set<DatabaseEntity>()
                 .Include(d => d.DatabaseServer)
                 .FirstOrDefaultAsync(d => d.DatabaseId == databaseId)
-            ?? throw new InvalidOperationException("Database not found.");
+            ?? throw new KeyNotFoundException($"Database with ID {databaseId} not found.");
 
         var uName = Sql.SanitizeSqlIdentifier(userName);
         var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);

@@ -41,4 +41,83 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
         Assert.NotNull(cachedTenants);
         Assert.Contains(cachedTenants, t => t.Id == tenantId);
     }
+
+    [Fact]
+    public async Task GetTenantById()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        var tenant = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(tenantId, tenant.Id);
+        Assert.Equal(tenantName, tenant.Name);
+        Assert.Equal(tenantCode, tenant.Code);
+        Assert.Equal(Status.Active, tenant.Status);
+    }
+
+    [Fact]
+    public async Task GetTenantByCode()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        var tenant = await _dbLocator.GetTenant(tenantCode);
+        Assert.Equal(tenantName, tenant.Name);
+        Assert.Equal(tenantCode, tenant.Code);
+        Assert.Equal(Status.Active, tenant.Status);
+    }
+
+    [Fact]
+    public async Task UpdateTenant()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        var newName = TestHelpers.GetRandomString();
+        var newCode = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateTenant(tenantId, newName, newCode, Status.Inactive);
+
+        var updatedTenant = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(newName, updatedTenant.Name);
+        Assert.Equal(newCode, updatedTenant.Code);
+        Assert.Equal(Status.Inactive, updatedTenant.Status);
+    }
+
+    [Fact]
+    public async Task DeleteTenant()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        await _dbLocator.DeleteTenant(tenantId);
+
+        var tenants = await _dbLocator.GetTenants();
+        Assert.DoesNotContain(tenants, t => t.Id == tenantId);
+    }
+
+    [Fact]
+    public async Task GetNonExistentTenantById_ThrowsKeyNotFoundException()
+    {
+        await Assert.ThrowsAsync<KeyNotFoundException>(async () => await _dbLocator.GetTenant(-1));
+    }
+
+    [Fact]
+    public async Task GetNonExistentTenantByCode_ThrowsKeyNotFoundException()
+    {
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.GetTenant("NONEXISTENT")
+        );
+    }
+
+    [Fact]
+    public async Task DeleteNonExistentTenant_ThrowsKeyNotFoundException()
+    {
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.DeleteTenant(-1)
+        );
+    }
 }

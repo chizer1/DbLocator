@@ -18,27 +18,35 @@ internal sealed class AddDatabaseServerCommandValidator
 {
     internal AddDatabaseServerCommandValidator()
     {
-        RuleFor(x => x.DatabaseServerName)
-            .NotEmpty()
-            .WithMessage("Database Server Name is required.")
-            .MaximumLength(50)
-            .WithMessage("Database Server Name cannot be more than 50 characters.");
+        RuleFor(x => x.DatabaseServerName).MustBeValidName().WithName("Database Server Name");
 
         RuleFor(x => x.DatabaseServerHostName)
             .MaximumLength(50)
-            .WithMessage("Database Server Host Name cannot be more than 50 characters.");
+            .WithMessage("Database Server Host Name cannot be more than 50 characters.")
+            .Matches(@"^[a-zA-Z0-9][a-zA-Z0-9-.]*[a-zA-Z0-9]$")
+            .WithMessage("Database Server Host Name must be a valid hostname.");
 
         RuleFor(x => x.DatabaseServerFullyQualifiedDomainName)
             .MaximumLength(50)
-            .WithMessage(
-                "Database Server Fully Qualified Domain Name cannot be more than 50 characters."
-            );
-        // todo: add ip regex
+            .WithMessage("Database Server FQDN cannot be more than 50 characters.")
+            .Matches(@"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$")
+            .WithMessage("Database Server FQDN must be a valid domain name.");
 
         RuleFor(x => x.DatabaseServerIpAddress)
             .MaximumLength(50)
-            .WithMessage("Database Server IP Address cannot be more than 50 characters.");
-        // todo: add domain regex
+            .WithMessage("Database Server IP Address cannot be more than 50 characters.")
+            .Matches(
+                @"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+            )
+            .WithMessage("Database Server IP Address must be a valid IPv4 address.");
+
+        RuleFor(x => x)
+            .Must(x =>
+                !string.IsNullOrEmpty(x.DatabaseServerHostName)
+                || !string.IsNullOrEmpty(x.DatabaseServerFullyQualifiedDomainName)
+                || !string.IsNullOrEmpty(x.DatabaseServerIpAddress)
+            )
+            .WithMessage("At least one of Host Name, FQDN, or IP Address must be provided.");
     }
 }
 

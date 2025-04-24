@@ -41,7 +41,12 @@ internal class Tenants(IDbContextFactory<DbLocatorContext> dbContextFactory, DbL
 
     internal async Task<Tenant> GetTenant(int tenantId)
     {
-        return await _getTenant.Handle(new GetTenantQuery { TenantId = tenantId });
+        return await _getTenant.Handle(new GetTenantByIdQuery { TenantId = tenantId });
+    }
+
+    internal async Task<Tenant> GetTenant(string tenantCode)
+    {
+        return await _getTenant.Handle(new GetTenantByCodeQuery { TenantCode = tenantCode });
     }
 
     internal async Task UpdateTenant(int tenantId, Status tenantStatus)

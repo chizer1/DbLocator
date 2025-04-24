@@ -46,6 +46,17 @@ namespace DbLocator
         }
 
         /// <summary>
+        /// Gets all database user roles.
+        /// </summary>
+        /// <returns>
+        /// A task that represents the asynchronous operation.
+        /// </returns>
+        public async Task<List<DatabaseUserRole>> GetDatabaseUserRoles()
+        {
+            return await _databaseUserRoles.GetDatabaseUserRoles();
+        }
+
+        /// <summary>
         /// Deletes a role from a database user. This method also removes the role from the database if specified.
         /// </summary>
         /// <param name="databaseUserId">

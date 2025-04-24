@@ -44,6 +44,7 @@ internal class GetConnections(
 
         var connectionEntities = await dbContext
             .Set<ConnectionEntity>()
+            .AsNoTracking()
             .Include(c => c.Database)
             .ThenInclude(d => d.DatabaseServer)
             .Include(c => c.Tenant)

@@ -86,6 +86,23 @@ namespace DbLocator
         }
 
         /// <summary>
+        /// Retrieves a single tenant by their code.
+        /// </summary>
+        /// <param name="tenantCode">
+        /// The code of the tenant to retrieve.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Tenant"/> object representing the tenant with the specified code.
+        /// </returns>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when no tenant is found with the given code.
+        /// </exception>
+        public async Task<Tenant> GetTenant(string tenantCode)
+        {
+            return await _tenants.GetTenant(tenantCode);
+        }
+
+        /// <summary>
         /// Updates the details of an existing tenant with the specified ID, name, code, and status.
         /// </summary>
         /// <param name="tenantId">
