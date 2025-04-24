@@ -82,6 +82,10 @@ public class DatabaseTests
         var dbName = TestHelpers.GetRandomString();
         var database = await AddDatabaseAsync(dbName);
 
+        // Verify database exists
+        var existingDatabase = await _dbLocator.GetDatabase(database.Id);
+        Assert.NotNull(existingDatabase);
+
         var newName = TestHelpers.GetRandomString();
         var newDatabaseTypeName = TestHelpers.GetRandomString();
         var newDatabaseTypeId = await _dbLocator.AddDatabaseType(newDatabaseTypeName);

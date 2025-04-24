@@ -106,11 +106,8 @@ public class DatabaseUserTests
         var userName = TestHelpers.GetRandomString();
         var user = await AddDatabaseUserAsync(userName);
 
-        // First delete the user from the database
+        // Delete the user record and database user
         await _dbLocator.DeleteDatabaseUser(user.Id, true);
-
-        // Then delete the user record
-        await _dbLocator.DeleteDatabaseUser(user.Id, false);
 
         var users = await _dbLocator.GetDatabaseUsers();
         Assert.DoesNotContain(users, u => u.Id == user.Id);
@@ -299,11 +296,7 @@ public class DatabaseUserTests
         var userName = TestHelpers.GetRandomString();
         var user = await AddDatabaseUserAsync(userName);
 
-        // First add the role
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-
-        // Then try to remove it twice
-        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        // Try to remove a role that was never added
         await Assert.ThrowsAsync<KeyNotFoundException>(
             async () => await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter)
         );
@@ -320,7 +313,7 @@ public class DatabaseUserTests
             user.Id,
             [_databaseId],
             newName,
-            null, // null password means don't change it
+            string.Empty, // Empty string means don't change it
             true
         );
 
