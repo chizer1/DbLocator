@@ -70,7 +70,7 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
                 attempt++;
                 if (attempt < maxAttempts)
                 {
-                    await Task.Delay(2000);
+                    await Task.Delay(10000);
                 }
                 else
                 {
