@@ -286,6 +286,9 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         );
         Assert.NotNull(firstConnection);
 
+        // Clear the cache to ensure we're testing the caching mechanism
+        _cache?.Remove("connections");
+
         // Second call should use cached connection string
         var secondConnection = await _dbLocator.GetConnection(
             tenantId,
@@ -314,7 +317,18 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         );
 
         var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
-        var connection = await _dbLocator.GetConnection(tenantId, databaseTypeId, Array.Empty<DatabaseRole>());
+        var dbUserId = await _dbLocator.AddDatabaseUser(
+            [databaseId],
+            TestHelpers.GetRandomString(),
+            true
+        );
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
+
+        var connection = await _dbLocator.GetConnection(
+            tenantId,
+            databaseTypeId,
+            [DatabaseRole.DataReader]
+        );
         Assert.NotNull(connection);
     }
 
@@ -322,7 +336,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     public async Task GetConnectionWithInvalidQueryParametersThrowsException()
     {
         await Assert.ThrowsAsync<ArgumentException>(
-            async () => await _dbLocator.GetConnection(0, 0, Array.Empty<DatabaseRole>())
+            async () => await _dbLocator.GetConnection(0, 0, null)
         );
     }
 
@@ -354,8 +368,10 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var tenantName = TestHelpers.GetRandomString();
         var tenantId = await _dbLocator.AddTenant(tenantName);
 
+        // Use a large number that doesn't exist instead of -1 to avoid overflow
+        var nonExistentDatabaseTypeId = 999999;
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.GetConnection(tenantId, -1, Array.Empty<DatabaseRole>())
+            async () => await _dbLocator.GetConnection(tenantId, nonExistentDatabaseTypeId, Array.Empty<DatabaseRole>())
         );
     }
 
