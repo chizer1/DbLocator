@@ -314,7 +314,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         );
 
         var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
-        var connection = await _dbLocator.GetConnection(tenantId, databaseTypeId);
+        var connection = await _dbLocator.GetConnection(tenantId, databaseTypeId, Array.Empty<DatabaseRole>());
         Assert.NotNull(connection);
     }
 
@@ -322,7 +322,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     public async Task GetConnectionWithInvalidQueryParametersThrowsException()
     {
         await Assert.ThrowsAsync<ArgumentException>(
-            async () => await _dbLocator.GetConnection(345, null)
+            async () => await _dbLocator.GetConnection(0, 0, Array.Empty<DatabaseRole>())
         );
     }
 
@@ -333,7 +333,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.GetConnection(-1, databaseTypeId)
+            async () => await _dbLocator.GetConnection(-1, databaseTypeId, Array.Empty<DatabaseRole>())
         );
     }
 
@@ -344,7 +344,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.GetConnection("NonExistentCode", databaseTypeId)
+            async () => await _dbLocator.GetConnection("NonExistentCode", databaseTypeId, Array.Empty<DatabaseRole>())
         );
     }
 
@@ -355,7 +355,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var tenantId = await _dbLocator.AddTenant(tenantName);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.GetConnection(tenantId, -1)
+            async () => await _dbLocator.GetConnection(tenantId, -1, Array.Empty<DatabaseRole>())
         );
     }
 
