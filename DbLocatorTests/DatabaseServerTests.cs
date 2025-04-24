@@ -209,6 +209,10 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
             false
         );
 
+        // Ensure cache is populated by getting the servers
+        var databaseServers = await _dbLocator.GetDatabaseServers();
+        Assert.Contains(databaseServers, ds => ds.Id == databaseServerId);
+
         // Verify server is in cache
         var cachedDatabaseServers = await _cache.GetCachedData<List<DatabaseServer>>(
             "databaseServers"
