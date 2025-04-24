@@ -322,7 +322,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     public async Task GetConnectionWithInvalidQueryParametersThrowsException()
     {
         await Assert.ThrowsAsync<ArgumentException>(
-            async () => await _dbLocator.GetConnection(null, null, null, null)
+            async () => await _dbLocator.GetConnection(345, null)
         );
     }
 
