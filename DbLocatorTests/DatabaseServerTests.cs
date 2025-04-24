@@ -347,11 +347,23 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
     public async Task AddDatabaseServer_WithDuplicateIpAddress_ThrowsInvalidOperationException()
     {
         // Arrange
-        var existingServer = await _dbLocator.AddDatabaseServer("TestServer1", "test-server1", "test-server1.example.com", "192.168.1.1", false);
+        var existingServer = await _dbLocator.AddDatabaseServer(
+            "TestServer1",
+            "192.168.1.1",
+            "test-server1",
+            "test-server1.example.com",
+            false
+        );
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            async () => await _dbLocator.AddDatabaseServer("TestServer2", "test-server2", "test-server2.example.com", "192.168.1.1", false)
+            async () => await _dbLocator.AddDatabaseServer(
+                "TestServer2",
+                "192.168.1.1",
+                "test-server2",
+                "test-server2.example.com",
+                false
+            )
         );
 
         Assert.Contains("A database server with the same IP address already exists", exception.Message);
