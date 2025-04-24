@@ -1,6 +1,6 @@
 using DbLocator;
+using DbLocator.Db;
 using DbLocator.Utilities;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -29,57 +29,26 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        var maxAttempts = 30;
-        var attempt = 0;
-        var serverReady = false;
+        var localHostServers = await DbLocator.GetDatabaseServers();
+        var localHostServer = localHostServers.FirstOrDefault(server =>
+            server.HostName == "localhost"
+        );
 
-        while (!serverReady && attempt < maxAttempts)
+        if (localHostServer != null)
         {
-            try
-            {
-                using var connection = new SqlConnection(connString);
-                await connection.OpenAsync();
-                await connection.CloseAsync();
-
-                var localHostServers = await DbLocator.GetDatabaseServers();
-                var localHostServer = localHostServers.FirstOrDefault(server =>
-                    server.HostName == "localhost"
-                );
-
-                if (localHostServer != null)
-                {
-                    LocalhostServerId = localHostServer.Id;
-                    serverReady = true;
-                }
-                else
-                {
-                    var databaseServerName = TestHelpers.GetRandomString();
-                    var databaseServerHostName = "localhost";
-                    LocalhostServerId = await DbLocator.AddDatabaseServer(
-                        databaseServerName,
-                        databaseServerHostName,
-                        null,
-                        null,
-                        false
-                    );
-                    serverReady = true;
-                }
-            }
-            catch (Exception)
-            {
-                attempt++;
-                if (attempt < maxAttempts)
-                {
-                    await Task.Delay(10000);
-                }
-                else
-                {
-                    throw new TimeoutException(
-                        "Failed to initialize database server after multiple attempts"
-                    );
-                }
-            }
+            LocalhostServerId = localHostServer.Id;
+            return;
         }
+
+        var databaseServerName = TestHelpers.GetRandomString();
+        var databaseServerHostName = "localhost";
+        LocalhostServerId = await DbLocator.AddDatabaseServer(
+            databaseServerName,
+            databaseServerHostName,
+            null,
+            null,
+            false
+        );
     }
 
     public async Task DisposeAsync()
