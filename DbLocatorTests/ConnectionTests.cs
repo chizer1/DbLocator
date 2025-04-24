@@ -214,6 +214,40 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         );
     }
 
+    [Fact]
+    public async Task AddConnectionWithNonExistentTenantThrowsException()
+    {
+        // Create a database
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(databaseName, _databaseServerId, databaseTypeId, Status.Active);
+
+        // Try to add connection with non-existent tenant
+        var nonExistentTenantId = -1;
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.AddConnection(nonExistentTenantId, databaseId)
+        );
+
+        Assert.Contains($"Tenant with ID {nonExistentTenantId} not found", exception.Message);
+    }
+
+    [Fact]
+    public async Task AddConnectionWithNonExistentDatabaseThrowsException()
+    {
+        // Create a tenant
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+
+        // Try to add connection with non-existent database
+        var nonExistentDatabaseId = -1;
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.AddConnection(tenantId, nonExistentDatabaseId)
+        );
+
+        Assert.Contains($"Database with ID {nonExistentDatabaseId} not found", exception.Message);
+    }
+
     private async Task<int> GetConnectionId()
     {
         var tenantName = TestHelpers.GetRandomString();
