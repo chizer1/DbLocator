@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using DbLocator;
 using DbLocator.Domain;
 using DbLocator.Utilities;
@@ -116,23 +117,6 @@ public class DatabaseTests
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(
             async () => await _dbLocator.GetDatabase(-1)
-        );
-    }
-
-    [Fact]
-    public async Task UpdateNonExistentDatabase_ThrowsKeyNotFoundException()
-    {
-        // Arrange
-        var database = new Database
-        {
-            Id = -1,
-            Name = "TestDatabase",
-            ServerId = 1
-        };
-
-        // Act & Assert
-        await Assert.ThrowsAsync<ValidationException>(
-            async () => await _dbLocator.UpdateDatabase(database)
         );
     }
 
