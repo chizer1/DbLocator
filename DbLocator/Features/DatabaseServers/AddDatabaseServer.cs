@@ -18,7 +18,9 @@ internal sealed class AddDatabaseServerCommandValidator
 {
     internal AddDatabaseServerCommandValidator()
     {
-        RuleFor(x => x.DatabaseServerName).MustBeValidName().WithName("Database Server Name");
+        RuleFor(x => x.DatabaseServerName)
+            .MaximumLength(50)
+            .WithMessage("Database Server Name cannot be more than 50 characters.");
 
         RuleFor(x => x.DatabaseServerHostName)
             .MaximumLength(50)
