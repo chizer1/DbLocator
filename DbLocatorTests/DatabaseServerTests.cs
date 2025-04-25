@@ -371,7 +371,7 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.AddDatabaseServer(
-                "TestServer2",
+                "TestServer3",
                 "192.168.1.2",
                 "server2",
                 "server1.example.com",
@@ -397,7 +397,7 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.AddDatabaseServer(
-                "TestServer2",
+                "TestServer4",
                 "192.168.1.1",
                 "server2",
                 "server2.example.com",
