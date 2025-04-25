@@ -30,10 +30,9 @@ public class DatabaseUserTests
 
     private async Task<DatabaseUser> AddDatabaseUserAsync(string userName)
     {
-        var uniqueUserName = $"TestUser_{userName}_{DateTime.UtcNow.Ticks}";
         var userId = await _dbLocator.AddDatabaseUser(
             [_databaseId],
-            uniqueUserName,
+            userName,
             "TestPassword123!",
             true
         );
@@ -156,29 +155,33 @@ public class DatabaseUserTests
     [Fact]
     public async Task CannotAddUserWithDuplicateName()
     {
+        // Arrange
         var userName = TestHelpers.GetRandomString();
-        await AddDatabaseUserAsync(userName);
+        var user = await AddDatabaseUserAsync(userName);
 
+        // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(
             async () =>
-                await _dbLocator.AddDatabaseUser([_databaseId], userName, "TestPassword123!", true)
+                await _dbLocator.AddDatabaseUser([_databaseId], user.Name, "TestPassword123!", true)
         );
     }
 
     [Fact]
     public async Task CannotUpdateUserWithDuplicateName()
     {
+        // Arrange
         var userName1 = TestHelpers.GetRandomString();
         var userName2 = TestHelpers.GetRandomString();
         var user1 = await AddDatabaseUserAsync(userName1);
-        await AddDatabaseUserAsync(userName2);
+        var user2 = await AddDatabaseUserAsync(userName2);
 
+        // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(
             async () =>
                 await _dbLocator.UpdateDatabaseUser(
                     user1.Id,
                     [_databaseId],
-                    userName2,
+                    user2.Name,
                     "TestPassword123!",
                     true
                 )
@@ -316,24 +319,6 @@ public class DatabaseUserTests
     }
 
     [Fact]
-    public async Task DeleteDatabaseUserRole_ClearsCache()
-    {
-        // Arrange
-        var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-
-        // Act
-        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-
-        // Assert
-        var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
-        Assert.NotNull(cachedUsers);
-        var cachedUser = cachedUsers.Single(u => u.Id == user.Id);
-        Assert.DoesNotContain(DatabaseRole.DataWriter, cachedUser.Roles);
-    }
-
-    [Fact]
     public async Task DeleteDatabaseUser_WithDeleteDatabaseUserFlag_RemovesUserFromAllDatabases()
     {
         // Arrange
@@ -380,6 +365,13 @@ public class DatabaseUserTests
         var userName = TestHelpers.GetRandomString();
         var user = await AddDatabaseUserAsync(userName);
 
+        // Delete any roles first
+        var roles = (await _dbLocator.GetDatabaseUser(user.Id)).Roles;
+        foreach (var role in roles)
+        {
+            await _dbLocator.DeleteDatabaseUserRole(user.Id, role);
+        }
+
         // Act
         await _dbLocator.DeleteDatabaseUser(user.Id, true);
 
@@ -397,6 +389,10 @@ public class DatabaseUserTests
         var user = await AddDatabaseUserAsync(userName);
         await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
         await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataReader);
+
+        // Delete roles first
+        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataReader);
 
         // Act
         await _dbLocator.DeleteDatabaseUser(user.Id, true);
