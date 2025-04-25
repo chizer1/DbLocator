@@ -58,7 +58,14 @@ public class DatabaseUserTests : IAsyncLifetime
 
     private async Task<DatabaseUser> AddDatabaseUserAsync(string userName)
     {
-        var uniqueUserName = $"TestUser_{userName}_{Guid.NewGuid()}";
+        // Generate a unique 8-character string from a GUID
+        var uniqueId = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+            .Replace("=", "")
+            .Replace("+", "")
+            .Replace("/", "")
+            .Substring(0, 8);
+            
+        var uniqueUserName = $"TestUser_{userName}_{uniqueId}";
         var userId = await _dbLocator.AddDatabaseUser(
             [_databaseId],
             uniqueUserName,
