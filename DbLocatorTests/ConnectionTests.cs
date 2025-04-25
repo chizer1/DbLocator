@@ -500,4 +500,44 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         Assert.Contains("User ID=", connectionString);
         Assert.Contains("Password=", connectionString);
     }
+
+    [Fact]
+    public async Task GetConnection_FromCache()
+    {
+        // Arrange
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerId,
+            databaseTypeId,
+            Status.Active
+        );
+
+        // Act
+        var connection1 = await _dbLocator.GetConnection(tenantId, databaseTypeId);
+        var connection2 = await _dbLocator.GetConnection(tenantId, databaseTypeId);
+
+        // Assert
+        Assert.NotNull(connection1);
+        Assert.NotNull(connection2);
+        Assert.Equal(connection1.ConnectionString, connection2.ConnectionString);
+
+        // Verify cache key generation
+        var queryString =
+            @$"TenantId:{tenantId},
+            DatabaseTypeId:{databaseTypeId},
+            ConnectionId:,
+            TenantCode:
+            Roles:None";
+        var cacheKey = $"connection:{queryString}";
+        var cachedData = await _cache.GetCachedData<string>(cacheKey);
+        Assert.NotNull(cachedData);
+        Assert.Equal(connection1.ConnectionString, cachedData);
+    }
 }

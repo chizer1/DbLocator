@@ -110,8 +110,10 @@ internal class GetConnection(
                     $"Connection not found with Tenant Code '{query.TenantCode}' and Database Type Id '{query.DatabaseTypeId}'."
                 );
         }
-
-        throw new ArgumentException("Invalid query parameters.");
+        else
+        {
+            throw new ArgumentException("Invalid query parameters.");
+        }
     }
 
     private static async Task EnsureTenantExistsAsync(DbLocatorContext dbContext, int tenantId)
@@ -196,12 +198,6 @@ internal class GetConnection(
         DatabaseRole[] roleList
     )
     {
-        // For trusted connections, we don't need a database user
-        if (database.UseTrustedConnection)
-        {
-            return null;
-        }
-
         var roles =
             roleList?.Length > 0
                 ? roleList.Select(r => (int)r)
