@@ -32,6 +32,7 @@ public class DatabaseUserTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         await _cache.Remove("databaseUsers");
+        await _cache.Remove("databaseUserRoles");
     }
 
     public async Task DisposeAsync()
@@ -54,6 +55,8 @@ public class DatabaseUserTests : IAsyncLifetime
             }
         }
         _testUsers.Clear();
+        await _cache.Remove("databaseUsers");
+        await _cache.Remove("databaseUserRoles");
     }
 
     private async Task<DatabaseUser> AddDatabaseUserAsync(string userName)
@@ -357,6 +360,57 @@ public class DatabaseUserTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task DeleteDatabaseUser_ClearsCache()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+
+        // Ensure cache is populated
+        var users = await _dbLocator.GetDatabaseUsers();
+        Assert.Contains(users, u => u.Id == user.Id);
+
+        // Delete any roles first
+        var roles = (await _dbLocator.GetDatabaseUser(user.Id)).Roles;
+        foreach (var role in roles)
+        {
+            await _dbLocator.DeleteDatabaseUserRole(user.Id, role);
+        }
+
+        // Act
+        await _dbLocator.DeleteDatabaseUser(user.Id, true);
+
+        // Assert
+        var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
+        Assert.Null(cachedUsers);
+    }
+
+    [Fact]
+    public async Task DeleteDatabaseUser_WithRoles_ClearsRoleCache()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataReader);
+
+        // Ensure cache is populated
+        var users = await _dbLocator.GetDatabaseUsers();
+        Assert.Contains(users, u => u.Id == user.Id);
+
+        // Delete roles first
+        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataReader);
+
+        // Act
+        await _dbLocator.DeleteDatabaseUser(user.Id, true);
+
+        // Assert
+        var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
+        Assert.Null(cachedUsers);
+    }
+
+    [Fact]
     public async Task DeleteDatabaseUser_WithDeleteDatabaseUserFlag_RemovesUserFromAllDatabases()
     {
         // Arrange
@@ -371,7 +425,10 @@ public class DatabaseUserTests : IAsyncLifetime
             _databaseTypeId,
             Status.Active
         );
-        await _dbLocator.AddDatabaseUser([database2Id], user.Name, "TestPassword123!", true);
+        
+        // Use a different username for the second database
+        var userName2 = TestHelpers.GetRandomString();
+        await _dbLocator.AddDatabaseUser([database2Id], userName2, "TestPassword123!", true);
 
         // Act
         await _dbLocator.DeleteDatabaseUser(user.Id, true);
@@ -394,50 +451,5 @@ public class DatabaseUserTests : IAsyncLifetime
         // Assert
         var users = await _dbLocator.GetDatabaseUsers();
         Assert.DoesNotContain(users, u => u.Id == user.Id);
-    }
-
-    [Fact]
-    public async Task DeleteDatabaseUser_ClearsCache()
-    {
-        // Arrange
-        var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
-
-        // Delete any roles first
-        var roles = (await _dbLocator.GetDatabaseUser(user.Id)).Roles;
-        foreach (var role in roles)
-        {
-            await _dbLocator.DeleteDatabaseUserRole(user.Id, role);
-        }
-
-        // Act
-        await _dbLocator.DeleteDatabaseUser(user.Id, true);
-
-        // Assert
-        var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
-        Assert.NotNull(cachedUsers);
-        Assert.DoesNotContain(cachedUsers, u => u.Id == user.Id);
-    }
-
-    [Fact]
-    public async Task DeleteDatabaseUser_WithRoles_ClearsRoleCache()
-    {
-        // Arrange
-        var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataReader);
-
-        // Delete roles first
-        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataReader);
-
-        // Act
-        await _dbLocator.DeleteDatabaseUser(user.Id, true);
-
-        // Assert
-        var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
-        Assert.NotNull(cachedUsers);
-        Assert.DoesNotContain(cachedUsers, u => u.Id == user.Id);
     }
 }
