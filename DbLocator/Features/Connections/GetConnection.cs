@@ -36,7 +36,7 @@ internal class GetConnection(
             DatabaseTypeId:{query.DatabaseTypeId},
             ConnectionId:{query.ConnectionId},
             TenantCode:{query.TenantCode}
-            Roles:{string.Join(",", query.Roles)}";
+            Roles:{(query.Roles?.Length > 0 ? string.Join(",", query.Roles) : "None")}";
 
         var cacheKey = $"connection:{queryString}";
         var cachedData = await cache?.GetCachedData<string>(cacheKey);
@@ -178,15 +178,16 @@ internal class GetConnection(
         if (database.UseTrustedConnection)
         {
             connectionStringBuilder.IntegratedSecurity = true;
+            return connectionStringBuilder.ConnectionString;
         }
         else
         {
             var user = await GetDatabaseUser(database, dbContext, roles);
+            connectionStringBuilder.IntegratedSecurity = false;
             connectionStringBuilder.UserID = user.UserName;
             connectionStringBuilder.Password = encrypytion.Decrypt(user.UserPassword);
+            return connectionStringBuilder.ConnectionString;
         }
-
-        return connectionStringBuilder.ConnectionString;
     }
 
     private static async Task<DatabaseUserEntity> GetDatabaseUser(
@@ -195,6 +196,12 @@ internal class GetConnection(
         DatabaseRole[] roleList
     )
     {
+        // For trusted connections, we don't need a database user
+        if (database.UseTrustedConnection)
+        {
+            return null;
+        }
+
         var roles =
             roleList?.Length > 0
                 ? roleList.Select(r => (int)r)
@@ -218,7 +225,7 @@ internal class GetConnection(
                 !roles.Except(u.UserRoles.Select(ur => ur.DatabaseRoleId)).Any()
             )
             ?? throw new InvalidOperationException(
-                $"No suitable database user found for database '{database.DatabaseName}' with roles {string.Join(", ", roleList)}."
+                $"No suitable database user found for database '{database.DatabaseName}' with roles {(roleList?.Length > 0 ? string.Join(", ", roleList) : "None")}."
             );
     }
 }

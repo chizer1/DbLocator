@@ -287,7 +287,8 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         Assert.NotNull(firstConnection);
 
         // Clear the cache to ensure we're testing the caching mechanism
-        var queryString = @$"TenantId:{tenantId},
+        var queryString =
+            @$"TenantId:{tenantId},
             DatabaseTypeId:{databaseTypeId},
             ConnectionId:,
             TenantCode:
@@ -419,5 +420,84 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         );
 
         return await _dbLocator.AddConnection(tenantId, databaseId);
+    }
+
+    [Fact]
+    public async Task GetConnection_WithTrustedConnection_ReturnsConnectionWithIntegratedSecurity()
+    {
+        // Arrange
+        // Create a database with trusted connection enabled
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerId,
+            databaseTypeId,
+            Status.Active,
+            true // Create the database
+        );
+
+        // Add a tenant and create a connection
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+        await _dbLocator.AddConnection(tenantId, databaseId);
+
+        // Enable trusted connection
+        await _dbLocator.UpdateDatabase(databaseId, true);
+
+        // Act
+        var connection = await _dbLocator.GetConnection(tenantId, databaseTypeId);
+
+        // Assert
+        Assert.NotNull(connection);
+        var connectionString = connection.ConnectionString;
+        Assert.Contains("Integrated Security=True", connectionString);
+        Assert.DoesNotContain("User ID=", connectionString);
+        Assert.DoesNotContain("Password=", connectionString);
+    }
+
+    [Fact]
+    public async Task GetConnection_WithoutTrustedConnection_ReturnsConnectionWithUserCredentials()
+    {
+        // Arrange
+        // Create a database with trusted connection disabled
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerId,
+            databaseTypeId,
+            Status.Active,
+            true // Create the database
+        );
+
+        // Add a tenant and create a connection
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+        await _dbLocator.AddConnection(tenantId, databaseId);
+
+        // Disable trusted connection
+        await _dbLocator.UpdateDatabase(databaseId, false);
+
+        // Add a database user with required roles
+        var dbUserId = await _dbLocator.AddDatabaseUser(
+            [databaseId],
+            TestHelpers.GetRandomString(),
+            true
+        );
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataWriter, true);
+
+        // Act
+        var connection = await _dbLocator.GetConnection(tenantId, databaseTypeId);
+
+        // Assert
+        Assert.NotNull(connection);
+        var connectionString = connection.ConnectionString;
+        Assert.Contains("Integrated Security=False", connectionString);
+        Assert.Contains("User ID=", connectionString);
+        Assert.Contains("Password=", connectionString);
     }
 }
