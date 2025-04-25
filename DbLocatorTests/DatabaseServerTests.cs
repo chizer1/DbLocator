@@ -309,7 +309,7 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
     {
         // Arrange
         var existingServer = await _dbLocator.AddDatabaseServer(
-            "TestServer1",
+            "DuplicateNameTestServer",
             "192.168.1.1",
             "server1",
             "server1.example.com",
@@ -319,7 +319,7 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.AddDatabaseServer(
-                "TestServer1",
+                "DuplicateNameTestServer",
                 "192.168.1.2",
                 "server2",
                 "server2.example.com",
@@ -327,7 +327,7 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
             )
         );
 
-        Assert.Contains("Database Server Name 'TestServer1' already exists", exception.Message);
+        Assert.Contains("Database Server Name 'DuplicateNameTestServer' already exists", exception.Message);
     }
 
     [Fact]
@@ -335,9 +335,9 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
     {
         // Arrange
         var existingServer = await _dbLocator.AddDatabaseServer(
-            "TestServer1",
+            "DuplicateHostTestServer1",
             "192.168.1.1",
-            "server1",
+            "duplicate-host",
             "server1.example.com",
             false
         );
@@ -345,15 +345,15 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.AddDatabaseServer(
-                "TestServer2",
+                "DuplicateHostTestServer2",
                 "192.168.1.2",
-                "server1",
+                "duplicate-host",
                 "server2.example.com",
                 false
             )
         );
 
-        Assert.Contains("Database Server Host Name 'server1' already exists", exception.Message);
+        Assert.Contains("Database Server Host Name 'duplicate-host' already exists", exception.Message);
     }
 
     [Fact]
@@ -361,25 +361,25 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
     {
         // Arrange
         var existingServer = await _dbLocator.AddDatabaseServer(
-            "TestServer1",
+            "DuplicateFqdnTestServer1",
             "192.168.1.1",
             "server1",
-            "server1.example.com",
+            "duplicate.example.com",
             false
         );
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.AddDatabaseServer(
-                "TestServer3",
+                "DuplicateFqdnTestServer2",
                 "192.168.1.2",
                 "server2",
-                "server1.example.com",
+                "duplicate.example.com",
                 false
             )
         );
 
-        Assert.Contains("Database Server Fully Qualified Domain Name 'server1.example.com' already exists", exception.Message);
+        Assert.Contains("Database Server Fully Qualified Domain Name 'duplicate.example.com' already exists", exception.Message);
     }
 
     [Fact]
@@ -387,8 +387,8 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
     {
         // Arrange
         var existingServer = await _dbLocator.AddDatabaseServer(
-            "TestServer1",
-            "192.168.1.1",
+            "DuplicateIpTestServer1",
+            "192.168.1.100",
             "server1",
             "server1.example.com",
             false
@@ -397,15 +397,15 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.AddDatabaseServer(
-                "TestServer4",
-                "192.168.1.1",
+                "DuplicateIpTestServer2",
+                "192.168.1.100",
                 "server2",
                 "server2.example.com",
                 false
             )
         );
 
-        Assert.Contains("Database Server IP Address '192.168.1.1' already exists", exception.Message);
+        Assert.Contains("Database Server IP Address '192.168.1.100' already exists", exception.Message);
     }
 
     [Fact]
