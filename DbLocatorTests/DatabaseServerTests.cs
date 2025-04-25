@@ -7,15 +7,32 @@ using DbLocator.Utilities;
 using DbLocatorTests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace DbLocatorTests;
 
 [Collection("DbLocator")]
-public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
+public class DatabaseServerTests : IAsyncLifetime
 {
-    private readonly Locator _dbLocator = dbLocatorFixture.DbLocator;
-    private readonly DbLocatorCache _cache = dbLocatorFixture.LocatorCache;
+    private readonly Locator _dbLocator;
+    private readonly DbLocatorCache _cache;
     private readonly string databaseServerName = TestHelpers.GetRandomString();
+
+    public DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
+    {
+        _dbLocator = dbLocatorFixture.DbLocator;
+        _cache = dbLocatorFixture.LocatorCache;
+    }
+
+    public async Task InitializeAsync()
+    {
+        await _cache.Remove("databaseServers");
+    }
+
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
+    }
 
     [Fact]
     public async Task AddMultipleDatabaseServersAndSearchByKeyWord()
@@ -532,11 +549,23 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         // Arrange
         var server1Name = TestHelpers.GetRandomString();
         var server1Ip = TestHelpers.GetRandomIpAddressString();
-        var server1Id = await _dbLocator.AddDatabaseServer(server1Name, server1Ip, null, null, false);
+        var server1Id = await _dbLocator.AddDatabaseServer(
+            server1Name,
+            server1Ip,
+            null,
+            null,
+            false
+        );
 
         var server2Name = TestHelpers.GetRandomString();
         var server2Ip = TestHelpers.GetRandomIpAddressString();
-        var server2Id = await _dbLocator.AddDatabaseServer(server2Name, server2Ip, null, null, false);
+        var server2Id = await _dbLocator.AddDatabaseServer(
+            server2Name,
+            server2Ip,
+            null,
+            null,
+            false
+        );
 
         // Get servers to populate cache
         var servers = await _dbLocator.GetDatabaseServers();
@@ -552,7 +581,13 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
 
         // Assert
         Assert.NotNull(cachedServers);
-        Assert.Contains(cachedServers, s => s.Id == server1Id && s.Name == server1Name && s.IpAddress == server1Ip);
-        Assert.Contains(cachedServers, s => s.Id == server2Id && s.Name == server2Name && s.IpAddress == server2Ip);
+        Assert.Contains(
+            cachedServers,
+            s => s.Id == server1Id && s.Name == server1Name && s.IpAddress == server1Ip
+        );
+        Assert.Contains(
+            cachedServers,
+            s => s.Id == server2Id && s.Name == server2Name && s.IpAddress == server2Ip
+        );
     }
 }
