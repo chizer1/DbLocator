@@ -58,7 +58,7 @@ public class DatabaseUserTests : IAsyncLifetime
 
     private async Task<DatabaseUser> AddDatabaseUserAsync(string userName)
     {
-        var uniqueUserName = $"TestUser_{userName}_{DateTime.UtcNow.Ticks}";
+        var uniqueUserName = $"TestUser_{userName}_{Guid.NewGuid()}";
         var userId = await _dbLocator.AddDatabaseUser(
             [_databaseId],
             uniqueUserName,
