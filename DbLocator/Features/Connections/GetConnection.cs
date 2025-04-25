@@ -224,7 +224,7 @@ internal class GetConnection(
                 !roles.Except(u.UserRoles.Select(ur => ur.DatabaseRoleId)).Any()
             )
             ?? throw new InvalidOperationException(
-                $"No suitable database user found for database '{database.DatabaseName}' with roles {string.Join(", ", roleList)}."
+                $"No suitable database user found for database '{database.DatabaseName}' with roles {(roleList?.Length > 0 ? string.Join(", ", roleList) : "None")}."
             );
     }
 }
