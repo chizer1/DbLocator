@@ -516,11 +516,9 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
             databaseName,
             _databaseServerId,
             databaseTypeId,
-            Status.Active
+            Status.Active,
+            true
         );
-
-        // Create a connection for the tenant and database
-        await _dbLocator.AddConnection(tenantId, databaseId);
 
         // Add a database user with required roles
         var dbUserId = await _dbLocator.AddDatabaseUser(
@@ -530,9 +528,20 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         );
         await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
 
+        // Create a connection for the tenant and database
+        await _dbLocator.AddConnection(tenantId, databaseId);
+
         // Act
-        var connection1 = await _dbLocator.GetConnection(tenantId, databaseTypeId);
-        var connection2 = await _dbLocator.GetConnection(tenantId, databaseTypeId);
+        var connection1 = await _dbLocator.GetConnection(
+            tenantId,
+            databaseTypeId,
+            [DatabaseRole.DataReader]
+        );
+        var connection2 = await _dbLocator.GetConnection(
+            tenantId,
+            databaseTypeId,
+            [DatabaseRole.DataReader]
+        );
 
         // Assert
         Assert.NotNull(connection1);
@@ -545,7 +554,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
             DatabaseTypeId:{databaseTypeId},
             ConnectionId:,
             TenantCode:
-            Roles:None";
+            Roles:DataReader";
         var cacheKey = $"connection:{queryString}";
         var cachedData = await _cache.GetCachedData<string>(cacheKey);
         Assert.NotNull(cachedData);
