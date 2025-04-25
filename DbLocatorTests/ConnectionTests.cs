@@ -522,6 +522,14 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         // Create a connection for the tenant and database
         await _dbLocator.AddConnection(tenantId, databaseId);
 
+        // Add a database user with required roles
+        var dbUserId = await _dbLocator.AddDatabaseUser(
+            [databaseId],
+            TestHelpers.GetRandomString(),
+            true
+        );
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
+
         // Act
         var connection1 = await _dbLocator.GetConnection(tenantId, databaseTypeId);
         var connection2 = await _dbLocator.GetConnection(tenantId, databaseTypeId);
