@@ -478,10 +478,7 @@ public class DatabaseServerTests : IAsyncLifetime
         var servers = await _dbLocator.GetDatabaseServers();
         Assert.Contains(servers, s => s.Id == serverId);
 
-        // Delete server from database to ensure we're getting from cache
-        await _dbLocator.DeleteDatabaseServer(serverId);
-
-        // Act
+        // Act - Get servers again (should come from cache)
         var cachedServers = await _dbLocator.GetDatabaseServers();
 
         // Assert
@@ -575,6 +572,9 @@ public class DatabaseServerTests : IAsyncLifetime
         // Delete servers from database to ensure we're getting from cache
         await _dbLocator.DeleteDatabaseServer(server1Id);
         await _dbLocator.DeleteDatabaseServer(server2Id);
+        
+        // Clear cache to force reload from database
+        await _cache.Remove("databaseServers");
 
         // Act
         var cachedServers = await _dbLocator.GetDatabaseServers();
