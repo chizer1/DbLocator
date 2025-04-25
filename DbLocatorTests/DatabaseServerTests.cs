@@ -310,9 +310,9 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         // Arrange
         var existingServer = await _dbLocator.AddDatabaseServer(
             "DuplicateNameTestServer",
-            "192.168.1.1",
-            "server1",
-            "server1.example.com",
+            "192.168.1.101",
+            "name-test-host1",
+            "name-test1.example.com",
             false
         );
 
@@ -320,9 +320,9 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.AddDatabaseServer(
                 "DuplicateNameTestServer",
-                "192.168.1.2",
-                "server2",
-                "server2.example.com",
+                "192.168.1.102",
+                "name-test-host2",
+                "name-test2.example.com",
                 false
             )
         );
@@ -336,9 +336,9 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         // Arrange
         var existingServer = await _dbLocator.AddDatabaseServer(
             "DuplicateHostTestServer1",
-            "192.168.1.1",
+            "192.168.1.201",
             "duplicate-host",
-            "server1.example.com",
+            "host-test1.example.com",
             false
         );
 
@@ -346,9 +346,9 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.AddDatabaseServer(
                 "DuplicateHostTestServer2",
-                "192.168.1.2",
+                "192.168.1.202",
                 "duplicate-host",
-                "server2.example.com",
+                "host-test2.example.com",
                 false
             )
         );
@@ -362,8 +362,8 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         // Arrange
         var existingServer = await _dbLocator.AddDatabaseServer(
             "DuplicateFqdnTestServer1",
-            "192.168.1.1",
-            "server1",
+            "192.168.1.301",
+            "fqdn-test-host1",
             "duplicate.example.com",
             false
         );
@@ -372,8 +372,8 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.AddDatabaseServer(
                 "DuplicateFqdnTestServer2",
-                "192.168.1.2",
-                "server2",
+                "192.168.1.302",
+                "fqdn-test-host2",
                 "duplicate.example.com",
                 false
             )
@@ -388,9 +388,9 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         // Arrange
         var existingServer = await _dbLocator.AddDatabaseServer(
             "DuplicateIpTestServer1",
-            "192.168.1.100",
-            "server1",
-            "server1.example.com",
+            "192.168.1.400",
+            "ip-test-host1",
+            "ip-test1.example.com",
             false
         );
 
@@ -398,14 +398,14 @@ public class DatabaseServerTests(DbLocatorFixture dbLocatorFixture)
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.AddDatabaseServer(
                 "DuplicateIpTestServer2",
-                "192.168.1.100",
-                "server2",
-                "server2.example.com",
+                "192.168.1.400",
+                "ip-test-host2",
+                "ip-test2.example.com",
                 false
             )
         );
 
-        Assert.Contains("Database Server IP Address '192.168.1.100' already exists", exception.Message);
+        Assert.Contains("Database Server IP Address '192.168.1.400' already exists", exception.Message);
     }
 
     [Fact]
