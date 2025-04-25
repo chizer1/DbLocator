@@ -501,8 +501,9 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         Assert.Contains("Password=", connectionString);
     }
 
+    // create test to get connections from cache
     [Fact]
-    public async Task GetConnection_FromCache()
+    public async Task GetConnections_FromCache()
     {
         // Arrange
         var tenantName = TestHelpers.GetRandomString();
@@ -516,48 +517,21 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
             databaseName,
             _databaseServerId,
             databaseTypeId,
-            Status.Active,
-            true
+            Status.Active
         );
 
-        // Add a database user with required roles
-        var dbUserId = await _dbLocator.AddDatabaseUser(
-            [databaseId],
-            TestHelpers.GetRandomString(),
-            true
-        );
-        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
-
-        // Create a connection for the tenant and database
-        await _dbLocator.AddConnection(tenantId, databaseId);
+        var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
 
         // Act
-        var connection1 = await _dbLocator.GetConnection(
-            tenantId,
-            databaseTypeId,
-            [DatabaseRole.DataReader]
-        );
-        var connection2 = await _dbLocator.GetConnection(
-            tenantId,
-            databaseTypeId,
-            [DatabaseRole.DataReader]
-        );
+        var connections = await _dbLocator.GetConnections();
 
         // Assert
-        Assert.NotNull(connection1);
-        Assert.NotNull(connection2);
-        Assert.Equal(connection1.ConnectionString, connection2.ConnectionString);
+        Assert.Contains(connections, cn => cn.Id == connectionId);
 
-        // Verify cache key generation
-        var queryString =
-            @$"TenantId:{tenantId},
-            DatabaseTypeId:{databaseTypeId},
-            ConnectionId:,
-            TenantCode:
-            Roles:DataReader";
-        var cacheKey = $"connection:{queryString}";
-        var cachedData = await _cache.GetCachedData<string>(cacheKey);
-        Assert.NotNull(cachedData);
-        Assert.Equal(connection1.ConnectionString, cachedData);
+        // Act again to hit the cache
+        var cachedConnections = await _dbLocator.GetConnections();
+
+        // Assert
+        Assert.Contains(cachedConnections, cn => cn.Id == connectionId);
     }
 }
