@@ -300,16 +300,18 @@ public class DatabaseUserTests
     }
 
     [Fact]
-    public async Task DeleteDatabaseUserRole_NonExistentRole_ThrowsKeyNotFoundException()
+    public async Task DeleteDatabaseUserRole_NonExistentRole_Succeeds()
     {
         // Arrange
         var userName = TestHelpers.GetRandomString();
         var user = await AddDatabaseUserAsync(userName);
 
-        // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter)
-        );
+        // Act
+        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.DoesNotContain(DatabaseRole.DataWriter, updatedUser.Roles);
     }
 
     [Fact]
