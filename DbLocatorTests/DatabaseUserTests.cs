@@ -7,7 +7,7 @@ using DbLocatorTests.Fixtures;
 namespace DbLocatorTests;
 
 [Collection("DbLocator")]
-public class DatabaseUserTests
+public class DatabaseUserTests : IAsyncLifetime
 {
     private readonly Locator _dbLocator;
     private readonly DbLocatorCache _cache;
@@ -15,6 +15,7 @@ public class DatabaseUserTests
     private readonly byte _databaseTypeId;
     private readonly int _databaseId;
     private readonly string _databaseName;
+    private readonly List<DatabaseUser> _testUsers = new();
 
     public DatabaseUserTests(DbLocatorFixture dbLocatorFixture)
     {
@@ -28,6 +29,33 @@ public class DatabaseUserTests
             .Result;
     }
 
+    public async Task InitializeAsync()
+    {
+        await _cache.Remove("databaseUsers");
+    }
+
+    public async Task DisposeAsync()
+    {
+        foreach (var user in _testUsers)
+        {
+            try
+            {
+                // Delete any roles first
+                var roles = (await _dbLocator.GetDatabaseUser(user.Id)).Roles;
+                foreach (var role in roles)
+                {
+                    await _dbLocator.DeleteDatabaseUserRole(user.Id, role);
+                }
+                await _dbLocator.DeleteDatabaseUser(user.Id, true);
+            }
+            catch
+            {
+                // Ignore cleanup errors
+            }
+        }
+        _testUsers.Clear();
+    }
+
     private async Task<DatabaseUser> AddDatabaseUserAsync(string userName)
     {
         var uniqueUserName = $"TestUser_{userName}_{DateTime.UtcNow.Ticks}";
@@ -38,7 +66,9 @@ public class DatabaseUserTests
             true
         );
 
-        return (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
+        var user = (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
+        _testUsers.Add(user);
+        return user;
     }
 
     [Fact]
@@ -325,7 +355,7 @@ public class DatabaseUserTests
         // Arrange
         var userName = TestHelpers.GetRandomString();
         var user = await AddDatabaseUserAsync(userName);
-        
+
         // Add user to multiple databases
         var database2Name = TestHelpers.GetRandomString();
         var database2Id = await _dbLocator.AddDatabase(
