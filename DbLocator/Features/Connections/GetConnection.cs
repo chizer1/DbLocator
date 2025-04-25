@@ -36,7 +36,7 @@ internal class GetConnection(
             DatabaseTypeId:{query.DatabaseTypeId},
             ConnectionId:{query.ConnectionId},
             TenantCode:{query.TenantCode}
-            Roles:{string.Join(",", query.Roles)}";
+            Roles:{query.Roles?.Length > 0 ? string.Join(",", query.Roles) : "None"}";
 
         var cacheKey = $"connection:{queryString}";
         var cachedData = await cache?.GetCachedData<string>(cacheKey);
@@ -195,6 +195,12 @@ internal class GetConnection(
         DatabaseRole[] roleList
     )
     {
+        // For trusted connections, we don't need a database user
+        if (database.UseTrustedConnection)
+        {
+            return null;
+        }
+
         var roles =
             roleList?.Length > 0
                 ? roleList.Select(r => (int)r)
