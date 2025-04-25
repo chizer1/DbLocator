@@ -331,4 +331,78 @@ public class DatabaseUserTests
         var cachedUser = cachedUsers.Single(u => u.Id == user.Id);
         Assert.DoesNotContain(DatabaseRole.DataWriter, cachedUser.Roles);
     }
+
+    [Fact]
+    public async Task DeleteDatabaseUser_WithDeleteDatabaseUserFlag_RemovesUserFromAllDatabases()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+        
+        // Add user to multiple databases
+        var database2Name = TestHelpers.GetRandomString();
+        var database2Id = await _dbLocator.AddDatabase(
+            database2Name,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+        await _dbLocator.AddDatabaseUser([database2Id], userName, "TestPassword123!", true);
+
+        // Act
+        await _dbLocator.DeleteDatabaseUser(user.Id, true);
+
+        // Assert
+        var users = await _dbLocator.GetDatabaseUsers();
+        Assert.DoesNotContain(users, u => u.Id == user.Id);
+    }
+
+    [Fact]
+    public async Task DeleteDatabaseUser_WithoutDeleteDatabaseUserFlag_KeepsDatabaseUsers()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+
+        // Act
+        await _dbLocator.DeleteDatabaseUser(user.Id, false);
+
+        // Assert
+        var users = await _dbLocator.GetDatabaseUsers();
+        Assert.DoesNotContain(users, u => u.Id == user.Id);
+    }
+
+    [Fact]
+    public async Task DeleteDatabaseUser_ClearsCache()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+
+        // Act
+        await _dbLocator.DeleteDatabaseUser(user.Id, true);
+
+        // Assert
+        var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
+        Assert.NotNull(cachedUsers);
+        Assert.DoesNotContain(cachedUsers, u => u.Id == user.Id);
+    }
+
+    [Fact]
+    public async Task DeleteDatabaseUser_WithRoles_ClearsRoleCache()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataReader);
+
+        // Act
+        await _dbLocator.DeleteDatabaseUser(user.Id, true);
+
+        // Assert
+        var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
+        Assert.NotNull(cachedUsers);
+        Assert.DoesNotContain(cachedUsers, u => u.Id == user.Id);
+    }
 }
