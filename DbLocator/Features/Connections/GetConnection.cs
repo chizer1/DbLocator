@@ -178,14 +178,12 @@ internal class GetConnection(
         if (database.UseTrustedConnection)
         {
             connectionStringBuilder.IntegratedSecurity = true;
-        }
-        else
-        {
-            var user = await GetDatabaseUser(database, dbContext, roles);
-            connectionStringBuilder.UserID = user.UserName;
-            connectionStringBuilder.Password = encrypytion.Decrypt(user.UserPassword);
+            return connectionStringBuilder.ConnectionString;
         }
 
+        var user = await GetDatabaseUser(database, dbContext, roles);
+        connectionStringBuilder.UserID = user.UserName;
+        connectionStringBuilder.Password = encrypytion.Decrypt(user.UserPassword);
         return connectionStringBuilder.ConnectionString;
     }
 
