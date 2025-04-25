@@ -30,9 +30,10 @@ public class DatabaseUserTests
 
     private async Task<DatabaseUser> AddDatabaseUserAsync(string userName)
     {
+        var uniqueUserName = $"TestUser_{userName}_{DateTime.UtcNow.Ticks}";
         var userId = await _dbLocator.AddDatabaseUser(
             [_databaseId],
-            userName,
+            uniqueUserName,
             "TestPassword123!",
             true
         );
