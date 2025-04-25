@@ -180,12 +180,14 @@ internal class GetConnection(
             connectionStringBuilder.IntegratedSecurity = true;
             return connectionStringBuilder.ConnectionString;
         }
-
-        var user = await GetDatabaseUser(database, dbContext, roles);
-        connectionStringBuilder.IntegratedSecurity = false;
-        connectionStringBuilder.UserID = user.UserName;
-        connectionStringBuilder.Password = encrypytion.Decrypt(user.UserPassword);
-        return connectionStringBuilder.ConnectionString;
+        else
+        {
+            var user = await GetDatabaseUser(database, dbContext, roles);
+            connectionStringBuilder.IntegratedSecurity = false;
+            connectionStringBuilder.UserID = user.UserName;
+            connectionStringBuilder.Password = encrypytion.Decrypt(user.UserPassword);
+            return connectionStringBuilder.ConnectionString;
+        }
     }
 
     private static async Task<DatabaseUserEntity> GetDatabaseUser(
