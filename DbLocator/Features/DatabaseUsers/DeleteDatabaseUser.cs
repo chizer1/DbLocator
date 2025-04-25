@@ -92,13 +92,15 @@ namespace DbLocator.Features.DatabaseUsers
             var userName = Sql.SanitizeSqlIdentifier(databaseUser.UserName);
             var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
 
+            // First try to drop the user from the database
             await Sql.ExecuteSqlCommandAsync(
                 dbContext,
-                $"use [{dbName}]; create user [{userName}] for login [{userName}]",
+                $"use [{dbName}]; if exists (select * from sys.database_principals where name = '{userName}') drop user [{userName}]",
                 database.DatabaseServer.IsLinkedServer,
                 database.DatabaseServer.DatabaseServerHostName
             );
 
+            // Then try to drop the login
             await Sql.ExecuteSqlCommandAsync(
                 dbContext,
                 $"if exists (select * from sys.server_principals where name = '{userName}') drop login [{userName}]",
