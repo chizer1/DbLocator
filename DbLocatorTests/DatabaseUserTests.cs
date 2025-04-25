@@ -62,12 +62,12 @@ public class DatabaseUserTests : IAsyncLifetime
     private async Task<DatabaseUser> AddDatabaseUserAsync(string userName)
     {
         // Generate a unique 8-character string from a GUID
-        var uniqueId = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+        var uniqueId = Convert
+            .ToBase64String(Guid.NewGuid().ToByteArray())
             .Replace("=", "")
             .Replace("+", "")
-            .Replace("/", "")
-            .Substring(0, 8);
-            
+            .Replace("/", "")[..8];
+
         var uniqueUserName = $"TestUser_{userName}_{uniqueId}";
         var userId = await _dbLocator.AddDatabaseUser(
             [_databaseId],
@@ -425,7 +425,7 @@ public class DatabaseUserTests : IAsyncLifetime
             _databaseTypeId,
             Status.Active
         );
-        
+
         // Use a different username for the second database
         var userName2 = TestHelpers.GetRandomString();
         await _dbLocator.AddDatabaseUser([database2Id], userName2, "TestPassword123!", true);

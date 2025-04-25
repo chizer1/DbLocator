@@ -127,4 +127,4 @@ public class ConnectionTests : IAsyncLifetime
         database = await _dbLocator.GetDatabase(databaseId);
         Assert.False(database.UseTrustedConnection);
     }
-} 
+}

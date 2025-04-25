@@ -182,6 +182,7 @@ internal class GetConnection(
         }
 
         var user = await GetDatabaseUser(database, dbContext, roles);
+        connectionStringBuilder.IntegratedSecurity = false;
         connectionStringBuilder.UserID = user.UserName;
         connectionStringBuilder.Password = encrypytion.Decrypt(user.UserPassword);
         return connectionStringBuilder.ConnectionString;
@@ -200,7 +201,7 @@ internal class GetConnection(
         }
 
         var roles =
-            roleList?.Length > 0
+            roleList != null && roleList.Length > 0
                 ? roleList.Select(r => (int)r)
                 : [(int)DatabaseRole.DataReader, (int)DatabaseRole.DataWriter];
 
