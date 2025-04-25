@@ -60,7 +60,7 @@ public class ConnectionTests : IAsyncLifetime
         await _dbLocator.AddConnection(tenantId, databaseId);
 
         // Act
-        var connection = await _dbLocator.GetConnection(tenantId, _databaseTypeId);
+        var connection = await _dbLocator.GetConnection(tenantId, _databaseTypeId, []);
 
         // Assert
         Assert.NotNull(connection);
@@ -90,7 +90,7 @@ public class ConnectionTests : IAsyncLifetime
         await _dbLocator.AddConnection(tenantId, databaseId);
 
         // Act
-        var connection = await _dbLocator.GetConnection(tenantId, _databaseTypeId);
+        var connection = await _dbLocator.GetConnection(tenantId, _databaseTypeId, []);
 
         // Assert
         Assert.NotNull(connection);
