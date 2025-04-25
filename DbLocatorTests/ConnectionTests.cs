@@ -519,6 +519,9 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
             Status.Active
         );
 
+        // Create a connection for the tenant and database
+        await _dbLocator.AddConnection(tenantId, databaseId);
+
         // Act
         var connection1 = await _dbLocator.GetConnection(tenantId, databaseTypeId);
         var connection2 = await _dbLocator.GetConnection(tenantId, databaseTypeId);
