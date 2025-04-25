@@ -273,4 +273,60 @@ public class DatabaseUserTests
     //     Assert.Equal(newName, updatedUser.Name);
     //     Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
     // }
+
+    [Fact]
+    public async Task CanDeleteDatabaseUserRole()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+
+        // Act
+        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.DoesNotContain(DatabaseRole.DataWriter, updatedUser.Roles);
+    }
+
+    [Fact]
+    public async Task DeleteDatabaseUserRole_NonExistentUser_ThrowsKeyNotFoundException()
+    {
+        // Act & Assert
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.DeleteDatabaseUserRole(-1, DatabaseRole.DataWriter)
+        );
+    }
+
+    [Fact]
+    public async Task DeleteDatabaseUserRole_NonExistentRole_ThrowsKeyNotFoundException()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter)
+        );
+    }
+
+    [Fact]
+    public async Task DeleteDatabaseUserRole_ClearsCache()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+
+        // Act
+        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+
+        // Assert
+        var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
+        Assert.NotNull(cachedUsers);
+        var cachedUser = cachedUsers.Single(u => u.Id == user.Id);
+        Assert.DoesNotContain(DatabaseRole.DataWriter, cachedUser.Roles);
+    }
 }
