@@ -89,6 +89,15 @@ public class ConnectionTests : IAsyncLifetime
         var tenantId = await _dbLocator.AddTenant(tenantName);
         await _dbLocator.AddConnection(tenantId, databaseId);
 
+        // Add a database user with required roles
+        var dbUserId = await _dbLocator.AddDatabaseUser(
+            [databaseId],
+            TestHelpers.GetRandomString(),
+            true
+        );
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataWriter, true);
+
         // Act
         var connection = await _dbLocator.GetConnection(tenantId, _databaseTypeId);
 
