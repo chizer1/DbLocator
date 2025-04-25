@@ -201,7 +201,7 @@ internal class GetConnection(
         }
 
         var roles =
-            roleList != null && roleList.Length > 0
+            roleList?.Length > 0
                 ? roleList.Select(r => (int)r)
                 : [(int)DatabaseRole.DataReader, (int)DatabaseRole.DataWriter];
 
