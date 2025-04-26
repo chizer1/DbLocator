@@ -13,6 +13,7 @@ internal record UpdateDatabaseCommand(
     byte? DatabaseTypeId,
     Status? DatabaseStatus,
     bool? UseTrustedConnection
+// bool UpdateDatabase = false
 );
 
 internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateDatabaseCommand>
@@ -88,18 +89,18 @@ internal class UpdateDatabase(
         dbContext.Update(databaseEntity);
         await dbContext.SaveChangesAsync();
 
-        if (oldDatabaseName != command.DatabaseName && !string.IsNullOrEmpty(command.DatabaseName))
-        {
-            var oldDbName = Sql.SanitizeSqlIdentifier(oldDatabaseName);
-            var newDbName = Sql.SanitizeSqlIdentifier(command.DatabaseName);
+        // if (oldDatabaseName != command.DatabaseName && !string.IsNullOrEmpty(command.DatabaseName))
+        // {
+        //     var oldDbName = Sql.SanitizeSqlIdentifier(oldDatabaseName);
+        //     var newDbName = Sql.SanitizeSqlIdentifier(command.DatabaseName);
 
-            await Sql.ExecuteSqlCommandAsync(
-                dbContext,
-                $"alter database [{oldDbName}] modify name = [{newDbName}]",
-                databaseEntity.DatabaseServer.IsLinkedServer,
-                databaseEntity.DatabaseServer.DatabaseServerHostName
-            );
-        }
+        //     await Sql.ExecuteSqlCommandAsync(
+        //         dbContext,
+        //         $"alter database [{oldDbName}] modify name = [{newDbName}]",
+        //         databaseEntity.DatabaseServer.IsLinkedServer,
+        //         databaseEntity.DatabaseServer.DatabaseServerHostName
+        //     );
+        // }
 
         cache?.Remove("databases");
         cache?.Remove("connections");

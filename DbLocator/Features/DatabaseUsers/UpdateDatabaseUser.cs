@@ -145,7 +145,7 @@ internal class UpdateDatabaseUser(
                     $"use [{sanitizedDbName}]; alter user [{sanitizedOldUserName}] with name = [{sanitizedNewUserName}]"
                 );
                 commands.Add(
-                    $"alter login [{sanitizedOldUserName}] with name = '{sanitizedNewUserName}'"
+                    $"alter login [{sanitizedOldUserName}] with name = [{sanitizedNewUserName}]"
                 );
             }
 

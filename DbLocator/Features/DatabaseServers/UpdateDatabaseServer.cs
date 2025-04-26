@@ -29,18 +29,34 @@ internal sealed class UpdateDatabaseServerCommandValidator
         RuleFor(x => x.DatabaseServerHostName)
             .MaximumLength(50)
             .WithMessage("Database Server Host Name cannot be more than 50 characters.");
+        RuleFor(x => x.DatabaseServerHostName)
+            .MaximumLength(50)
+            .WithMessage("Database Server Host Name cannot be more than 50 characters.")
+            .Matches(@"^[a-zA-Z0-9][a-zA-Z0-9-.]*[a-zA-Z0-9]$")
+            .WithMessage("Database Server Host Name must be a valid hostname.");
 
         RuleFor(x => x.DatabaseServerFullyQualifiedDomainName)
             .MaximumLength(50)
-            .WithMessage(
-                "Database Server Fully Qualified Domain Name cannot be more than 50 characters."
-            );
-        // todo: add ip regex
+            .WithMessage("Database Server FQDN cannot be more than 50 characters.")
+            .Matches(@"^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$")
+            .WithMessage("Database Server FQDN must be a valid domain name.");
 
-        RuleFor(x => x.DatabaseServerIpAddress)
-            .MaximumLength(50)
-            .WithMessage("Database Server IP Address cannot be more than 50 characters.");
-        // todo: add domain regex
+        // RuleFor(x => x.DatabaseServerIpAddress)
+        //     .MaximumLength(50)
+        //     .WithMessage("Database Server IP Address cannot be more than 50 characters.")
+        //     .When(x => !string.IsNullOrEmpty(x.DatabaseServerIpAddress))
+        //     .Matches(
+        //         @"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+        //     )
+        //     .WithMessage("Database Server IP Address must be a valid IPv4 address.");
+
+        RuleFor(x => x)
+            .Must(x =>
+                !string.IsNullOrEmpty(x.DatabaseServerHostName)
+                || !string.IsNullOrEmpty(x.DatabaseServerFullyQualifiedDomainName)
+                || !string.IsNullOrEmpty(x.DatabaseServerIpAddress)
+            )
+            .WithMessage("At least one of Host Name, FQDN, or IP Address must be provided.");
     }
 }
 
@@ -52,8 +68,6 @@ internal class UpdateDatabaseServer(
     internal async Task Handle(UpdateDatabaseServerCommand command)
     {
         await new UpdateDatabaseServerCommandValidator().ValidateAndThrowAsync(command);
-
-        Validate(command);
 
         await using var dbContext = dbContextFactory.CreateDbContext();
 
@@ -79,19 +93,5 @@ internal class UpdateDatabaseServer(
         await dbContext.SaveChangesAsync();
 
         cache?.Remove("databaseServers");
-    }
-
-    private static void Validate(UpdateDatabaseServerCommand command)
-    {
-        if (
-            string.IsNullOrEmpty(command.DatabaseServerHostName)
-            && string.IsNullOrEmpty(command.DatabaseServerFullyQualifiedDomainName)
-            && string.IsNullOrEmpty(command.DatabaseServerIpAddress)
-        )
-        {
-            throw new InvalidOperationException(
-                "At least one of the following fields must be provided: Database Server Host Name, Database Server Fully Qualified Domain Name, Database Server IP Address."
-            );
-        }
     }
 }

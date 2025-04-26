@@ -100,17 +100,6 @@ internal class AddDatabaseServer(
     )
     {
         if (
-            string.IsNullOrEmpty(command.DatabaseServerHostName)
-            && string.IsNullOrEmpty(command.DatabaseServerFullyQualifiedDomainName)
-            && string.IsNullOrEmpty(command.DatabaseServerIpAddress)
-        )
-        {
-            throw new InvalidOperationException(
-                "At least one of the following fields must be provided: Database Server Host Name, Database Server Fully Qualified Domain Name, Database Server IP Address."
-            );
-        }
-
-        if (
             await dbContext
                 .Set<DatabaseServerEntity>()
                 .AnyAsync(ds => ds.DatabaseServerName == command.DatabaseServerName)

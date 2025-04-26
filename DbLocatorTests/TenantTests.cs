@@ -122,4 +122,149 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
             async () => await _dbLocator.DeleteTenant(-1)
         );
     }
+
+    [Fact]
+    public async Task CannotDeleteTenantWithActiveConnections()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        // Add a database and create a connection to the tenant
+        var dbName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(dbName, 1, 1);
+        await _dbLocator.AddConnection(tenantId, databaseId);
+
+        // Attempt to delete the tenant
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.DeleteTenant(tenantId)
+        );
+    }
+
+    [Fact]
+    public async Task GetTenantById_Cached()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        // First call to fetch from database
+        var tenantFromDb = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(tenantId, tenantFromDb.Id);
+        Assert.Equal(tenantName, tenantFromDb.Name);
+        Assert.Equal(tenantCode, tenantFromDb.Code);
+        Assert.Equal(Status.Active, tenantFromDb.Status);
+
+        // Second call to fetch from cache
+        var tenantFromCache = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(tenantId, tenantFromCache.Id);
+        Assert.Equal(tenantName, tenantFromCache.Name);
+        Assert.Equal(tenantCode, tenantFromCache.Code);
+        Assert.Equal(Status.Active, tenantFromCache.Status);
+    }
+
+    [Fact]
+    public async Task GetTenantByCode_Cached()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        // First call to fetch from database
+        var tenantFromDb = await _dbLocator.GetTenant(tenantCode);
+        Assert.Equal(tenantName, tenantFromDb.Name);
+        Assert.Equal(tenantCode, tenantFromDb.Code);
+        Assert.Equal(Status.Active, tenantFromDb.Status);
+
+        // Second call to fetch from cache
+        var tenantFromCache = await _dbLocator.GetTenant(tenantCode);
+        Assert.Equal(tenantName, tenantFromCache.Name);
+        Assert.Equal(tenantCode, tenantFromCache.Code);
+        Assert.Equal(Status.Active, tenantFromCache.Status);
+    }
+
+    [Fact]
+    public async Task AddTenantWithOnlyName()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+
+        var tenant = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(tenantId, tenant.Id);
+        Assert.Equal(tenantName, tenant.Name);
+        Assert.Null(tenant.Code);
+        Assert.Equal(Status.Active, tenant.Status);
+    }
+
+    [Fact]
+    public async Task UpdateTenant_StatusOnly()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        await _dbLocator.UpdateTenant(tenantId, Status.Inactive);
+
+        var updatedTenant = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(Status.Inactive, updatedTenant.Status);
+        Assert.Equal(tenantName, updatedTenant.Name);
+        Assert.Equal(tenantCode, updatedTenant.Code);
+    }
+
+    [Fact]
+    public async Task UpdateTenant_NameOnly()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        var newName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateTenant(tenantId, newName);
+
+        var updatedTenant = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(newName, updatedTenant.Name);
+        Assert.Equal(tenantCode, updatedTenant.Code);
+        Assert.Equal(Status.Active, updatedTenant.Status);
+    }
+
+    [Fact]
+    public async Task UpdateTenant_NameAndCode()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        var newName = TestHelpers.GetRandomString();
+        var newCode = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateTenant(tenantId, newName, newCode);
+
+        var updatedTenant = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(newName, updatedTenant.Name);
+        Assert.Equal(newCode, updatedTenant.Code);
+        Assert.Equal(Status.Active, updatedTenant.Status);
+    }
+
+    [Fact]
+    public async Task AddTenantWithNameAndStatus()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, Status.Active);
+
+        var tenant = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(tenantId, tenant.Id);
+        Assert.Equal(tenantName, tenant.Name);
+        Assert.Null(tenant.Code);
+        Assert.Equal(Status.Active, tenant.Status);
+    }
+
+    [Fact]
+    public async Task AddTenantButTenantNameAlreadyExists()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+        await Assert.ThrowsAsync<ArgumentException>(
+            async () => await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active)
+        );
+    }
 }

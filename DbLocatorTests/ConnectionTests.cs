@@ -500,4 +500,38 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         Assert.Contains("User ID=", connectionString);
         Assert.Contains("Password=", connectionString);
     }
+
+    // create test to get connections from cache
+    [Fact]
+    public async Task GetConnections_FromCache()
+    {
+        // Arrange
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerId,
+            databaseTypeId,
+            Status.Active
+        );
+
+        var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
+
+        // Act
+        var connections = await _dbLocator.GetConnections();
+
+        // Assert
+        Assert.Contains(connections, cn => cn.Id == connectionId);
+
+        // Act again to hit the cache
+        var cachedConnections = await _dbLocator.GetConnections();
+
+        // Assert
+        Assert.Contains(cachedConnections, cn => cn.Id == connectionId);
+    }
 }
