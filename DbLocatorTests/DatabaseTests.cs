@@ -76,35 +76,6 @@ public class DatabaseTests
         Assert.Equal(database.Status, retrievedDatabase.Status);
     }
 
-    // [Fact]
-    // public async Task UpdateDatabase()
-    // {
-    //     var dbName = TestHelpers.GetRandomString();
-    //     var database = await AddDatabaseAsync(dbName);
-
-    //     // Verify database exists
-    //     var existingDatabase = await _dbLocator.GetDatabase(database.Id);
-    //     Assert.NotNull(existingDatabase);
-
-    //     var newName = TestHelpers.GetRandomString();
-    //     var newDatabaseTypeName = TestHelpers.GetRandomString();
-    //     var newDatabaseTypeId = await _dbLocator.AddDatabaseType(newDatabaseTypeName);
-
-    //     await _dbLocator.UpdateDatabase(
-    //         database.Id,
-    //         newName,
-    //         _databaseServerID,
-    //         newDatabaseTypeId,
-    //         Status.Inactive
-    //     );
-
-    //     var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
-    //     Assert.NotNull(updatedDatabase);
-    //     Assert.Equal(newName, updatedDatabase.Name);
-    //     Assert.Equal(newDatabaseTypeId, updatedDatabase.Type.Id);
-    //     Assert.Equal(Status.Inactive, updatedDatabase.Status);
-    // }
-
     [Fact]
     public async Task DeleteDatabase()
     {
@@ -329,7 +300,7 @@ public class DatabaseTests
     }
 
     [Fact]
-    public async Task DeleteDatabase_DeleteDabase()
+    public async Task DeleteDatabase_DeleteDatabase()
     {
         var dbName = TestHelpers.GetRandomString();
         var database = await AddDatabaseAsync(dbName);
@@ -339,4 +310,6 @@ public class DatabaseTests
         var databases = await _dbLocator.GetDatabases();
         Assert.DoesNotContain(databases, db => db.Id == database.Id);
     }
+
+    
 }
