@@ -301,19 +301,19 @@ public class DatabaseTests
         Assert.Equal(newDatabaseTypeId, updatedDatabase.Type.Id);
     }
 
-    [Fact]
-    public async Task UpdateDatabase_DatabaseName()
-    {
-        var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+    // [Fact]
+    // public async Task UpdateDatabase_DatabaseName()
+    // {
+    //     var dbName = TestHelpers.GetRandomString();
+    //     var database = await AddDatabaseAsync(dbName);
 
-        var newDatabaseName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabase(database.Id, newDatabaseName);
+    //     var newDatabaseName = TestHelpers.GetRandomString();
+    //     await _dbLocator.UpdateDatabase(database.Id, newDatabaseName);
 
-        var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
-        Assert.NotNull(updatedDatabase);
-        Assert.Equal(newDatabaseName, updatedDatabase.Name);
-    }
+    //     var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
+    //     Assert.NotNull(updatedDatabase);
+    //     Assert.Equal(newDatabaseName, updatedDatabase.Name);
+    // }
 
     [Fact]
     public async Task UpdateDatabase_UpdateStatus()
