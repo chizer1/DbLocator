@@ -141,7 +141,6 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
         );
     }
 
-    // add two tests... get tenant by id (cached) and get tenant by code (cached)
     [Fact]
     public async Task GetTenantById_Cached()
     {
@@ -149,11 +148,19 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
         var tenantCode = TestHelpers.GetRandomString();
         var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
 
-        var tenant = await _cache.GetCachedData<Tenant>(tenantId.ToString());
-        Assert.Equal(tenantId, tenant.Id);
-        Assert.Equal(tenantName, tenant.Name);
-        Assert.Equal(tenantCode, tenant.Code);
-        Assert.Equal(Status.Active, tenant.Status);
+        // First call to fetch from database
+        var tenantFromDb = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(tenantId, tenantFromDb.Id);
+        Assert.Equal(tenantName, tenantFromDb.Name);
+        Assert.Equal(tenantCode, tenantFromDb.Code);
+        Assert.Equal(Status.Active, tenantFromDb.Status);
+
+        // Second call to fetch from cache
+        var tenantFromCache = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(tenantId, tenantFromCache.Id);
+        Assert.Equal(tenantName, tenantFromCache.Name);
+        Assert.Equal(tenantCode, tenantFromCache.Code);
+        Assert.Equal(Status.Active, tenantFromCache.Status);
     }
 
     [Fact]
@@ -163,9 +170,16 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
         var tenantCode = TestHelpers.GetRandomString();
         await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
 
-        var tenant = await _cache.GetCachedData<Tenant>(tenantCode);
-        Assert.Equal(tenantName, tenant.Name);
-        Assert.Equal(tenantCode, tenant.Code);
-        Assert.Equal(Status.Active, tenant.Status);
+        // First call to fetch from database
+        var tenantFromDb = await _dbLocator.GetTenant(tenantCode);
+        Assert.Equal(tenantName, tenantFromDb.Name);
+        Assert.Equal(tenantCode, tenantFromDb.Code);
+        Assert.Equal(Status.Active, tenantFromDb.Status);
+
+        // Second call to fetch from cache
+        var tenantFromCache = await _dbLocator.GetTenant(tenantCode);
+        Assert.Equal(tenantName, tenantFromCache.Name);
+        Assert.Equal(tenantCode, tenantFromCache.Code);
+        Assert.Equal(Status.Active, tenantFromCache.Status);
     }
 }
