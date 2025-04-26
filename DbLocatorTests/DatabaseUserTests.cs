@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using DbLocator;
 using DbLocator.Domain;
+using DbLocator.Features.Databases;
 using DbLocator.Utilities;
 using DbLocatorTests.Fixtures;
 
@@ -578,7 +579,6 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
     }
 
-    // add database user: databaseIds, userName, userPassword
     [Fact]
     public async Task AddDatabaseUser_WithDatabaseIdsNameAndPassword()
     {
@@ -593,5 +593,24 @@ public class DatabaseUserTests : IAsyncLifetime
         var user = (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
         Assert.Equal(userName, user.Name);
         Assert.Equal(_databaseId, user.Databases[0].Id);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithDatabaseIdsAndName()
+    {
+        var userName = TestHelpers.GetRandomString();
+        var userId = await _dbLocator.AddDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
+
+        var newName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId], newName);
+
+        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
+        Assert.Equal(newName, updatedUser.Name);
+        Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
     }
 }
