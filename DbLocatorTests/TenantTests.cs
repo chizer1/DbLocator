@@ -243,4 +243,18 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
         Assert.Equal(newCode, updatedTenant.Code);
         Assert.Equal(Status.Active, updatedTenant.Status);
     }
+
+    // add tenant with name and status
+    [Fact]
+    public async Task AddTenantWithNameAndStatus()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, Status.Active);
+
+        var tenant = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(tenantId, tenant.Id);
+        Assert.Equal(tenantName, tenant.Name);
+        Assert.Null(tenant.Code);
+        Assert.Equal(Status.Active, tenant.Status);
+    }
 }

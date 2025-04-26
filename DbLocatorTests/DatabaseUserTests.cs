@@ -452,4 +452,22 @@ public class DatabaseUserTests : IAsyncLifetime
         var users = await _dbLocator.GetDatabaseUsers();
         Assert.DoesNotContain(users, u => u.Id == user.Id);
     }
+
+    // delete database user role test
+    [Fact]
+    public async Task DeleteDatabaseUserRole_InDatabase()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+        // add role before deleting
+        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter, true);
+
+        // Act
+        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter, true);
+
+        // Assert
+        var users = await _dbLocator.GetDatabaseUsers();
+        Assert.Contains(users, u => u.Id == user.Id);
+    }
 }
