@@ -17,24 +17,6 @@ internal class Databases(IDbContextFactory<DbLocatorContext> dbContextFactory, D
     internal async Task<int> AddDatabase(
         string databaseName,
         int databaseServerId,
-        byte databaseTypeId
-    )
-    {
-        return await _addDatabase.Handle(
-            new AddDatabaseCommand(
-                databaseName,
-                databaseServerId,
-                databaseTypeId,
-                Status.Active,
-                false,
-                true
-            )
-        );
-    }
-
-    internal async Task<int> AddDatabase(
-        string databaseName,
-        int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
     )

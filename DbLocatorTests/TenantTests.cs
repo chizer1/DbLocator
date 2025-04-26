@@ -244,7 +244,6 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
         Assert.Equal(Status.Active, updatedTenant.Status);
     }
 
-    // add tenant with name and status
     [Fact]
     public async Task AddTenantWithNameAndStatus()
     {
@@ -256,5 +255,16 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
         Assert.Equal(tenantName, tenant.Name);
         Assert.Null(tenant.Code);
         Assert.Equal(Status.Active, tenant.Status);
+    }
+
+    [Fact]
+    public async Task AddTenantButTenantNameAlreadyExists()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+        await Assert.ThrowsAsync<ArgumentException>(
+            async () => await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active)
+        );
     }
 }
