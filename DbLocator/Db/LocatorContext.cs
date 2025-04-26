@@ -23,12 +23,6 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
 
     public virtual DbSet<TenantEntity> Tenants { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
-            throw new InvalidOperationException("DbContextOptions must be configured externally.");
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ConnectionEntity>(entity =>

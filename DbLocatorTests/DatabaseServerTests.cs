@@ -583,4 +583,22 @@ public class DatabaseServerTests : IAsyncLifetime
             s => s.Id == server2Id && s.Name == server2Name && s.IpAddress == server2Ip
         );
     }
+
+    [Fact]
+    public async Task AddDatabaseServer_NoValidParameters()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+            async () => await _dbLocator.AddDatabaseServer(serverName, "", "", "", false)
+        );
+
+        Assert.Contains(
+            "At least one of Host Name, FQDN, or IP Address must be provided",
+            exception.Message
+        );
+    }
 }
