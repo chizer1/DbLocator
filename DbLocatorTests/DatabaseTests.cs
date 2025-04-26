@@ -185,4 +185,47 @@ public class DatabaseTests
                 )
         );
     }
+
+    [Fact]
+    public async Task AddDatabase_WithNonExistentServer_ThrowsValidationException()
+    {
+        var dbName = TestHelpers.GetRandomString();
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () =>
+                await _dbLocator.AddDatabase(
+                    dbName,
+                    4, // Non-existent server ID
+                    _databaseTypeId,
+                    Status.Active
+                )
+        );
+    }
+
+    [Fact]
+    public async Task AddDatabase_WithNonExistentDatabaseType_ThrowsValidationException()
+    {
+        var dbName = TestHelpers.GetRandomString();
+        var newIpAddress = TestHelpers.GetRandomIpAddressString();
+        var newHostName = "updated-host";
+        var newFqdn = "updated-host.example.com";
+
+        var dbServerId = await _dbLocator.AddDatabaseServer(
+            "NewDatabaseServer123",
+            newIpAddress,
+            newHostName,
+            newFqdn,
+            false
+        );
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () =>
+                await _dbLocator.AddDatabase(
+                    dbName,
+                    dbServerId,
+                    56, // Non-existent database type ID
+                    Status.Active
+                )
+        );
+    }
 }
