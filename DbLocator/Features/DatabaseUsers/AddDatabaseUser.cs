@@ -121,11 +121,15 @@ internal class AddDatabaseUser(
         await dbContext.Set<DatabaseUserDatabaseEntity>().AddRangeAsync(databaseUserDatabases);
         await dbContext.SaveChangesAsync();
 
-        foreach (var databaseId in command.DatabaseIds)
+        // only if create user is specificed, do we ran any sql commands
+        if (command.CreateUser)
         {
-            await using var scopedDbContext = await dbContextFactory.CreateDbContextAsync();
+            foreach (var databaseId in command.DatabaseIds)
+            {
+                await using var scopedDbContext = await dbContextFactory.CreateDbContextAsync();
 
-            await CreateDatabaseUser(scopedDbContext, databaseId, command.UserName);
+                await CreateDatabaseUser(scopedDbContext, databaseId, command.UserName);
+            }
         }
 
         cache?.Remove("databaseUsers");

@@ -515,7 +515,6 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.DoesNotContain(users, u => u.Id == userId);
     }
 
-    // update database user (id), databaseids, userName
     [Fact]
     public async Task UpdateDatabaseUserById()
     {
@@ -560,7 +559,6 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
     }
 
-    // // update database user (id), databaseids, userName and password
     [Fact]
     public async Task UpdateDatabaseUser_NoDatabaseChange()
     {
@@ -573,7 +571,7 @@ public class DatabaseUserTests : IAsyncLifetime
         );
 
         var newName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId], "NewPassword123!");
+        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId], newName, "NewPassword123!");
 
         var updatedUser = await _dbLocator.GetDatabaseUser(userId);
         Assert.Equal(newName, updatedUser.Name);
