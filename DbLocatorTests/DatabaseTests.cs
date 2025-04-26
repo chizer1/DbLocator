@@ -195,7 +195,7 @@ public class DatabaseTests
             async () =>
                 await _dbLocator.AddDatabase(
                     dbName,
-                    4, // Non-existent server ID
+                    77, // Non-existent server ID
                     _databaseTypeId,
                     Status.Active
                 )
