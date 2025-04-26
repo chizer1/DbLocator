@@ -140,4 +140,32 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
             async () => await _dbLocator.DeleteTenant(tenantId)
         );
     }
+
+    // add two tests... get tenant by id (cached) and get tenant by code (cached)
+    [Fact]
+    public async Task GetTenantById_Cached()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        var tenant = await _cache.GetCachedData<Tenant>(tenantId.ToString());
+        Assert.Equal(tenantId, tenant.Id);
+        Assert.Equal(tenantName, tenant.Name);
+        Assert.Equal(tenantCode, tenant.Code);
+        Assert.Equal(Status.Active, tenant.Status);
+    }
+
+    [Fact]
+    public async Task GetTenantByCode_Cached()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        var tenant = await _cache.GetCachedData<Tenant>(tenantCode);
+        Assert.Equal(tenantName, tenant.Name);
+        Assert.Equal(tenantCode, tenant.Code);
+        Assert.Equal(Status.Active, tenant.Status);
+    }
 }
