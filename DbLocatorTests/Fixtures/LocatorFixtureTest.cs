@@ -11,7 +11,7 @@ public class LocatorFixtureTest
         string nullConnectionString = null;
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new Locator(nullConnectionString, null, null));
+        Assert.Throws<ArgumentException>(() => new Locator(nullConnectionString, null, null));
     }
 
     [Fact]
@@ -21,7 +21,7 @@ public class LocatorFixtureTest
         string emptyConnectionString = string.Empty;
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new Locator(emptyConnectionString, null, null));
+        Assert.Throws<ArgumentException>(() => new Locator(emptyConnectionString, null, null));
     }
 
     [Fact]
@@ -31,6 +31,6 @@ public class LocatorFixtureTest
         string whitespaceConnectionString = "   ";
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => new Locator(whitespaceConnectionString, null, null));
+        Assert.Throws<ArgumentException>(() => new Locator(whitespaceConnectionString, null, null));
     }
 }
