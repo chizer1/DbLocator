@@ -122,4 +122,22 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
             async () => await _dbLocator.DeleteTenant(-1)
         );
     }
+
+    [Fact]
+    public async Task CannotDeleteTenantWithActiveConnections()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        // Add a database and create a connection to the tenant
+        var dbName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(dbName, 1, 1);
+        await _dbLocator.AddConnection(tenantId, databaseId);
+
+        // Attempt to delete the tenant
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.DeleteTenant(tenantId)
+        );
+    }
 }
