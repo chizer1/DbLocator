@@ -228,4 +228,115 @@ public class DatabaseTests
                 )
         );
     }
+
+    [Fact]
+    public async Task AddDatabase_WithDbNameServerIdAndTypeId()
+    {
+        var dbName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(dbName, _databaseServerID, _databaseTypeId);
+
+        var database = await _dbLocator.GetDatabase(databaseId);
+        Assert.NotNull(database);
+        Assert.Equal(dbName, database.Name);
+        Assert.Equal(_databaseServerID, database.Server.Id);
+        Assert.Equal(_databaseTypeId, database.Type.Id);
+    }
+
+    [Fact]
+    public async Task AddDatabase_WithDbNameServerIdAndTypeIdAndCreate()
+    {
+        var dbName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            dbName,
+            _databaseServerID,
+            _databaseTypeId,
+            true
+        );
+
+        var database = await _dbLocator.GetDatabase(databaseId);
+        Assert.NotNull(database);
+        Assert.Equal(dbName, database.Name);
+        Assert.Equal(_databaseServerID, database.Server.Id);
+        Assert.Equal(_databaseTypeId, database.Type.Id);
+    }
+
+    [Fact]
+    public async Task UpdateDatabase_ServerId()
+    {
+        var dbName = TestHelpers.GetRandomString();
+        var database = await AddDatabaseAsync(dbName);
+
+        var newIpAddress = TestHelpers.GetRandomIpAddressString();
+        var newHostName = "testserver987name";
+        var newFqdn = "testservername987.example.com";
+
+        var newServerId = await _dbLocator.AddDatabaseServer(
+            "testservername987",
+            newIpAddress,
+            newHostName,
+            newFqdn,
+            false
+        );
+
+        await _dbLocator.UpdateDatabase(database.Id, newServerId);
+
+        var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
+        Assert.NotNull(updatedDatabase);
+        Assert.Equal(newServerId, updatedDatabase.Server.Id);
+    }
+
+    [Fact]
+    public async Task UpdateDatabase_TypeId()
+    {
+        var dbName = TestHelpers.GetRandomString();
+        var database = await AddDatabaseAsync(dbName);
+
+        var newDatabaseTypeName = TestHelpers.GetRandomString();
+        var newDatabaseTypeId = await _dbLocator.AddDatabaseType(newDatabaseTypeName);
+
+        await _dbLocator.UpdateDatabase(database.Id, newDatabaseTypeId);
+
+        var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
+        Assert.NotNull(updatedDatabase);
+        Assert.Equal(newDatabaseTypeId, updatedDatabase.Type.Id);
+    }
+
+    [Fact]
+    public async Task UpdateDatabase_DatabaseName()
+    {
+        var dbName = TestHelpers.GetRandomString();
+        var database = await AddDatabaseAsync(dbName);
+
+        var newDatabaseName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabase(database.Id, newDatabaseName);
+
+        var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
+        Assert.NotNull(updatedDatabase);
+        Assert.Equal(newDatabaseName, updatedDatabase.Name);
+    }
+
+    [Fact]
+    public async Task UpdateDatabase_UpdateStatus()
+    {
+        var dbName = TestHelpers.GetRandomString();
+        var database = await AddDatabaseAsync(dbName);
+
+        await _dbLocator.UpdateDatabase(database.Id, Status.Inactive);
+
+        var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
+        Assert.NotNull(updatedDatabase);
+        Assert.Equal(Status.Inactive, updatedDatabase.Status);
+    }
+
+    [Fact]
+    public async Task DeleteDatabase_DeleteDabase()
+    {
+        var dbName = TestHelpers.GetRandomString();
+        var database = await AddDatabaseAsync(dbName);
+
+        await _dbLocator.DeleteDatabase(database.Id, true);
+
+        var databases = await _dbLocator.GetDatabases();
+        Assert.DoesNotContain(databases, db => db.Id == database.Id);
+    }
 }
