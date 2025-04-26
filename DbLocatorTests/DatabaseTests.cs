@@ -207,11 +207,11 @@ public class DatabaseTests
     {
         var dbName = TestHelpers.GetRandomString();
         var newIpAddress = TestHelpers.GetRandomIpAddressString();
-        var newHostName = "updated-host123";
-        var newFqdn = "updated-host123.example.com";
+        var newHostName = "testhostname";
+        var newFqdn = "testhostname.example.com";
 
         var dbServerId = await _dbLocator.AddDatabaseServer(
-            "NewDatabaseServer123",
+            "testservername",
             newIpAddress,
             newHostName,
             newFqdn,
