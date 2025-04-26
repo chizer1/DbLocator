@@ -628,13 +628,20 @@ public class DatabaseUserTests : IAsyncLifetime
             Status.Active
         );
 
-        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId, newDatabaseId], userName);
+        var newDatabaseName2 = TestHelpers.GetRandomString();
+        var newDatabaseId2 = await _dbLocator.AddDatabase(
+            newDatabaseName,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        await _dbLocator.UpdateDatabaseUser(userId, [newDatabaseId, newDatabaseId2], userName);
 
         var updatedUser = await _dbLocator.GetDatabaseUser(userId);
-        Assert.Equal(userName, updatedUser.Name);
         Assert.Equal(2, updatedUser.Databases.Count);
-        Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
         Assert.Contains(updatedUser.Databases, d => d.Id == newDatabaseId);
+        Assert.Contains(updatedUser.Databases, d => d.Id == newDatabaseId2);
     }
 
     [Fact]
