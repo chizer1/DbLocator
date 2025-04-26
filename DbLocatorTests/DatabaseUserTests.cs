@@ -632,6 +632,8 @@ public class DatabaseUserTests : IAsyncLifetime
 
         var updatedUser = await _dbLocator.GetDatabaseUser(userId);
         Assert.Equal(userName, updatedUser.Name);
+        Assert.Equal(2, updatedUser.Databases.Count);
+        Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
         Assert.Contains(updatedUser.Databases, d => d.Id == newDatabaseId);
     }
 
