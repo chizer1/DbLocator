@@ -310,4 +310,27 @@ public class DatabaseTests
         var databases = await _dbLocator.GetDatabases();
         Assert.DoesNotContain(databases, db => db.Id == database.Id);
     }
+
+    // update database, but not using real db server id to throw error
+    [Fact]
+    public async Task UpdateDatabase_WithInvalidDatabaseServerId()
+    {
+        var dbName = TestHelpers.GetRandomString();
+        var database = await AddDatabaseAsync(dbName);
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.UpdateDatabase(database.Id, 34345)
+        );
+    }
+
+    [Fact]
+    public async Task UpdateDatabase_WithInvalidDatabaseTypeId()
+    {
+        var dbName = TestHelpers.GetRandomString();
+        var database = await AddDatabaseAsync(dbName);
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.UpdateDatabase(database.Id, 2387)
+        );
+    }
 }
