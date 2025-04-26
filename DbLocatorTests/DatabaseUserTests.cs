@@ -470,4 +470,113 @@ public class DatabaseUserTests : IAsyncLifetime
         var users = await _dbLocator.GetDatabaseUsers();
         Assert.Contains(users, u => u.Id == user.Id);
     }
+
+    [Fact]
+    public async Task AddDatabaseUserWithDatabaseIds()
+    {
+        var userName = TestHelpers.GetRandomString();
+        var userId = await _dbLocator.AddDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
+
+        var user = (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
+        Assert.Equal(userName, user.Name);
+        Assert.Equal(_databaseId, user.Databases[0].Id);
+    }
+
+    [Fact]
+    public async Task AddDatabaseUserWithDatabaseIds_NoPassword()
+    {
+        var userName = TestHelpers.GetRandomString();
+        var userId = await _dbLocator.AddDatabaseUser([_databaseId], userName);
+
+        var user = (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
+        Assert.Equal(userName, user.Name);
+        Assert.Equal(_databaseId, user.Databases[0].Id);
+    }
+
+    [Fact]
+    public async Task DeleteDatabaseUserById()
+    {
+        var userName = TestHelpers.GetRandomString();
+        var userId = await _dbLocator.AddDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
+
+        await _dbLocator.DeleteDatabaseUser(userId);
+
+        var users = await _dbLocator.GetDatabaseUsers();
+        Assert.DoesNotContain(users, u => u.Id == userId);
+    }
+
+    // update database user (id), databaseids, userName
+    [Fact]
+    public async Task UpdateDatabaseUserById()
+    {
+        var userName = TestHelpers.GetRandomString();
+        var userId = await _dbLocator.AddDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
+
+        var newName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId], newName, true);
+
+        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
+        Assert.Equal(newName, updatedUser.Name);
+        Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser()
+    {
+        var userName = TestHelpers.GetRandomString();
+        var userId = await _dbLocator.AddDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
+
+        var newName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseUser(
+            userId,
+            [_databaseId],
+            newName,
+            "NewPassword123!",
+            true
+        );
+
+        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
+        Assert.Equal(newName, updatedUser.Name);
+        Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
+    }
+
+    // // update database user (id), databaseids, userName and password
+    [Fact]
+    public async Task UpdateDatabaseUser_NoDatabaseChange()
+    {
+        var userName = TestHelpers.GetRandomString();
+        var userId = await _dbLocator.AddDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
+
+        var newName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId], "NewPassword123!");
+
+        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
+        Assert.Equal(newName, updatedUser.Name);
+        Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
+    }
 }
