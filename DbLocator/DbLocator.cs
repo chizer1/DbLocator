@@ -24,6 +24,11 @@ public partial class Locator
     private readonly Tenants _tenants;
 
     /// <summary>
+    /// Get the connection string for the DbLocator database.
+    /// </summary>
+    public string ConnectionString { get; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Locator"/> class.
     /// </summary>
     /// <param name="dbLocatorConnectionString">The connection string for the DbLocator database.</param>
@@ -56,6 +61,8 @@ public partial class Locator
         _databaseUserRoles = new DatabaseUserRoles(dbContextFactory, dbLocatorCache);
         _databaseTypes = new DatabaseTypes(dbContextFactory, dbLocatorCache);
         _tenants = new Tenants(dbContextFactory, dbLocatorCache);
+
+        ConnectionString = dbLocatorConnectionString;
     }
 
     /// <summary>
