@@ -592,7 +592,7 @@ public class DatabaseServerTests : IAsyncLifetime
         var ipAddress = TestHelpers.GetRandomIpAddressString();
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.AddDatabaseServer(serverName, "", "", "", false)
         );
 
