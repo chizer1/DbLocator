@@ -577,4 +577,21 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Equal(newName, updatedUser.Name);
         Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
     }
+
+    // add database user: databaseIds, userName, userPassword
+    [Fact]
+    public async Task AddDatabaseUser_WithDatabaseIdsNameAndPassword()
+    {
+        var userName = TestHelpers.GetRandomString();
+        var userId = await _dbLocator.AddDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
+
+        var user = (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
+        Assert.Equal(userName, user.Name);
+        Assert.Equal(_databaseId, user.Databases[0].Id);
+    }
 }

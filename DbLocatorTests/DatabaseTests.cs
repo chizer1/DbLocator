@@ -310,6 +310,4 @@ public class DatabaseTests
         var databases = await _dbLocator.GetDatabases();
         Assert.DoesNotContain(databases, db => db.Id == database.Id);
     }
-
-    
 }
