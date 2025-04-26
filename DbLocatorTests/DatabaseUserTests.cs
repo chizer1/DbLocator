@@ -630,7 +630,7 @@ public class DatabaseUserTests : IAsyncLifetime
 
         var newDatabaseName2 = TestHelpers.GetRandomString();
         var newDatabaseId2 = await _dbLocator.AddDatabase(
-            newDatabaseName,
+            newDatabaseName2,
             _databaseServerID,
             _databaseTypeId,
             Status.Active
