@@ -182,4 +182,65 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
         Assert.Equal(tenantCode, tenantFromCache.Code);
         Assert.Equal(Status.Active, tenantFromCache.Status);
     }
+
+    [Fact]
+    public async Task AddTenantWithOnlyName()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+
+        var tenant = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(tenantId, tenant.Id);
+        Assert.Equal(tenantName, tenant.Name);
+        Assert.Null(tenant.Code);
+        Assert.Equal(Status.Active, tenant.Status);
+    }
+
+    [Fact]
+    public async Task UpdateTenant_StatusOnly()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        await _dbLocator.UpdateTenant(tenantId, Status.Inactive);
+
+        var updatedTenant = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(Status.Inactive, updatedTenant.Status);
+        Assert.Equal(tenantName, updatedTenant.Name);
+        Assert.Equal(tenantCode, updatedTenant.Code);
+    }
+
+    [Fact]
+    public async Task UpdateTenant_NameOnly()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        var newName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateTenant(tenantId, newName);
+
+        var updatedTenant = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(newName, updatedTenant.Name);
+        Assert.Equal(tenantCode, updatedTenant.Code);
+        Assert.Equal(Status.Active, updatedTenant.Status);
+    }
+
+    [Fact]
+    public async Task UpdateTenant_NameAndCode()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        var newName = TestHelpers.GetRandomString();
+        var newCode = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateTenant(tenantId, newName, newCode);
+
+        var updatedTenant = await _dbLocator.GetTenant(tenantId);
+        Assert.Equal(newName, updatedTenant.Name);
+        Assert.Equal(newCode, updatedTenant.Code);
+        Assert.Equal(Status.Active, updatedTenant.Status);
+    }
 }
