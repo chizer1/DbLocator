@@ -608,4 +608,62 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Equal(newName, updatedUser.Name);
         Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
     }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_AddNewDatabaseIds()
+    {
+        var userName = TestHelpers.GetRandomString();
+        var userId = await _dbLocator.AddDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
+
+        var newDatabaseName = TestHelpers.GetRandomString();
+        var newDatabaseId = await _dbLocator.AddDatabase(
+            newDatabaseName,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId, newDatabaseId], userName);
+
+        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
+        Assert.Equal(userName, updatedUser.Name);
+        Assert.Contains(updatedUser.Databases, d => d.Id == newDatabaseId);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_RemovingAnExistingDatabaseId()
+    {
+        var userName = TestHelpers.GetRandomString();
+        var userId = await _dbLocator.AddDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
+
+        var newDatabaseName = TestHelpers.GetRandomString();
+        var newDatabaseId = await _dbLocator.AddDatabase(
+            newDatabaseName,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        // Add the user to the second database
+        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId, newDatabaseId], userName);
+
+        // Now update the user to only have the first database
+        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId], userName);
+
+        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
+        Assert.Equal(userName, updatedUser.Name);
+        Assert.Single(updatedUser.Databases);
+        Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
+        Assert.DoesNotContain(updatedUser.Databases, d => d.Id == newDatabaseId);
+    }
 }
