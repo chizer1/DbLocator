@@ -1,12 +1,13 @@
 # DbLocator
 
-DbLocator is a library designed to simplify database interactions for multi-tenant applications by managing and cataloging multiple database connections.  
+DbLocator is a library designed to simplify database interactions for multi-database tenant applications on SQL Server by managing and cataloging multiple separate database connections for each tenant.
 
 ## Features  
-- Dynamically retrieves and creates database connections.
-- Allows tenants to have multiple databases, each serving distinct functional purposes.  
-- Implements database-level role management for SQL Server, enabling fine-grained control over built-in database roles such as read/write privileges.
-- Supports horizontal scaling by distributing tenant databases across multiple servers.  
+- Dynamically manages the retrieval and creation of database connections.
+- Enables tenants to utilize multiple databases, each dedicated to distinct functional purposes.
+- Implements database-level role management for SQL Server, offering fine-grained control over built-in database roles such as read/write privileges, while also supporting trusted connections that do not require a database user.
+- Facilitates horizontal scaling by distributing tenant databases across multiple servers.
+- Allows for automating the creation of databases, logins, users, and roles, eliminating the need for some manual scripting.
 
 ## Limitations  
 - Does not manage schema definitions, modifications, or data structure enforcement.  
@@ -54,18 +55,24 @@ You will need an instance of SQL Server running. For local development, you can 
 
 ### 3. Initialization 
 
-After installing the DbLocator package and setting up SQL Server, you can start using the library. The main class of the library is `Locator`, which can be initialized in several ways:
+After installing the DbLocator package and setting up SQL Server, you can start using the library. The primary class of the library is **Locator**, which can be initialized in several ways, allowing for optional configurations such as encryption and caching.
+
+  - The **EncryptionKey** is an optional parameter that can be provided when initializing the Locator. It enables the encryption of passwords, offering an added layer of security for your database connection strings.
+  - The cache parameter is also optional and can be used for caching purposes. If you wish to improve performance by caching database-related information, you can provide an IDistributedCache instance, which DbLocator will utilize for storing and retrieving data efficiently.
 
 ```csharp
+// Initialize Locator with just the connection string
 Locator dbLocator = new("YourConnectionString");
 
+// Initialize Locator with connection string and encryption key for added security
 Locator dbLocator = new("YourConnectionString", "EncryptionKey");
 
-// full example for caching omitted for brevity
+// Full example for caching, omitted for brevity
 IDistributedCache cache = builder
     .Services.BuildServiceProvider()
     .GetRequiredService<IDistributedCache>();
 
+// Initialize Locator with connection string, encryption key, and caching
 Locator dbLocator = new("YourConnectionString", "EncryptionKey", cache);
 ```
 In a real world scenario, you probably wouldn't want to connect an sysadmin login to this library for security purposes (Principle of Least Privilege).
