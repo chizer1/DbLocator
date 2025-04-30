@@ -12,12 +12,10 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <Target Name="DbContainerUp" BeforeTargets="VSTest">
-    <Exec Command="cd $(SolutionRoot)" />
     <Exec Command="docker compose up --detach" />
   </Target>
   <Target Name="DbContainerDown" AfterTargets="VSTest">
     <Message Text="Stopping and removing containers" Importance="high" />
-    <Exec Command="cd $(SolutionRoot)" />
     <Exec Command="docker compose down -v --remove-orphans" />
     <Exec Command="docker volume prune --force" />
   </Target>
