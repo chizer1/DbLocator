@@ -25,19 +25,6 @@ services:
       retries: 10
       start_period: 10s
       timeout: 3s
-  sqlserver_server_1.configurator:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    user: root
-    volumes:
-      - ./init:/docker-entrypoint-initdb.d
-    depends_on:
-      sqlserver_server_1:
-        condition: service_healthy
-    command: >
-      bash -c '
-      /opt/mssql-tools18/bin/sqlcmd -S "sqlserver_server_1" -U sa -P 1StrongPwd!! -C -d master -i docker-entrypoint-initdb.d/init.sql;
-      echo "All done!";
-      '
   sqlserver_server_2:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
@@ -60,19 +47,6 @@ services:
       retries: 10
       start_period: 10s
       timeout: 3s
-  sqlserver_server_2.configurator:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    user: root
-    volumes:
-      - ./init:/docker-entrypoint-initdb.d
-    depends_on:
-      sqlserver_server_2:
-        condition: service_healthy
-    command: >
-      bash -c '
-      /opt/mssql-tools18/bin/sqlcmd -S "sqlserver_server_2" -U sa -P 1StrongPwd!! -C -d master -i docker-entrypoint-initdb.d/init.sql;
-      echo "All done!";
-      '
   link_servers:
     image: mcr.microsoft.com/mssql/server:2022-latest
     user: root
