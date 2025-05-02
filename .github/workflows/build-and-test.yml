@@ -29,17 +29,17 @@ jobs:
       - name: Build Project
         run: dotnet build /warnAsError
 
-      - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+      # - name: Install ReportGenerator
+      #   run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
       - name: Run Tests with Coverage
-        run: dotnet test --collect:"XPlat Code Coverage" --results-directory TestResult
+        run: dotnet test --no-build
 
-      - name: Generate Coverage Report
-        run: reportgenerator -reports:**/coverage.cobertura.xml -targetdir:CoverageReport
+      # - name: Generate Coverage Report
+      #   run: reportgenerator -reports:**/coverage.cobertura.xml -targetdir:CoverageReport
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
           name: Code-Coverage-Report
-          path: CoverageReport
+          path: ${{ github.workspace }}/DbLocatorTests/CoverageReport

@@ -73,33 +73,38 @@ public class SqlTests(DbLocatorFixture dbLocatorFixture)
         );
     }
 
-    // [Fact]
-    // public async Task ExecuteSqlCommandAsync_ShouldEscapeCommandText_WhenLinkedServer()
-    // {
-    //     // Arrange
-    //     string commandText = "SELECT * FROM Users";
-    //     string linkedServerHostName = "localhost";
-    //     // Create the Users table for the test
-    //     string createTableCommand =
-    //         @"
-    //         IF OBJECT_ID('Users', 'U') IS NULL
-    //         CREATE TABLE Users (
-    //             Id INT PRIMARY KEY IDENTITY(1,1),
-    //             Name NVARCHAR(100) NOT NULL
-    //         );";
+    [Fact]
+    public async Task ExecuteSqlCommandAsync_ShouldEscapeCommandText_WhenLinkedServer()
+    {
+        // Arrange
+        string commandText = "SELECT * FROM Users";
+        string linkedServerHostName = "sqlserver_server_2";
 
-    //     await ExecuteSqlCommandAsync(createTableCommand);
+        // Create the Users table for the test
+        string createTableCommand =
+            @"
+            IF OBJECT_ID('Users', 'U') IS NULL
+            CREATE TABLE Users (
+                Id INT PRIMARY KEY IDENTITY(1,1),
+                Name NVARCHAR(100) NOT NULL
+            );";
 
-    //     // Act
-    //     await ExecuteSqlCommandAsync(
-    //         commandText,
-    //         isLinkedServer: true,
-    //         linkedServerHostName: linkedServerHostName
-    //     );
+        await ExecuteSqlCommandAsync(
+            createTableCommand,
+            isLinkedServer: true,
+            linkedServerHostName: linkedServerHostName
+        );
 
-    //     // Assert
-    //     // No exception means the command executed successfully
-    // }
+        // Act
+        await ExecuteSqlCommandAsync(
+            commandText,
+            isLinkedServer: true,
+            linkedServerHostName: linkedServerHostName
+        );
+
+        // Assert
+        // No exception means the command executed successfully
+    }
 
     private async Task ExecuteSqlCommandAsync(
         string commandText,

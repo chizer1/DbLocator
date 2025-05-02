@@ -1,0 +1,101 @@
+volumes:
+  sqlserver_data1:
+  sqlserver_data2:
+
+services:
+  sqlserver_server_1:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=1StrongPwd!!
+      - MSSQL_PID=Developer
+    user: root
+    ports:
+      - 1433:1433
+    volumes:
+      - sqlserver_data1:/var/opt/mssql
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          '/opt/mssql-tools18/bin/sqlcmd -S "sqlserver_server_1" -U sa -P 1StrongPwd!! -C -Q ''SELECT 1'' || exit 1',
+        ]
+      interval: 10s
+      retries: 10
+      start_period: 10s
+      timeout: 3s
+  sqlserver_server_2:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=1StrongPwd!!
+      - MSSQL_PID=Developer
+    user: root
+    ports:
+      - 1434:1433
+    volumes:
+      - sqlserver_data2:/var/opt/mssql
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          '/opt/mssql-tools18/bin/sqlcmd -S "sqlserver_server_2" -U sa -P 1StrongPwd!! -C -Q ''SELECT 1'' || exit 1',
+        ]
+      interval: 10s
+      retries: 10
+      start_period: 10s
+      timeout: 3s
+  link_servers:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    user: root
+    depends_on:
+      sqlserver_server_2:
+        condition: service_healthy
+      sqlserver_server_1:
+        condition: service_healthy
+    # Link the two servers
+    command: >
+      bash -c '
+        link_server() {
+          echo "Linking $1 to $2"
+
+          /opt/mssql-tools18/bin/sqlcmd \
+            -S $1 \
+            -U sa \
+            -P $3 \
+            -C \
+            -d master \
+            -No \
+            -q "
+                EXEC sp_addlinkedserver
+                    @server = N'"'"'$2'"'"', 
+                    @srvproduct = N'"''"', 
+                    @provider = N'"'"'MSOLEDBSQL'"'"', 
+                    @datasrc = N'"'"'$2'"'"'; 
+                    
+                EXEC sp_addlinkedsrvlogin 
+                    @rmtsrvname = N'"'"'$2'"'"', 
+                    @useself = N'"'"'False'"'"', 
+                    @rmtuser = N'"'"'sa'"'"', 
+                    @rmtpassword = N'"'"'$3'"'"';
+
+                EXEC sp_serveroption 
+                    @server = '"'"'$2'"'"', 
+                    @optname = '"'"'rpc out'"'"', 
+                    @optvalue = '"'"'true'"'"';
+
+                EXEC sp_serveroption 
+                  @server = '"'"'$2'"'"', 
+                  @optname = '"'"'rpc'"'"', 
+                  @optvalue = '"'"'true'"'"';
+              "
+        }
+
+          
+        
+        link_server sqlserver_server_1 sqlserver_server_2 1StrongPwd!!
+        link_server sqlserver_server_2 sqlserver_server_1 1StrongPwd!!
+        echo "Servers Linked!";
+      '
