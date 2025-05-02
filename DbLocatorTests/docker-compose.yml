@@ -74,13 +74,26 @@ services:
                     @srvproduct = N'"''"', 
                     @provider = N'"'"'MSOLEDBSQL'"'"', 
                     @datasrc = N'"'"'$2'"'"'; 
+                    
                 EXEC sp_addlinkedsrvlogin 
                     @rmtsrvname = N'"'"'$2'"'"', 
                     @useself = N'"'"'False'"'"', 
                     @rmtuser = N'"'"'sa'"'"', 
                     @rmtpassword = N'"'"'$3'"'"';
+
+                EXEC sp_serveroption 
+                    @server = '"'"'$2'"'"', 
+                    @optname = '"'"'rpc out'"'"', 
+                    @optvalue = '"'"'true'"'"';
+
+                EXEC sp_serveroption 
+                  @server = '"'"'$2'"'"', 
+                  @optname = '"'"'rpc'"'"', 
+                  @optvalue = '"'"'true'"'"';
               "
         }
+
+          
         
         link_server sqlserver_server_1 sqlserver_server_2 1StrongPwd!!
         link_server sqlserver_server_2 sqlserver_server_1 1StrongPwd!!
