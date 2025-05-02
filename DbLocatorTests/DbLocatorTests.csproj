@@ -2,7 +2,9 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RunSettingsFilePath>.runsettings</RunSettingsFilePath>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
@@ -11,12 +13,20 @@
     <ProjectReference Include="..\DbLocator\DbLocator.csproj" />
     <Using Include="Xunit" />
   </ItemGroup>
+
+  <!-- Start DB container before VSTest -->
   <Target Name="DbContainerUp" BeforeTargets="VSTest">
+    <Exec Command="rm -rf TestResults" />
+    <Exec Command="rm -rf CoverageReport" />
     <Exec Command="docker compose up --detach" />
   </Target>
+
+  <!-- Cleanup logic -->
   <Target Name="DbContainerDown" AfterTargets="VSTest">
     <Message Text="Stopping and removing containers" Importance="high" />
     <Exec Command="docker compose down -v --remove-orphans" />
     <Exec Command="docker volume prune --force" />
+    <Exec Command="dotnet tool run reportgenerator -reports:&quot;TestResults/**/coverage.cobertura.xml&quot; -targetdir:CoverageReport" />
   </Target>
+
 </Project>
