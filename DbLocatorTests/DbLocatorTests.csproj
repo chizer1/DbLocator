@@ -15,13 +15,13 @@
   </ItemGroup>
 
   <!-- Start DB container before VSTest -->
-  <Target Name="DbContainerUp" BeforeTargets="VSTest">
+  <Target Name="RemoveOldTestFiles" BeforeTargets="VSTest">
     <Exec Command="rm -rf TestResults" />
     <Exec Command="rm -rf CoverageReport" />
   </Target>
 
   <!-- Cleanup logic -->
-  <Target Name="DbContainerDown" AfterTargets="VSTest">
+  <Target Name="GenerateReport" AfterTargets="VSTest">
     <Exec Command="dotnet tool run reportgenerator -reports:&quot;TestResults/**/coverage.cobertura.xml&quot; -targetdir:CoverageReport" />
   </Target>
 
