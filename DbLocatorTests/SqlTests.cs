@@ -1,3 +1,5 @@
+using DbLocator;
+using DbLocator.Db;
 using DbLocatorTests.Fixtures;
 using Microsoft.Data.SqlClient;
 
@@ -6,9 +8,9 @@ namespace DbLocatorTests;
 [Collection("DbLocator")]
 public class SqlTests(DbLocatorFixture dbLocatorFixture)
 {
-    private readonly string _dbLocatorConnectionString = dbLocatorFixture
-        .DbLocator
-        .ConnectionString;
+    private readonly DbLocatorContext _dbLocatorContext = DbContextFactory
+        .CreateDbContextFactory(dbLocatorFixture.DbLocator.ConnectionString)
+        .CreateDbContext();
 
     [Fact]
     public void SanitizeSqlIdentifier_ShouldReturnInput_WhenValidIdentifier()
@@ -50,7 +52,7 @@ public class SqlTests(DbLocatorFixture dbLocatorFixture)
         string commandText = "SELECT 1";
 
         // Act
-        await ExecuteSqlCommandAsync(commandText);
+        await Sql.ExecuteSqlCommandAsync(_dbLocatorContext, commandText);
 
         // Assert
         // No exception means the command executed successfully
@@ -65,7 +67,8 @@ public class SqlTests(DbLocatorFixture dbLocatorFixture)
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentException>(
             () =>
-                ExecuteSqlCommandAsync(
+                Sql.ExecuteSqlCommandAsync(
+                    _dbLocatorContext,
                     commandText,
                     isLinkedServer: true,
                     linkedServerHostName: null
@@ -89,14 +92,16 @@ public class SqlTests(DbLocatorFixture dbLocatorFixture)
                 Name NVARCHAR(100) NOT NULL
             );";
 
-        await ExecuteSqlCommandAsync(
+        await Sql.ExecuteSqlCommandAsync(
+            _dbLocatorContext,
             createTableCommand,
             isLinkedServer: true,
             linkedServerHostName: linkedServerHostName
         );
 
         // Act
-        await ExecuteSqlCommandAsync(
+        await Sql.ExecuteSqlCommandAsync(
+            _dbLocatorContext,
             commandText,
             isLinkedServer: true,
             linkedServerHostName: linkedServerHostName
@@ -104,24 +109,5 @@ public class SqlTests(DbLocatorFixture dbLocatorFixture)
 
         // Assert
         // No exception means the command executed successfully
-    }
-
-    private async Task ExecuteSqlCommandAsync(
-        string commandText,
-        bool isLinkedServer = false,
-        string linkedServerHostName = null
-    )
-    {
-        if (isLinkedServer && string.IsNullOrEmpty(linkedServerHostName))
-            throw new ArgumentException("Linked server host name cannot be null or empty.");
-
-        if (isLinkedServer)
-            commandText = $"exec('{commandText.Replace("'", "''")}') at [{linkedServerHostName}];";
-
-        using var connection = new SqlConnection(_dbLocatorConnectionString);
-        await connection.OpenAsync();
-
-        using var command = new SqlCommand(commandText, connection);
-        await command.ExecuteNonQueryAsync();
     }
 }
