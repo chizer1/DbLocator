@@ -8,15 +8,7 @@
       <DataCollector friendlyName="XPlat code coverage">
         <Configuration>
           <Format>json,cobertura,lcov,teamcity,opencover</Format>
-          <Include>[DbLocator]*</Include> <!-- [Assembly-Filter]Type-Filter -->
-          <ExcludeByFile>**/DbLocator/Migrations/*.cs</ExcludeByFile>
-          <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>
-          <SingleHit>false</SingleHit>
-          <UseSourceLink>true</UseSourceLink>
-          <IncludeTestAssembly>false</IncludeTestAssembly>
-          <SkipAutoProps>true</SkipAutoProps>
-          <DeterministicReport>false</DeterministicReport>
-          <ExcludeAssembliesWithoutSources>MissingAll,MissingAny,None</ExcludeAssembliesWithoutSources>
+          <ExcludeByFile>**/DbLocator/Migrations/*.cs,**/obj/**/*.cs,**/bin/**/*.cs</ExcludeByFile>
         </Configuration>
       </DataCollector>
     </DataCollectors>
