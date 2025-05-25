@@ -144,7 +144,7 @@ namespace DbLocator
         {
             return await _databaseUsers.GetDatabaseUser(databaseUserId);
         }
-        
+
         /// <summary>
         /// Updates the details of an existing database user, including the user name, user password, and the option to update the database.
         /// </summary>
@@ -278,11 +278,7 @@ namespace DbLocator
         /// <returns>
         /// A task that represents the asynchronous operation.
         /// </returns>
-        public async Task UpdateDatabaseUser(
-            int databaseUserId,
-            int[] databaseIds,
-            string userName
-        )
+        public async Task UpdateDatabaseUser(int databaseUserId, int[] databaseIds, string userName)
         {
             await _databaseUsers.UpdateDatabaseUser(databaseUserId, databaseIds, userName);
         }

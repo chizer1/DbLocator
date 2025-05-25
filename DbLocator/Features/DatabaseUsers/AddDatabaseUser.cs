@@ -17,7 +17,11 @@ internal sealed class AddDatabaseUserCommandValidator : AbstractValidator<AddDat
     internal AddDatabaseUserCommandValidator()
     {
         RuleFor(x => x.UserName).NotEmpty().WithMessage("User name is required.");
-        RuleFor(x => x.UserPassword).NotEmpty().WithMessage("User password is required.");
+        RuleFor(x => x.UserPassword)
+            .NotEmpty()
+            .WithMessage("User password is required.")
+            .MinimumLength(8)
+            .WithMessage("Password must be at least 8 characters long.");
         RuleFor(x => x.DatabaseIds).NotEmpty().WithMessage("Database ids are required.");
     }
 }
