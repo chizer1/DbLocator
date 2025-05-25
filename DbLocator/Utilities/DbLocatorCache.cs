@@ -45,7 +45,8 @@ internal class DbLocatorCache(IDistributedCache cache)
             return;
         }
 
-        await cache.SetStringAsync(cacheKey, connectionString);
+        var serializedData = JsonSerializer.Serialize(connectionString);
+        await cache.SetStringAsync(cacheKey, serializedData);
 
         // Add cacheKey to cached dictionary
         var cacheKeys = await GetCachedData<List<string>>("connectionCacheKeys") ?? [];
