@@ -609,40 +609,152 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
     }
 
-    // [Fact]
-    // public async Task UpdateDatabaseUser_AddNewDatabaseIds()
-    // {
-    //     var userName = TestHelpers.GetRandomString();
-    //     var userId = await _dbLocator.AddDatabaseUser(
-    //         [_databaseId],
-    //         userName,
-    //         "TestPassword123!",
-    //         true
-    //     );
+    [Fact]
+    public async Task UpdateDatabaseUser_AddNewDatabases()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var userId = await _dbLocator.AddDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
 
-    //     var newDatabaseName = TestHelpers.GetRandomString();
-    //     var newDatabaseId = await _dbLocator.AddDatabase(
-    //         newDatabaseName,
-    //         _databaseServerID,
-    //         _databaseTypeId,
-    //         Status.Active
-    //     );
+        // Create two new databases
+        var database2Name = TestHelpers.GetRandomString();
+        var database2Id = await _dbLocator.AddDatabase(
+            database2Name,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
 
-    //     var newDatabaseName2 = TestHelpers.GetRandomString();
-    //     var newDatabaseId2 = await _dbLocator.AddDatabase(
-    //         newDatabaseName2,
-    //         _databaseServerID,
-    //         _databaseTypeId,
-    //         Status.Active
-    //     );
+        var database3Name = TestHelpers.GetRandomString();
+        var database3Id = await _dbLocator.AddDatabase(
+            database3Name,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
 
-    //     await _dbLocator.UpdateDatabaseUser(userId, [newDatabaseId, newDatabaseId2], userName);
+        // Act - Update user to have all three databases
+        await _dbLocator.UpdateDatabaseUser(
+            userId,
+            [_databaseId, database2Id, database3Id],
+            userName
+        );
 
-    //     var updatedUser = await _dbLocator.GetDatabaseUser(userId);
-    //     Assert.Equal(2, updatedUser.Databases.Count);
-    //     Assert.Contains(updatedUser.Databases, d => d.Id == newDatabaseId);
-    //     Assert.Contains(updatedUser.Databases, d => d.Id == newDatabaseId2);
-    // }
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
+        Assert.Equal(3, updatedUser.Databases.Count);
+        Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
+        Assert.Contains(updatedUser.Databases, d => d.Id == database2Id);
+        Assert.Contains(updatedUser.Databases, d => d.Id == database3Id);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_RemoveDatabases()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var userId = await _dbLocator.AddDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
+
+        // Create two new databases
+        var database2Name = TestHelpers.GetRandomString();
+        var database2Id = await _dbLocator.AddDatabase(
+            database2Name,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        var database3Name = TestHelpers.GetRandomString();
+        var database3Id = await _dbLocator.AddDatabase(
+            database3Name,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        // First add all databases
+        await _dbLocator.UpdateDatabaseUser(
+            userId,
+            [_databaseId, database2Id, database3Id],
+            userName
+        );
+
+        // Act - Remove two databases, keeping only the first one
+        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId], userName);
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
+        Assert.Single(updatedUser.Databases);
+        Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
+        Assert.DoesNotContain(updatedUser.Databases, d => d.Id == database2Id);
+        Assert.DoesNotContain(updatedUser.Databases, d => d.Id == database3Id);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_AddAndRemoveDatabases()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var userId = await _dbLocator.AddDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
+
+        // Create three new databases
+        var database2Name = TestHelpers.GetRandomString();
+        var database2Id = await _dbLocator.AddDatabase(
+            database2Name,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        var database3Name = TestHelpers.GetRandomString();
+        var database3Id = await _dbLocator.AddDatabase(
+            database3Name,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        var database4Name = TestHelpers.GetRandomString();
+        var database4Id = await _dbLocator.AddDatabase(
+            database4Name,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        // First add three databases
+        await _dbLocator.UpdateDatabaseUser(
+            userId,
+            [_databaseId, database2Id, database3Id],
+            userName
+        );
+
+        // Act - Remove two databases and add one new one
+        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId, database4Id], userName);
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
+        Assert.Equal(2, updatedUser.Databases.Count);
+        Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
+        Assert.DoesNotContain(updatedUser.Databases, d => d.Id == database2Id);
+        Assert.DoesNotContain(updatedUser.Databases, d => d.Id == database3Id);
+        Assert.Contains(updatedUser.Databases, d => d.Id == database4Id);
+    }
 
     [Fact]
     public async Task UpdateDatabaseUser_RemovingAnExistingDatabaseId()
