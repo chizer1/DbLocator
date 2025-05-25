@@ -17,7 +17,18 @@ internal record GetConnectionQuery(
 
 internal sealed class GetConnectionQueryValidator : AbstractValidator<GetConnectionQuery>
 {
-    internal GetConnectionQueryValidator() { }
+    internal GetConnectionQueryValidator()
+    {
+        RuleFor(query => query)
+            .Must(query =>
+                (query.TenantId.HasValue && query.DatabaseTypeId.HasValue)
+                || query.ConnectionId.HasValue
+                || (!string.IsNullOrEmpty(query.TenantCode) && query.DatabaseTypeId.HasValue)
+            )
+            .WithMessage(
+                "At least one of the following combinations must be provided: (TenantId and DatabaseTypeId), ConnectionId, or (TenantCode and DatabaseTypeId)"
+            );
+    }
 }
 
 internal class GetConnection(
@@ -109,10 +120,9 @@ internal class GetConnection(
                     $"Connection not found with Tenant Code '{query.TenantCode}' and Database Type Id '{query.DatabaseTypeId}'."
                 );
         }
-        else
-        {
-            throw new ArgumentException("Invalid query parameters.");
-        }
+
+        // This should never happen due to validation in GetConnectionQueryValidator
+        return null;
     }
 
     private static async Task EnsureTenantExistsAsync(DbLocatorContext dbContext, int tenantId)

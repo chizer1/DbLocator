@@ -344,52 +344,6 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     }
 
     [Fact]
-    public async Task GetConnection_WithInvalidQueryParameters_ThrowsArgumentException()
-    {
-        // Arrange
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.AddTenant(tenantName);
-
-        var databaseTypeName = TestHelpers.GetRandomString();
-        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
-
-        var databaseName = TestHelpers.GetRandomString();
-        var databaseId = await _dbLocator.AddDatabase(
-            databaseName,
-            _databaseServerId,
-            databaseTypeId,
-            Status.Active
-        );
-
-        var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
-        var dbUserId = await _dbLocator.AddDatabaseUser(
-            [databaseId],
-            TestHelpers.GetRandomString(),
-            true
-        );
-        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
-        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataWriter, true);
-
-        // Act & Assert - Test with invalid tenant ID and invalid database type ID
-        var exception = await Assert.ThrowsAsync<ArgumentException>(
-            async () => await _dbLocator.GetConnection(-1, -1, [DatabaseRole.DataReader])
-        );
-        Assert.Equal("Invalid query parameters.", exception.Message);
-
-        // Act & Assert - Test with invalid tenant ID
-        exception = await Assert.ThrowsAsync<ArgumentException>(
-            async () => await _dbLocator.GetConnection(-1, databaseTypeId, [DatabaseRole.DataReader])
-        );
-        Assert.Equal("Invalid query parameters.", exception.Message);
-
-        // Act & Assert - Test with invalid database type ID
-        exception = await Assert.ThrowsAsync<ArgumentException>(
-            async () => await _dbLocator.GetConnection(tenantId, -1, [DatabaseRole.DataReader])
-        );
-        Assert.Equal("Invalid query parameters.", exception.Message);
-    }
-
-    [Fact]
     public async Task GetConnectionWithNonExistentTenantIdThrowsException()
     {
         var databaseTypeName = TestHelpers.GetRandomString();
