@@ -114,7 +114,9 @@ internal class UpdateDatabaseUser(
 
         foreach (var databaseId in databasesToRemove)
         {
-            var entityToRemove = databaseUserEntity.Databases.First(d => d.DatabaseId == databaseId);
+            var entityToRemove = databaseUserEntity.Databases.First(d =>
+                d.DatabaseId == databaseId
+            );
             dbContext.Remove(entityToRemove);
         }
 
