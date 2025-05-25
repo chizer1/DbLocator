@@ -267,4 +267,37 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
             async () => await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active)
         );
     }
+
+    [Fact]
+    public async Task GetTenants_ReturnsCachedData()
+    {
+        // Arrange
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName, tenantCode, Status.Active);
+
+        // Get tenants to populate cache
+        var tenants = await _dbLocator.GetTenants();
+        Assert.Contains(tenants, t => t.Id == tenantId);
+
+        // Act - Get tenants again (should come from cache)
+        var cachedTenants = await _dbLocator.GetTenants();
+
+        // Assert
+        Assert.NotNull(cachedTenants);
+        Assert.Contains(cachedTenants, t => t.Id == tenantId);
+        Assert.Contains(cachedTenants, t => t.Name == tenantName);
+        Assert.Contains(cachedTenants, t => t.Code == tenantCode);
+        Assert.Contains(cachedTenants, t => t.Status == Status.Active);
+
+        // Verify the data was actually from cache
+        var cacheKey = "tenants";
+        var cachedData = await _cache.GetCachedData<List<Tenant>>(cacheKey);
+        Assert.NotNull(cachedData);
+        Assert.Equal(cachedTenants.Count, cachedData.Count);
+        Assert.Equal(cachedTenants[0].Id, cachedData[0].Id);
+        Assert.Equal(cachedTenants[0].Name, cachedData[0].Name);
+        Assert.Equal(cachedTenants[0].Code, cachedData[0].Code);
+        Assert.Equal(cachedTenants[0].Status, cachedData[0].Status);
+    }
 }

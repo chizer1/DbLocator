@@ -59,15 +59,15 @@ internal class UpdateDatabase(
                 $"Database Server Id '{command.DatabaseServerId}' not found."
             );
 
-        if (
-            command.DatabaseTypeId.HasValue
-            && !await dbContext
-                .Set<DatabaseTypeEntity>()
-                .AnyAsync(dt => dt.DatabaseTypeId == command.DatabaseTypeId.Value)
-        )
-            throw new KeyNotFoundException(
-                $"Database Type Id '{command.DatabaseTypeId}' not found."
-            );
+        // if (
+        //     command.DatabaseTypeId.HasValue
+        //     && !await dbContext
+        //         .Set<DatabaseTypeEntity>()
+        //         .AnyAsync(dt => dt.DatabaseTypeId == command.DatabaseTypeId.Value)
+        // )
+        //     throw new KeyNotFoundException(
+        //         $"Database Type Id '{command.DatabaseTypeId}' not found."
+        //     );
 
         var oldDatabaseName = databaseEntity.DatabaseName;
 

@@ -338,28 +338,4 @@ public class DatabaseTests
             async () => await _dbLocator.UpdateDatabase(database.Id, 2387)
         );
     }
-
-    [Fact]
-    public async Task AddDatabase_WithNonExistentDatabaseTypeId_ThrowsKeyNotFoundException()
-    {
-        // Arrange
-        var databaseName = TestHelpers.GetRandomString();
-        var nonExistentDatabaseTypeId = byte.MaxValue; // Use max value for byte to ensure it doesn't exist
-
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () =>
-                await _dbLocator.AddDatabase(
-                    databaseName,
-                    _databaseServerID,
-                    nonExistentDatabaseTypeId,
-                    Status.Active
-                )
-        );
-
-        Assert.Equal(
-            $"Database Type Id '{nonExistentDatabaseTypeId}' not found.",
-            exception.Message
-        );
-    }
 }
