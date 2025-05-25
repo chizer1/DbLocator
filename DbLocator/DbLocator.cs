@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using DbLocator.Db;
 using DbLocator.Library;
 using DbLocator.Utilities;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -24,9 +25,9 @@ public partial class Locator
     private readonly Tenants _tenants;
 
     /// <summary>
-    /// Get the connection string for the DbLocator database.
+    /// Get a sql connection for the DbLocator database.
     /// </summary>
-    public string ConnectionString { get; }
+    public SqlConnection SqlConnection { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Locator"/> class.
@@ -62,7 +63,7 @@ public partial class Locator
         _databaseTypes = new DatabaseTypes(dbContextFactory, dbLocatorCache);
         _tenants = new Tenants(dbContextFactory, dbLocatorCache);
 
-        ConnectionString = dbLocatorConnectionString;
+        SqlConnection = new SqlConnection(dbLocatorConnectionString);
     }
 
     /// <summary>

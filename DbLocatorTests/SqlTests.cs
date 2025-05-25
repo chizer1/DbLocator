@@ -1,7 +1,6 @@
 using DbLocator;
 using DbLocator.Db;
 using DbLocatorTests.Fixtures;
-using Microsoft.Data.SqlClient;
 
 namespace DbLocatorTests;
 
@@ -9,7 +8,7 @@ namespace DbLocatorTests;
 public class SqlTests(DbLocatorFixture dbLocatorFixture)
 {
     private readonly DbLocatorContext _dbLocatorContext = DbContextFactory
-        .CreateDbContextFactory(dbLocatorFixture.DbLocator.ConnectionString)
+        .CreateDbContextFactory(dbLocatorFixture.ConnectionString)
         .CreateDbContext();
 
     [Fact]
