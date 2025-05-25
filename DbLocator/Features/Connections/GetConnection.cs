@@ -93,7 +93,8 @@ internal class GetConnection(
                     $"Connection not found with Tenant Id '{query.TenantId}' and Database Type Id '{query.DatabaseTypeId}'."
                 );
         }
-        else if (query.ConnectionId.HasValue)
+
+        if (query.ConnectionId.HasValue)
         {
             return await dbContext
                     .Set<ConnectionEntity>()
@@ -103,26 +104,22 @@ internal class GetConnection(
                     $"Connection with ID {query.ConnectionId} not found."
                 );
         }
-        else if (!string.IsNullOrEmpty(query.TenantCode) && query.DatabaseTypeId.HasValue)
-        {
-            await EnsureTenantExistsAsync(dbContext, query.TenantCode);
-            await EnsureDatabaseTypeExistsAsync(dbContext, query.DatabaseTypeId.Value);
 
-            return await dbContext
-                    .Set<ConnectionEntity>()
-                    .Include(con => con.Database)
-                    .Where(con =>
-                        con.Tenant.TenantCode == query.TenantCode
-                        && con.Database.DatabaseTypeId == query.DatabaseTypeId
-                    )
-                    .FirstOrDefaultAsync()
-                ?? throw new KeyNotFoundException(
-                    $"Connection not found with Tenant Code '{query.TenantCode}' and Database Type Id '{query.DatabaseTypeId}'."
-                );
-        }
+        // At this point, we know we have TenantCode and DatabaseTypeId due to validation
+        await EnsureTenantExistsAsync(dbContext, query.TenantCode);
+        await EnsureDatabaseTypeExistsAsync(dbContext, query.DatabaseTypeId!.Value);
 
-        // This should never happen due to validation in GetConnectionQueryValidator
-        return null;
+        return await dbContext
+                .Set<ConnectionEntity>()
+                .Include(con => con.Database)
+                .Where(con =>
+                    con.Tenant.TenantCode == query.TenantCode
+                    && con.Database.DatabaseTypeId == query.DatabaseTypeId
+                )
+                .FirstOrDefaultAsync()
+            ?? throw new KeyNotFoundException(
+                $"Connection not found with Tenant Code '{query.TenantCode}' and Database Type Id '{query.DatabaseTypeId}'."
+            );
     }
 
     private static async Task EnsureTenantExistsAsync(DbLocatorContext dbContext, int tenantId)
