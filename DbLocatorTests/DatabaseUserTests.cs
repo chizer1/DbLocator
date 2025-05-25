@@ -682,7 +682,7 @@ public class DatabaseUserTests : IAsyncLifetime
         // Arrange
         var tenantId = await _dbLocator.AddTenant("TestTenant", "TEST", Status.Active);
         var databaseType = await _dbLocator.AddDatabaseType("TestType");
-
+        
         // Create two databases on the same server
         var database1 = await _dbLocator.AddDatabase(
             "TestDB1",
@@ -696,7 +696,7 @@ public class DatabaseUserTests : IAsyncLifetime
             databaseType,
             Status.Active
         );
-
+        
         // Add connections for both databases
         await _dbLocator.AddConnection(tenantId, database1);
         await _dbLocator.AddConnection(tenantId, database2);
@@ -706,17 +706,20 @@ public class DatabaseUserTests : IAsyncLifetime
             [database1, database2],
             "testuser",
             "TestPassword123!",
-            true
+            true // Set affectDatabase to true to hit server processing code
         );
 
         // Assert
         var user = await _dbLocator.GetDatabaseUser(dbUserId);
         Assert.NotNull(user);
         Assert.Equal("testuser", user.Name);
-
+        
         // Verify the user has access to both databases
         Assert.Equal(2, user.Databases.Count);
         Assert.Contains(user.Databases, d => d.Id == database1);
         Assert.Contains(user.Databases, d => d.Id == database2);
+
+        // Note: The server is only processed once due to the Distinct() query in AddDatabaseUser,
+        // so we don't need to explicitly test the processedServers.Contains() check
     }
 }
