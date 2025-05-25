@@ -59,6 +59,7 @@ internal class UpdateDatabaseUser(
             await dbContext
                 .Set<DatabaseUserEntity>()
                 .Include(du => du.UserRoles)
+                .Include(du => du.Databases)
                 .FirstOrDefaultAsync(d => d.DatabaseUserId == command.DatabaseUserId)
             ?? throw new KeyNotFoundException("Database user not found.");
 
