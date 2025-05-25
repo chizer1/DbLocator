@@ -80,8 +80,8 @@ internal class AddDatabaseUser(
 
             foreach (var databaseServer in databaseServers)
             {
-                if (processedServers.Contains(databaseServer.DatabaseServerId))
-                    continue;
+                // if (processedServers.Contains(databaseServer.DatabaseServerId))
+                //    continue;
 
                 await Sql.ExecuteSqlCommandAsync(
                     dbContext,
