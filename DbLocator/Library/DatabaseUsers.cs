@@ -20,47 +20,47 @@ internal class DatabaseUsers(
         new(dbContextFactory, encryption, cache);
 
     internal async Task<int> AddDatabaseUser(
-        List<int> databaseIds,
+        int[] databaseIds,
         string userName,
         string userPassword,
-        bool createUser
+        bool affectDatabase
     )
     {
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(databaseIds, userName, userPassword, createUser)
+            new AddDatabaseUserCommand(userName, userPassword, databaseIds, affectDatabase)
         );
     }
 
     internal async Task<int> AddDatabaseUser(
-        List<int> databaseIds,
+        int[] databaseIds,
         string userName,
-        bool createUser
+        bool affectDatabase
     )
     {
         var userPassword = PasswordGenerator.GenerateRandomPassword(25);
 
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(databaseIds, userName, userPassword, createUser)
+            new AddDatabaseUserCommand(userName, userPassword, databaseIds, affectDatabase)
         );
     }
 
     internal async Task<int> AddDatabaseUser(
-        List<int> databaseIds,
+        int[] databaseIds,
         string userName,
         string userPassword
     )
     {
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(databaseIds, userName, userPassword, false)
+            new AddDatabaseUserCommand(userName, userPassword, databaseIds, false)
         );
     }
 
-    internal async Task<int> AddDatabaseUser(List<int> databaseIds, string userName)
+    internal async Task<int> AddDatabaseUser(int[] databaseIds, string userName)
     {
         var userPassword = PasswordGenerator.GenerateRandomPassword(25);
 
         return await _addDatabaseUser.Handle(
-            new AddDatabaseUserCommand(databaseIds, userName, userPassword, false)
+            new AddDatabaseUserCommand(userName, userPassword, databaseIds, false)
         );
     }
 
@@ -83,7 +83,7 @@ internal class DatabaseUsers(
 
     internal async Task UpdateDatabaseUser(
         int databaseUserId,
-        List<int> databaseIds,
+        int[] databaseIds,
         string databaseUserName,
         string databaseUserPassword,
         bool updateDatabase
@@ -92,7 +92,7 @@ internal class DatabaseUsers(
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
                 databaseUserId,
-                databaseIds,
+                databaseIds.ToList(),
                 databaseUserName,
                 databaseUserPassword,
                 updateDatabase
@@ -102,7 +102,7 @@ internal class DatabaseUsers(
 
     internal async Task UpdateDatabaseUser(
         int databaseUserId,
-        List<int> databaseIds,
+        int[] databaseIds,
         string databaseUserName,
         bool updateDatabase
     )
@@ -112,7 +112,7 @@ internal class DatabaseUsers(
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
                 databaseUserId,
-                databaseIds,
+                databaseIds.ToList(),
                 databaseUserName,
                 databaseUserPassword,
                 updateDatabase
@@ -122,7 +122,7 @@ internal class DatabaseUsers(
 
     internal async Task UpdateDatabaseUser(
         int databaseUserId,
-        List<int> databaseIds,
+        int[] databaseIds,
         string databaseUserName,
         string databaseUserPassword
     )
@@ -130,7 +130,7 @@ internal class DatabaseUsers(
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
                 databaseUserId,
-                databaseIds,
+                databaseIds.ToList(),
                 databaseUserName,
                 databaseUserPassword,
                 false
@@ -140,7 +140,7 @@ internal class DatabaseUsers(
 
     internal async Task UpdateDatabaseUser(
         int databaseUserId,
-        List<int> databaseIds,
+        int[] databaseIds,
         string databaseUserName
     )
     {
@@ -149,7 +149,7 @@ internal class DatabaseUsers(
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
                 databaseUserId,
-                databaseIds,
+                databaseIds.ToList(),
                 databaseUserName,
                 databaseUserPassword,
                 false

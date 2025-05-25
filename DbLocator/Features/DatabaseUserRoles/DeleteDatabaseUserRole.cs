@@ -9,7 +9,7 @@ namespace DbLocator.Features.DatabaseUserRoles
     internal record DeleteDatabaseUserRoleCommand(
         int DatabaseUserId,
         DatabaseRole UserRole,
-        bool DeleteDatabaseUserRole
+        bool AffectDatabase
     );
 
     internal sealed class DeleteDatabaseUserRoleCommandValidator
@@ -56,7 +56,7 @@ namespace DbLocator.Features.DatabaseUserRoles
             await dbContext.SaveChangesAsync();
 
             cache?.TryClearConnectionStringFromCache(Roles: [command.UserRole]);
-            if (!command.DeleteDatabaseUserRole)
+            if (!command.AffectDatabase)
             {
                 return;
             }

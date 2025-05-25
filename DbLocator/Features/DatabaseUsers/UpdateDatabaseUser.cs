@@ -11,7 +11,7 @@ internal record UpdateDatabaseUserCommand(
     List<int> DatabaseIds,
     string UserName,
     string UserPassword,
-    bool UpdateDatabase = false
+    bool AffectDatabase
 );
 
 internal sealed class UpdateDatabaseUserCommandValidator
@@ -92,7 +92,7 @@ internal class UpdateDatabaseUser(
         dbContext.Update(databaseUserEntity);
         await dbContext.SaveChangesAsync();
 
-        if (!command.UpdateDatabase)
+        if (!command.AffectDatabase)
             return;
 
         var databaseUserDatabases = await dbContext

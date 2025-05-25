@@ -72,6 +72,26 @@ internal class Databases(IDbContextFactory<DbLocatorContext> dbContextFactory, D
         );
     }
 
+    internal async Task<int> AddDatabase(
+        string databaseName,
+        int databaseServerId,
+        byte databaseTypeId,
+        bool createDatabase,
+        bool useTrustedConnection
+    )
+    {
+        return await _addDatabase.Handle(
+            new AddDatabaseCommand(
+                databaseName,
+                databaseServerId,
+                databaseTypeId,
+                Status.Active,
+                useTrustedConnection,
+                createDatabase
+            )
+        );
+    }
+
     internal async Task DeleteDatabase(int databaseId)
     {
         await _deleteDatabase.Handle(new DeleteDatabaseCommand(databaseId, false));

@@ -58,8 +58,8 @@ namespace DbLocator
         /// <param name="databaseStatus">
         /// The status of the database.
         /// </param>
-        /// <param name="createDatabase">
-        /// A flag indicating whether to create the database.
+        /// <param name="affectDatabase">
+        /// A flag indicating whether to perform DDL operations on the database server.
         /// </param>
         /// <returns>
         /// The ID of the newly added database.
@@ -75,7 +75,7 @@ namespace DbLocator
             int databaseServerId,
             byte databaseTypeId,
             Status databaseStatus,
-            bool createDatabase
+            bool affectDatabase
         )
         {
             return await _databases.AddDatabase(
@@ -83,7 +83,7 @@ namespace DbLocator
                 databaseServerId,
                 databaseTypeId,
                 databaseStatus,
-                createDatabase
+                affectDatabase
             );
         }
 
@@ -99,43 +99,8 @@ namespace DbLocator
         /// <param name="databaseTypeId">
         /// The ID of the database type.
         /// </param>
-        /// <returns>
-        /// The ID of the newly added database.
-        /// </returns>
-        /// <exception cref="KeyNotFoundException">
-        /// Thrown when the specified database server or database type is not found.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// Thrown when the database name is invalid or when attempting to create a database with invalid parameters.
-        /// </exception>
-        public async Task<int> AddDatabase(
-            string databaseName,
-            int databaseServerId,
-            byte databaseTypeId
-        )
-        {
-            return await _databases.AddDatabase(
-                databaseName,
-                databaseServerId,
-                databaseTypeId,
-                Status.Active
-            );
-        }
-
-        /// <summary>
-        /// Adds a new database with an option to create the database.
-        /// </summary>
-        /// <param name="databaseName">
-        /// The name of the database.
-        /// </param>
-        /// <param name="databaseServerId">
-        /// The ID of the database server where the database is located.
-        /// </param>
-        /// <param name="databaseTypeId">
-        /// The ID of the database type.
-        /// </param>
-        /// <param name="createDatabase">
-        /// A flag indicating whether to create the database.
+        /// <param name="affectDatabase">
+        /// A flag indicating whether to perform DDL operations on the database server.
         /// </param>
         /// <returns>
         /// The ID of the newly added database.
@@ -150,14 +115,41 @@ namespace DbLocator
             string databaseName,
             int databaseServerId,
             byte databaseTypeId,
-            bool createDatabase
+            bool affectDatabase
         )
         {
             return await _databases.AddDatabase(
                 databaseName,
                 databaseServerId,
                 databaseTypeId,
-                createDatabase
+                affectDatabase
+            );
+        }
+
+        /// <summary>
+        /// Adds a new database with specified trusted connection settings.
+        /// </summary>
+        /// <param name="databaseName">The name of the database to be added.</param>
+        /// <param name="databaseServerId">The ID of the database server where the database will be created.</param>
+        /// <param name="databaseTypeId">The ID of the database type.</param>
+        /// <param name="affectDatabase">A flag indicating whether to perform DDL operations on the database server.</param>
+        /// <param name="useTrustedConnection">A flag indicating whether to use Windows authentication for the database connection.</param>
+        /// <returns>The ID of the newly created database.</returns>
+        /// <exception cref="KeyNotFoundException">Thrown when the specified database server or type is not found.</exception>
+        public async Task<int> AddDatabase(
+            string databaseName,
+            int databaseServerId,
+            byte databaseTypeId,
+            bool affectDatabase,
+            bool useTrustedConnection
+        )
+        {
+            return await _databases.AddDatabase(
+                databaseName,
+                databaseServerId,
+                databaseTypeId,
+                affectDatabase,
+                useTrustedConnection
             );
         }
 
