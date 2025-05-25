@@ -13,9 +13,6 @@ public class ConnectionTests
     private readonly DbLocatorCache _cache;
     private readonly byte _databaseTypeId;
 
-    public ConnectionTests()
-        : this(new DbLocatorFixture()) { }
-
     public ConnectionTests(DbLocatorFixture dbLocatorFixture)
     {
         _dbLocator = dbLocatorFixture.DbLocator;
