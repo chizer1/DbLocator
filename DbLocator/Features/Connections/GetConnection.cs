@@ -30,12 +30,11 @@ internal class GetConnection(
     {
         await new GetConnectionQueryValidator().ValidateAndThrowAsync(query);
 
-        // Override the default toString so I can control it
         var queryString =
             @$"TenantId:{query.TenantId},
             DatabaseTypeId:{query.DatabaseTypeId},
             ConnectionId:{query.ConnectionId},
-            TenantCode:{query.TenantCode}
+            TenantCode:{query.TenantCode},
             Roles:{(query.Roles?.Length > 0 ? string.Join(",", query.Roles) : "None")}";
 
         var cacheKey = $"connection:{queryString}";

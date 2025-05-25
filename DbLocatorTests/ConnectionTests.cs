@@ -560,19 +560,20 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
             true
         );
         await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataWriter, true);
 
         // Act - First call to populate cache
         var firstConnection = await _dbLocator.GetConnection(
             tenantId,
             databaseTypeId,
-            [DatabaseRole.DataReader]
+            [DatabaseRole.DataReader, DatabaseRole.DataWriter]
         );
 
         // Act - Second call should use cached connection string
         var secondConnection = await _dbLocator.GetConnection(
             tenantId,
             databaseTypeId,
-            [DatabaseRole.DataReader]
+            [DatabaseRole.DataReader, DatabaseRole.DataWriter]
         );
 
         // Assert
@@ -580,7 +581,13 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         Assert.Equal(firstConnection.ConnectionString, secondConnection.ConnectionString);
 
         // Verify the connection string was cached
-        var cacheKey = $"connection:TenantId:{tenantId},DatabaseTypeId:{databaseTypeId},ConnectionId:,TenantCode:Roles:DataReader";
+        var queryString =
+            @$"TenantId:{tenantId},
+            DatabaseTypeId:{databaseTypeId},
+            ConnectionId:,
+            TenantCode:,
+            Roles:DataReader,DataWriter";
+        var cacheKey = $"connection:{queryString}";
         var cachedConnectionString = await _cache.GetCachedData<string>(cacheKey);
         Assert.NotNull(cachedConnectionString);
         Assert.Equal(secondConnection.ConnectionString, cachedConnectionString);
