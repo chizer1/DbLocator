@@ -680,33 +680,43 @@ public class DatabaseUserTests : IAsyncLifetime
     public async Task AddDatabaseUser_WithMultipleDatabasesOnSameServer_ProcessesServerOnce()
     {
         // Arrange
-        var tenant = await _fixture.AddTenant("TestTenant", "TEST");
-        var databaseType = await _fixture.AddDatabaseType("TestType");
-        
+        var tenantId = await _dbLocator.AddTenant("TestTenant", "TEST", Status.Active);
+        var databaseType = await _dbLocator.AddDatabaseType("TestType");
+
         // Create two databases on the same server
-        var database1 = await _fixture.AddDatabase(databaseType.DatabaseTypeId, "TestDB1");
-        var database2 = await _fixture.AddDatabase(databaseType.DatabaseTypeId, "TestDB2");
-        
+        var database1 = await _dbLocator.AddDatabase(
+            "TestDB1",
+            _databaseServerID,
+            databaseType,
+            Status.Active
+        );
+        var database2 = await _dbLocator.AddDatabase(
+            "TestDB2",
+            _databaseServerID,
+            databaseType,
+            Status.Active
+        );
+
         // Add connections for both databases
-        await _fixture.AddConnection(tenant.TenantId, database1.DatabaseId);
-        await _fixture.AddConnection(tenant.TenantId, database2.DatabaseId);
+        await _dbLocator.AddConnection(tenantId, database1);
+        await _dbLocator.AddConnection(tenantId, database2);
 
         // Act
-        var dbUserId = await _fixture.DbLocator.AddDatabaseUser(
-            [database1.DatabaseId, database2.DatabaseId],
+        var dbUserId = await _dbLocator.AddDatabaseUser(
+            [database1, database2],
             "testuser",
-            "TestPassword123!"
+            "TestPassword123!",
+            true
         );
 
         // Assert
-        var user = await _fixture.DbLocator.GetDatabaseUser(dbUserId);
+        var user = await _dbLocator.GetDatabaseUser(dbUserId);
         Assert.NotNull(user);
-        Assert.Equal("testuser", user.UserName);
-        
+        Assert.Equal("testuser", user.Name);
+
         // Verify the user has access to both databases
-        var userDatabases = await _fixture.DbLocator.GetDatabaseUserDatabases(dbUserId);
-        Assert.Equal(2, userDatabases.Count);
-        Assert.Contains(userDatabases, d => d.DatabaseId == database1.DatabaseId);
-        Assert.Contains(userDatabases, d => d.DatabaseId == database2.DatabaseId);
+        Assert.Equal(2, user.Databases.Count);
+        Assert.Contains(user.Databases, d => d.Id == database1);
+        Assert.Contains(user.Databases, d => d.Id == database2);
     }
 }
