@@ -8,7 +8,7 @@ namespace DbLocator.Features.DatabaseUserRoles;
 internal record AddDatabaseUserRoleCommand(
     int DatabaseUserId,
     DatabaseRole UserRole,
-    bool UpdateUser
+    bool AffectDatabase
 );
 
 internal sealed class AddDatabaseUserRoleCommandValidator
@@ -56,7 +56,7 @@ internal class AddDatabaseUserRole(IDbContextFactory<DbLocatorContext> dbContext
         await dbContext.Set<DatabaseUserRoleEntity>().AddAsync(databaseUserRole);
         await dbContext.SaveChangesAsync();
 
-        if (command.UpdateUser)
+        if (command.AffectDatabase)
             await CreateDatabaseUserRole(dbContext, user, command);
 
         return databaseUserRole.DatabaseUserRoleId;

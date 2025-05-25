@@ -204,7 +204,12 @@ public class DatabaseTests
     public async Task AddDatabase_WithDbNameServerIdAndTypeId()
     {
         var dbName = TestHelpers.GetRandomString();
-        var databaseId = await _dbLocator.AddDatabase(dbName, _databaseServerID, _databaseTypeId);
+        var databaseId = await _dbLocator.AddDatabase(
+            dbName,
+            _databaseServerID,
+            _databaseTypeId,
+            false
+        );
 
         var database = await _dbLocator.GetDatabase(databaseId);
         Assert.NotNull(database);

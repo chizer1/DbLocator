@@ -132,7 +132,7 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
 
         // Add a database and create a connection to the tenant
         var dbName = TestHelpers.GetRandomString();
-        var databaseId = await _dbLocator.AddDatabase(dbName, 1, 1);
+        var databaseId = await _dbLocator.AddDatabase(dbName, 1, 1, false);
         await _dbLocator.AddConnection(tenantId, databaseId);
 
         // Attempt to delete the tenant

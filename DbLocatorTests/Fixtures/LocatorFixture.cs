@@ -16,7 +16,7 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
 
     private readonly string DockerFile;
 
-    private const string connString =
+    public string ConnectionString =
         "Server=localhost;Database=DbLocator;User Id=sa;Password=1StrongPwd!!;Encrypt=True;TrustServerCertificate=True;";
 
     public DbLocatorFixture()
@@ -37,7 +37,7 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
         var options = Options.Create<MemoryDistributedCacheOptions>(new());
         var memCache = new MemoryDistributedCache(options, NullLoggerFactory.Instance);
         LocatorCache = new DbLocatorCache(memCache);
-        DbLocator = new Locator(connString, null, memCache);
+        DbLocator = new Locator(ConnectionString, null, memCache);
     }
 
     public void Dispose() { }

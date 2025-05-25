@@ -6,37 +6,23 @@ using Microsoft.EntityFrameworkCore;
 namespace DbLocator.Features.DatabaseUsers;
 
 internal record AddDatabaseUserCommand(
-    List<int> DatabaseIds,
     string UserName,
     string UserPassword,
-    bool CreateUser
+    int[] DatabaseIds,
+    bool AffectDatabase
 );
 
 internal sealed class AddDatabaseUserCommandValidator : AbstractValidator<AddDatabaseUserCommand>
 {
     internal AddDatabaseUserCommandValidator()
     {
-        RuleFor(x => x.DatabaseIds).NotEmpty().WithMessage("At least one Database Id is required.");
-
-        RuleFor(x => x.UserName)
-            .MaximumLength(50)
-            .WithMessage("Database User cannot be more than 50 characters.")
-            .Matches(@"^[a-zA-Z0-9_]+$")
-            .WithMessage("Database User can only contain letters, numbers, and underscores.");
-
+        RuleFor(x => x.UserName).NotEmpty().WithMessage("User name is required.");
         RuleFor(x => x.UserPassword)
+            .NotEmpty()
+            .WithMessage("User password is required.")
             .MinimumLength(8)
-            .WithMessage("Database User Password must be at least 8 characters long.")
-            .Matches(@"[A-Z]")
-            .WithMessage("Database User Password must contain at least one uppercase letter.")
-            .Matches(@"[a-z]")
-            .WithMessage("Database User Password must contain at least one lowercase letter.")
-            .Matches(@"[0-9]")
-            .WithMessage("Database User Password must contain at least one number.")
-            .Matches(@"[\W_]")
-            .WithMessage("Database User Password must contain at least one special character.")
-            .MaximumLength(50)
-            .WithMessage("Database User Password cannot be more than 50 characters.");
+            .WithMessage("Password must be at least 8 characters long.");
+        RuleFor(x => x.DatabaseIds).NotEmpty().WithMessage("Database ids are required.");
     }
 }
 
@@ -81,7 +67,7 @@ internal class AddDatabaseUser(
         await dbContext.Set<DatabaseUserEntity>().AddAsync(databaseUser);
         await dbContext.SaveChangesAsync();
 
-        if (command.CreateUser)
+        if (command.AffectDatabase)
         {
             var databaseServers = await dbContext
                 .Set<DatabaseEntity>()
@@ -121,8 +107,8 @@ internal class AddDatabaseUser(
         await dbContext.Set<DatabaseUserDatabaseEntity>().AddRangeAsync(databaseUserDatabases);
         await dbContext.SaveChangesAsync();
 
-        // only if create user is specificed, do we ran any sql commands
-        if (command.CreateUser)
+        // only if affect database is specified, do we run any sql commands
+        if (command.AffectDatabase)
         {
             foreach (var databaseId in command.DatabaseIds)
             {

@@ -12,7 +12,7 @@ internal record AddDatabaseCommand(
     byte DatabaseTypeId,
     Status DatabaseStatus,
     bool UseTrustedConnection,
-    bool CreateDatabase
+    bool AffectDatabase
 );
 
 internal sealed class AddDatabaseCommandValidator : AbstractValidator<AddDatabaseCommand>
@@ -78,7 +78,7 @@ internal class AddDatabase(
         await dbContext.Set<DatabaseEntity>().AddAsync(database);
         await dbContext.SaveChangesAsync();
 
-        if (command.CreateDatabase)
+        if (command.AffectDatabase)
             await CreateDatabaseAsync(command, dbContext);
 
         cache?.Remove("databases");

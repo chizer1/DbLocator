@@ -13,8 +13,8 @@ namespace DbLocator
         /// <param name="userRole">
         /// The <see cref="DatabaseRole"/> to be assigned to the database user.
         /// </param>
-        /// <param name="updateUser">
-        /// A flag indicating whether to update the user after the role is added.
+        /// <param name="affectDatabase">
+        /// A flag indicating whether to perform DDL operations on the database server.
         /// </param>
         /// <returns>
         /// A task that represents the asynchronous operation.
@@ -22,10 +22,10 @@ namespace DbLocator
         public async Task AddDatabaseUserRole(
             int databaseUserId,
             DatabaseRole userRole,
-            bool updateUser
+            bool affectDatabase
         )
         {
-            await _databaseUserRoles.AddDatabaseUserRole(databaseUserId, userRole, updateUser);
+            await _databaseUserRoles.AddDatabaseUserRole(databaseUserId, userRole, affectDatabase);
         }
 
         /// <summary>
@@ -54,8 +54,8 @@ namespace DbLocator
         /// <param name="userRole">
         /// The <see cref="DatabaseRole"/> to be deleted from the database user.
         /// </param>
-        /// <param name="deleteDatabaseUserRole">
-        /// A flag indicating whether to delete the role from the database.
+        /// <param name="affectDatabase">
+        /// A flag indicating whether to perform DDL operations on the database server.
         /// </param>
         /// <returns>
         /// A task that represents the asynchronous operation.
@@ -63,18 +63,18 @@ namespace DbLocator
         public async Task DeleteDatabaseUserRole(
             int databaseUserId,
             DatabaseRole userRole,
-            bool deleteDatabaseUserRole
+            bool affectDatabase
         )
         {
             await _databaseUserRoles.DeleteDatabaseUserRole(
                 databaseUserId,
                 userRole,
-                deleteDatabaseUserRole
+                affectDatabase
             );
         }
 
         /// <summary>
-        /// Deletes a role from a database user. This method does not delete the role from the database.
+        /// Deletes a role from a database user. This method does not remove the role from the database.
         /// </summary>
         /// <param name="databaseUserId">
         /// The ID of the database user from which the role will be removed.
