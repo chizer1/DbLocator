@@ -675,4 +675,38 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
         Assert.DoesNotContain(updatedUser.Databases, d => d.Id == newDatabaseId);
     }
+
+    [Fact]
+    public async Task AddDatabaseUser_WithMultipleDatabasesOnSameServer_ProcessesServerOnce()
+    {
+        // Arrange
+        var tenant = await _fixture.AddTenant("TestTenant", "TEST");
+        var databaseType = await _fixture.AddDatabaseType("TestType");
+        
+        // Create two databases on the same server
+        var database1 = await _fixture.AddDatabase(databaseType.DatabaseTypeId, "TestDB1");
+        var database2 = await _fixture.AddDatabase(databaseType.DatabaseTypeId, "TestDB2");
+        
+        // Add connections for both databases
+        await _fixture.AddConnection(tenant.TenantId, database1.DatabaseId);
+        await _fixture.AddConnection(tenant.TenantId, database2.DatabaseId);
+
+        // Act
+        var dbUserId = await _fixture.DbLocator.AddDatabaseUser(
+            [database1.DatabaseId, database2.DatabaseId],
+            "testuser",
+            "TestPassword123!"
+        );
+
+        // Assert
+        var user = await _fixture.DbLocator.GetDatabaseUser(dbUserId);
+        Assert.NotNull(user);
+        Assert.Equal("testuser", user.UserName);
+        
+        // Verify the user has access to both databases
+        var userDatabases = await _fixture.DbLocator.GetDatabaseUserDatabases(dbUserId);
+        Assert.Equal(2, userDatabases.Count);
+        Assert.Contains(userDatabases, d => d.DatabaseId == database1.DatabaseId);
+        Assert.Contains(userDatabases, d => d.DatabaseId == database2.DatabaseId);
+    }
 }
