@@ -96,13 +96,8 @@ internal class UpdateDatabaseUser(
         if (!command.AffectDatabase)
             return;
 
-        var databaseUserDatabases = await dbContext
-            .Set<DatabaseUserDatabaseEntity>()
-            .Where(dud => dud.DatabaseUserId == databaseUserEntity.DatabaseUserId)
-            .ToListAsync();
-
         // Handle adding/removing databases
-        var currentDatabaseIds = databaseUserDatabases.Select(d => d.DatabaseId).ToList();
+        var currentDatabaseIds = databaseUserEntity.Databases.Select(d => d.DatabaseId).ToList();
         var databasesToAdd = command.DatabaseIds.Except(currentDatabaseIds).ToList();
         var databasesToRemove = currentDatabaseIds.Except(command.DatabaseIds).ToList();
 
@@ -119,7 +114,7 @@ internal class UpdateDatabaseUser(
 
         foreach (var databaseId in databasesToRemove)
         {
-            var entityToRemove = databaseUserDatabases.First(d => d.DatabaseId == databaseId);
+            var entityToRemove = databaseUserEntity.Databases.First(d => d.DatabaseId == databaseId);
             dbContext.Remove(entityToRemove);
         }
 
@@ -127,15 +122,15 @@ internal class UpdateDatabaseUser(
 
         var commands = new List<string>();
 
-        foreach (var databaseUserDatabase in databaseUserDatabases)
-        {
-            var database =
-                await dbContext
-                    .Set<DatabaseEntity>()
-                    .Include(d => d.DatabaseServer)
-                    .FirstOrDefaultAsync(ds => ds.DatabaseId == databaseUserDatabase.DatabaseId)
-                ?? throw new KeyNotFoundException("Database not found.");
+        // Get all databases for the user after the update
+        var updatedDatabases = await dbContext
+            .Set<DatabaseEntity>()
+            .Include(d => d.DatabaseServer)
+            .Where(d => command.DatabaseIds.Contains(d.DatabaseId))
+            .ToListAsync();
 
+        foreach (var database in updatedDatabases)
+        {
             if (oldDatabaseUserName != command.UserName && !string.IsNullOrEmpty(command.UserName))
             {
                 var sanitizedOldUserName = Sql.SanitizeSqlIdentifier(oldDatabaseUserName);
