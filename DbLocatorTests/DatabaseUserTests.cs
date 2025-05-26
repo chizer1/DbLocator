@@ -981,14 +981,14 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.NotNull(databaseUserDatabase.Database);
         Assert.Equal(user.Id, databaseUserDatabase.DatabaseUserId);
         Assert.Equal(_databaseId, databaseUserDatabase.DatabaseId);
-        Assert.Equal(userName, databaseUserDatabase.User.UserName);
+        Assert.Equal(user.Name, databaseUserDatabase.User.UserName);
 
         Assert.NotNull(databaseUserRole);
         Assert.NotNull(databaseUserRole.User);
         Assert.NotNull(databaseUserRole.Role);
         Assert.Equal(user.Id, databaseUserRole.DatabaseUserId);
         Assert.Equal((int)DatabaseRole.DataWriter, databaseUserRole.DatabaseRoleId);
-        Assert.Equal(userName, databaseUserRole.User.UserName);
+        Assert.Equal(user.Name, databaseUserRole.User.UserName);
         Assert.Equal(DatabaseRole.DataWriter.ToString(), databaseUserRole.Role.DatabaseRoleName);
     }
 
