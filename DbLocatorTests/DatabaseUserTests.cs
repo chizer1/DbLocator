@@ -1029,8 +1029,8 @@ public class DatabaseUserTests : IAsyncLifetime
         await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
         await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataReader);
 
-        // Cache a connection string
-        var cacheKey = $"connection_{user.Id}";
+        // Cache a connection string with the correct format
+        var cacheKey = $"connection_{_databaseId}_{user.Id}_{(int)DatabaseRole.DataWriter}";
         await _cache.CacheConnectionString(cacheKey, "test_connection_string");
 
         // Act - Try to clear cache with matching criteria
@@ -1055,8 +1055,8 @@ public class DatabaseUserTests : IAsyncLifetime
         var user = await AddDatabaseUserAsync(userName);
         await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
 
-        // Cache a connection string
-        var cacheKey = $"connection_{user.Id}";
+        // Cache a connection string with the correct format
+        var cacheKey = $"connection_{_databaseId}_{user.Id}_{(int)DatabaseRole.DataWriter}";
         await _cache.CacheConnectionString(cacheKey, "test_connection_string");
 
         // Act - Try to clear cache with non-matching criteria
