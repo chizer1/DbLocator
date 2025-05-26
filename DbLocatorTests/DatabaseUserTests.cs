@@ -1,9 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using DbLocator;
+using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.Databases;
+using DbLocator.Library;
 using DbLocator.Utilities;
 using DbLocatorTests.Fixtures;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace DbLocatorTests;
@@ -898,5 +901,44 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Contains(DatabaseRole.Owner, user.Roles);
         Assert.Contains(DatabaseRole.DataWriter, user.Roles);
         Assert.Contains(DatabaseRole.DataReader, user.Roles);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithDatabaseChanges_UpdatesAssociations()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+        var database1 = await AddDatabaseAsync(TestHelpers.GetRandomString());
+        var database2 = await AddDatabaseAsync(TestHelpers.GetRandomString());
+
+        // Act
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            [database1.Id, database2.Id],
+            userName,
+            "NewPassword123!",
+            true
+        );
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Equal(2, updatedUser.Databases.Count);
+        Assert.Contains(updatedUser.Databases, d => d.Id == database1.Id);
+        Assert.Contains(updatedUser.Databases, d => d.Id == database2.Id);
+        Assert.DoesNotContain(updatedUser.Databases, d => d.Id == _databaseId);
+    }
+
+    private async Task<Database> AddDatabaseAsync(string databaseName)
+    {
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active,
+            false
+        );
+
+        return (await _dbLocator.GetDatabases()).Single(db => db.Id == databaseId);
     }
 }

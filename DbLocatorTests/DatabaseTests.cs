@@ -379,4 +379,51 @@ public class DatabaseTests
         Assert.NotNull(updatedDatabase);
         Assert.True(updatedDatabase.UseTrustedConnection);
     }
+
+    [Fact]
+    public async Task CacheData_WithStringData_CachesStringDirectly()
+    {
+        // Arrange
+        var cacheKey = "test_string_cache";
+        var stringData = "test string data";
+
+        // Act
+        await _cache.CacheData(cacheKey, stringData);
+
+        // Assert
+        var cachedData = await _cache.GetCachedData<string>(cacheKey);
+        Assert.Equal(stringData, cachedData);
+    }
+
+    [Fact]
+    public async Task TryClearConnectionStringFromCache_WithTenantCode_RemovesMatchingKeys()
+    {
+        // Arrange
+        var tenantCode = TestHelpers.GetRandomString();
+        var cacheKey = $"connection_{tenantCode}_test";
+        await _cache.CacheConnectionString(cacheKey, "test connection string");
+
+        // Act
+        await _cache.TryClearConnectionStringFromCache(tenantCode: tenantCode);
+
+        // Assert
+        var cachedData = await _cache.GetCachedData<string>(cacheKey);
+        Assert.Null(cachedData);
+    }
+
+    [Fact]
+    public async Task TryClearConnectionStringFromCache_WithDatabaseRoles_RemovesMatchingKeys()
+    {
+        // Arrange
+        var roles = new[] { DatabaseRole.DataReader, DatabaseRole.DataWriter };
+        var cacheKey = $"connection_roles_{string.Join("_", roles)}";
+        await _cache.CacheConnectionString(cacheKey, "test connection string");
+
+        // Act
+        await _cache.TryClearConnectionStringFromCache(roles: roles);
+
+        // Assert
+        var cachedData = await _cache.GetCachedData<string>(cacheKey);
+        Assert.Null(cachedData);
+    }
 }
