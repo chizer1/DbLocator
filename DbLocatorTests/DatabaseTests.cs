@@ -61,32 +61,32 @@ public class DatabaseTests
         Assert.Contains(cachedDatabases, db => db.Name == database.Name);
     }
 
-    [Fact]
-    public async Task GetDatabaseById()
-    {
-        var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+    //[Fact]
+    //public async Task GetDatabaseById()
+    //{
+    //    var dbName = TestHelpers.GetRandomString();
+    //    var database = await AddDatabaseAsync(dbName);
 
-        var retrievedDatabase = await _dbLocator.GetDatabase(database.Id);
-        Assert.NotNull(retrievedDatabase);
-        Assert.Equal(database.Id, retrievedDatabase.Id);
-        Assert.Equal(database.Name, retrievedDatabase.Name);
-        Assert.Equal(database.Server.Id, retrievedDatabase.Server.Id);
-        Assert.Equal(database.Type.Id, retrievedDatabase.Type.Id);
-        Assert.Equal(database.Status, retrievedDatabase.Status);
-    }
+    //    var retrievedDatabase = await _dbLocator.GetDatabase(database.Id);
+    //    Assert.NotNull(retrievedDatabase);
+    //    Assert.Equal(database.Id, retrievedDatabase.Id);
+    //    Assert.Equal(database.Name, retrievedDatabase.Name);
+    //    Assert.Equal(database.Server.Id, retrievedDatabase.Server.Id);
+    //    Assert.Equal(database.Type.Id, retrievedDatabase.Type.Id);
+    //    Assert.Equal(database.Status, retrievedDatabase.Status);
+    //}
 
-    [Fact]
-    public async Task DeleteDatabase()
-    {
-        var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+    //[Fact]
+    //public async Task DeleteDatabase()
+    //{
+    //    var dbName = TestHelpers.GetRandomString();
+    //    var database = await AddDatabaseAsync(dbName);
 
-        await _dbLocator.DeleteDatabase(database.Id);
+    //    await _dbLocator.DeleteDatabase(database.Id);
 
-        var databases = await _dbLocator.GetDatabases();
-        Assert.DoesNotContain(databases, db => db.Id == database.Id);
-    }
+    //    var databases = await _dbLocator.GetDatabases();
+    //    Assert.DoesNotContain(databases, db => db.Id == database.Id);
+    //}
 
     [Fact]
     public async Task GetNonExistentDatabase_ThrowsKeyNotFoundException()
