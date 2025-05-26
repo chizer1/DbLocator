@@ -8,6 +8,8 @@
     <CoverletOutput>TestResults/</CoverletOutput>
     <Threshold>100</Threshold>
     <ThresholdType>line</ThresholdType>
+    <ThresholdStat>total</ThresholdStat>
+    <ExcludeByFile>**/Migrations/*.cs,**/obj/**/*.cs,**/bin/**/*.cs</ExcludeByFile>
   </PropertyGroup>
 
   <ItemGroup>
