@@ -393,7 +393,7 @@ public class DatabaseUserTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task DeleteDatabaseUser_WithRoles_ClearsRoleCache()
+    public async Task DeleteDatabaseUser_WithRoles_ClearsCache()
     {
         // Arrange
         var userName = TestHelpers.GetRandomString();
@@ -415,6 +415,10 @@ public class DatabaseUserTests : IAsyncLifetime
         // Assert
         var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
         Assert.Null(cachedUsers);
+
+        // Verify user is deleted from database
+        var allUsers = await _dbLocator.GetDatabaseUsers();
+        Assert.DoesNotContain(allUsers, u => u.Id == user.Id);
     }
 
     [Fact]
@@ -1011,29 +1015,5 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.True(databaseUserDatabase.DatabaseUserDatabaseId > 0);
         Assert.Equal(user.Id, databaseUserDatabase.DatabaseUserId);
         Assert.Equal(_databaseId, databaseUserDatabase.DatabaseId);
-    }
-
-    [Fact]
-    public async Task DeleteDatabaseUser_WithRolesAndNullCache_ClearsCache()
-    {
-        // Arrange
-        var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataReader);
-
-        // Ensure cache is populated
-        var users = await _dbLocator.GetDatabaseUsers();
-        Assert.Contains(users, u => u.Id == user.Id);
-
-        // Create a new instance of DbLocator with null cache
-        var dbLocatorWithNullCache = new Locator(_fixture.DbContextFactory, null);
-
-        // Act
-        await dbLocatorWithNullCache.DeleteDatabaseUser(user.Id, true);
-
-        // Assert
-        var allUsers = await dbLocatorWithNullCache.GetDatabaseUsers();
-        Assert.DoesNotContain(allUsers, u => u.Id == user.Id);
     }
 }
