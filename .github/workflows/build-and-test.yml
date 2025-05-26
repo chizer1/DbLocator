@@ -34,7 +34,7 @@ jobs:
 
       - name: Run Tests with Coverage
         run: |
-          dotnet test --no-build --collect:"XPlat Code Coverage" --results-directory:TestResults /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+          dotnet test --no-build --collect:"XPlat Code Coverage" --results-directory:TestResults /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:IncludeTestAssembly=true /p:SingleHit=true
           if [ $? -ne 0 ]; then
             echo "Tests failed"
             exit 1
@@ -42,12 +42,29 @@ jobs:
 
       - name: Check Coverage Threshold
         run: |
-          coverage=$(find TestResults -name "coverage.cobertura.xml" -type f -exec cat {} \; | grep -o 'line-rate="[^"]*"' | cut -d'"' -f2)
-          if (( $(echo "$coverage < 1.0" | bc -l) )); then
-            echo "Code coverage is below 100% (current: ${coverage})"
+          # Extract coverage metrics
+          coverage_file=$(find TestResults -name "coverage.cobertura.xml" -type f)
+          if [ -z "$coverage_file" ]; then
+            echo "No coverage file found"
             exit 1
           fi
-          echo "Code coverage is at 100%"
+          
+          # Get line and branch coverage
+          line_rate=$(grep -o 'line-rate="[^"]*"' "$coverage_file" | cut -d'"' -f2)
+          branch_rate=$(grep -o 'branch-rate="[^"]*"' "$coverage_file" | cut -d'"' -f2)
+          
+          echo "Current coverage:"
+          echo "Line coverage: ${line_rate}"
+          echo "Branch coverage: ${branch_rate}"
+          
+          # Check if either metric is below 100%
+          if (( $(echo "$line_rate < 1.0" | bc -l) )) || (( $(echo "$branch_rate < 1.0" | bc -l) )); then
+            echo "Coverage is below 100%"
+            echo "Files with less than 100% coverage:"
+            grep -A 2 '<class ' "$coverage_file" | grep -v '^--$' | grep -v '^$' | grep -v '^<' | sort -u
+            exit 1
+          fi
+          echo "Coverage is at 100% for both line and branch coverage"
 
       - name: Generate Coverage Report
         run: reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" -targetdir:CoverageReport
