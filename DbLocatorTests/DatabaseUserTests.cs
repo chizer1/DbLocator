@@ -757,4 +757,130 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Contains(DatabaseRole.DataReader, user.Roles);
         Assert.Contains(databaseId, user.Databases.Select(d => d.Id));
     }
+
+    [Fact]
+    public async Task AddDatabaseUser_WithMultipleDatabases_CreatesCorrectEntities()
+    {
+        // Arrange
+        var databaseName1 = TestHelpers.GetRandomString();
+        var databaseId1 = await _dbLocator.AddDatabase(
+            databaseName1,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        var databaseName2 = TestHelpers.GetRandomString();
+        var databaseId2 = await _dbLocator.AddDatabase(
+            databaseName2,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        // Act
+        var dbUserId = await _dbLocator.AddDatabaseUser(
+            new[] { databaseId1, databaseId2 },
+            TestHelpers.GetRandomString(),
+            true
+        );
+
+        // Assert
+        var user = await _dbLocator.GetDatabaseUser(dbUserId);
+        Assert.NotNull(user);
+        Assert.Equal(2, user.Databases.Count);
+        Assert.Contains(databaseId1, user.Databases.Select(d => d.Id));
+        Assert.Contains(databaseId2, user.Databases.Select(d => d.Id));
+    }
+
+    [Fact]
+    public async Task AddDatabaseUser_WithMultipleRoles_CreatesCorrectEntities()
+    {
+        // Arrange
+        var dbUserId = await _dbLocator.AddDatabaseUser(
+            new[] { _databaseId },
+            TestHelpers.GetRandomString(),
+            true
+        );
+
+        // Act
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.Owner, true);
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataWriter, true);
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
+
+        // Assert
+        var user = await _dbLocator.GetDatabaseUser(dbUserId);
+        Assert.NotNull(user);
+        Assert.Equal(3, user.Roles.Count);
+        Assert.Contains(DatabaseRole.Owner, user.Roles);
+        Assert.Contains(DatabaseRole.DataWriter, user.Roles);
+        Assert.Contains(DatabaseRole.DataReader, user.Roles);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithMultipleDatabases_UpdatesCorrectEntities()
+    {
+        // Arrange
+        var databaseName1 = TestHelpers.GetRandomString();
+        var databaseId1 = await _dbLocator.AddDatabase(
+            databaseName1,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        var databaseName2 = TestHelpers.GetRandomString();
+        var databaseId2 = await _dbLocator.AddDatabase(
+            databaseName2,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        var dbUserId = await _dbLocator.AddDatabaseUser(
+            new[] { databaseId1 },
+            TestHelpers.GetRandomString(),
+            true
+        );
+
+        // Act
+        await _dbLocator.UpdateDatabaseUser(
+            dbUserId,
+            new[] { databaseId1, databaseId2 },
+            TestHelpers.GetRandomString(),
+            true
+        );
+
+        // Assert
+        var user = await _dbLocator.GetDatabaseUser(dbUserId);
+        Assert.NotNull(user);
+        Assert.Equal(2, user.Databases.Count);
+        Assert.Contains(databaseId1, user.Databases.Select(d => d.Id));
+        Assert.Contains(databaseId2, user.Databases.Select(d => d.Id));
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithMultipleRoles_UpdatesCorrectEntities()
+    {
+        // Arrange
+        var dbUserId = await _dbLocator.AddDatabaseUser(
+            new[] { _databaseId },
+            TestHelpers.GetRandomString(),
+            true
+        );
+
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.Owner, true);
+
+        // Act
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataWriter, true);
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
+
+        // Assert
+        var user = await _dbLocator.GetDatabaseUser(dbUserId);
+        Assert.NotNull(user);
+        Assert.Equal(3, user.Roles.Count);
+        Assert.Contains(DatabaseRole.Owner, user.Roles);
+        Assert.Contains(DatabaseRole.DataWriter, user.Roles);
+        Assert.Contains(DatabaseRole.DataReader, user.Roles);
+    }
 }

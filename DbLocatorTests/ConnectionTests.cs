@@ -590,4 +590,138 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         Assert.Equal(firstConnection.ConnectionString, secondConnection.ConnectionString);
         Assert.Equal(cachedConnectionString, secondConnection.ConnectionString);
     }
+
+    [Fact]
+    public async Task GetConnection_ByConnectionId()
+    {
+        // Arrange
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerId,
+            databaseTypeId,
+            Status.Active
+        );
+
+        var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
+        var dbUserId = await _dbLocator.AddDatabaseUser(
+            [databaseId],
+            TestHelpers.GetRandomString(),
+            true
+        );
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
+
+        // Act
+        var connection = await _dbLocator.GetConnection(connectionId, [DatabaseRole.DataReader]);
+
+        // Assert
+        Assert.NotNull(connection);
+        Assert.Contains(databaseName, connection.ConnectionString);
+    }
+
+    [Fact]
+    public async Task GetConnection_WithNoRolesSpecified()
+    {
+        // Arrange
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerId,
+            databaseTypeId,
+            Status.Active
+        );
+
+        var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
+        var dbUserId = await _dbLocator.AddDatabaseUser(
+            [databaseId],
+            TestHelpers.GetRandomString(),
+            true
+        );
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
+        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataWriter, true);
+
+        // Act
+        var connection = await _dbLocator.GetConnection(tenantId, databaseTypeId);
+
+        // Assert
+        Assert.NotNull(connection);
+        Assert.Contains(databaseName, connection.ConnectionString);
+    }
+
+    [Fact]
+    public async Task GetConnection_WithNonExistentConnectionId_ThrowsKeyNotFoundException()
+    {
+        // Act & Assert
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.GetConnection(-1, [DatabaseRole.DataReader])
+        );
+    }
+
+    [Fact]
+    public async Task GetConnection_WithInvalidQueryParameters_ThrowsValidationException()
+    {
+        // Act & Assert
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+            async () => await _dbLocator.GetConnection(0, 0)
+        );
+    }
+
+    [Fact]
+    public async Task GetConnections_WithEmptyDatabase()
+    {
+        // Arrange - Clean up any existing connections
+        var existingConnections = await _dbLocator.GetConnections();
+        foreach (var connection in existingConnections)
+        {
+            await _dbLocator.DeleteConnection(connection.Id);
+        }
+
+        // Act
+        var connections = await _dbLocator.GetConnections();
+
+        // Assert
+        Assert.Empty(connections);
+    }
+
+    [Fact]
+    public async Task GetConnections_WithNullCache()
+    {
+        // Arrange
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.AddTenant(tenantName);
+
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerId,
+            databaseTypeId,
+            Status.Active
+        );
+
+        var connectionId = await _dbLocator.AddConnection(tenantId, databaseId);
+
+        // Clear the cache
+        await _cache.Remove("connections");
+
+        // Act
+        var connections = await _dbLocator.GetConnections();
+
+        // Assert
+        Assert.Contains(connections, cn => cn.Id == connectionId);
+    }
 }
