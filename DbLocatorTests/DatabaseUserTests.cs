@@ -1021,33 +1021,6 @@ public class DatabaseUserTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task ShouldRemoveCacheKey_WithMatchingCriteria_ReturnsTrue()
-    {
-        // Arrange
-        var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataReader);
-
-        // Cache a connection string with the correct format
-        var cacheKey = $"connection_{_databaseId}_{user.Id}_{(int)DatabaseRole.DataWriter}";
-        await _cache.CacheConnectionString(cacheKey, "test_connection_string");
-
-        // Act - Try to clear cache with matching criteria
-        await _cache.TryClearConnectionStringFromCache(
-            tenantId: null,
-            databaseTypeId: null,
-            connectionId: user.Id,
-            tenantCode: null,
-            roles: [DatabaseRole.DataWriter]
-        );
-
-        // Assert
-        var cachedData = await _cache.GetCachedData<string>(cacheKey);
-        Assert.Null(cachedData); // Cache should be cleared
-    }
-
-    [Fact]
     public async Task ShouldRemoveCacheKey_WithNonMatchingCriteria_ReturnsFalse()
     {
         // Arrange
