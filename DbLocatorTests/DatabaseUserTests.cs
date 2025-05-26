@@ -1091,13 +1091,14 @@ public class DatabaseUserTests : IAsyncLifetime
             Status.Active
         );
 
-        // Create a new database server
+        // Create a new database server with unique hostname
         var newServerName = TestHelpers.GetRandomString();
+        var newHostName = $"server-{TestHelpers.GetRandomString()}";
         var newServerId = await _dbLocator.AddDatabaseServer(
             newServerName,
             "127.0.0.1",
-            "localhost",
-            "localhost.localdomain",
+            newHostName,
+            $"{newHostName}.localdomain",
             true
         );
 
