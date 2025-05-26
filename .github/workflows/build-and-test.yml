@@ -44,6 +44,8 @@ jobs:
         run: reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" -targetdir:CoverageReport
 
       - name: Check Coverage Threshold
+        id: coverage
+        continue-on-error: true
         run: |
           coverage=$(grep -A 1 "Line coverage" CoverageReport/index.html | grep -o '[0-9]\+\.[0-9]\+%' | cut -d'%' -f1)
           echo "Current coverage: ${coverage}%"
@@ -54,7 +56,12 @@ jobs:
           echo "Coverage is at 100%"
 
       - name: Upload Coverage Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Code-Coverage-Report
           path: ${{ github.workspace }}/CoverageReport
+
+      - name: Fail if coverage below threshold
+        if: steps.coverage.outcome == 'failure'
+        run: exit 1
