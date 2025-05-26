@@ -1078,4 +1078,48 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Equal(_databaseTypeId, updatedDatabase.Type.Id); // Type should remain unchanged
         Assert.Equal(Status.Active, updatedDatabase.Status); // Status should remain unchanged
     }
+
+    [Fact]
+    public async Task UpdateDatabase_WithAllParameters_UpdatesCorrectly()
+    {
+        // Arrange
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        // Create a new database server
+        var newServerName = TestHelpers.GetRandomString();
+        var newServerId = await _dbLocator.AddDatabaseServer(
+            newServerName,
+            "127.0.0.1",
+            "localhost",
+            "localhost.localdomain",
+            true
+        );
+
+        // Create a new database type
+        var newTypeName = TestHelpers.GetRandomString();
+        var newTypeId = await _dbLocator.AddDatabaseType(newTypeName);
+
+        // Act
+        var newDatabaseName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabase(
+            databaseId,
+            newDatabaseName,
+            newServerId,
+            newTypeId,
+            Status.Inactive
+        );
+
+        // Assert
+        var updatedDatabase = await _dbLocator.GetDatabase(databaseId);
+        Assert.Equal(newDatabaseName, updatedDatabase.Name);
+        Assert.Equal(newServerId, updatedDatabase.Server.Id);
+        Assert.Equal(newTypeId, updatedDatabase.Type.Id);
+        Assert.Equal(Status.Inactive, updatedDatabase.Status);
+    }
 }
