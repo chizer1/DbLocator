@@ -962,14 +962,34 @@ public class DatabaseUserTests : IAsyncLifetime
         await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter, true);
 
         // Act
-        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        var dbContext = DbContextFactory.CreateDbContextFactory(_fixture.ConnectionString).CreateDbContext();
+        var databaseUserDatabase = await dbContext
+            .Set<DatabaseUserDatabaseEntity>()
+            .Include(d => d.User)
+            .Include(d => d.Database)
+            .FirstOrDefaultAsync(d => d.DatabaseUserId == user.Id);
+
+        var databaseUserRole = await dbContext
+            .Set<DatabaseUserRoleEntity>()
+            .Include(r => r.User)
+            .Include(r => r.Role)
+            .FirstOrDefaultAsync(r => r.DatabaseUserId == user.Id);
 
         // Assert
-        Assert.NotNull(updatedUser);
-        Assert.Single(updatedUser.Databases);
-        Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
-        Assert.Single(updatedUser.Roles);
-        Assert.Equal(DatabaseRole.DataWriter, updatedUser.Roles[0]);
+        Assert.NotNull(databaseUserDatabase);
+        Assert.NotNull(databaseUserDatabase.User);
+        Assert.NotNull(databaseUserDatabase.Database);
+        Assert.Equal(user.Id, databaseUserDatabase.DatabaseUserId);
+        Assert.Equal(_databaseId, databaseUserDatabase.DatabaseId);
+        Assert.Equal(userName, databaseUserDatabase.User.UserName);
+
+        Assert.NotNull(databaseUserRole);
+        Assert.NotNull(databaseUserRole.User);
+        Assert.NotNull(databaseUserRole.Role);
+        Assert.Equal(user.Id, databaseUserRole.DatabaseUserId);
+        Assert.Equal((int)DatabaseRole.DataWriter, databaseUserRole.DatabaseRoleId);
+        Assert.Equal(userName, databaseUserRole.User.UserName);
+        Assert.Equal(DatabaseRole.DataWriter.ToString(), databaseUserRole.Role.DatabaseRoleName);
     }
 
     [Fact]
