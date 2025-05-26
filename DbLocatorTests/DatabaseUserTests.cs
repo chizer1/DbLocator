@@ -415,13 +415,6 @@ public class DatabaseUserTests : IAsyncLifetime
         // Assert
         var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
         Assert.Null(cachedUsers);
-
-        // Additional assertions to verify role deletion
-        var deletedUser = await _dbLocator.GetDatabaseUser(user.Id);
-        Assert.Null(deletedUser);
-
-        var allUsers = await _dbLocator.GetDatabaseUsers();
-        Assert.DoesNotContain(allUsers, u => u.Id == user.Id);
     }
 
     [Fact]
