@@ -971,4 +971,25 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Single(updatedUser.Roles);
         Assert.Equal(DatabaseRole.DataWriter, updatedUser.Roles[0]);
     }
+
+    [Fact]
+    public async Task AddDatabaseUser_CreatesDatabaseUserDatabaseEntities()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        
+        // Act
+        var user = await AddDatabaseUserAsync(userName);
+        
+        // Assert
+        var dbContext = DbContextFactory.CreateDbContextFactory(_fixture.ConnectionString).CreateDbContext();
+        var databaseUserDatabase = await dbContext
+            .Set<DatabaseUserDatabaseEntity>()
+            .FirstOrDefaultAsync(d => d.DatabaseUserId == user.Id);
+            
+        Assert.NotNull(databaseUserDatabase);
+        Assert.True(databaseUserDatabase.DatabaseUserDatabaseId > 0);
+        Assert.Equal(user.Id, databaseUserDatabase.DatabaseUserId);
+        Assert.Equal(_databaseId, databaseUserDatabase.DatabaseId);
+    }
 }
