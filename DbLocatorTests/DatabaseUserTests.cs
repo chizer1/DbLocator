@@ -1019,4 +1019,57 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Equal(user.Id, databaseUserDatabase.DatabaseUserId);
         Assert.Equal(_databaseId, databaseUserDatabase.DatabaseId);
     }
+
+    [Fact]
+    public async Task ShouldRemoveCacheKey_WithMatchingCriteria_ReturnsTrue()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataReader);
+
+        // Cache a connection string
+        var cacheKey = $"connection_{user.Id}";
+        await _cache.CacheConnectionString(cacheKey, "test_connection_string");
+
+        // Act - Try to clear cache with matching criteria
+        await _cache.TryClearConnectionStringFromCache(
+            tenantId: null,
+            databaseTypeId: null,
+            connectionId: user.Id,
+            tenantCode: null,
+            roles: [DatabaseRole.DataWriter]
+        );
+
+        // Assert
+        var cachedData = await _cache.GetCachedData<string>(cacheKey);
+        Assert.Null(cachedData); // Cache should be cleared
+    }
+
+    [Fact]
+    public async Task ShouldRemoveCacheKey_WithNonMatchingCriteria_ReturnsFalse()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+
+        // Cache a connection string
+        var cacheKey = $"connection_{user.Id}";
+        await _cache.CacheConnectionString(cacheKey, "test_connection_string");
+
+        // Act - Try to clear cache with non-matching criteria
+        await _cache.TryClearConnectionStringFromCache(
+            tenantId: null,
+            databaseTypeId: null,
+            connectionId: user.Id,
+            tenantCode: null,
+            roles: [DatabaseRole.DataReader] // Different role
+        );
+
+        // Assert
+        var cachedData = await _cache.GetCachedData<string>(cacheKey);
+        Assert.NotNull(cachedData); // Cache should not be cleared
+    }
 }
