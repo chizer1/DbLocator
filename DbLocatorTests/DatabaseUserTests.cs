@@ -1026,14 +1026,14 @@ public class DatabaseUserTests : IAsyncLifetime
         var users = await _dbLocator.GetDatabaseUsers();
         Assert.Contains(users, u => u.Id == user.Id);
 
-        // Set cache to null to test null cache scenario
-        _cache = null;
+        // Create a new instance of DbLocator with null cache
+        var dbLocatorWithNullCache = new Locator(_fixture.DbContextFactory, null);
 
         // Act
-        await _dbLocator.DeleteDatabaseUser(user.Id, true);
+        await dbLocatorWithNullCache.DeleteDatabaseUser(user.Id, true);
 
         // Assert
-        var allUsers = await _dbLocator.GetDatabaseUsers();
+        var allUsers = await dbLocatorWithNullCache.GetDatabaseUsers();
         Assert.DoesNotContain(allUsers, u => u.Id == user.Id);
     }
 }
