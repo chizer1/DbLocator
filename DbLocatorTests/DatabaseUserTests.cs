@@ -405,11 +405,7 @@ public class DatabaseUserTests : IAsyncLifetime
         var users = await _dbLocator.GetDatabaseUsers();
         Assert.Contains(users, u => u.Id == user.Id);
 
-        // Delete roles first
-        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataReader);
-
-        // Act
+        // Act - Delete user without first deleting roles to hit the UserRoles.Select line
         await _dbLocator.DeleteDatabaseUser(user.Id, true);
 
         // Assert
