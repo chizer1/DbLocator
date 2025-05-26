@@ -1063,8 +1063,8 @@ public class DatabaseUserTests : IAsyncLifetime
         var newServerId = await _dbLocator.AddDatabaseServer(
             newServerName,
             "127.0.0.1",
-            "test",
-            "test",
+            "localhost",
+            "localhost.localdomain",
             true
         );
 
