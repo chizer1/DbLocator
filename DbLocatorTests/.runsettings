@@ -7,8 +7,11 @@
     <DataCollectors>
       <DataCollector friendlyName="XPlat code coverage">
         <Configuration>
-          <Format>json,cobertura,lcov,teamcity,opencover</Format>
-          <ExcludeByFile>**/DbLocator/Migrations/*.cs,**/obj/**/*.cs,**/bin/**/*.cs</ExcludeByFile>
+          <Format>cobertura</Format>
+          <ExcludeByFile>**/Migrations/*.cs,**/obj/**/*.cs,**/bin/**/*.cs</ExcludeByFile>
+          <Threshold>100</Threshold>
+          <ThresholdType>line</ThresholdType>
+          <ThresholdStat>total</ThresholdStat>
         </Configuration>
       </DataCollector>
     </DataCollectors>

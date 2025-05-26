@@ -32,7 +32,7 @@ jobs:
 
       - name: Run Tests with Coverage
         run: |
-          dotnet test --no-build --collect:"XPlat Code Coverage" --results-directory:TestResults -- /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Threshold=100 /p:ThresholdType=line /p:ThresholdStat=total
+          dotnet test --no-build --collect:"XPlat Code Coverage" --results-directory:TestResults /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Threshold=100 /p:ThresholdType=line /p:ThresholdStat=total
           if [ $? -ne 0 ]; then
             echo "Tests failed or coverage threshold not met"
             exit 1
