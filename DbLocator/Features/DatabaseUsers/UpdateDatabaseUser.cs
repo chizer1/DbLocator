@@ -101,24 +101,24 @@ internal class UpdateDatabaseUser(
         var databasesToAdd = command.DatabaseIds.Except(currentDatabaseIds).ToList();
         var databasesToRemove = currentDatabaseIds.Except(command.DatabaseIds).ToList();
 
-        foreach (var databaseId in databasesToAdd)
-        {
-            dbContext.Add(
-                new DatabaseUserDatabaseEntity
-                {
-                    DatabaseUserId = databaseUserEntity.DatabaseUserId,
-                    DatabaseId = databaseId
-                }
-            );
-        }
+        //foreach (var databaseId in databasesToAdd)
+        //{
+        //    dbContext.Add(
+        //        new DatabaseUserDatabaseEntity
+        //        {
+        //            DatabaseUserId = databaseUserEntity.DatabaseUserId,
+        //            DatabaseId = databaseId
+        //        }
+        //    );
+        //}
 
-        foreach (var databaseId in databasesToRemove)
-        {
-            var entityToRemove = databaseUserEntity.Databases.First(d =>
-                d.DatabaseId == databaseId
-            );
-            dbContext.Remove(entityToRemove);
-        }
+        //foreach (var databaseId in databasesToRemove)
+        //{
+        //    var entityToRemove = databaseUserEntity.Databases.First(d =>
+        //        d.DatabaseId == databaseId
+        //    );
+        //    dbContext.Remove(entityToRemove);
+        //}
 
         await dbContext.SaveChangesAsync();
 
