@@ -338,4 +338,45 @@ public class DatabaseTests
             async () => await _dbLocator.UpdateDatabase(database.Id, 2387)
         );
     }
+
+    [Fact]
+    public async Task AddDatabase_WithTrustedConnection_CreatesDatabaseWithTrustedConnection()
+    {
+        // Arrange
+        var dbName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            dbName,
+            _databaseServerID,
+            _databaseTypeId,
+            true, // Create database
+            true  // Use trusted connection
+        );
+
+        // Act
+        var database = await _dbLocator.GetDatabase(databaseId);
+
+        // Assert
+        Assert.NotNull(database);
+        Assert.Equal(dbName, database.Name);
+        Assert.Equal(_databaseServerID, database.Server.Id);
+        Assert.Equal(_databaseTypeId, database.Type.Id);
+        Assert.True(database.UseTrustedConnection);
+    }
+
+    [Fact]
+    public async Task UpdateDatabase_WithTrustedConnection_UpdatesDatabaseTrustedConnection()
+    {
+        // Arrange
+        var dbName = TestHelpers.GetRandomString();
+        var database = await AddDatabaseAsync(dbName);
+        Assert.False(database.UseTrustedConnection); // Initial state
+
+        // Act
+        await _dbLocator.UpdateDatabase(database.Id, true); // Enable trusted connection
+
+        // Assert
+        var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
+        Assert.NotNull(updatedDatabase);
+        Assert.True(updatedDatabase.UseTrustedConnection);
+    }
 }
