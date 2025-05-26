@@ -40,6 +40,6 @@ internal class DeleteConnection(
         await dbContext.SaveChangesAsync();
 
         cache?.Remove("connections");
-        cache?.TryClearConnectionStringFromCache(ConnectionId: command.ConnectionId);
+        cache?.TryClearConnectionStringFromCache(connectionId: command.ConnectionId);
     }
 }

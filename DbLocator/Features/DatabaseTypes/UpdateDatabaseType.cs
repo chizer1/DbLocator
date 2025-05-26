@@ -60,6 +60,6 @@ internal class UpdateDatabaseType(
 
         cache?.Remove("databaseTypes");
         cache?.Remove("connections");
-        cache?.TryClearConnectionStringFromCache(DatabaseTypeId: databaseType.DatabaseTypeId);
+        cache?.TryClearConnectionStringFromCache(databaseTypeId: databaseType.DatabaseTypeId);
     }
 }

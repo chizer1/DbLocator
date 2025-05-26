@@ -55,7 +55,7 @@ namespace DbLocator.Features.DatabaseUserRoles
             dbContext.Set<DatabaseUserRoleEntity>().Remove(databaseUserRoleEntity);
             await dbContext.SaveChangesAsync();
 
-            cache?.TryClearConnectionStringFromCache(Roles: [command.UserRole]);
+            cache?.TryClearConnectionStringFromCache(roles: [command.UserRole]);
             if (!command.AffectDatabase)
             {
                 return;

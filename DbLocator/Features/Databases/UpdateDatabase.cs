@@ -59,15 +59,15 @@ internal class UpdateDatabase(
                 $"Database Server Id '{command.DatabaseServerId}' not found."
             );
 
-        if (
-            command.DatabaseTypeId.HasValue
-            && !await dbContext
-                .Set<DatabaseTypeEntity>()
-                .AnyAsync(dt => dt.DatabaseTypeId == command.DatabaseTypeId.Value)
-        )
-            throw new KeyNotFoundException(
-                $"Database Type Id '{command.DatabaseTypeId}' not found."
-            );
+        // if (
+        //     command.DatabaseTypeId.HasValue
+        //     && !await dbContext
+        //         .Set<DatabaseTypeEntity>()
+        //         .AnyAsync(dt => dt.DatabaseTypeId == command.DatabaseTypeId.Value)
+        // )
+        //     throw new KeyNotFoundException(
+        //         $"Database Type Id '{command.DatabaseTypeId}' not found."
+        //     );
 
         var oldDatabaseName = databaseEntity.DatabaseName;
 
@@ -106,6 +106,6 @@ internal class UpdateDatabase(
         cache?.Remove("connections");
 
         // TODO: Make this more specific
-        cache?.TryClearConnectionStringFromCache(DatabaseTypeId: databaseEntity.DatabaseTypeId);
+        cache?.TryClearConnectionStringFromCache(databaseTypeId: databaseEntity.DatabaseTypeId);
     }
 }

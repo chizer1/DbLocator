@@ -338,4 +338,103 @@ public class DatabaseTests
             async () => await _dbLocator.UpdateDatabase(database.Id, 2387)
         );
     }
+
+    [Fact]
+    public async Task AddDatabase_WithTrustedConnection_CreatesDatabaseWithTrustedConnection()
+    {
+        // Arrange
+        var dbName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            dbName,
+            _databaseServerID,
+            _databaseTypeId,
+            true, // Create database
+            true  // Use trusted connection
+        );
+
+        // Act
+        var database = await _dbLocator.GetDatabase(databaseId);
+
+        // Assert
+        Assert.NotNull(database);
+        Assert.Equal(dbName, database.Name);
+        Assert.Equal(_databaseServerID, database.Server.Id);
+        Assert.Equal(_databaseTypeId, database.Type.Id);
+        Assert.True(database.UseTrustedConnection);
+    }
+
+    [Fact]
+    public async Task UpdateDatabase_WithTrustedConnection_UpdatesDatabaseTrustedConnection()
+    {
+        // Arrange
+        var dbName = TestHelpers.GetRandomString();
+        var database = await AddDatabaseAsync(dbName);
+        Assert.False(database.UseTrustedConnection); // Initial state
+
+        // Act
+        await _dbLocator.UpdateDatabase(database.Id, true); // Enable trusted connection
+
+        // Assert
+        var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
+        Assert.NotNull(updatedDatabase);
+        Assert.True(updatedDatabase.UseTrustedConnection);
+    }
+
+    [Fact]
+    public async Task CacheData_WithStringData_CachesStringDirectly()
+    {
+        // Arrange
+        var cacheKey = "test_string_cache";
+        var stringData = "test string data";
+
+        // Act
+        await _cache.CacheData(cacheKey, stringData);
+
+        // Assert
+        var cachedData = await _cache.GetCachedData<string>(cacheKey);
+        Assert.Equal(stringData, cachedData);
+    }
+
+    [Fact]
+    public async Task TryClearConnectionStringFromCache_WithTenantCode_RemovesMatchingKeys()
+    {
+        // Arrange
+        var tenantCode = TestHelpers.GetRandomString();
+        var queryString = @$"TenantId:,
+            DatabaseTypeId:,
+            ConnectionId:,
+            TenantCode:{tenantCode},
+            Roles:None";
+        var cacheKey = $"connection:{queryString}";
+        await _cache.CacheConnectionString(cacheKey, "test connection string");
+
+        // Act
+        await _cache.TryClearConnectionStringFromCache(tenantCode: tenantCode);
+
+        // Assert
+        var cachedData = await _cache.GetCachedData<string>(cacheKey);
+        Assert.Null(cachedData);
+    }
+
+    [Fact]
+    public async Task TryClearConnectionStringFromCache_WithDatabaseRoles_RemovesMatchingKeys()
+    {
+        // Arrange
+        var roles = new[] { DatabaseRole.DataReader, DatabaseRole.DataWriter };
+        var rolesString = string.Join(",", roles);
+        var queryString = @$"TenantId:,
+            DatabaseTypeId:,
+            ConnectionId:,
+            TenantCode:,
+            Roles:{rolesString}";
+        var cacheKey = $"connection:{queryString}";
+        await _cache.CacheConnectionString(cacheKey, "test connection string");
+
+        // Act
+        await _cache.TryClearConnectionStringFromCache(roles: roles);
+
+        // Assert
+        var cachedData = await _cache.GetCachedData<string>(cacheKey);
+        Assert.Null(cachedData);
+    }
 }
