@@ -950,4 +950,25 @@ public class DatabaseUserTests : IAsyncLifetime
 
         return (await _dbLocator.GetDatabases()).Single(db => db.Id == databaseId);
     }
+
+    [Fact]
+    public async Task AddDatabaseUser_WithRolesAndDatabases_LoadsNavigationProperties()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+
+        // Add a role to the user
+        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter, true);
+
+        // Act
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+
+        // Assert
+        Assert.NotNull(updatedUser);
+        Assert.Single(updatedUser.Databases);
+        Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
+        Assert.Single(updatedUser.Roles);
+        Assert.Equal(DatabaseRole.DataWriter, updatedUser.Roles[0]);
+    }
 }
