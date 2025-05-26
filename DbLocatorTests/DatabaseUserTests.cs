@@ -1012,4 +1012,28 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Equal(user.Id, databaseUserDatabase.DatabaseUserId);
         Assert.Equal(_databaseId, databaseUserDatabase.DatabaseId);
     }
+
+    [Fact]
+    public async Task DeleteDatabaseUser_WithRolesAndNullCache_ClearsCache()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataReader);
+
+        // Ensure cache is populated
+        var users = await _dbLocator.GetDatabaseUsers();
+        Assert.Contains(users, u => u.Id == user.Id);
+
+        // Set cache to null to test null cache scenario
+        _cache = null;
+
+        // Act
+        await _dbLocator.DeleteDatabaseUser(user.Id, true);
+
+        // Assert
+        var allUsers = await _dbLocator.GetDatabaseUsers();
+        Assert.DoesNotContain(allUsers, u => u.Id == user.Id);
+    }
 }
