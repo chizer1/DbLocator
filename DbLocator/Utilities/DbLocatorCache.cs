@@ -21,7 +21,18 @@ internal class DbLocatorCache(IDistributedCache cache)
     internal async Task<T> GetCachedData<T>(string cacheKey)
     {
         var cachedData = await _cache.GetStringAsync(cacheKey);
-        return cachedData != null ? JsonSerializer.Deserialize<T>(cachedData) : default;
+        if (cachedData == null)
+        {
+            return default;
+        }
+
+        // Handle string type separately to avoid JSON deserialization
+        if (typeof(T) == typeof(string))
+        {
+            return (T)(object)cachedData;
+        }
+
+        return JsonSerializer.Deserialize<T>(cachedData);
     }
 
     /// <summary>
@@ -31,6 +42,13 @@ internal class DbLocatorCache(IDistributedCache cache)
     /// <param name="data">The data to cache.</param>
     internal async Task CacheData(string cacheKey, object data)
     {
+        // Handle string type separately to avoid JSON serialization
+        if (data is string stringData)
+        {
+            await _cache.SetStringAsync(cacheKey, stringData);
+            return;
+        }
+
         var serializedData = JsonSerializer.Serialize(data);
         await _cache.SetStringAsync(cacheKey, serializedData);
     }
