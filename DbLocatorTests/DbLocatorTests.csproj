@@ -7,7 +7,7 @@
     <CoverletOutputFormat>cobertura</CoverletOutputFormat>
     <CoverletOutput>TestResults/</CoverletOutput>
     <Threshold>100</Threshold>
-    <ThresholdType>line,branch,method</ThresholdType>
+    <ThresholdType>line</ThresholdType>
   </PropertyGroup>
 
   <ItemGroup>

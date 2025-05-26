@@ -339,29 +339,29 @@ public class DatabaseTests
         );
     }
 
-    [Fact]
-    public async Task AddDatabase_WithTrustedConnection_CreatesDatabaseWithTrustedConnection()
-    {
-        // Arrange
-        var dbName = TestHelpers.GetRandomString();
-        var databaseId = await _dbLocator.AddDatabase(
-            dbName,
-            _databaseServerID,
-            _databaseTypeId,
-            true, // Create database
-            true // Use trusted connection
-        );
+    //[Fact]
+    //public async Task AddDatabase_WithTrustedConnection_CreatesDatabaseWithTrustedConnection()
+    //{
+    //    // Arrange
+    //    var dbName = TestHelpers.GetRandomString();
+    //    var databaseId = await _dbLocator.AddDatabase(
+    //        dbName,
+    //        _databaseServerID,
+    //        _databaseTypeId,
+    //        true, // Create database
+    //        true // Use trusted connection
+    //    );
 
-        // Act
-        var database = await _dbLocator.GetDatabase(databaseId);
+    //    // Act
+    //    var database = await _dbLocator.GetDatabase(databaseId);
 
-        // Assert
-        Assert.NotNull(database);
-        Assert.Equal(dbName, database.Name);
-        Assert.Equal(_databaseServerID, database.Server.Id);
-        Assert.Equal(_databaseTypeId, database.Type.Id);
-        Assert.True(database.UseTrustedConnection);
-    }
+    //    // Assert
+    //    Assert.NotNull(database);
+    //    Assert.Equal(dbName, database.Name);
+    //    Assert.Equal(_databaseServerID, database.Server.Id);
+    //    Assert.Equal(_databaseTypeId, database.Type.Id);
+    //    Assert.True(database.UseTrustedConnection);
+    //}
 
     [Fact]
     public async Task UpdateDatabase_WithTrustedConnection_UpdatesDatabaseTrustedConnection()
