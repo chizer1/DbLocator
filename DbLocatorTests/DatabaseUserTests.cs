@@ -845,6 +845,9 @@ public class DatabaseUserTests : IAsyncLifetime
             true
         );
 
+        // Wait a moment to ensure the user is created in the database
+        await Task.Delay(1000);
+
         // Act
         var newUserName = TestHelpers.GetRandomString();
         await _dbLocator.UpdateDatabaseUser(

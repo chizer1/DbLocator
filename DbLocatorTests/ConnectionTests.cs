@@ -674,7 +674,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     {
         // Act & Assert
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(
-            async () => await _dbLocator.GetConnection(1, null)
+            async () => await _dbLocator.GetConnection(0, 0)
         );
     }
 
