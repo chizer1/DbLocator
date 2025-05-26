@@ -147,8 +147,12 @@ internal class DbLocatorCache(IDistributedCache cache)
         if (tenantCode != null && !cacheKey.Contains($"TenantCode:{tenantCode}"))
             return false;
 
-        if (roles != null && !cacheKey.Contains($"Roles:{string.Join(",", roles)}"))
-            return false;
+        if (roles != null)
+        {
+            var rolesString = string.Join(",", roles);
+            if (!cacheKey.Contains($"Roles:{rolesString}"))
+                return false;
+        }
 
         return true;
     }

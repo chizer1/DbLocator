@@ -400,7 +400,12 @@ public class DatabaseTests
     {
         // Arrange
         var tenantCode = TestHelpers.GetRandomString();
-        var cacheKey = $"connection_{tenantCode}_test";
+        var queryString = @$"TenantId:,
+            DatabaseTypeId:,
+            ConnectionId:,
+            TenantCode:{tenantCode},
+            Roles:None";
+        var cacheKey = $"connection:{queryString}";
         await _cache.CacheConnectionString(cacheKey, "test connection string");
 
         // Act
@@ -416,7 +421,13 @@ public class DatabaseTests
     {
         // Arrange
         var roles = new[] { DatabaseRole.DataReader, DatabaseRole.DataWriter };
-        var cacheKey = $"connection_roles_{string.Join("_", roles)}";
+        var rolesString = string.Join(",", roles);
+        var queryString = @$"TenantId:,
+            DatabaseTypeId:,
+            ConnectionId:,
+            TenantCode:,
+            Roles:{rolesString}";
+        var cacheKey = $"connection:{queryString}";
         await _cache.CacheConnectionString(cacheKey, "test connection string");
 
         // Act
