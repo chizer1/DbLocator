@@ -26,17 +26,28 @@ jobs:
           dotnet restore
           dotnet tool restore
           dotnet tool install --global dotnet-reportgenerator-globaltool
+          sudo apt-get update
+          sudo apt-get install -y bc
 
       - name: Build Project
         run: dotnet build /warnAsError
 
       - name: Run Tests with Coverage
         run: |
-          dotnet test --no-build --collect:"XPlat Code Coverage" --results-directory:TestResults /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:Threshold=100 /p:ThresholdType=line /p:ThresholdStat=total
+          dotnet test --no-build --collect:"XPlat Code Coverage" --results-directory:TestResults /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
           if [ $? -ne 0 ]; then
-            echo "Tests failed or coverage threshold not met"
+            echo "Tests failed"
             exit 1
           fi
+
+      - name: Check Coverage Threshold
+        run: |
+          coverage=$(find TestResults -name "coverage.cobertura.xml" -type f -exec cat {} \; | grep -o 'line-rate="[^"]*"' | cut -d'"' -f2)
+          if (( $(echo "$coverage < 1.0" | bc -l) )); then
+            echo "Code coverage is below 100% (current: ${coverage})"
+            exit 1
+          fi
+          echo "Code coverage is at 100%"
 
       - name: Generate Coverage Report
         run: reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" -targetdir:CoverageReport
