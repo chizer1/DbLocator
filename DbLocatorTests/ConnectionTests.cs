@@ -670,10 +670,10 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     }
 
     [Fact]
-    public async Task GetConnection_WithInvalidQueryParameters_ThrowsValidationException()
+    public async Task GetConnection_WithInvalidQueryParameters_ThrowsKeyNotFoundException()
     {
         // Act & Assert
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<KeyNotFoundException>(
             async () => await _dbLocator.GetConnection(0, 0)
         );
     }

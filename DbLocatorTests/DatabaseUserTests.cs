@@ -837,6 +837,7 @@ public class DatabaseUserTests : IAsyncLifetime
             Status.Active
         );
 
+        // Create user in first database
         var userName = TestHelpers.GetRandomString();
         var dbUserId = await _dbLocator.AddDatabaseUser(
             new[] { databaseId1 },
@@ -845,7 +846,10 @@ public class DatabaseUserTests : IAsyncLifetime
             true
         );
 
-        // Wait a moment to ensure the user is created in the database
+        // Add user to second database
+        await _dbLocator.AddDatabaseUser(new[] { databaseId2 }, userName, "TestPassword123!", true);
+
+        // Wait a moment to ensure the user is created in both databases
         await Task.Delay(1000);
 
         // Act
