@@ -1045,4 +1045,37 @@ public class DatabaseUserTests : IAsyncLifetime
         var cachedData = await _cache.GetCachedData<string>(cacheKey);
         Assert.NotNull(cachedData); // Cache should not be cleared
     }
+
+    [Fact]
+    public async Task UpdateDatabase_WithDatabaseServerId_UpdatesCorrectly()
+    {
+        // Arrange
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        // Create a new database server
+        var newServerName = TestHelpers.GetRandomString();
+        var newServerId = await _dbLocator.AddDatabaseServer(
+            newServerName,
+            "127.0.0.1",
+            "test",
+            "test",
+            true
+        );
+
+        // Act
+        await _dbLocator.UpdateDatabase(databaseId, newServerId);
+
+        // Assert
+        var updatedDatabase = await _dbLocator.GetDatabase(databaseId);
+        Assert.Equal(newServerId, updatedDatabase.Server.Id);
+        Assert.Equal(databaseName, updatedDatabase.Name); // Name should remain unchanged
+        Assert.Equal(_databaseTypeId, updatedDatabase.Type.Id); // Type should remain unchanged
+        Assert.Equal(Status.Active, updatedDatabase.Status); // Status should remain unchanged
+    }
 }
