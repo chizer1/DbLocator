@@ -909,8 +909,13 @@ public class DatabaseUserTests : IAsyncLifetime
         // Arrange
         var userName = TestHelpers.GetRandomString();
         var user = await AddDatabaseUserAsync(userName);
+
+        // Create new databases with explicit settings
         var database1 = await AddDatabaseAsync(TestHelpers.GetRandomString());
         var database2 = await AddDatabaseAsync(TestHelpers.GetRandomString());
+
+        // Wait a moment to ensure databases are created
+        await Task.Delay(1000);
 
         // Act
         await _dbLocator.UpdateDatabaseUser(
@@ -921,8 +926,12 @@ public class DatabaseUserTests : IAsyncLifetime
             true
         );
 
+        // Wait a moment to ensure user is updated in all databases
+        await Task.Delay(1000);
+
         // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.NotNull(updatedUser);
         Assert.Equal(2, updatedUser.Databases.Count);
         Assert.Contains(updatedUser.Databases, d => d.Id == database1.Id);
         Assert.Contains(updatedUser.Databases, d => d.Id == database2.Id);
@@ -936,7 +945,7 @@ public class DatabaseUserTests : IAsyncLifetime
             _databaseServerID,
             _databaseTypeId,
             Status.Active,
-            false
+            true  // Create the database
         );
 
         return (await _dbLocator.GetDatabases()).Single(db => db.Id == databaseId);
