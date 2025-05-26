@@ -846,8 +846,14 @@ public class DatabaseUserTests : IAsyncLifetime
             true
         );
 
-        // Add user to second database
-        await _dbLocator.AddDatabaseUser(new[] { databaseId2 }, userName, "TestPassword123!", true);
+        // Add user to second database by updating the existing user
+        await _dbLocator.UpdateDatabaseUser(
+            dbUserId,
+            new[] { databaseId1, databaseId2 },
+            userName,
+            "TestPassword123!",
+            true
+        );
 
         // Wait a moment to ensure the user is created in both databases
         await Task.Delay(1000);
