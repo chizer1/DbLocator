@@ -837,17 +837,21 @@ public class DatabaseUserTests : IAsyncLifetime
             Status.Active
         );
 
+        var userName = TestHelpers.GetRandomString();
         var dbUserId = await _dbLocator.AddDatabaseUser(
             new[] { databaseId1 },
-            TestHelpers.GetRandomString(),
+            userName,
+            "TestPassword123!",
             true
         );
 
         // Act
+        var newUserName = TestHelpers.GetRandomString();
         await _dbLocator.UpdateDatabaseUser(
             dbUserId,
             new[] { databaseId1, databaseId2 },
-            TestHelpers.GetRandomString(),
+            newUserName,
+            "NewPassword123!",
             true
         );
 
