@@ -77,10 +77,10 @@ namespace DbLocator.Features.DatabaseUsers
 
             cache?.Remove("databaseUsers");
 
-            var roles = databaseUserEntity
-                .UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)
-                .ToArray();
-            cache?.TryClearConnectionStringFromCache(roles: roles);
+            //var roles = databaseUserEntity
+            //    .UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)
+            //    .ToArray();
+            //cache?.TryClearConnectionStringFromCache(roles: roles);
         }
 
         private static async Task DropDatabaseUserAsync(

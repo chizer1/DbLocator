@@ -393,7 +393,7 @@ public class DatabaseUserTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task DeleteDatabaseUser_WithRoles_ClearsRoleCache()
+    public async Task DeleteDatabaseUser_WithRoles_ClearsCache()
     {
         // Arrange
         var userName = TestHelpers.GetRandomString();
@@ -405,16 +405,23 @@ public class DatabaseUserTests : IAsyncLifetime
         var users = await _dbLocator.GetDatabaseUsers();
         Assert.Contains(users, u => u.Id == user.Id);
 
+        // Get the roles before deleting them
+        var roles = (await _dbLocator.GetDatabaseUser(user.Id)).Roles.ToArray();
+
         // Delete roles first
         await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
         await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataReader);
 
-        // Act
+        // Act - Now delete the user
         await _dbLocator.DeleteDatabaseUser(user.Id, true);
 
         // Assert
         var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
         Assert.Null(cachedUsers);
+
+        // Verify user is deleted from database
+        var allUsers = await _dbLocator.GetDatabaseUsers();
+        Assert.DoesNotContain(allUsers, u => u.Id == user.Id);
     }
 
     [Fact]
@@ -945,7 +952,7 @@ public class DatabaseUserTests : IAsyncLifetime
             _databaseServerID,
             _databaseTypeId,
             Status.Active,
-            true  // Create the database
+            true // Create the database
         );
 
         return (await _dbLocator.GetDatabases()).Single(db => db.Id == databaseId);
@@ -962,7 +969,9 @@ public class DatabaseUserTests : IAsyncLifetime
         await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter, true);
 
         // Act
-        var dbContext = DbContextFactory.CreateDbContextFactory(_fixture.ConnectionString).CreateDbContext();
+        var dbContext = DbContextFactory
+            .CreateDbContextFactory(_fixture.ConnectionString)
+            .CreateDbContext();
         var databaseUserDatabase = await dbContext
             .Set<DatabaseUserDatabaseEntity>()
             .Include(d => d.User)
@@ -997,19 +1006,126 @@ public class DatabaseUserTests : IAsyncLifetime
     {
         // Arrange
         var userName = TestHelpers.GetRandomString();
-        
+
         // Act
         var user = await AddDatabaseUserAsync(userName);
-        
+
         // Assert
-        var dbContext = DbContextFactory.CreateDbContextFactory(_fixture.ConnectionString).CreateDbContext();
+        var dbContext = DbContextFactory
+            .CreateDbContextFactory(_fixture.ConnectionString)
+            .CreateDbContext();
         var databaseUserDatabase = await dbContext
             .Set<DatabaseUserDatabaseEntity>()
             .FirstOrDefaultAsync(d => d.DatabaseUserId == user.Id);
-            
+
         Assert.NotNull(databaseUserDatabase);
         Assert.True(databaseUserDatabase.DatabaseUserDatabaseId > 0);
         Assert.Equal(user.Id, databaseUserDatabase.DatabaseUserId);
         Assert.Equal(_databaseId, databaseUserDatabase.DatabaseId);
+    }
+
+    [Fact]
+    public async Task ShouldRemoveCacheKey_WithNonMatchingCriteria_ReturnsFalse()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await AddDatabaseUserAsync(userName);
+        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+
+        // Cache a connection string with the correct format
+        var cacheKey = $"connection_{_databaseId}_{user.Id}_{(int)DatabaseRole.DataWriter}";
+        await _cache.CacheConnectionString(cacheKey, "test_connection_string");
+
+        // Act - Try to clear cache with non-matching criteria
+        await _cache.TryClearConnectionStringFromCache(
+            tenantId: null,
+            databaseTypeId: null,
+            connectionId: user.Id,
+            tenantCode: null,
+            roles: [DatabaseRole.DataReader] // Different role
+        );
+
+        // Assert
+        var cachedData = await _cache.GetCachedData<string>(cacheKey);
+        Assert.NotNull(cachedData); // Cache should not be cleared
+    }
+
+    [Fact]
+    public async Task UpdateDatabase_WithDatabaseServerId_UpdatesCorrectly()
+    {
+        // Arrange
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        // Create a new database server
+        var newServerName = TestHelpers.GetRandomString();
+        var newServerId = await _dbLocator.AddDatabaseServer(
+            newServerName,
+            "127.0.0.1",
+            "localhost",
+            "localhost.localdomain",
+            true
+        );
+
+        // Act
+        await _dbLocator.UpdateDatabase(databaseId, newServerId);
+
+        // Assert
+        var updatedDatabase = await _dbLocator.GetDatabase(databaseId);
+        Assert.Equal(newServerId, updatedDatabase.Server.Id);
+        Assert.Equal(databaseName, updatedDatabase.Name); // Name should remain unchanged
+        Assert.Equal(_databaseTypeId, updatedDatabase.Type.Id); // Type should remain unchanged
+        Assert.Equal(Status.Active, updatedDatabase.Status); // Status should remain unchanged
+    }
+
+    [Fact]
+    public async Task UpdateDatabase_WithAllParameters_UpdatesCorrectly()
+    {
+        // Arrange
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.AddDatabase(
+            databaseName,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        // Create a new database server with unique hostname and IP
+        var newServerName = TestHelpers.GetRandomString();
+        var newHostName = $"server-{TestHelpers.GetRandomString()}";
+        var newIpAddress = $"192.168.1.{new Random().Next(1, 255)}";
+        var newServerId = await _dbLocator.AddDatabaseServer(
+            newServerName,
+            newIpAddress,
+            newHostName,
+            $"{newHostName}.localdomain",
+            true
+        );
+
+        // Create a new database type
+        var newTypeName = TestHelpers.GetRandomString();
+        var newTypeId = await _dbLocator.AddDatabaseType(newTypeName);
+
+        // Act
+        var newDatabaseName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabase(
+            databaseId,
+            newDatabaseName,
+            newServerId,
+            newTypeId,
+            Status.Inactive
+        );
+
+        // Assert
+        var updatedDatabase = await _dbLocator.GetDatabase(databaseId);
+        Assert.Equal(newDatabaseName, updatedDatabase.Name);
+        Assert.Equal(newServerId, updatedDatabase.Server.Id);
+        Assert.Equal(newTypeId, updatedDatabase.Type.Id);
+        Assert.Equal(Status.Inactive, updatedDatabase.Status);
     }
 }
