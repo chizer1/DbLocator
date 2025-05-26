@@ -25,6 +25,7 @@ jobs:
         run: |
           dotnet restore
           dotnet tool restore
+          dotnet tool install --global dotnet-reportgenerator-globaltool
 
       - name: Build Project
         run: dotnet build /warnAsError
@@ -37,8 +38,11 @@ jobs:
             exit 1
           fi
 
+      - name: Generate Coverage Report
+        run: reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" -targetdir:CoverageReport
+
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
           name: Code-Coverage-Report
-          path: ${{ github.workspace }}/DbLocatorTests/CoverageReport
+          path: ${{ github.workspace }}/CoverageReport

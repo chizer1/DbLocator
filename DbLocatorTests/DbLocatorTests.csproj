@@ -28,9 +28,4 @@
     <Exec Command="rm -rf CoverageReport" />
   </Target>
 
-  <!-- Cleanup logic -->
-  <Target Name="GenerateReport" AfterTargets="VSTest">
-    <Exec Command="dotnet tool run reportgenerator -reports:&quot;TestResults/**/coverage.cobertura.xml&quot; -targetdir:CoverageReport" />
-  </Target>
-
 </Project>
