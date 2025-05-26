@@ -177,6 +177,6 @@ internal class UpdateDatabaseUser(
             .UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)
             .ToArray();
 
-        cache?.TryClearConnectionStringFromCache(Roles: roles);
+        cache?.TryClearConnectionStringFromCache(roles: roles);
     }
 }

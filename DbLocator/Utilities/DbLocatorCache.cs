@@ -4,100 +4,134 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace DbLocator.Utilities;
 
+/// <summary>
+/// Provides caching functionality for DbLocator entities and connection strings.
+/// </summary>
 internal class DbLocatorCache(IDistributedCache cache)
 {
+    private readonly IDistributedCache _cache = cache;
+    private const string ConnectionCacheKeysKey = "connectionCacheKeys";
+
+    /// <summary>
+    /// Retrieves cached data of type T for the specified cache key.
+    /// </summary>
+    /// <typeparam name="T">The type of data to retrieve.</typeparam>
+    /// <param name="cacheKey">The key used to identify the cached data.</param>
+    /// <returns>The cached data if found; otherwise, default(T).</returns>
     internal async Task<T> GetCachedData<T>(string cacheKey)
     {
-        if (cache == null)
-        {
-            return default;
-        }
-
-        var cachedData = cache != null ? await cache.GetStringAsync(cacheKey) : null;
+        var cachedData = await _cache.GetStringAsync(cacheKey);
         return cachedData != null ? JsonSerializer.Deserialize<T>(cachedData) : default;
     }
 
+    /// <summary>
+    /// Caches the specified data with the given cache key.
+    /// </summary>
+    /// <param name="cacheKey">The key to use for caching the data.</param>
+    /// <param name="data">The data to cache.</param>
     internal async Task CacheData(string cacheKey, object data)
     {
-        if (cache == null)
-        {
-            return;
-        }
-
         var serializedData = JsonSerializer.Serialize(data);
-        await cache.SetStringAsync(cacheKey, serializedData);
+        await _cache.SetStringAsync(cacheKey, serializedData);
     }
 
+    /// <summary>
+    /// Removes the cached data for the specified cache key.
+    /// </summary>
+    /// <param name="cacheKey">The key of the cached data to remove.</param>
     internal async Task Remove(string cacheKey)
     {
-        if (cache == null)
-        {
-            return;
-        }
-
-        await cache.RemoveAsync(cacheKey);
+        await _cache.RemoveAsync(cacheKey);
     }
 
+    /// <summary>
+    /// Caches a connection string and adds its key to the list of connection cache keys.
+    /// </summary>
+    /// <param name="cacheKey">The key to use for caching the connection string.</param>
+    /// <param name="connectionString">The connection string to cache.</param>
     internal async Task CacheConnectionString(string cacheKey, string connectionString)
     {
-        if (cache == null)
-        {
-            return;
-        }
-
-        var serializedData = JsonSerializer.Serialize(connectionString);
-        await cache.SetStringAsync(cacheKey, serializedData);
+        await _cache.SetStringAsync(cacheKey, connectionString);
 
         // Add cacheKey to cached dictionary
-        var cacheKeys = await GetCachedData<List<string>>("connectionCacheKeys") ?? [];
-        cacheKeys.Add(cacheKey);
-        await CacheData("connectionCacheKeys", cacheKeys);
+        var cacheKeys = await GetCachedData<List<string>>(ConnectionCacheKeysKey) ?? [];
+        if (!cacheKeys.Contains(cacheKey))
+        {
+            cacheKeys.Add(cacheKey);
+            await CacheData(ConnectionCacheKeysKey, cacheKeys);
+        }
     }
 
-    // Note, if this is ran with no specified parameters,
-    // it will clear all connection strings from the cache
+    /// <summary>
+    /// Clears connection strings from the cache based on specified criteria.
+    /// </summary>
+    /// <param name="tenantId">Optional tenant ID to filter connection strings.</param>
+    /// <param name="databaseTypeId">Optional database type ID to filter connection strings.</param>
+    /// <param name="connectionId">Optional connection ID to filter connection strings.</param>
+    /// <param name="tenantCode">Optional tenant code to filter connection strings.</param>
+    /// <param name="roles">Optional database roles to filter connection strings.</param>
     internal async Task TryClearConnectionStringFromCache(
-        int? TenantId = null,
-        int? DatabaseTypeId = null,
-        int? ConnectionId = null,
-        string TenantCode = null,
-        DatabaseRole[] Roles = null
+        int? tenantId = null,
+        int? databaseTypeId = null,
+        int? connectionId = null,
+        string tenantCode = null,
+        DatabaseRole[] roles = null
     )
     {
-        if (cache == null)
-        {
-            return;
-        }
+        var cacheKeys = await GetCachedData<List<string>>(ConnectionCacheKeysKey) ?? [];
+        var keysToRemove = new List<string>();
 
-        var cacheKeys = await GetCachedData<List<string>>("connectionCacheKeys") ?? [];
         foreach (var cacheKey in cacheKeys)
         {
-            if (TenantId != null && !cacheKey.Contains($"TenantId:{TenantId}"))
+            if (
+                ShouldRemoveCacheKey(
+                    cacheKey,
+                    tenantId,
+                    databaseTypeId,
+                    connectionId,
+                    tenantCode,
+                    roles
+                )
+            )
             {
-                continue;
+                keysToRemove.Add(cacheKey);
             }
-
-            if (DatabaseTypeId != null && !cacheKey.Contains($"DatabaseTypeId:{DatabaseTypeId}"))
-            {
-                continue;
-            }
-
-            if (ConnectionId != null && !cacheKey.Contains($"ConnectionId:{ConnectionId}"))
-            {
-                continue;
-            }
-
-            if (TenantCode != null && !cacheKey.Contains($"TenantCode:{TenantCode}"))
-            {
-                continue;
-            }
-
-            if (Roles != null && !cacheKey.Contains($"Roles:{string.Join(",", Roles)}"))
-            {
-                continue;
-            }
-
-            await cache.RemoveAsync(cacheKey);
         }
+
+        foreach (var key in keysToRemove)
+        {
+            await _cache.RemoveAsync(key);
+            cacheKeys.Remove(key);
+        }
+
+        if (keysToRemove.Count != 0)
+            await CacheData(ConnectionCacheKeysKey, cacheKeys);
+    }
+
+    private static bool ShouldRemoveCacheKey(
+        string cacheKey,
+        int? tenantId,
+        int? databaseTypeId,
+        int? connectionId,
+        string tenantCode,
+        DatabaseRole[] roles
+    )
+    {
+        if (tenantId != null && !cacheKey.Contains($"TenantId:{tenantId}"))
+            return false;
+
+        if (databaseTypeId != null && !cacheKey.Contains($"DatabaseTypeId:{databaseTypeId}"))
+            return false;
+
+        if (connectionId != null && !cacheKey.Contains($"ConnectionId:{connectionId}"))
+            return false;
+
+        if (tenantCode != null && !cacheKey.Contains($"TenantCode:{tenantCode}"))
+            return false;
+
+        if (roles != null && !cacheKey.Contains($"Roles:{string.Join(",", roles)}"))
+            return false;
+
+        return true;
     }
 }

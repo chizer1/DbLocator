@@ -42,7 +42,7 @@ internal class DeleteTenant(
 
         cache?.Remove("tenants");
         cache?.Remove("connections");
-        cache?.TryClearConnectionStringFromCache(TenantCode: tenant.TenantCode);
-        cache?.TryClearConnectionStringFromCache(TenantId: tenant.TenantId);
+        cache?.TryClearConnectionStringFromCache(tenantCode: tenant.TenantCode);
+        cache?.TryClearConnectionStringFromCache(tenantId: tenant.TenantId);
     }
 }

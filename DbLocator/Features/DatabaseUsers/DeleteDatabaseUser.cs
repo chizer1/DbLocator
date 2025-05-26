@@ -80,7 +80,7 @@ namespace DbLocator.Features.DatabaseUsers
             var roles = databaseUserEntity
                 .UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)
                 .ToArray();
-            cache?.TryClearConnectionStringFromCache(Roles: roles);
+            cache?.TryClearConnectionStringFromCache(roles: roles);
         }
 
         private static async Task DropDatabaseUserAsync(
