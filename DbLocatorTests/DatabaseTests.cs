@@ -349,7 +349,7 @@ public class DatabaseTests
             _databaseServerID,
             _databaseTypeId,
             true, // Create database
-            true  // Use trusted connection
+            true // Use trusted connection
         );
 
         // Act
@@ -400,7 +400,8 @@ public class DatabaseTests
     {
         // Arrange
         var tenantCode = TestHelpers.GetRandomString();
-        var queryString = @$"TenantId:,
+        var queryString =
+            @$"TenantId:,
             DatabaseTypeId:,
             ConnectionId:,
             TenantCode:{tenantCode},
@@ -422,7 +423,8 @@ public class DatabaseTests
         // Arrange
         var roles = new[] { DatabaseRole.DataReader, DatabaseRole.DataWriter };
         var rolesString = string.Join(",", roles);
-        var queryString = @$"TenantId:,
+        var queryString =
+            @$"TenantId:,
             DatabaseTypeId:,
             ConnectionId:,
             TenantCode:,

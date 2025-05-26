@@ -952,7 +952,7 @@ public class DatabaseUserTests : IAsyncLifetime
             _databaseServerID,
             _databaseTypeId,
             Status.Active,
-            true  // Create the database
+            true // Create the database
         );
 
         return (await _dbLocator.GetDatabases()).Single(db => db.Id == databaseId);
@@ -969,7 +969,9 @@ public class DatabaseUserTests : IAsyncLifetime
         await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter, true);
 
         // Act
-        var dbContext = DbContextFactory.CreateDbContextFactory(_fixture.ConnectionString).CreateDbContext();
+        var dbContext = DbContextFactory
+            .CreateDbContextFactory(_fixture.ConnectionString)
+            .CreateDbContext();
         var databaseUserDatabase = await dbContext
             .Set<DatabaseUserDatabaseEntity>()
             .Include(d => d.User)
@@ -1004,16 +1006,18 @@ public class DatabaseUserTests : IAsyncLifetime
     {
         // Arrange
         var userName = TestHelpers.GetRandomString();
-        
+
         // Act
         var user = await AddDatabaseUserAsync(userName);
-        
+
         // Assert
-        var dbContext = DbContextFactory.CreateDbContextFactory(_fixture.ConnectionString).CreateDbContext();
+        var dbContext = DbContextFactory
+            .CreateDbContextFactory(_fixture.ConnectionString)
+            .CreateDbContext();
         var databaseUserDatabase = await dbContext
             .Set<DatabaseUserDatabaseEntity>()
             .FirstOrDefaultAsync(d => d.DatabaseUserId == user.Id);
-            
+
         Assert.NotNull(databaseUserDatabase);
         Assert.True(databaseUserDatabase.DatabaseUserDatabaseId > 0);
         Assert.Equal(user.Id, databaseUserDatabase.DatabaseUserId);
