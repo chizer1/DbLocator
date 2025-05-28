@@ -1,3 +1,5 @@
+#nullable enable
+
 using DbLocator.Db;
 using DbLocator.Utilities;
 using FluentValidation;
@@ -16,9 +18,12 @@ internal record UpdateDatabaseServerNameCommand(int DatabaseServerId, string Nam
 internal sealed class UpdateDatabaseServerNameCommandValidator
     : AbstractValidator<UpdateDatabaseServerNameCommand>
 {
-    public UpdateDatabaseServerNameCommandValidator()
+    internal UpdateDatabaseServerNameCommandValidator()
     {
-        RuleFor(x => x.DatabaseServerId).GreaterThan(0);
+        RuleFor(x => x.DatabaseServerId)
+            .GreaterThan(0)
+            .WithMessage("Database Server Id must be greater than 0.");
+
         RuleFor(x => x.Name)
             .NotEmpty()
             .WithMessage("Database Server Name is required.")
@@ -32,38 +37,59 @@ internal sealed class UpdateDatabaseServerNameCommandValidator
 /// </summary>
 internal class UpdateDatabaseServerNameHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    DbLocatorCache cache
+    DbLocatorCache? cache = null
 )
 {
-    public async Task Handle(UpdateDatabaseServerNameCommand command)
-    {
-        await new UpdateDatabaseServerNameCommandValidator().ValidateAndThrowAsync(command);
+    private readonly IDbContextFactory<DbLocatorContext> _dbContextFactory = dbContextFactory;
+    private readonly DbLocatorCache? _cache = cache;
 
-        await using var dbContext = dbContextFactory.CreateDbContext();
+    public async Task Handle(
+        UpdateDatabaseServerNameCommand request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        await new UpdateDatabaseServerNameCommandValidator().ValidateAndThrowAsync(
+            request,
+            cancellationToken
+        );
+
+        await using var dbContext = _dbContextFactory.CreateDbContext();
 
         var databaseServer =
             await dbContext
                 .Set<DatabaseServerEntity>()
-                .FirstOrDefaultAsync(ds => ds.DatabaseServerId == command.DatabaseServerId)
+                .FirstOrDefaultAsync(
+                    ds => ds.DatabaseServerId == request.DatabaseServerId,
+                    cancellationToken
+                )
             ?? throw new KeyNotFoundException(
-                $"Database Server with ID {command.DatabaseServerId} not found."
+                $"Database server with ID {request.DatabaseServerId} not found"
             );
 
         if (
             await dbContext
                 .Set<DatabaseServerEntity>()
-                .AnyAsync(ds =>
-                    ds.DatabaseServerName == command.Name
-                    && ds.DatabaseServerId != command.DatabaseServerId
+                .AnyAsync(
+                    ds =>
+                        ds.DatabaseServerName == request.Name
+                        && ds.DatabaseServerId != request.DatabaseServerId,
+                    cancellationToken
                 )
         )
-            throw new ArgumentException($"Database Server '{command.Name}' already exists.");
+            throw new InvalidOperationException(
+                $"Database server with name \"{request.Name}\" already exists"
+            );
 
-        databaseServer.DatabaseServerName = command.Name;
+        databaseServer.DatabaseServerName = request.Name;
         dbContext.Set<DatabaseServerEntity>().Update(databaseServer);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(cancellationToken);
 
-        cache?.Remove("databaseServers");
-        cache?.Remove($"databaseServer-id-{command.DatabaseServerId}");
+        if (_cache != null)
+        {
+            await _cache.Remove("databaseServers");
+            await _cache.Remove($"databaseServer-id-{request.DatabaseServerId}");
+        }
     }
 }
+
+#nullable disable

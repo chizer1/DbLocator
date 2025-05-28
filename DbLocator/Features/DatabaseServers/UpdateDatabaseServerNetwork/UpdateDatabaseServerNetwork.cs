@@ -1,3 +1,5 @@
+#nullable enable
+
 using DbLocator.Db;
 using DbLocator.Utilities;
 using FluentValidation;
@@ -20,12 +22,16 @@ internal record UpdateDatabaseServerNetworkCommand(
 internal sealed class UpdateDatabaseServerNetworkCommandValidator
     : AbstractValidator<UpdateDatabaseServerNetworkCommand>
 {
-    public UpdateDatabaseServerNetworkCommandValidator()
+    internal UpdateDatabaseServerNetworkCommandValidator()
     {
-        RuleFor(x => x.DatabaseServerId).GreaterThan(0);
+        RuleFor(x => x.DatabaseServerId)
+            .GreaterThan(0)
+            .WithMessage("Database Server Id must be greater than 0.");
+
         RuleFor(x => x.FullyQualifiedDomainName)
             .MaximumLength(100)
             .WithMessage("Fully Qualified Domain Name cannot be more than 100 characters.");
+
         RuleFor(x => x.IpAddress)
             .MaximumLength(15)
             .WithMessage("IP Address cannot be more than 15 characters.");
@@ -37,34 +43,51 @@ internal sealed class UpdateDatabaseServerNetworkCommandValidator
 /// </summary>
 internal class UpdateDatabaseServerNetworkHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    DbLocatorCache cache
+    DbLocatorCache? cache = null
 )
 {
-    public async Task Handle(UpdateDatabaseServerNetworkCommand command)
-    {
-        await new UpdateDatabaseServerNetworkCommandValidator().ValidateAndThrowAsync(command);
+    private readonly IDbContextFactory<DbLocatorContext> _dbContextFactory = dbContextFactory;
+    private readonly DbLocatorCache? _cache = cache;
 
-        await using var dbContext = dbContextFactory.CreateDbContext();
+    public async Task Handle(
+        UpdateDatabaseServerNetworkCommand request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        await new UpdateDatabaseServerNetworkCommandValidator().ValidateAndThrowAsync(
+            request,
+            cancellationToken
+        );
+
+        await using var dbContext = _dbContextFactory.CreateDbContext();
 
         var databaseServer =
             await dbContext
                 .Set<DatabaseServerEntity>()
-                .FirstOrDefaultAsync(ds => ds.DatabaseServerId == command.DatabaseServerId)
+                .FirstOrDefaultAsync(
+                    ds => ds.DatabaseServerId == request.DatabaseServerId,
+                    cancellationToken
+                )
             ?? throw new KeyNotFoundException(
-                $"Database Server with ID {command.DatabaseServerId} not found."
+                $"Database Server with ID {request.DatabaseServerId} not found."
             );
 
-        if (!string.IsNullOrEmpty(command.FullyQualifiedDomainName))
+        if (!string.IsNullOrEmpty(request.FullyQualifiedDomainName))
             databaseServer.DatabaseServerFullyQualifiedDomainName =
-                command.FullyQualifiedDomainName;
+                request.FullyQualifiedDomainName;
 
-        if (!string.IsNullOrEmpty(command.IpAddress))
-            databaseServer.DatabaseServerIpaddress = command.IpAddress;
+        if (!string.IsNullOrEmpty(request.IpAddress))
+            databaseServer.DatabaseServerIpaddress = request.IpAddress;
 
         dbContext.Set<DatabaseServerEntity>().Update(databaseServer);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(cancellationToken);
 
-        cache?.Remove("databaseServers");
-        cache?.Remove($"databaseServer-id-{command.DatabaseServerId}");
+        if (_cache != null)
+        {
+            await _cache.Remove("databaseServers");
+            await _cache.Remove($"databaseServer-id-{request.DatabaseServerId}");
+        }
     }
 }
+
+#nullable disable

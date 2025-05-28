@@ -1,5 +1,3 @@
-using DbLocator.Domain;
-
 namespace DbLocator.Services.DatabaseType;
 
 internal interface IDatabaseTypeService

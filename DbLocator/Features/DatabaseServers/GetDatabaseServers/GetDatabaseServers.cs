@@ -1,42 +1,61 @@
+#nullable enable
+
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Utilities;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseServers.GetDatabaseServers;
+
+internal record GetDatabaseServersQuery;
+
+internal sealed class GetDatabaseServersQueryValidator : AbstractValidator<GetDatabaseServersQuery>
+{
+    internal GetDatabaseServersQueryValidator()
+    {
+        // No validation rules needed for empty query
+    }
+}
 
 /// <summary>
 /// Handles the ListDatabaseServersQuery and returns all database servers.
 /// </summary>
 internal class GetDatabaseServersHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    DbLocatorCache cache
+    DbLocatorCache? cache = null
 )
 {
-    public async Task<List<DatabaseServer>> Handle()
+    private readonly IDbContextFactory<DbLocatorContext> _dbContextFactory = dbContextFactory;
+    private readonly DbLocatorCache? _cache = cache;
+
+    public async Task<IEnumerable<DatabaseServer>> Handle(
+        GetDatabaseServersQuery request,
+        CancellationToken cancellationToken = default
+    )
     {
-        var cacheKey = "databaseServers";
-        var cachedData = await cache?.GetCachedData<List<DatabaseServer>>(cacheKey);
-        if (cachedData != null)
+        await new GetDatabaseServersQueryValidator().ValidateAndThrowAsync(
+            request,
+            cancellationToken
+        );
+
+        const string cacheKey = "databaseServers";
+
+        if (_cache != null)
         {
-            return cachedData;
+            var cachedData = await _cache.GetCachedData<IEnumerable<DatabaseServer>>(cacheKey);
+            if (cachedData != null)
+                return cachedData;
         }
 
-        var databaseServers = await GetDatabaseServersFromDatabase();
-        await cache?.CacheData(cacheKey, databaseServers);
+        await using var dbContext = _dbContextFactory.CreateDbContext();
 
-        return databaseServers;
-    }
+        var databaseServerEntities = await dbContext
+            .Set<DatabaseServerEntity>()
+            .ToListAsync(cancellationToken);
 
-    private async Task<List<DatabaseServer>> GetDatabaseServersFromDatabase()
-    {
-        await using var dbContext = dbContextFactory.CreateDbContext();
-
-        var databaseServerEntities = await dbContext.Set<DatabaseServerEntity>().ToListAsync();
-
-        return
-        [
-            .. databaseServerEntities.Select(ds => new DatabaseServer(
+        var result = databaseServerEntities
+            .Select(ds => new DatabaseServer(
                 ds.DatabaseServerId,
                 ds.DatabaseServerName,
                 ds.DatabaseServerIpaddress,
@@ -44,6 +63,13 @@ internal class GetDatabaseServersHandler(
                 ds.DatabaseServerFullyQualifiedDomainName,
                 ds.IsLinkedServer
             ))
-        ];
+            .ToList();
+
+        if (_cache != null)
+            await _cache.CacheData(cacheKey, result);
+
+        return result;
     }
 }
+
+#nullable disable

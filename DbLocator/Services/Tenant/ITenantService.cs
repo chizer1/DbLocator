@@ -14,4 +14,5 @@ internal interface ITenantService
     Task UpdateTenant(int tenantId, Status tenantStatus);
     Task UpdateTenant(int tenantId, string tenantName);
     Task UpdateTenant(int tenantId, string tenantName, string tenantCode);
+    Task UpdateTenant(int tenantId, string tenantName, string tenantCode, Status tenantStatus);
 }

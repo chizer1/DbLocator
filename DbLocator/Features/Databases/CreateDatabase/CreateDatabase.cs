@@ -1,0 +1,105 @@
+#nullable enable
+
+using DbLocator.Db;
+using DbLocator.Domain;
+using DbLocator.Utilities;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+
+namespace DbLocator.Features.Databases.CreateDatabase;
+
+internal record CreateDatabaseCommand(
+    string DatabaseName,
+    int DatabaseServerId,
+    int DatabaseTypeId,
+    bool affectDatabase = true,
+    bool UseTrustedConnection = false
+);
+
+internal sealed class CreateDatabaseCommandValidator : AbstractValidator<CreateDatabaseCommand>
+{
+    internal CreateDatabaseCommandValidator()
+    {
+        RuleFor(x => x.DatabaseName)
+            .NotEmpty()
+            .WithMessage("Database name is required")
+            .MaximumLength(50)
+            .WithMessage("Database name cannot be more than 50 characters");
+
+        RuleFor(x => x.DatabaseServerId)
+            .GreaterThan(0)
+            .WithMessage("Database server ID must be greater than zero");
+
+        RuleFor(x => x.DatabaseTypeId)
+            .GreaterThan(0)
+            .WithMessage("Database type ID must be greater than zero");
+    }
+}
+
+internal class CreateDatabaseHandler(
+    IDbContextFactory<DbLocatorContext> dbContextFactory,
+    DbLocatorCache? cache = null
+)
+{
+    private readonly IDbContextFactory<DbLocatorContext> _dbContextFactory = dbContextFactory;
+    private readonly DbLocatorCache? _cache = cache;
+
+    public async Task<Database> Handle(
+        CreateDatabaseCommand request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        await new CreateDatabaseCommandValidator().ValidateAndThrowAsync(
+            request,
+            cancellationToken
+        );
+
+        await using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var databaseEntity = new DatabaseEntity
+        {
+            DatabaseName = request.DatabaseName,
+            DatabaseServerId = request.DatabaseServerId,
+            DatabaseTypeId = (byte)request.DatabaseTypeId,
+            DatabaseStatusId = (int)Status.Active,
+            UseTrustedConnection = request.UseTrustedConnection
+        };
+
+        dbContext.Databases.Add(databaseEntity);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        var savedEntity =
+            await dbContext
+                .Set<DatabaseEntity>()
+                .Include(d => d.DatabaseType)
+                .Include(d => d.DatabaseServer)
+                .FirstOrDefaultAsync(
+                    d => d.DatabaseId == databaseEntity.DatabaseId,
+                    cancellationToken
+                )
+            ?? throw new KeyNotFoundException(
+                $"Database with ID {databaseEntity.DatabaseId} not found"
+            );
+
+        if (_cache != null)
+            await _cache.Remove("databases");
+
+        return new Database(
+            savedEntity.DatabaseId,
+            savedEntity.DatabaseName,
+            new DatabaseType(savedEntity.DatabaseTypeId, savedEntity.DatabaseType.DatabaseTypeName),
+            new DatabaseServer(
+                savedEntity.DatabaseServerId,
+                savedEntity.DatabaseServer.DatabaseServerName,
+                savedEntity.DatabaseServer.DatabaseServerHostName,
+                savedEntity.DatabaseServer.DatabaseServerIpaddress,
+                savedEntity.DatabaseServer.DatabaseServerFullyQualifiedDomainName,
+                savedEntity.DatabaseServer.IsLinkedServer
+            ),
+            (Status)savedEntity.DatabaseStatusId,
+            savedEntity.UseTrustedConnection
+        );
+    }
+}
+
+#nullable disable

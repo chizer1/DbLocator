@@ -1,6 +1,9 @@
 using DbLocator.Db;
 using DbLocator.Domain;
-using DbLocator.Features.Connections;
+using DbLocator.Features.Connections.CreateConnection;
+using DbLocator.Features.Connections.DeleteConnection;
+using DbLocator.Features.Connections.GetConnection;
+using DbLocator.Features.Connections.GetConnections;
 using DbLocator.Utilities;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -8,19 +11,19 @@ using Microsoft.EntityFrameworkCore;
 namespace DbLocator.Services.Connection;
 
 internal class ConnectionService(
-    IDbContextFactory<DbLocatorContext> dbContextFactory,
-    Encryption encryption,
-    DbLocatorCache cache
+    IDbContextFactory<DbLocatorContext> contextFactory,
+    DbLocatorCache cache,
+    Encryption encryption
 ) : IConnectionService
 {
-    private readonly AddConnection _addConnection = new(dbContextFactory, cache);
-    private readonly DeleteConnection _deleteConnection = new(dbContextFactory, cache);
-    private readonly GetConnection _getConnection = new(dbContextFactory, encryption, cache);
-    private readonly GetConnections _getConnections = new(dbContextFactory, cache);
+    private readonly CreateConnectionHandler _createConnection = new(contextFactory, cache);
+    private readonly DeleteConnectionHandler _deleteConnection = new(contextFactory, cache);
+    private readonly GetConnectionHandler _getConnection = new(contextFactory, encryption, cache);
+    private readonly GetConnectionsHandler _getConnections = new(contextFactory, cache);
 
     public async Task<int> AddConnection(int tenantId, int databaseId)
     {
-        return await _addConnection.Handle(new AddConnectionCommand(tenantId, databaseId));
+        return await _createConnection.Handle(new CreateConnectionCommand(tenantId, databaseId));
     }
 
     public async Task DeleteConnection(int connectionId)
@@ -59,6 +62,7 @@ internal class ConnectionService(
 
     public async Task<List<Domain.Connection>> GetConnections()
     {
-        return await _getConnections.Handle(new GetConnectionsQuery());
+        var connections = await _getConnections.Handle(new GetConnectionsQuery());
+        return connections.ToList();
     }
 }

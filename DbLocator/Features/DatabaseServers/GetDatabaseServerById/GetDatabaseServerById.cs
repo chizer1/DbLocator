@@ -1,3 +1,5 @@
+#nullable enable
+
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Utilities;
@@ -17,9 +19,11 @@ internal record GetDatabaseServerByIdQuery(int DatabaseServerId);
 internal sealed class GetDatabaseServerByIdQueryValidator
     : AbstractValidator<GetDatabaseServerByIdQuery>
 {
-    public GetDatabaseServerByIdQueryValidator()
+    internal GetDatabaseServerByIdQueryValidator()
     {
-        RuleFor(x => x.DatabaseServerId).GreaterThan(0);
+        RuleFor(x => x.DatabaseServerId)
+            .GreaterThan(0)
+            .WithMessage("Database Server Id must be greater than 0.");
     }
 }
 
@@ -28,39 +32,46 @@ internal sealed class GetDatabaseServerByIdQueryValidator
 /// </summary>
 internal class GetDatabaseServerByIdHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    DbLocatorCache cache
+    DbLocatorCache? cache = null
 )
 {
-    public async Task<DatabaseServer> Handle(GetDatabaseServerByIdQuery query)
-    {
-        await new GetDatabaseServerByIdQueryValidator().ValidateAndThrowAsync(query);
+    private readonly IDbContextFactory<DbLocatorContext> _dbContextFactory = dbContextFactory;
+    private readonly DbLocatorCache? _cache = cache;
 
-        var cacheKey = $"databaseServer-id-{query.DatabaseServerId}";
-        var cachedData = await cache?.GetCachedData<DatabaseServer>(cacheKey);
-        if (cachedData != null)
+    public async Task<DatabaseServer> Handle(
+        GetDatabaseServerByIdQuery request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        await new GetDatabaseServerByIdQueryValidator().ValidateAndThrowAsync(
+            request,
+            cancellationToken
+        );
+
+        const string cacheKeyPrefix = "databaseServer-id-";
+        var cacheKey = $"{cacheKeyPrefix}{request.DatabaseServerId}";
+
+        if (_cache != null)
         {
-            return cachedData;
+            var cachedData = await _cache.GetCachedData<DatabaseServer>(cacheKey);
+            if (cachedData != null)
+                return cachedData;
         }
 
-        var databaseServer = await GetDatabaseServerFromDatabase(query.DatabaseServerId);
-        await cache?.CacheData(cacheKey, databaseServer);
-
-        return databaseServer;
-    }
-
-    private async Task<DatabaseServer> GetDatabaseServerFromDatabase(int databaseServerId)
-    {
-        await using var dbContext = dbContextFactory.CreateDbContext();
+        await using var dbContext = _dbContextFactory.CreateDbContext();
 
         var databaseServerEntity =
             await dbContext
                 .Set<DatabaseServerEntity>()
-                .FirstOrDefaultAsync(ds => ds.DatabaseServerId == databaseServerId)
+                .FirstOrDefaultAsync(
+                    ds => ds.DatabaseServerId == request.DatabaseServerId,
+                    cancellationToken
+                )
             ?? throw new KeyNotFoundException(
-                $"Database Server with ID {databaseServerId} not found."
+                $"Database Server with ID {request.DatabaseServerId} not found."
             );
 
-        return new DatabaseServer(
+        var result = new DatabaseServer(
             databaseServerEntity.DatabaseServerId,
             databaseServerEntity.DatabaseServerName,
             databaseServerEntity.DatabaseServerIpaddress,
@@ -68,5 +79,12 @@ internal class GetDatabaseServerByIdHandler(
             databaseServerEntity.DatabaseServerFullyQualifiedDomainName,
             databaseServerEntity.IsLinkedServer
         );
+
+        if (_cache != null)
+            await _cache.CacheData(cacheKey, result);
+
+        return result;
     }
 }
+
+#nullable disable

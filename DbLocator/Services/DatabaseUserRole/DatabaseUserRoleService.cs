@@ -1,6 +1,7 @@
 using DbLocator.Db;
 using DbLocator.Domain;
-using DbLocator.Features.DatabaseUserRoles;
+using DbLocator.Features.DatabaseUserRoles.CreateDatabaseUserRole;
+using DbLocator.Features.DatabaseUserRoles.DeleteDatabaseUserRole;
 using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,8 +12,10 @@ internal class DatabaseUserRoleService(
     DbLocatorCache cache
 ) : IDatabaseUserRoleService
 {
-    private readonly AddDatabaseUserRole _addDatabaseUserRole = new(dbContextFactory);
-    private readonly DeleteDatabaseUserRole _deleteDatabaseUserRole = new(dbContextFactory, cache);
+    private readonly CreateDatabaseUserRoleHandler _createDatabaseUserRole =
+        new(dbContextFactory, cache);
+    private readonly DeleteDatabaseUserRoleHandler _deleteDatabaseUserRole =
+        new(dbContextFactory, cache);
 
     public async Task AddDatabaseUserRole(
         int databaseUserId,
@@ -20,15 +23,15 @@ internal class DatabaseUserRoleService(
         bool updateUser
     )
     {
-        await _addDatabaseUserRole.Handle(
-            new AddDatabaseUserRoleCommand(databaseUserId, userRole, updateUser)
+        await _createDatabaseUserRole.Handle(
+            new CreateDatabaseUserRoleCommand(databaseUserId, userRole, updateUser)
         );
     }
 
     public async Task AddDatabaseUserRole(int databaseUserId, DatabaseRole userRole)
     {
-        await _addDatabaseUserRole.Handle(
-            new AddDatabaseUserRoleCommand(databaseUserId, userRole, true)
+        await _createDatabaseUserRole.Handle(
+            new CreateDatabaseUserRoleCommand(databaseUserId, userRole, true)
         );
     }
 

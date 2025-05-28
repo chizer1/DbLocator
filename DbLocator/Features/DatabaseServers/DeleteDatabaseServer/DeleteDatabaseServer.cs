@@ -1,3 +1,5 @@
+#nullable enable
+
 using DbLocator.Db;
 using DbLocator.Utilities;
 using FluentValidation;
@@ -18,7 +20,9 @@ internal sealed class DeleteDatabaseServerCommandValidator
 {
     internal DeleteDatabaseServerCommandValidator()
     {
-        RuleFor(x => x.DatabaseServerId).GreaterThan(0);
+        RuleFor(x => x.DatabaseServerId)
+            .GreaterThan(0)
+            .WithMessage("Database Server Id must be greater than 0.");
     }
 }
 
@@ -27,39 +31,53 @@ internal sealed class DeleteDatabaseServerCommandValidator
 /// </summary>
 internal class DeleteDatabaseServerHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    DbLocatorCache cache
+    DbLocatorCache? cache = null
 )
 {
     private readonly IDbContextFactory<DbLocatorContext> _dbContextFactory = dbContextFactory;
-    private readonly DbLocatorCache _cache = cache;
+    private readonly DbLocatorCache? _cache = cache;
 
-    public async Task Handle(DeleteDatabaseServerCommand command)
+    public async Task Handle(
+        DeleteDatabaseServerCommand request,
+        CancellationToken cancellationToken = default
+    )
     {
-        await new DeleteDatabaseServerCommandValidator().ValidateAndThrowAsync(command);
+        await new DeleteDatabaseServerCommandValidator().ValidateAndThrowAsync(
+            request,
+            cancellationToken
+        );
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
         var databaseServer =
             await dbContext
                 .Set<DatabaseServerEntity>()
-                .FirstOrDefaultAsync(ds => ds.DatabaseServerId == command.DatabaseServerId)
+                .FirstOrDefaultAsync(
+                    ds => ds.DatabaseServerId == request.DatabaseServerId,
+                    cancellationToken
+                )
             ?? throw new KeyNotFoundException(
-                $"Database Server with ID {command.DatabaseServerId} not found."
+                $"Database server with ID {request.DatabaseServerId} not found"
             );
 
         if (
             await dbContext
                 .Set<DatabaseEntity>()
-                .AnyAsync(d => d.DatabaseServerId == command.DatabaseServerId)
+                .AnyAsync(d => d.DatabaseServerId == request.DatabaseServerId, cancellationToken)
         )
             throw new InvalidOperationException(
-                "Cannot delete database server because there are databases associated with it, please delete the databases first."
+                "Cannot delete database server because it is in use by one or more databases"
             );
 
         dbContext.Set<DatabaseServerEntity>().Remove(databaseServer);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(cancellationToken);
 
-        _cache?.Remove("databaseServers");
-        _cache?.Remove($"databaseServer-id-{command.DatabaseServerId}");
+        if (_cache != null)
+        {
+            await _cache.Remove("databaseServers");
+            await _cache.Remove($"databaseServer-id-{request.DatabaseServerId}");
+        }
     }
 }
+
+#nullable disable

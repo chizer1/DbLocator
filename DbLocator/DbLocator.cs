@@ -50,7 +50,7 @@ public partial class Locator
     {
         if (string.IsNullOrWhiteSpace(dbLocatorConnectionString))
             throw new ArgumentException(
-                "DbLocator connection string is required.",
+                "Connection string is required",
                 nameof(dbLocatorConnectionString)
             );
 
@@ -58,19 +58,18 @@ public partial class Locator
 
         var dbContextFactory = DbContextFactory.CreateDbContextFactory(dbLocatorConnectionString);
         var encryption = new Encryption(encryptionKey);
-
         var dbLocatorCache = new DbLocatorCache(distributedCache);
 
-        _connectionService = new ConnectionService(dbContextFactory, encryption, dbLocatorCache);
+        _connectionService = new ConnectionService(dbContextFactory, dbLocatorCache, encryption);
         _databaseService = new DatabaseService(dbContextFactory, dbLocatorCache);
+        _databaseServerService = new DatabaseServerService(dbContextFactory, dbLocatorCache);
+        _databaseTypeService = new DatabaseTypeService(dbContextFactory, dbLocatorCache);
         _databaseUserService = new DatabaseUserService(
             dbContextFactory,
             encryption,
             dbLocatorCache
         );
         _databaseUserRoleService = new DatabaseUserRoleService(dbContextFactory, dbLocatorCache);
-        _databaseServerService = new DatabaseServerService(dbContextFactory, dbLocatorCache);
-        _databaseTypeService = new DatabaseTypeService(dbContextFactory, dbLocatorCache);
         _tenantService = new TenantService(dbContextFactory, dbLocatorCache);
     }
 

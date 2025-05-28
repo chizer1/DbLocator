@@ -14,7 +14,7 @@ namespace DbLocator
         /// The ID of the newly added database type.
         /// </returns>
         /// <exception cref="ArgumentException">
-        /// Thrown when the database type name is invalid or already exists.
+        /// Thrown when the database type name is invalid or already exists. The parameter name is included.
         /// </exception>
         public async Task<byte> AddDatabaseType(string databaseTypeName)
         {

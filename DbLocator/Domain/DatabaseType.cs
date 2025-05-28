@@ -1,3 +1,5 @@
+#nullable enable
+
 namespace DbLocator.Domain;
 
 /// <summary>

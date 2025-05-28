@@ -1,3 +1,5 @@
+#nullable enable
+
 using DbLocator.Db;
 using DbLocator.Utilities;
 using FluentValidation;
@@ -16,9 +18,11 @@ internal record UpdateDatabaseServerStatusCommand(int DatabaseServerId, bool IsL
 internal sealed class UpdateDatabaseServerStatusCommandValidator
     : AbstractValidator<UpdateDatabaseServerStatusCommand>
 {
-    public UpdateDatabaseServerStatusCommandValidator()
+    internal UpdateDatabaseServerStatusCommandValidator()
     {
-        RuleFor(x => x.DatabaseServerId).GreaterThan(0);
+        RuleFor(x => x.DatabaseServerId)
+            .GreaterThan(0)
+            .WithMessage("Database Server Id must be greater than 0.");
     }
 }
 
@@ -27,31 +31,45 @@ internal sealed class UpdateDatabaseServerStatusCommandValidator
 /// </summary>
 internal class UpdateDatabaseServerStatusHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
-    DbLocatorCache cache
+    DbLocatorCache? cache = null
 )
 {
     private readonly IDbContextFactory<DbLocatorContext> _dbContextFactory = dbContextFactory;
-    private readonly DbLocatorCache _cache = cache;
+    private readonly DbLocatorCache? _cache = cache;
 
-    public async Task Handle(UpdateDatabaseServerStatusCommand command)
+    public async Task Handle(
+        UpdateDatabaseServerStatusCommand request,
+        CancellationToken cancellationToken = default
+    )
     {
-        await new UpdateDatabaseServerStatusCommandValidator().ValidateAndThrowAsync(command);
+        await new UpdateDatabaseServerStatusCommandValidator().ValidateAndThrowAsync(
+            request,
+            cancellationToken
+        );
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
         var databaseServer =
             await dbContext
                 .Set<DatabaseServerEntity>()
-                .FirstOrDefaultAsync(ds => ds.DatabaseServerId == command.DatabaseServerId)
+                .FirstOrDefaultAsync(
+                    ds => ds.DatabaseServerId == request.DatabaseServerId,
+                    cancellationToken
+                )
             ?? throw new KeyNotFoundException(
-                $"Database Server with ID {command.DatabaseServerId} not found."
+                $"Database Server with ID {request.DatabaseServerId} not found."
             );
 
-        databaseServer.IsLinkedServer = command.IsLinkedServer;
+        databaseServer.IsLinkedServer = request.IsLinkedServer;
         dbContext.Set<DatabaseServerEntity>().Update(databaseServer);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(cancellationToken);
 
-        _cache?.Remove("databaseServers");
-        _cache?.Remove($"databaseServer-id-{command.DatabaseServerId}");
+        if (_cache != null)
+        {
+            await _cache.Remove("databaseServers");
+            await _cache.Remove($"databaseServer-id-{request.DatabaseServerId}");
+        }
     }
 }
+
+#nullable disable

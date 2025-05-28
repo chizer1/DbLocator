@@ -1,6 +1,12 @@
+#nullable enable
+
 using DbLocator.Db;
 using DbLocator.Domain;
-using DbLocator.Features.Databases;
+using DbLocator.Features.Databases.CreateDatabase;
+using DbLocator.Features.Databases.DeleteDatabase;
+using DbLocator.Features.Databases.GetDatabase;
+using DbLocator.Features.Databases.GetDatabases;
+using DbLocator.Features.Databases.UpdateDatabase;
 using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,103 +17,65 @@ internal class DatabaseService(
     DbLocatorCache cache
 ) : IDatabaseService
 {
-    private readonly AddDatabase _addDatabase = new(dbContextFactory, cache);
-    private readonly DeleteDatabase _deleteDatabase = new(dbContextFactory, cache);
-    private readonly GetDatabase _getDatabase = new(dbContextFactory);
-    private readonly GetDatabases _getDatabases = new(dbContextFactory, cache);
-    private readonly UpdateDatabase _updateDatabase = new(dbContextFactory, cache);
+    private readonly CreateDatabaseHandler _createDatabase = new(dbContextFactory, cache);
+    private readonly DeleteDatabaseHandler _deleteDatabase = new(dbContextFactory, cache);
+    private readonly GetDatabaseHandler _getDatabase = new(dbContextFactory, cache);
+    private readonly GetDatabasesHandler _getDatabases = new(dbContextFactory, cache);
+    private readonly UpdateDatabaseHandler _updateDatabase = new(dbContextFactory, cache);
 
-    public async Task<int> AddDatabase(
+    public Task<int> AddDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
-    )
-    {
-        return await _addDatabase.Handle(
-            new AddDatabaseCommand(
-                databaseName,
-                databaseServerId,
-                databaseTypeId,
-                databaseStatus,
-                false,
-                true
-            )
-        );
-    }
+    ) => AddDatabase(databaseName, databaseServerId, databaseTypeId, databaseStatus, true);
 
-    public async Task<int> AddDatabase(
+    public Task<int> AddDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus,
-        bool createDatabase
-    )
-    {
-        return await _addDatabase.Handle(
-            new AddDatabaseCommand(
-                databaseName,
-                databaseServerId,
-                databaseTypeId,
-                databaseStatus,
-                false,
-                createDatabase
-            )
-        );
-    }
+        bool affectDatabase = true
+    ) => AddDatabase(databaseName, databaseServerId, databaseTypeId, affectDatabase, true);
+
+    public Task<int> AddDatabase(
+        string databaseName,
+        int databaseServerId,
+        byte databaseTypeId,
+        bool affectDatabase = true
+    ) => AddDatabase(databaseName, databaseServerId, databaseTypeId, affectDatabase, true);
 
     public async Task<int> AddDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
-        bool createDatabase
+        bool affectDatabase = true,
+        bool useTrustedConnection = false
     )
     {
-        return await _addDatabase.Handle(
-            new AddDatabaseCommand(
+        var database = await _createDatabase.Handle(
+            new CreateDatabaseCommand(
                 databaseName,
                 databaseServerId,
                 databaseTypeId,
-                Status.Active,
-                true,
-                createDatabase
+                affectDatabase,
+                useTrustedConnection
             )
         );
+        return database.Id;
     }
 
-    public async Task<int> AddDatabase(
-        string databaseName,
-        int databaseServerId,
-        byte databaseTypeId,
-        bool createDatabase,
-        bool useTrustedConnection
-    )
-    {
-        return await _addDatabase.Handle(
-            new AddDatabaseCommand(
-                databaseName,
-                databaseServerId,
-                databaseTypeId,
-                Status.Active,
-                useTrustedConnection,
-                createDatabase
-            )
-        );
-    }
-
-    public async Task DeleteDatabase(int databaseId)
-    {
-        await _deleteDatabase.Handle(new DeleteDatabaseCommand(databaseId, true));
-    }
+    public Task DeleteDatabase(int databaseId) => DeleteDatabase(databaseId, true);
 
     public async Task DeleteDatabase(int databaseId, bool deleteDatabase)
     {
-        await _deleteDatabase.Handle(new DeleteDatabaseCommand(databaseId, deleteDatabase));
+        await _deleteDatabase.Handle(new DeleteDatabaseCommand(databaseId));
     }
 
     public async Task<List<Domain.Database>> GetDatabases()
     {
-        return await _getDatabases.Handle(new GetDatabasesQuery());
+        var databases = await _getDatabases.Handle(new GetDatabasesQuery());
+        return databases.ToList();
     }
 
     public async Task<Domain.Database> GetDatabase(int databaseId)
@@ -115,12 +83,35 @@ internal class DatabaseService(
         return await _getDatabase.Handle(new GetDatabaseQuery(databaseId));
     }
 
-    public async Task UpdateDatabase(
+    public Task UpdateDatabase(
         int databaseId,
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
+    ) => UpdateDatabase(databaseId, databaseName, databaseServerId, databaseTypeId, true);
+
+    public Task UpdateDatabase(int databaseId, int databaseServerId) =>
+        UpdateDatabase(databaseId, string.Empty, databaseServerId, 0, true);
+
+    public Task UpdateDatabase(int databaseId, byte databaseTypeId) =>
+        UpdateDatabase(databaseId, string.Empty, 0, databaseTypeId, true);
+
+    public Task UpdateDatabase(int databaseId, string databaseName) =>
+        UpdateDatabase(databaseId, databaseName, 0, 0, true);
+
+    public Task UpdateDatabase(int databaseId, Status databaseStatus) =>
+        UpdateDatabase(databaseId, string.Empty, 0, 0, true);
+
+    public Task UpdateDatabase(int databaseId, bool useTrustedConnection) =>
+        UpdateDatabase(databaseId, string.Empty, 0, 0, useTrustedConnection);
+
+    private async Task UpdateDatabase(
+        int databaseId,
+        string databaseName,
+        int databaseServerId,
+        byte databaseTypeId,
+        bool useTrustedConnection
     )
     {
         await _updateDatabase.Handle(
@@ -129,44 +120,8 @@ internal class DatabaseService(
                 databaseName,
                 databaseServerId,
                 databaseTypeId,
-                databaseStatus,
-                null
+                useTrustedConnection
             )
-        );
-    }
-
-    public async Task UpdateDatabase(int databaseId, int databaseServerId)
-    {
-        await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(databaseId, null, databaseServerId, null, null, null)
-        );
-    }
-
-    public async Task UpdateDatabase(int databaseId, byte databaseTypeId)
-    {
-        await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(databaseId, null, null, databaseTypeId, null, null)
-        );
-    }
-
-    public async Task UpdateDatabase(int databaseId, string databaseName)
-    {
-        await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(databaseId, databaseName, null, null, null, null)
-        );
-    }
-
-    public async Task UpdateDatabase(int databaseId, Status databaseStatus)
-    {
-        await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(databaseId, null, null, null, databaseStatus, null)
-        );
-    }
-
-    public async Task UpdateDatabase(int databaseId, bool useTrustedConnection)
-    {
-        await _updateDatabase.Handle(
-            new UpdateDatabaseCommand(databaseId, null, null, null, null, useTrustedConnection)
         );
     }
 }

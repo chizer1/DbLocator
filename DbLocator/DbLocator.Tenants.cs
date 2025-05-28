@@ -157,6 +157,34 @@ namespace DbLocator
         }
 
         /// <summary>
+        /// Updates an existing tenant with the specified ID, name, code, and status.
+        /// </summary>
+        /// <param name="tenantId">
+        /// The ID of the tenant to be updated.
+        /// </param>
+        /// <param name="tenantName">
+        /// The new name for the tenant.
+        /// </param>
+        /// <param name="tenantCode">
+        /// The new code for the tenant.
+        /// </param>
+        /// <param name="tenantStatus">
+        /// The new status of the tenant (e.g., Active, Inactive).
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous operation.
+        /// </returns>
+        public async Task UpdateTenant(
+            int tenantId,
+            string tenantName,
+            string tenantCode,
+            Status tenantStatus
+        )
+        {
+            await _tenantService.UpdateTenant(tenantId, tenantName, tenantCode, tenantStatus);
+        }
+
+        /// <summary>
         /// Deletes a tenant with the specified ID from the system.
         /// </summary>
         /// <param name="tenantId">

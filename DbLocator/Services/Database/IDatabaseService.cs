@@ -4,31 +4,62 @@ namespace DbLocator.Services.Database;
 
 internal interface IDatabaseService
 {
+    /// <param name="databaseName">The name of the database to add.</param>
+    /// <param name="databaseServerId">The ID of the database server to which the database belongs.</param>
+    /// <param name="databaseTypeId">The type of the database.</param>
+    /// <param name="databaseStatus">The status of the database.</param>
+    /// <returns>The ID of the added database.</returns>
     Task<int> AddDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
     );
+
+    /// <param name="databaseName">The name of the database to add.</param>
+    /// <param name="databaseServerId">The ID of the database server to which the database belongs.</param>
+    /// <param name="databaseTypeId">The type of the database.</param>
+    /// <param name="databaseStatus">The status of the database.</param>
+    /// <param name="AffectDatabase">
+    /// A flag indicating whether to perform DDL operations on the database server. If not provided, defaults to true.
+    /// </param>
+    /// <returns>The ID of the added database.</returns>
     Task<int> AddDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus,
-        bool createDatabase
+        bool AffectDatabase = true
     );
+
+    /// <param name="databaseName">The name of the database to add.</param>
+    /// <param name="databaseServerId">The ID of the database server to which the database belongs.</param>
+    /// <param name="databaseTypeId">The type of the database.</param>
+    /// <param name="AffectDatabase">
+    /// A flag indicating whether to perform DDL operations on the database server. If not provided, defaults to true.
+    /// </param>
+    /// <returns>The ID of the added database.</returns>
     Task<int> AddDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
-        bool createDatabase
+        bool AffectDatabase = true
     );
+
+    /// <param name="databaseName">The name of the database to add.</param>
+    /// <param name="databaseServerId">The ID of the database server to which the database belongs.</param>
+    /// <param name="databaseTypeId">The type of the database.</param>
+    /// <param name="AffectDatabase">
+    /// A flag indicating whether to perform DDL operations on the database server. If not provided, defaults to true.
+    /// </param>
+    /// <param name="useTrustedConnection">A flag indicating whether to use trusted connection.</param>
+    /// <returns>The ID of the added database.</returns>
     Task<int> AddDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
-        bool createDatabase,
-        bool useTrustedConnection
+        bool AffectDatabase = true,
+        bool useTrustedConnection = false
     );
     Task DeleteDatabase(int databaseId);
     Task DeleteDatabase(int databaseId, bool deleteDatabase);

@@ -1,3 +1,5 @@
+#nullable enable
+
 using DbLocator.Domain;
 using Microsoft.Data.SqlClient;
 
@@ -25,7 +27,7 @@ namespace DbLocator
         /// </exception>
         public async Task<SqlConnection> GetConnection(
             int connectionId,
-            DatabaseRole[] roles = null
+            DatabaseRole[]? roles = null
         )
         {
             return await _connectionService.GetConnection(connectionId, roles);
@@ -55,7 +57,7 @@ namespace DbLocator
         public async Task<SqlConnection> GetConnection(
             int tenantId,
             int databaseTypeId,
-            DatabaseRole[] roles = null
+            DatabaseRole[]? roles = null
         )
         {
             return await _connectionService.GetConnection(tenantId, databaseTypeId, roles);
@@ -85,7 +87,7 @@ namespace DbLocator
         public async Task<SqlConnection> GetConnection(
             string tenantCode,
             int databaseTypeId,
-            DatabaseRole[] roles = null
+            DatabaseRole[]? roles = null
         )
         {
             return await _connectionService.GetConnection(tenantCode, databaseTypeId, roles);

@@ -1,16 +1,26 @@
-using DbLocator.Domain;
-
 namespace DbLocator.Services.DatabaseUser;
 
 internal interface IDatabaseUserService
 {
+    /// <param name="databaseIds">The IDs of the databases to which the user will be assigned.</param>
+    /// <param name="userName">The name of the user.</param>
+    /// <param name="userPassword">The password for the user.</param>
+    /// <param name="affectDatabase">
+    /// A flag indicating whether to perform DDL operations on the database server. If not provided, defaults to true.
+    /// </param>
     Task<int> AddDatabaseUser(
         int[] databaseIds,
         string userName,
         string userPassword,
-        bool affectDatabase
+        bool affectDatabase = true
     );
-    Task<int> AddDatabaseUser(int[] databaseIds, string userName, bool affectDatabase);
+
+    /// <param name="databaseIds">The IDs of the databases to which the user will be assigned.</param>
+    /// <param name="userName">The name of the user.</param>
+    /// <param name="affectDatabase">
+    /// A flag indicating whether to perform DDL operations on the database server. If not provided, defaults to true.
+    /// </param>
+    Task<int> AddDatabaseUser(int[] databaseIds, string userName, bool affectDatabase = true);
     Task<int> AddDatabaseUser(int[] databaseIds, string userName, string userPassword);
     Task<int> AddDatabaseUser(int[] databaseIds, string userName);
     Task DeleteDatabaseUser(int databaseUserId);

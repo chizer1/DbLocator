@@ -1,5 +1,9 @@
 using DbLocator.Db;
-using DbLocator.Features.DatabaseUsers;
+using DbLocator.Features.DatabaseUsers.AddDatabaseUser;
+using DbLocator.Features.DatabaseUsers.DeleteDatabaseUser;
+using DbLocator.Features.DatabaseUsers.GetDatabaseUser;
+using DbLocator.Features.DatabaseUsers.GetDatabaseUsers;
+using DbLocator.Features.DatabaseUsers.UpdateDatabaseUser;
 using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,18 +15,19 @@ internal class DatabaseUserService(
     DbLocatorCache cache
 ) : IDatabaseUserService
 {
-    private readonly AddDatabaseUser _addDatabaseUser = new(dbContextFactory, encryption, cache);
-    private readonly DeleteDatabaseUser _deleteDatabaseUser = new(dbContextFactory, cache);
-    private readonly GetDatabaseUser _getDatabaseUser = new(dbContextFactory, cache);
-    private readonly GetDatabaseUsers _getDatabaseUsers = new(dbContextFactory, cache);
-    private readonly UpdateDatabaseUser _updateDatabaseUser =
+    private readonly AddDatabaseUserHandler _addDatabaseUser =
+        new(dbContextFactory, encryption, cache);
+    private readonly DeleteDatabaseUserHandler _deleteDatabaseUser = new(dbContextFactory, cache);
+    private readonly GetDatabaseUserHandler _getDatabaseUser = new(dbContextFactory, cache);
+    private readonly GetDatabaseUsersHandler _getDatabaseUsers = new(dbContextFactory, cache);
+    private readonly UpdateDatabaseUserHandler _updateDatabaseUser =
         new(dbContextFactory, encryption, cache);
 
     public async Task<int> AddDatabaseUser(
         int[] databaseIds,
         string userName,
         string userPassword,
-        bool affectDatabase
+        bool affectDatabase = true
     )
     {
         return await _addDatabaseUser.Handle(
@@ -30,7 +35,11 @@ internal class DatabaseUserService(
         );
     }
 
-    public async Task<int> AddDatabaseUser(int[] databaseIds, string userName, bool affectDatabase)
+    public async Task<int> AddDatabaseUser(
+        int[] databaseIds,
+        string userName,
+        bool affectDatabase = true
+    )
     {
         var userPassword = PasswordGenerator.GenerateRandomPassword(25);
 
@@ -74,9 +83,7 @@ internal class DatabaseUserService(
 
     public async Task<Domain.DatabaseUser> GetDatabaseUser(int databaseUserId)
     {
-        return await _getDatabaseUser.Handle(
-            new GetDatabaseUserQuery { DatabaseUserId = databaseUserId }
-        );
+        return await _getDatabaseUser.Handle(new GetDatabaseUserQuery(databaseUserId));
     }
 
     public async Task UpdateDatabaseUser(
@@ -105,14 +112,12 @@ internal class DatabaseUserService(
         bool updateDatabase
     )
     {
-        var databaseUserPassword = PasswordGenerator.GenerateRandomPassword(25);
-
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
                 databaseUserId,
-                databaseIds.ToList(),
+                [.. databaseIds],
                 databaseUserName,
-                databaseUserPassword,
+                null,
                 updateDatabase
             )
         );
@@ -128,7 +133,7 @@ internal class DatabaseUserService(
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
                 databaseUserId,
-                databaseIds.ToList(),
+                [.. databaseIds],
                 databaseUserName,
                 databaseUserPassword,
                 true
@@ -142,14 +147,12 @@ internal class DatabaseUserService(
         string databaseUserName
     )
     {
-        var databaseUserPassword = PasswordGenerator.GenerateRandomPassword(25);
-
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
                 databaseUserId,
-                databaseIds.ToList(),
+                [.. databaseIds],
                 databaseUserName,
-                databaseUserPassword,
+                null,
                 true
             )
         );
@@ -164,7 +167,7 @@ internal class DatabaseUserService(
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
                 databaseUserId,
-                null,
+                [],
                 databaseUserName,
                 databaseUserPassword,
                 true
@@ -174,23 +177,15 @@ internal class DatabaseUserService(
 
     public async Task UpdateDatabaseUser(int databaseUserId, string databaseUserName)
     {
-        var databaseUserPassword = PasswordGenerator.GenerateRandomPassword(25);
-
         await _updateDatabaseUser.Handle(
-            new UpdateDatabaseUserCommand(
-                databaseUserId,
-                null,
-                databaseUserName,
-                databaseUserPassword,
-                true
-            )
+            new UpdateDatabaseUserCommand(databaseUserId, [], databaseUserName, null, true)
         );
     }
 
     public async Task UpdateDatabaseUser(int databaseUserId, int[] databaseIds)
     {
         await _updateDatabaseUser.Handle(
-            new UpdateDatabaseUserCommand(databaseUserId, databaseIds.ToList(), null, null, true)
+            new UpdateDatabaseUserCommand(databaseUserId, [.. databaseIds], null, null, true)
         );
     }
 }

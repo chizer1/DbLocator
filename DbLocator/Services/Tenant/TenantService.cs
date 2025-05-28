@@ -1,6 +1,11 @@
 using DbLocator.Db;
 using DbLocator.Domain;
-using DbLocator.Features.Tenants;
+using DbLocator.Features.Tenants.CreateTenant;
+using DbLocator.Features.Tenants.DeleteTenant;
+using DbLocator.Features.Tenants.GetTenantByCode;
+using DbLocator.Features.Tenants.GetTenantById;
+using DbLocator.Features.Tenants.GetTenants;
+using DbLocator.Features.Tenants.UpdateTenant;
 using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,25 +16,28 @@ internal class TenantService(
     DbLocatorCache cache
 ) : ITenantService
 {
-    private readonly AddTenant _addTenant = new(dbContextFactory, cache);
-    private readonly DeleteTenant _deleteTenant = new(dbContextFactory, cache);
-    private readonly GetTenants _getTenants = new(dbContextFactory, cache);
-    private readonly GetTenant _getTenant = new(dbContextFactory, cache);
-    private readonly UpdateTenant _updateTenant = new(dbContextFactory, cache);
+    private readonly CreateTenantHandler _createTenant = new(dbContextFactory, cache);
+    private readonly DeleteTenantHandler _deleteTenant = new(dbContextFactory, cache);
+    private readonly GetTenantsHandler _getTenants = new(dbContextFactory, cache);
+    private readonly GetTenantByIdHandler _getTenantById = new(dbContextFactory, cache);
+    private readonly GetTenantByCodeHandler _getTenantByCode = new(dbContextFactory, cache);
+    private readonly UpdateTenantHandler _updateTenant = new(dbContextFactory, cache);
 
     public async Task<int> AddTenant(string tenantName)
     {
-        return await _addTenant.Handle(new AddTenantCommand(tenantName, null, Status.Active));
+        return await _createTenant.Handle(new CreateTenantCommand(tenantName, null, Status.Active));
     }
 
     public async Task<int> AddTenant(string tenantName, Status tenantStatus)
     {
-        return await _addTenant.Handle(new AddTenantCommand(tenantName, null, tenantStatus));
+        return await _createTenant.Handle(new CreateTenantCommand(tenantName, null, tenantStatus));
     }
 
     public async Task<int> AddTenant(string tenantName, string tenantCode, Status tenantStatus)
     {
-        return await _addTenant.Handle(new AddTenantCommand(tenantName, tenantCode, tenantStatus));
+        return await _createTenant.Handle(
+            new CreateTenantCommand(tenantName, tenantCode, tenantStatus)
+        );
     }
 
     public async Task DeleteTenant(int tenantId)
@@ -44,12 +52,12 @@ internal class TenantService(
 
     public async Task<Domain.Tenant> GetTenant(int tenantId)
     {
-        return await _getTenant.Handle(new GetTenantByIdQuery { TenantId = tenantId });
+        return await _getTenantById.Handle(new GetTenantByIdQuery(tenantId));
     }
 
     public async Task<Domain.Tenant> GetTenant(string tenantCode)
     {
-        return await _getTenant.Handle(new GetTenantByCodeQuery { TenantCode = tenantCode });
+        return await _getTenantByCode.Handle(new GetTenantByCodeQuery(tenantCode));
     }
 
     public async Task UpdateTenant(int tenantId, Status tenantStatus)
@@ -65,5 +73,17 @@ internal class TenantService(
     public async Task UpdateTenant(int tenantId, string tenantName, string tenantCode)
     {
         await _updateTenant.Handle(new UpdateTenantCommand(tenantId, tenantName, tenantCode, null));
+    }
+
+    public async Task UpdateTenant(
+        int tenantId,
+        string tenantName,
+        string tenantCode,
+        Status tenantStatus
+    )
+    {
+        await _updateTenant.Handle(
+            new UpdateTenantCommand(tenantId, tenantName, tenantCode, tenantStatus)
+        );
     }
 }

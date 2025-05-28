@@ -16,8 +16,8 @@ namespace DbLocator
         /// <param name="userPassword">
         /// The password for the user.
         /// </param>
-        /// <param name="affectDatabase">
-        /// A flag indicating whether to perform DDL operations on the database server.
+        /// <param name="AffectDatabase">
+        /// A flag indicating whether to perform DDL operations on the database server. If not provided, defaults to true.
         /// </param>
         /// <returns>
         /// The ID of the newly added database user.
@@ -32,14 +32,14 @@ namespace DbLocator
             int[] databaseIds,
             string userName,
             string userPassword,
-            bool affectDatabase
+            bool AffectDatabase = true
         )
         {
             return await _databaseUserService.AddDatabaseUser(
                 databaseIds,
                 userName,
                 userPassword,
-                affectDatabase
+                AffectDatabase
             );
         }
 
@@ -53,8 +53,8 @@ namespace DbLocator
         /// <param name="userName">
         /// The user name for the new database user.
         /// </param>
-        /// <param name="affectDatabase">
-        /// A flag indicating whether to perform DDL operations on the database server.
+        /// <param name="AffectDatabase">
+        /// A flag indicating whether to perform DDL operations on the database server. If not provided, defaults to true.
         /// </param>
         /// <returns>
         /// The ID of the newly created database user.
@@ -63,18 +63,20 @@ namespace DbLocator
         /// Thrown when any of the specified databases are not found.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// Thrown when the user name is invalid.
+        /// Thrown when the user name is invalid. The parameter name is included.
         /// </exception>
         public async Task<int> AddDatabaseUser(
             int[] databaseIds,
             string userName,
-            bool affectDatabase
+            bool AffectDatabase = true
         )
         {
+            if (string.IsNullOrWhiteSpace(userName))
+                throw new ArgumentException("Database user name is required", nameof(userName));
             return await _databaseUserService.AddDatabaseUser(
                 databaseIds,
                 userName,
-                affectDatabase
+                AffectDatabase
             );
         }
 

@@ -1,5 +1,9 @@
 using DbLocator.Db;
-using DbLocator.Features.DatabaseTypes;
+using DbLocator.Features.DatabaseTypes.CreateDatabaseType;
+using DbLocator.Features.DatabaseTypes.DeleteDatabaseType;
+using DbLocator.Features.DatabaseTypes.GetDatabaseTypeById;
+using DbLocator.Features.DatabaseTypes.GetDatabaseTypes;
+using DbLocator.Features.DatabaseTypes.UpdateDatabaseType;
 using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,15 +14,15 @@ internal class DatabaseTypeService(
     DbLocatorCache cache
 ) : IDatabaseTypeService
 {
-    private readonly AddDatabaseType _addDatabaseType = new(dbContextFactory, cache);
-    private readonly DeleteDatabaseType _deleteDatabaseType = new(dbContextFactory, cache);
-    private readonly GetDatabaseTypes _getDatabaseTypes = new(dbContextFactory, cache);
-    private readonly GetDatabaseType _getDatabaseType = new(dbContextFactory, cache);
-    private readonly UpdateDatabaseType _updateDatabaseType = new(dbContextFactory, cache);
+    private readonly CreateDatabaseTypeHandler _createDatabaseType = new(dbContextFactory, cache);
+    private readonly DeleteDatabaseTypeHandler _deleteDatabaseType = new(dbContextFactory, cache);
+    private readonly GetDatabaseTypesHandler _getDatabaseTypes = new(dbContextFactory, cache);
+    private readonly GetDatabaseTypeByIdHandler _getDatabaseTypeById = new(dbContextFactory, cache);
+    private readonly UpdateDatabaseTypeHandler _updateDatabaseType = new(dbContextFactory, cache);
 
     public async Task<byte> AddDatabaseType(string databaseTypeName)
     {
-        return await _addDatabaseType.Handle(new AddDatabaseTypeCommand(databaseTypeName));
+        return await _createDatabaseType.Handle(new CreateDatabaseTypeCommand(databaseTypeName));
     }
 
     public async Task DeleteDatabaseType(byte databaseTypeId)
@@ -33,9 +37,7 @@ internal class DatabaseTypeService(
 
     public async Task<Domain.DatabaseType> GetDatabaseType(byte databaseTypeId)
     {
-        return await _getDatabaseType.Handle(
-            new GetDatabaseTypeQuery { DatabaseTypeId = databaseTypeId }
-        );
+        return await _getDatabaseTypeById.Handle(new GetDatabaseTypeByIdQuery(databaseTypeId));
     }
 
     public async Task UpdateDatabaseType(byte databaseTypeId, string databaseTypeName)

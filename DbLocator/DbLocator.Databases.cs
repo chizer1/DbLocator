@@ -26,7 +26,7 @@ namespace DbLocator
         /// Thrown when the specified database server or database type is not found.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// Thrown when the database name is invalid or when attempting to create a database with invalid parameters.
+        /// Thrown when the database name is invalid or when attempting to create a database with invalid parameters. The parameter name is included.
         /// </exception>
         public async Task<int> AddDatabase(
             string databaseName,
@@ -58,8 +58,8 @@ namespace DbLocator
         /// <param name="databaseStatus">
         /// The status of the database.
         /// </param>
-        /// <param name="createDatabase">
-        /// A flag indicating whether to perform DDL operations on the database server.
+        /// <param name="affectDatabase">
+        /// A flag indicating whether to perform DDL operations on the database server. If not provided, defaults to true.
         /// </param>
         /// <returns>
         /// The ID of the newly added database.
@@ -68,14 +68,14 @@ namespace DbLocator
         /// Thrown when the specified database server or database type is not found.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// Thrown when the database name is invalid or when attempting to create a database with invalid parameters.
+        /// Thrown when the database name is invalid or when attempting to create a database with invalid parameters. The parameter name is included.
         /// </exception>
         public async Task<int> AddDatabase(
             string databaseName,
             int databaseServerId,
             byte databaseTypeId,
             Status databaseStatus,
-            bool createDatabase
+            bool affectDatabase = true
         )
         {
             return await _databaseService.AddDatabase(
@@ -83,7 +83,7 @@ namespace DbLocator
                 databaseServerId,
                 databaseTypeId,
                 databaseStatus,
-                createDatabase
+                affectDatabase
             );
         }
 
@@ -99,8 +99,8 @@ namespace DbLocator
         /// <param name="databaseTypeId">
         /// The ID of the database type.
         /// </param>
-        /// <param name="createDatabase">
-        /// A flag indicating whether to perform DDL operations on the database server.
+        /// <param name="AffectDatabase">
+        /// A flag indicating whether to perform DDL operations on the database server. If not provided, defaults to true.
         /// </param>
         /// <returns>
         /// The ID of the newly added database.
@@ -109,20 +109,23 @@ namespace DbLocator
         /// Thrown when the specified database server or database type is not found.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// Thrown when the database name is invalid or when attempting to create a database with invalid parameters.
+        /// Thrown when the database name is invalid or when attempting to create a database with invalid parameters. The parameter name is included.
         /// </exception>
         public async Task<int> AddDatabase(
             string databaseName,
             int databaseServerId,
             byte databaseTypeId,
-            bool createDatabase
+            bool AffectDatabase = true
         )
         {
+            if (string.IsNullOrWhiteSpace(databaseName))
+                throw new ArgumentException("Database name is required", nameof(databaseName));
+
             return await _databaseService.AddDatabase(
                 databaseName,
                 databaseServerId,
                 databaseTypeId,
-                createDatabase
+                AffectDatabase
             );
         }
 
@@ -132,7 +135,7 @@ namespace DbLocator
         /// <param name="databaseName">The name of the database to be added.</param>
         /// <param name="databaseServerId">The ID of the database server where the database will be created.</param>
         /// <param name="databaseTypeId">The ID of the database type.</param>
-        /// <param name="createDatabase">A flag indicating whether to perform DDL operations on the database server.</param>
+        /// <param name="AffectDatabase">A flag indicating whether to perform DDL operations on the database server. If not provided, defaults to true.</param>
         /// <param name="useTrustedConnection">A flag indicating whether to use Windows authentication for the database connection.</param>
         /// <returns>The ID of the newly created database.</returns>
         /// <exception cref="KeyNotFoundException">Thrown when the specified database server or type is not found.</exception>
@@ -140,15 +143,15 @@ namespace DbLocator
             string databaseName,
             int databaseServerId,
             byte databaseTypeId,
-            bool createDatabase,
-            bool useTrustedConnection
+            bool AffectDatabase = true,
+            bool useTrustedConnection = false
         )
         {
             return await _databaseService.AddDatabase(
                 databaseName,
                 databaseServerId,
                 databaseTypeId,
-                createDatabase,
+                AffectDatabase,
                 useTrustedConnection
             );
         }
