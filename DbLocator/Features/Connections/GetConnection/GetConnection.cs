@@ -127,11 +127,35 @@ internal class GetConnectionHandler(
         var server = connection.Database.DatabaseServer;
         var database = connection.Database;
 
+        // Get the server name using a fallback mechanism
+        var serverName = server.DatabaseServerFullyQualifiedDomainName;
+        if (string.IsNullOrEmpty(serverName))
+        {
+            serverName = server.DatabaseServerHostName;
+        }
+        if (string.IsNullOrEmpty(serverName))
+        {
+            serverName = server.DatabaseServerIpaddress;
+        }
+        if (string.IsNullOrEmpty(serverName))
+        {
+            serverName = server.DatabaseServerName;
+        }
+        if (string.IsNullOrEmpty(serverName))
+        {
+            throw new InvalidOperationException(
+                $"No valid server identifier found for database server {server.DatabaseServerId}"
+            );
+        }
+
         var builder = new SqlConnectionStringBuilder
         {
-            DataSource = server.DatabaseServerFullyQualifiedDomainName,
+            DataSource = serverName,
             InitialCatalog = database.DatabaseName,
-            IntegratedSecurity = database.UseTrustedConnection
+            IntegratedSecurity = database.UseTrustedConnection,
+            Encrypt = true,
+            TrustServerCertificate = true,
+            ConnectTimeout = 30
         };
 
         var user = await GetUserForRoles(connection, roles, dbContext, cancellationToken);

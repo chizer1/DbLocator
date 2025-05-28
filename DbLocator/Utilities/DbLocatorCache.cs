@@ -1,3 +1,5 @@
+#nullable enable
+
 using System.Text.Json;
 using DbLocator.Domain;
 using Microsoft.Extensions.Caching.Distributed;
@@ -7,9 +9,9 @@ namespace DbLocator.Utilities;
 /// <summary>
 /// Provides caching functionality for DbLocator entities and connection strings.
 /// </summary>
-internal class DbLocatorCache(IDistributedCache cache)
+internal class DbLocatorCache(IDistributedCache? cache)
 {
-    private readonly IDistributedCache _cache = cache;
+    private readonly IDistributedCache? _cache = cache;
     private const string ConnectionCacheKeysKey = "connectionCacheKeys";
 
     /// <summary>
@@ -18,8 +20,11 @@ internal class DbLocatorCache(IDistributedCache cache)
     /// <typeparam name="T">The type of data to retrieve.</typeparam>
     /// <param name="cacheKey">The key used to identify the cached data.</param>
     /// <returns>The cached data if found; otherwise, default(T).</returns>
-    internal async Task<T> GetCachedData<T>(string cacheKey)
+    internal async Task<T?> GetCachedData<T>(string cacheKey)
     {
+        if (_cache == null)
+            return default;
+
         var cachedData = await _cache.GetStringAsync(cacheKey);
         if (cachedData == null)
         {
@@ -42,6 +47,9 @@ internal class DbLocatorCache(IDistributedCache cache)
     /// <param name="data">The data to cache.</param>
     internal async Task CacheData(string cacheKey, object data)
     {
+        if (_cache == null)
+            return;
+
         // Handle string type separately to avoid JSON serialization
         if (data is string stringData)
         {
@@ -59,6 +67,9 @@ internal class DbLocatorCache(IDistributedCache cache)
     /// <param name="cacheKey">The key of the cached data to remove.</param>
     internal async Task Remove(string cacheKey)
     {
+        if (_cache == null)
+            return;
+
         await _cache.RemoveAsync(cacheKey);
     }
 
@@ -69,6 +80,9 @@ internal class DbLocatorCache(IDistributedCache cache)
     /// <param name="connectionString">The connection string to cache.</param>
     internal async Task CacheConnectionString(string cacheKey, string connectionString)
     {
+        if (_cache == null)
+            return;
+
         await _cache.SetStringAsync(cacheKey, connectionString);
 
         // Add cacheKey to cached dictionary
@@ -92,10 +106,13 @@ internal class DbLocatorCache(IDistributedCache cache)
         int? tenantId = null,
         int? databaseTypeId = null,
         int? connectionId = null,
-        string tenantCode = null,
-        DatabaseRole[] roles = null
+        string? tenantCode = null,
+        DatabaseRole[]? roles = null
     )
     {
+        if (_cache == null)
+            return;
+
         var cacheKeys = await GetCachedData<List<string>>(ConnectionCacheKeysKey) ?? [];
         var keysToRemove = new List<string>();
 
@@ -131,8 +148,8 @@ internal class DbLocatorCache(IDistributedCache cache)
         int? tenantId,
         int? databaseTypeId,
         int? connectionId,
-        string tenantCode,
-        DatabaseRole[] roles
+        string? tenantCode,
+        DatabaseRole[]? roles
     )
     {
         //if (tenantId != null && !cacheKey.Contains($"TenantId:{tenantId}"))
