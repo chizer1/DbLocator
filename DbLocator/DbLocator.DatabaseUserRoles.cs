@@ -13,8 +13,8 @@ namespace DbLocator
         /// <param name="userRole">
         /// The <see cref="DatabaseRole"/> to be assigned to the database user.
         /// </param>
-        /// <param name="affectDatabase">
-        /// A flag indicating whether to perform DDL operations on the database server.
+        /// <param name="updateUser">
+        /// A flag indicating whether to update the user.
         /// </param>
         /// <returns>
         /// A task that represents the asynchronous operation.
@@ -22,10 +22,14 @@ namespace DbLocator
         public async Task AddDatabaseUserRole(
             int databaseUserId,
             DatabaseRole userRole,
-            bool affectDatabase
+            bool updateUser
         )
         {
-            await _databaseUserRoles.AddDatabaseUserRole(databaseUserId, userRole, affectDatabase);
+            await _databaseUserRoleService.AddDatabaseUserRole(
+                databaseUserId,
+                userRole,
+                updateUser
+            );
         }
 
         /// <summary>
@@ -42,7 +46,7 @@ namespace DbLocator
         /// </returns>
         public async Task AddDatabaseUserRole(int databaseUserId, DatabaseRole userRole)
         {
-            await _databaseUserRoles.AddDatabaseUserRole(databaseUserId, userRole);
+            await _databaseUserRoleService.AddDatabaseUserRole(databaseUserId, userRole);
         }
 
         /// <summary>
@@ -54,8 +58,8 @@ namespace DbLocator
         /// <param name="userRole">
         /// The <see cref="DatabaseRole"/> to be deleted from the database user.
         /// </param>
-        /// <param name="affectDatabase">
-        /// A flag indicating whether to perform DDL operations on the database server.
+        /// <param name="deleteDatabaseUserRole">
+        /// A flag indicating whether to delete the database user role.
         /// </param>
         /// <returns>
         /// A task that represents the asynchronous operation.
@@ -63,13 +67,13 @@ namespace DbLocator
         public async Task DeleteDatabaseUserRole(
             int databaseUserId,
             DatabaseRole userRole,
-            bool affectDatabase
+            bool deleteDatabaseUserRole
         )
         {
-            await _databaseUserRoles.DeleteDatabaseUserRole(
+            await _databaseUserRoleService.DeleteDatabaseUserRole(
                 databaseUserId,
                 userRole,
-                affectDatabase
+                deleteDatabaseUserRole
             );
         }
 
@@ -87,7 +91,7 @@ namespace DbLocator
         /// </returns>
         public async Task DeleteDatabaseUserRole(int databaseUserId, DatabaseRole userRole)
         {
-            await _databaseUserRoles.DeleteDatabaseUserRole(databaseUserId, userRole);
+            await _databaseUserRoleService.DeleteDatabaseUserRole(databaseUserId, userRole);
         }
     }
 }

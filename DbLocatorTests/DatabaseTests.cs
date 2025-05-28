@@ -178,15 +178,13 @@ public class DatabaseTests
     {
         var dbName = TestHelpers.GetRandomString();
         var newIpAddress = TestHelpers.GetRandomIpAddressString();
-        var newHostName = "testhostname";
-        var newFqdn = "testhostname.example.com";
 
         var dbServerId = await _dbLocator.AddDatabaseServer(
             "testservername",
+            false,
+            null,
             newIpAddress,
-            newHostName,
-            newFqdn,
-            false
+            null
         );
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
@@ -243,15 +241,13 @@ public class DatabaseTests
         var database = await AddDatabaseAsync(dbName);
 
         var newIpAddress = TestHelpers.GetRandomIpAddressString();
-        var newHostName = "testserver987name";
-        var newFqdn = "testservername987.example.com";
 
         var newServerId = await _dbLocator.AddDatabaseServer(
             "testservername987",
+            false,
+            null,
             newIpAddress,
-            newHostName,
-            newFqdn,
-            false
+            null
         );
 
         await _dbLocator.UpdateDatabase(database.Id, newServerId);

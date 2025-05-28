@@ -1,12 +1,11 @@
 using DbLocator.Db;
-using DbLocator.Domain;
 using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseUsers
 {
-    internal record DeleteDatabaseUserCommand(int DatabaseUserId, bool DeleteDatabaseUser);
+    internal record DeleteDatabaseUserCommand(int DatabaseUserId, bool AffectDatabase);
 
     internal sealed class DeleteDatabaseUserCommandValidator
         : AbstractValidator<DeleteDatabaseUserCommand>
@@ -48,7 +47,7 @@ namespace DbLocator.Features.DatabaseUsers
                 .Where(dud => dud.DatabaseUserId == command.DatabaseUserId)
                 .ToListAsync();
 
-            if (command.DeleteDatabaseUser)
+            if (command.AffectDatabase)
             {
                 var databases = await dbContext
                     .Set<DatabaseUserDatabaseEntity>()

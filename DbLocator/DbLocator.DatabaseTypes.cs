@@ -18,7 +18,7 @@ namespace DbLocator
         /// </exception>
         public async Task<byte> AddDatabaseType(string databaseTypeName)
         {
-            return await _databaseTypes.AddDatabaseType(databaseTypeName);
+            return await _databaseTypeService.AddDatabaseType(databaseTypeName);
         }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace DbLocator
         /// </returns>
         public async Task<List<DatabaseType>> GetDatabaseTypes()
         {
-            return await _databaseTypes.GetDatabaseTypes();
+            return await _databaseTypeService.GetDatabaseTypes();
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace DbLocator
         /// </exception>
         public async Task UpdateDatabaseType(byte databaseTypeId, string databaseTypeName)
         {
-            await _databaseTypes.UpdateDatabaseType(databaseTypeId, databaseTypeName);
+            await _databaseTypeService.UpdateDatabaseType(databaseTypeId, databaseTypeName);
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace DbLocator
         /// </exception>
         public async Task DeleteDatabaseType(byte databaseTypeId)
         {
-            await _databaseTypes.DeleteDatabaseType(databaseTypeId);
+            await _databaseTypeService.DeleteDatabaseType(databaseTypeId);
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace DbLocator
         /// </exception>
         public async Task<DatabaseType> GetDatabaseType(byte databaseTypeId)
         {
-            return await _databaseTypes.GetDatabaseType(databaseTypeId);
+            return await _databaseTypeService.GetDatabaseType(databaseTypeId);
         }
     }
 }

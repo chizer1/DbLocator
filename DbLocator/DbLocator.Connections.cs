@@ -28,7 +28,7 @@ namespace DbLocator
             DatabaseRole[] roles = null
         )
         {
-            return await _connections.GetConnection(connectionId, roles);
+            return await _connectionService.GetConnection(connectionId, roles);
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace DbLocator
             DatabaseRole[] roles = null
         )
         {
-            return await _connections.GetConnection(tenantId, databaseTypeId, roles);
+            return await _connectionService.GetConnection(tenantId, databaseTypeId, roles);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace DbLocator
             DatabaseRole[] roles = null
         )
         {
-            return await _connections.GetConnection(tenantCode, databaseTypeId, roles);
+            return await _connectionService.GetConnection(tenantCode, databaseTypeId, roles);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace DbLocator
         /// </returns>
         public async Task<List<Connection>> GetConnections()
         {
-            return await _connections.GetConnections();
+            return await _connectionService.GetConnections();
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace DbLocator
         /// </exception>
         public async Task<int> AddConnection(int tenantId, int databaseId)
         {
-            return await _connections.AddConnection(tenantId, databaseId);
+            return await _connectionService.AddConnection(tenantId, databaseId);
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace DbLocator
         /// </exception>
         public async Task DeleteConnection(int connectionId)
         {
-            await _connections.DeleteConnection(connectionId);
+            await _connectionService.DeleteConnection(connectionId);
         }
     }
 }

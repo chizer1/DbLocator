@@ -1,13 +1,9 @@
-using System.ComponentModel.DataAnnotations;
 using DbLocator;
 using DbLocator.Db;
 using DbLocator.Domain;
-using DbLocator.Features.Databases;
-using DbLocator.Library;
 using DbLocator.Utilities;
 using DbLocatorTests.Fixtures;
 using Microsoft.EntityFrameworkCore;
-using Xunit;
 
 namespace DbLocatorTests;
 
@@ -1066,10 +1062,10 @@ public class DatabaseUserTests : IAsyncLifetime
         var newServerName = TestHelpers.GetRandomString();
         var newServerId = await _dbLocator.AddDatabaseServer(
             newServerName,
+            false,
+            null,
             "127.0.0.1",
-            "localhost",
-            "localhost.localdomain",
-            true
+            null
         );
 
         // Act
@@ -1101,10 +1097,10 @@ public class DatabaseUserTests : IAsyncLifetime
         var newIpAddress = $"192.168.1.{new Random().Next(1, 255)}";
         var newServerId = await _dbLocator.AddDatabaseServer(
             newServerName,
+            false,
+            null,
             newIpAddress,
-            newHostName,
-            $"{newHostName}.localdomain",
-            true
+            null
         );
 
         // Create a new database type

@@ -35,7 +35,7 @@ namespace DbLocator
             Status databaseStatus
         )
         {
-            return await _databases.AddDatabase(
+            return await _databaseService.AddDatabase(
                 databaseName,
                 databaseServerId,
                 databaseTypeId,
@@ -58,7 +58,7 @@ namespace DbLocator
         /// <param name="databaseStatus">
         /// The status of the database.
         /// </param>
-        /// <param name="affectDatabase">
+        /// <param name="createDatabase">
         /// A flag indicating whether to perform DDL operations on the database server.
         /// </param>
         /// <returns>
@@ -75,15 +75,15 @@ namespace DbLocator
             int databaseServerId,
             byte databaseTypeId,
             Status databaseStatus,
-            bool affectDatabase
+            bool createDatabase
         )
         {
-            return await _databases.AddDatabase(
+            return await _databaseService.AddDatabase(
                 databaseName,
                 databaseServerId,
                 databaseTypeId,
                 databaseStatus,
-                affectDatabase
+                createDatabase
             );
         }
 
@@ -99,7 +99,7 @@ namespace DbLocator
         /// <param name="databaseTypeId">
         /// The ID of the database type.
         /// </param>
-        /// <param name="affectDatabase">
+        /// <param name="createDatabase">
         /// A flag indicating whether to perform DDL operations on the database server.
         /// </param>
         /// <returns>
@@ -115,14 +115,14 @@ namespace DbLocator
             string databaseName,
             int databaseServerId,
             byte databaseTypeId,
-            bool affectDatabase
+            bool createDatabase
         )
         {
-            return await _databases.AddDatabase(
+            return await _databaseService.AddDatabase(
                 databaseName,
                 databaseServerId,
                 databaseTypeId,
-                affectDatabase
+                createDatabase
             );
         }
 
@@ -132,7 +132,7 @@ namespace DbLocator
         /// <param name="databaseName">The name of the database to be added.</param>
         /// <param name="databaseServerId">The ID of the database server where the database will be created.</param>
         /// <param name="databaseTypeId">The ID of the database type.</param>
-        /// <param name="affectDatabase">A flag indicating whether to perform DDL operations on the database server.</param>
+        /// <param name="createDatabase">A flag indicating whether to perform DDL operations on the database server.</param>
         /// <param name="useTrustedConnection">A flag indicating whether to use Windows authentication for the database connection.</param>
         /// <returns>The ID of the newly created database.</returns>
         /// <exception cref="KeyNotFoundException">Thrown when the specified database server or type is not found.</exception>
@@ -140,15 +140,15 @@ namespace DbLocator
             string databaseName,
             int databaseServerId,
             byte databaseTypeId,
-            bool affectDatabase,
+            bool createDatabase,
             bool useTrustedConnection
         )
         {
-            return await _databases.AddDatabase(
+            return await _databaseService.AddDatabase(
                 databaseName,
                 databaseServerId,
                 databaseTypeId,
-                affectDatabase,
+                createDatabase,
                 useTrustedConnection
             );
         }
@@ -167,7 +167,7 @@ namespace DbLocator
         /// </exception>
         public async Task<Database> GetDatabase(int databaseId)
         {
-            return await _databases.GetDatabase(databaseId);
+            return await _databaseService.GetDatabase(databaseId);
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace DbLocator
         /// </returns>
         public async Task<List<Database>> GetDatabases()
         {
-            return await _databases.GetDatabases();
+            return await _databaseService.GetDatabases();
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace DbLocator
             Status databaseStatus
         )
         {
-            await _databases.UpdateDatabase(
+            await _databaseService.UpdateDatabase(
                 databaseId,
                 databaseName,
                 databaseServerId,
@@ -239,7 +239,7 @@ namespace DbLocator
         /// </returns>
         public async Task UpdateDatabase(int databaseId, int databaseServerId)
         {
-            await _databases.UpdateDatabase(databaseId, databaseServerId);
+            await _databaseService.UpdateDatabase(databaseId, databaseServerId);
         }
 
         /// <summary>
@@ -256,7 +256,7 @@ namespace DbLocator
         /// </returns>
         public async Task UpdateDatabase(int databaseId, byte databaseTypeId)
         {
-            await _databases.UpdateDatabase(databaseId, databaseTypeId);
+            await _databaseService.UpdateDatabase(databaseId, databaseTypeId);
         }
 
         /// <summary>
@@ -279,7 +279,7 @@ namespace DbLocator
         /// </exception>
         public async Task UpdateDatabase(int databaseId, string databaseName)
         {
-            await _databases.UpdateDatabase(databaseId, databaseName);
+            await _databaseService.UpdateDatabase(databaseId, databaseName);
         }
 
         /// <summary>
@@ -302,7 +302,7 @@ namespace DbLocator
         /// </exception>
         public async Task UpdateDatabase(int databaseId, Status databaseStatus)
         {
-            await _databases.UpdateDatabase(databaseId, databaseStatus);
+            await _databaseService.UpdateDatabase(databaseId, databaseStatus);
         }
 
         /// <summary>
@@ -325,7 +325,7 @@ namespace DbLocator
         /// </exception>
         public async Task UpdateDatabase(int databaseId, bool useTrustedConnection)
         {
-            await _databases.UpdateDatabase(databaseId, useTrustedConnection);
+            await _databaseService.UpdateDatabase(databaseId, useTrustedConnection);
         }
 
         /// <summary>
@@ -345,7 +345,7 @@ namespace DbLocator
         /// </exception>
         public async Task DeleteDatabase(int databaseId)
         {
-            await _databases.DeleteDatabase(databaseId);
+            await _databaseService.DeleteDatabase(databaseId);
         }
 
         /// <summary>
@@ -368,7 +368,7 @@ namespace DbLocator
         /// </exception>
         public async Task DeleteDatabase(int databaseId, bool deleteDatabase)
         {
-            await _databases.DeleteDatabase(databaseId, deleteDatabase);
+            await _databaseService.DeleteDatabase(databaseId, deleteDatabase);
         }
     }
 }

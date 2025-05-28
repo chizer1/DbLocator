@@ -21,7 +21,7 @@ namespace DbLocator
         /// </returns>
         public async Task<int> AddTenant(string tenantName, string tenantCode, Status tenantStatus)
         {
-            return await _tenants.AddTenant(tenantName, tenantCode, tenantStatus);
+            return await _tenantService.AddTenant(tenantName, tenantCode, tenantStatus);
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace DbLocator
         /// </returns>
         public async Task<int> AddTenant(string tenantName, Status tenantStatus)
         {
-            return await _tenants.AddTenant(tenantName, tenantStatus);
+            return await _tenantService.AddTenant(tenantName, tenantStatus);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace DbLocator
         /// </returns>
         public async Task<int> AddTenant(string tenantName)
         {
-            return await _tenants.AddTenant(tenantName);
+            return await _tenantService.AddTenant(tenantName);
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace DbLocator
         /// </returns>
         public async Task<List<Tenant>> GetTenants()
         {
-            return await _tenants.GetTenants();
+            return await _tenantService.GetTenants();
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace DbLocator
         /// </exception>
         public async Task<Tenant> GetTenant(int tenantId)
         {
-            return await _tenants.GetTenant(tenantId);
+            return await _tenantService.GetTenant(tenantId);
         }
 
         /// <summary>
@@ -99,35 +99,7 @@ namespace DbLocator
         /// </exception>
         public async Task<Tenant> GetTenant(string tenantCode)
         {
-            return await _tenants.GetTenant(tenantCode);
-        }
-
-        /// <summary>
-        /// Updates the details of an existing tenant with the specified ID, name, code, and status.
-        /// </summary>
-        /// <param name="tenantId">
-        /// The ID of the tenant to be updated.
-        /// </param>
-        /// <param name="tenantName">
-        /// The new name for the tenant.
-        /// </param>
-        /// <param name="tenantCode">
-        /// The new code for the tenant.
-        /// </param>
-        /// <param name="tenantStatus">
-        /// The new status of the tenant (e.g., Active, Inactive).
-        /// </param>
-        /// <returns>
-        /// A task that represents the asynchronous operation.
-        /// </returns>
-        public async Task UpdateTenant(
-            int tenantId,
-            string tenantName,
-            string tenantCode,
-            Status tenantStatus
-        )
-        {
-            await _tenants.UpdateTenant(tenantId, tenantName, tenantCode, tenantStatus);
+            return await _tenantService.GetTenant(tenantCode);
         }
 
         /// <summary>
@@ -144,7 +116,7 @@ namespace DbLocator
         /// </returns>
         public async Task UpdateTenant(int tenantId, string tenantName)
         {
-            await _tenants.UpdateTenant(tenantId, tenantName);
+            await _tenantService.UpdateTenant(tenantId, tenantName);
         }
 
         /// <summary>
@@ -161,7 +133,7 @@ namespace DbLocator
         /// </returns>
         public async Task UpdateTenant(int tenantId, Status tenantStatus)
         {
-            await _tenants.UpdateTenant(tenantId, tenantStatus);
+            await _tenantService.UpdateTenant(tenantId, tenantStatus);
         }
 
         /// <summary>
@@ -181,7 +153,7 @@ namespace DbLocator
         /// </returns>
         public async Task UpdateTenant(int tenantId, string tenantName, string tenantCode)
         {
-            await _tenants.UpdateTenant(tenantId, tenantName, tenantCode);
+            await _tenantService.UpdateTenant(tenantId, tenantName, tenantCode);
         }
 
         /// <summary>
@@ -195,7 +167,7 @@ namespace DbLocator
         /// </returns>
         public async Task DeleteTenant(int tenantId)
         {
-            await _tenants.DeleteTenant(tenantId);
+            await _tenantService.DeleteTenant(tenantId);
         }
     }
 }

@@ -78,7 +78,8 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
 
         var newName = TestHelpers.GetRandomString();
         var newCode = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateTenant(tenantId, newName, newCode, Status.Inactive);
+        await _dbLocator.UpdateTenant(tenantId, newName, newCode);
+        await _dbLocator.UpdateTenant(tenantId, Status.Inactive);
 
         var updatedTenant = await _dbLocator.GetTenant(tenantId);
         Assert.Equal(newName, updatedTenant.Name);

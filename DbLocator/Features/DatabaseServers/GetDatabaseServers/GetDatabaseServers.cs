@@ -1,28 +1,20 @@
-using System.Text.Json;
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Utilities;
-using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace DbLocator.Features.DatabaseServers;
+namespace DbLocator.Features.DatabaseServers.GetDatabaseServers;
 
-internal class GetDatabaseServersQuery { }
-
-internal sealed class GetDatabaseServersQueryValidator : AbstractValidator<GetDatabaseServersQuery>
-{
-    internal GetDatabaseServersQueryValidator() { }
-}
-
-internal class GetDatabaseServers(
+/// <summary>
+/// Handles the ListDatabaseServersQuery and returns all database servers.
+/// </summary>
+internal class GetDatabaseServersHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     DbLocatorCache cache
 )
 {
-    internal async Task<List<DatabaseServer>> Handle(GetDatabaseServersQuery query)
+    public async Task<List<DatabaseServer>> Handle()
     {
-        await new GetDatabaseServersQueryValidator().ValidateAndThrowAsync(query);
-
         var cacheKey = "databaseServers";
         var cachedData = await cache?.GetCachedData<List<DatabaseServer>>(cacheKey);
         if (cachedData != null)
@@ -30,15 +22,13 @@ internal class GetDatabaseServers(
             return cachedData;
         }
 
-        var databaseServers = await GetDatabaseServersFromDatabase(dbContextFactory);
+        var databaseServers = await GetDatabaseServersFromDatabase();
         await cache?.CacheData(cacheKey, databaseServers);
 
         return databaseServers;
     }
 
-    private static async Task<List<DatabaseServer>> GetDatabaseServersFromDatabase(
-        IDbContextFactory<DbLocatorContext> dbContextFactory
-    )
+    private async Task<List<DatabaseServer>> GetDatabaseServersFromDatabase()
     {
         await using var dbContext = dbContextFactory.CreateDbContext();
 

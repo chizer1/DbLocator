@@ -4,60 +4,60 @@ using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace DbLocator.Features.DatabaseServers;
+namespace DbLocator.Features.DatabaseServers.GetDatabaseServerById;
 
-internal class GetDatabaseServerQuery
-{
-    public int DatabaseServerId { get; set; }
-}
+/// <summary>
+/// Represents a query to get a database server by its ID.
+/// </summary>
+internal record GetDatabaseServerByIdQuery(int DatabaseServerId);
 
-internal sealed class GetDatabaseServerQueryValidator : AbstractValidator<GetDatabaseServerQuery>
+/// <summary>
+/// Validates the GetDatabaseServerByIdQuery.
+/// </summary>
+internal sealed class GetDatabaseServerByIdQueryValidator
+    : AbstractValidator<GetDatabaseServerByIdQuery>
 {
-    internal GetDatabaseServerQueryValidator()
+    public GetDatabaseServerByIdQueryValidator()
     {
         RuleFor(x => x.DatabaseServerId).GreaterThan(0);
     }
 }
 
-internal class GetDatabaseServer(
+/// <summary>
+/// Handles the GetDatabaseServerByIdQuery and returns the corresponding database server.
+/// </summary>
+internal class GetDatabaseServerByIdHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     DbLocatorCache cache
 )
 {
-    internal async Task<DatabaseServer> Handle(GetDatabaseServerQuery query)
+    public async Task<DatabaseServer> Handle(GetDatabaseServerByIdQuery query)
     {
-        await new GetDatabaseServerQueryValidator().ValidateAndThrowAsync(query);
+        await new GetDatabaseServerByIdQueryValidator().ValidateAndThrowAsync(query);
 
-        var cacheKey = $"databaseServer-{query.DatabaseServerId}";
+        var cacheKey = $"databaseServer-id-{query.DatabaseServerId}";
         var cachedData = await cache?.GetCachedData<DatabaseServer>(cacheKey);
         if (cachedData != null)
         {
             return cachedData;
         }
 
-        var databaseServer = await GetDatabaseServerFromDatabase(
-            dbContextFactory,
-            query.DatabaseServerId
-        );
+        var databaseServer = await GetDatabaseServerFromDatabase(query.DatabaseServerId);
         await cache?.CacheData(cacheKey, databaseServer);
 
         return databaseServer;
     }
 
-    private static async Task<DatabaseServer> GetDatabaseServerFromDatabase(
-        IDbContextFactory<DbLocatorContext> dbContextFactory,
-        int databaseServerId
-    )
+    private async Task<DatabaseServer> GetDatabaseServerFromDatabase(int databaseServerId)
     {
         await using var dbContext = dbContextFactory.CreateDbContext();
 
         var databaseServerEntity =
             await dbContext
                 .Set<DatabaseServerEntity>()
-                .AsNoTracking()
                 .FirstOrDefaultAsync(ds => ds.DatabaseServerId == databaseServerId)
             ?? throw new KeyNotFoundException(
-                $"Database server with ID {databaseServerId} not found."
+                $"Database Server with ID {databaseServerId} not found."
             );
 
         return new DatabaseServer(

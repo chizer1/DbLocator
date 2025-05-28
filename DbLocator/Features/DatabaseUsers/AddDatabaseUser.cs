@@ -107,7 +107,6 @@ internal class AddDatabaseUser(
         await dbContext.Set<DatabaseUserDatabaseEntity>().AddRangeAsync(databaseUserDatabases);
         await dbContext.SaveChangesAsync();
 
-        // only if affect database is specified, do we run any sql commands
         if (command.AffectDatabase)
         {
             foreach (var databaseId in command.DatabaseIds)
