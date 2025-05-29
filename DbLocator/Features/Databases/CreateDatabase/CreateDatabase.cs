@@ -12,8 +12,9 @@ internal record CreateDatabaseCommand(
     string DatabaseName,
     int DatabaseServerId,
     int DatabaseTypeId,
-    bool affectDatabase = true,
-    bool UseTrustedConnection = false
+    bool AffectDatabase = true,
+    bool UseTrustedConnection = false,
+    Status Status = Status.Active
 );
 
 internal sealed class CreateDatabaseCommandValidator : AbstractValidator<CreateDatabaseCommand>
@@ -33,6 +34,8 @@ internal sealed class CreateDatabaseCommandValidator : AbstractValidator<CreateD
         RuleFor(x => x.DatabaseTypeId)
             .GreaterThan(0)
             .WithMessage("Database type ID must be greater than zero");
+
+        RuleFor(x => x.Status).IsInEnum().WithMessage("Status must be a valid Status enum value");
     }
 }
 
@@ -61,7 +64,7 @@ internal class CreateDatabaseHandler(
             DatabaseName = request.DatabaseName,
             DatabaseServerId = request.DatabaseServerId,
             DatabaseTypeId = (byte)request.DatabaseTypeId,
-            DatabaseStatusId = (int)Status.Active,
+            DatabaseStatusId = (byte)request.Status,
             UseTrustedConnection = request.UseTrustedConnection
         };
 
@@ -80,6 +83,17 @@ internal class CreateDatabaseHandler(
             ?? throw new KeyNotFoundException(
                 $"Database with ID {databaseEntity.DatabaseId} not found"
             );
+
+        if (request.AffectDatabase)
+        {
+            var dbName = Sql.SanitizeSqlIdentifier(request.DatabaseName);
+            await Sql.ExecuteSqlCommandAsync(
+                dbContext,
+                $"create database [{dbName}]",
+                savedEntity.DatabaseServer.IsLinkedServer,
+                savedEntity.DatabaseServer.DatabaseServerHostName
+            );
+        }
 
         if (_cache != null)
             await _cache.Remove("databases");

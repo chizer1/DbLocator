@@ -13,7 +13,9 @@ internal record UpdateDatabaseCommand(
     string Name,
     int DatabaseServerId,
     int DatabaseTypeId,
-    bool UseTrustedConnection
+    bool UseTrustedConnection = false,
+    Status Status = Status.Active,
+    bool AffectDatabase = true
 );
 
 internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateDatabaseCommand>
@@ -35,6 +37,8 @@ internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateD
         RuleFor(x => x.DatabaseTypeId)
             .GreaterThan(0)
             .WithMessage("Database type ID must be greater than zero");
+
+        RuleFor(x => x.Status).IsInEnum().WithMessage("Status must be a valid Status enum value");
     }
 }
 
@@ -66,10 +70,23 @@ internal class UpdateDatabaseHandler(
                 .FirstOrDefaultAsync(d => d.DatabaseId == request.Id, cancellationToken)
             ?? throw new KeyNotFoundException($"Database with ID {request.Id} not found");
 
+        if (request.AffectDatabase && database.DatabaseName != request.Name)
+        {
+            var oldDbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
+            var newDbName = Sql.SanitizeSqlIdentifier(request.Name);
+            await Sql.ExecuteSqlCommandAsync(
+                dbContext,
+                $"alter database [{oldDbName}] modify name = [{newDbName}]",
+                database.DatabaseServer.IsLinkedServer,
+                database.DatabaseServer.DatabaseServerHostName
+            );
+        }
+
         database.DatabaseName = request.Name;
         database.DatabaseServerId = request.DatabaseServerId;
         database.DatabaseTypeId = (byte)request.DatabaseTypeId;
         database.UseTrustedConnection = request.UseTrustedConnection;
+        database.DatabaseStatusId = (byte)request.Status;
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

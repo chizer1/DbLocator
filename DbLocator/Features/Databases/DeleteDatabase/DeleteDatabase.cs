@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.Databases.DeleteDatabase;
 
-internal record DeleteDatabaseCommand(int Id);
+internal record DeleteDatabaseCommand(int Id, bool AffectDatabase = true);
 
 internal sealed class DeleteDatabaseCommandValidator : AbstractValidator<DeleteDatabaseCommand>
 {
@@ -40,8 +40,20 @@ internal class DeleteDatabaseHandler(
         var database =
             await dbContext
                 .Set<DatabaseEntity>()
+                .Include(d => d.DatabaseServer)
                 .FirstOrDefaultAsync(d => d.DatabaseId == request.Id, cancellationToken)
             ?? throw new KeyNotFoundException($"Database with ID {request.Id} not found.");
+
+        if (request.AffectDatabase)
+        {
+            var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
+            await Sql.ExecuteSqlCommandAsync(
+                dbContext,
+                $"drop database [{dbName}]",
+                database.DatabaseServer.IsLinkedServer,
+                database.DatabaseServer.DatabaseServerHostName
+            );
+        }
 
         dbContext.Databases.Remove(database);
         await dbContext.SaveChangesAsync(cancellationToken);

@@ -28,7 +28,7 @@ internal class DatabaseService(
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
-    ) => AddDatabase(databaseName, databaseServerId, databaseTypeId, databaseStatus, true);
+    ) => AddDatabase(databaseName, databaseServerId, databaseTypeId, databaseStatus, true, false);
 
     public Task<int> AddDatabase(
         string databaseName,
@@ -36,19 +36,20 @@ internal class DatabaseService(
         byte databaseTypeId,
         Status databaseStatus,
         bool affectDatabase = true
-    ) => AddDatabase(databaseName, databaseServerId, databaseTypeId, affectDatabase, true);
+    ) => AddDatabase(databaseName, databaseServerId, databaseTypeId, databaseStatus, affectDatabase, false);
 
     public Task<int> AddDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
         bool affectDatabase = true
-    ) => AddDatabase(databaseName, databaseServerId, databaseTypeId, affectDatabase, true);
+    ) => AddDatabase(databaseName, databaseServerId, databaseTypeId, Status.Active, affectDatabase, false);
 
     public async Task<int> AddDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
+        Status databaseStatus,
         bool affectDatabase = true,
         bool useTrustedConnection = false
     )
@@ -59,7 +60,8 @@ internal class DatabaseService(
                 databaseServerId,
                 databaseTypeId,
                 affectDatabase,
-                useTrustedConnection
+                useTrustedConnection,
+                databaseStatus
             )
         );
         return database.Id;
@@ -89,19 +91,19 @@ internal class DatabaseService(
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
-    ) => UpdateDatabase(databaseId, databaseName, databaseServerId, databaseTypeId, true);
+    ) => UpdateDatabase(databaseId, databaseName, databaseServerId, databaseTypeId, false, databaseStatus);
 
     public Task UpdateDatabase(int databaseId, int databaseServerId) =>
-        UpdateDatabase(databaseId, string.Empty, databaseServerId, 0, true);
+        UpdateDatabase(databaseId, string.Empty, databaseServerId, 0, false);
 
     public Task UpdateDatabase(int databaseId, byte databaseTypeId) =>
-        UpdateDatabase(databaseId, string.Empty, 0, databaseTypeId, true);
+        UpdateDatabase(databaseId, string.Empty, 0, databaseTypeId, false);
 
     public Task UpdateDatabase(int databaseId, string databaseName) =>
-        UpdateDatabase(databaseId, databaseName, 0, 0, true);
+        UpdateDatabase(databaseId, databaseName, 0, 0, false);
 
     public Task UpdateDatabase(int databaseId, Status databaseStatus) =>
-        UpdateDatabase(databaseId, string.Empty, 0, 0, true);
+        UpdateDatabase(databaseId, string.Empty, 0, 0, false, databaseStatus);
 
     public Task UpdateDatabase(int databaseId, bool useTrustedConnection) =>
         UpdateDatabase(databaseId, string.Empty, 0, 0, useTrustedConnection);
@@ -111,7 +113,8 @@ internal class DatabaseService(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
-        bool useTrustedConnection
+        bool useTrustedConnection,
+        Status? status = null
     )
     {
         await _updateDatabase.Handle(
@@ -120,7 +123,8 @@ internal class DatabaseService(
                 databaseName,
                 databaseServerId,
                 databaseTypeId,
-                useTrustedConnection
+                useTrustedConnection,
+                status ?? Status.Active
             )
         );
     }

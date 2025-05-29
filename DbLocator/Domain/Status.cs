@@ -22,5 +22,5 @@ public enum Status
     /// An inactive status typically means the entity is either disabled or
     /// temporarily unavailable, and it is not involved in any operations.
     /// </summary>
-    Inactive = 2,
+    Inactive = 2
 }
