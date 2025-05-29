@@ -77,14 +77,23 @@ public partial class Locator
     /// Applies database migrations to ensure the database schema is up-to-date.
     /// </summary>
     /// <param name="dbLocatorConnectionString">The connection string for the DbLocator database.</param>
-    private static void ApplyMigrations(string dbLocatorConnectionString)
+    private static void ApplyMigrations(string connectionString, string provider)
     {
-        using var dbLocator = new DbLocatorContext(
-            new DbContextOptionsBuilder<DbLocatorContext>()
-                .UseSqlServer(dbLocatorConnectionString)
-                .Options
-        );
+        var optionsBuilder = new DbContextOptionsBuilder<DbLocatorContext>();
+        
+        // Configure the context based on the provider
+        switch (provider.ToLowerInvariant())
+        {
+            case "postgresql":
+                optionsBuilder.UseNpgsql(connectionString);
+                break;
+            case "sqlserver":
+            default:
+                optionsBuilder.UseSqlServer(connectionString);
+                break;
+        }
 
+        using var dbLocator = new DbLocatorContext(optionsBuilder.Options);
         dbLocator.Database.Migrate();
     }
 }
