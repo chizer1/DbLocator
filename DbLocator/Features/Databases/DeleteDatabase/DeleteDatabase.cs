@@ -13,7 +13,7 @@ internal sealed class DeleteDatabaseCommandValidator : AbstractValidator<DeleteD
 {
     internal DeleteDatabaseCommandValidator()
     {
-        RuleFor(x => x.Id).GreaterThan(0).WithMessage("Database Id must be greater than 0.");
+        RuleFor(x => x.Id).GreaterThan(0).WithMessage("Database ID must be greater than zero");
     }
 }
 
@@ -44,6 +44,18 @@ internal class DeleteDatabaseHandler(
                 .FirstOrDefaultAsync(d => d.DatabaseId == request.Id, cancellationToken)
             ?? throw new KeyNotFoundException($"Database with ID {request.Id} not found.");
 
+        // Check if database has any connections
+        var hasConnections = await dbContext
+            .Set<ConnectionEntity>()
+            .AnyAsync(c => c.DatabaseId == request.Id, cancellationToken);
+
+        if (hasConnections)
+        {
+            throw new InvalidOperationException(
+                $"Cannot delete database '{database.DatabaseName}' because it has existing connections."
+            );
+        }
+
         if (request.AffectDatabase)
         {
             var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
@@ -52,6 +64,7 @@ internal class DeleteDatabaseHandler(
                 $"drop database [{dbName}]",
                 database.DatabaseServer.IsLinkedServer,
                 database.DatabaseServer.DatabaseServerHostName
+                    ?? database.DatabaseServer.DatabaseServerName
             );
         }
 

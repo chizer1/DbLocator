@@ -504,7 +504,7 @@ internal class DatabaseServerService(
         }
 
         var server = await GetDatabaseServer(databaseServerId);
-        
+
         // Always update if any value is provided, even if it's empty (to allow clearing values)
         if (
             databaseServerHostName != null

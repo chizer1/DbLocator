@@ -89,19 +89,37 @@ internal class DeleteDatabaseUserHandler(
         var uName = Sql.SanitizeSqlIdentifier(databaseUser.UserName);
         var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
 
-        await Sql.ExecuteSqlCommandAsync(
-            dbContext,
-            $"use [{dbName}]; drop user [{uName}]",
-            database.DatabaseServer.IsLinkedServer,
-            database.DatabaseServer.DatabaseServerHostName
-        );
+        // First drop the database user
+        try
+        {
+            await Sql.ExecuteSqlCommandAsync(
+                dbContext,
+                $"use [{dbName}]; drop user [{uName}]",
+                database.DatabaseServer.IsLinkedServer,
+                database.DatabaseServer.DatabaseServerHostName
+                    ?? database.DatabaseServer.DatabaseServerName
+            );
+        }
+        catch (Exception)
+        {
+            // Ignore errors when dropping user - it might not exist
+        }
 
-        await Sql.ExecuteSqlCommandAsync(
-            dbContext,
-            $"drop login [{uName}]",
-            database.DatabaseServer.IsLinkedServer,
-            database.DatabaseServer.DatabaseServerHostName
-        );
+        // Then try to drop the login
+        try
+        {
+            await Sql.ExecuteSqlCommandAsync(
+                dbContext,
+                $"drop login [{uName}]",
+                database.DatabaseServer.IsLinkedServer,
+                database.DatabaseServer.DatabaseServerHostName
+                    ?? database.DatabaseServer.DatabaseServerName
+            );
+        }
+        catch (Exception)
+        {
+            // Ignore errors when dropping login - it might not exist
+        }
     }
 }
 
