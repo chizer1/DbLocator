@@ -27,13 +27,20 @@ public record DatabaseServerNetworkInfo
     /// The fully qualified domain name of the database server.
     /// </summary>
     [StringLength(255)]
+    [RegularExpression(
+        @"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63})*\.[A-Za-z]{2,}$",
+        ErrorMessage = "FQDN must be a valid domain name format (e.g., example.com, sub.example.com)"
+    )]
     public string FullyQualifiedDomainName { get; init; }
 
     /// <summary>
     /// The IP address of the database server.
     /// </summary>
     [StringLength(45)] // IPv6 max length
-    [RegularExpression(@"^([0-9]{1,3}\.){3}[0-9]{1,3}$|^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$")]
+    [RegularExpression(
+        @"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$",
+        ErrorMessage = "IP address must be a valid IPv4 (e.g., 192.168.1.1) or IPv6 (e.g., 2001:0db8:85a3:0000:0000:8a2e:0370:7334) address"
+    )]
     public string IpAddress { get; init; }
 
     /// <summary>
@@ -399,18 +406,46 @@ internal class DatabaseServerService(
     /// <param name="databaseServerId">The ID of the database server.</param>
     /// <param name="databaseServerName">The new name of the database server.</param>
     /// <param name="databaseServerHostName">The host name of the database server.</param>
-    /// <param name="databaseServerFullyQualifiedDomainName">The fully qualified domain name of the database server.</param>
     /// <param name="databaseServerIpAddress">The IP address of the database server.</param>
+    /// <param name="databaseServerFullyQualifiedDomainName">The fully qualified domain name of the database server.</param>
     /// <param name="isLinkedServer">Whether the database server is a linked server.</param>
     public Task UpdateDatabaseServer(
         int databaseServerId,
         string databaseServerName,
         string databaseServerHostName,
-        string databaseServerFullyQualifiedDomainName,
         string databaseServerIpAddress,
+        string databaseServerFullyQualifiedDomainName,
         bool isLinkedServer
     )
     {
+        // Validate FQDN format only if a non-empty value is provided
+        if (!string.IsNullOrWhiteSpace(databaseServerFullyQualifiedDomainName))
+        {
+            var fqdnRegex = new System.Text.RegularExpressions.Regex(
+                @"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63})*\.[A-Za-z]{2,}$"
+            );
+            if (!fqdnRegex.IsMatch(databaseServerFullyQualifiedDomainName))
+            {
+                throw new ValidationException(
+                    "FQDN must be a valid domain name format (e.g., example.com, sub.example.com)"
+                );
+            }
+        }
+
+        // Validate IP address format only if a non-empty value is provided
+        if (!string.IsNullOrWhiteSpace(databaseServerIpAddress))
+        {
+            var ipRegex = new System.Text.RegularExpressions.Regex(
+                @"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$"
+            );
+            if (!ipRegex.IsMatch(databaseServerIpAddress))
+            {
+                throw new ValidationException(
+                    "IP address must be a valid IPv4 (e.g., 192.168.1.1) or IPv6 (e.g., 2001:0db8:85a3:0000:0000:8a2e:0370:7334) address"
+                );
+            }
+        }
+
         return UpdateDatabaseServer(
             new DatabaseServerUpdateRequest(
                 databaseServerId,
@@ -469,42 +504,23 @@ internal class DatabaseServerService(
         }
 
         var server = await GetDatabaseServer(databaseServerId);
+        
+        // Always update if any value is provided, even if it's empty (to allow clearing values)
         if (
-            databaseServerHostName != server.HostName
-            || databaseServerFullyQualifiedDomainName != server.FullyQualifiedDomainName
-            || databaseServerIpAddress != server.IpAddress
+            databaseServerHostName != null
+            || databaseServerFullyQualifiedDomainName != null
+            || databaseServerIpAddress != null
         )
         {
-            await using var dbContext = dbContextFactory.CreateDbContext();
-            var databaseServer =
-                await dbContext
-                    .Set<DatabaseServerEntity>()
-                    .FirstOrDefaultAsync(
-                        ds => ds.DatabaseServerId == databaseServerId,
-                        cancellationToken
-                    )
-                ?? throw new KeyNotFoundException(
-                    $"Database server with ID {databaseServerId} not found"
-                );
-
-            if (!string.IsNullOrEmpty(databaseServerHostName))
-                databaseServer.DatabaseServerHostName = databaseServerHostName;
-
-            if (!string.IsNullOrEmpty(databaseServerFullyQualifiedDomainName))
-                databaseServer.DatabaseServerFullyQualifiedDomainName =
-                    databaseServerFullyQualifiedDomainName;
-
-            if (!string.IsNullOrEmpty(databaseServerIpAddress))
-                databaseServer.DatabaseServerIpaddress = databaseServerIpAddress;
-
-            dbContext.Set<DatabaseServerEntity>().Update(databaseServer);
-            await dbContext.SaveChangesAsync(cancellationToken);
-
-            if (cache != null)
-            {
-                await cache.Remove("databaseServers");
-                await cache.Remove($"databaseServer-id-{databaseServerId}");
-            }
+            await _updateDatabaseServerNetwork.Handle(
+                new UpdateDatabaseServerNetworkCommand(
+                    databaseServerId,
+                    databaseServerHostName,
+                    databaseServerFullyQualifiedDomainName,
+                    databaseServerIpAddress
+                ),
+                cancellationToken
+            );
         }
     }
 

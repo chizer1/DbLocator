@@ -36,14 +36,30 @@ internal class DatabaseService(
         byte databaseTypeId,
         Status databaseStatus,
         bool affectDatabase = true
-    ) => AddDatabase(databaseName, databaseServerId, databaseTypeId, databaseStatus, affectDatabase, false);
+    ) =>
+        AddDatabase(
+            databaseName,
+            databaseServerId,
+            databaseTypeId,
+            databaseStatus,
+            affectDatabase,
+            false
+        );
 
     public Task<int> AddDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
         bool affectDatabase = true
-    ) => AddDatabase(databaseName, databaseServerId, databaseTypeId, Status.Active, affectDatabase, false);
+    ) =>
+        AddDatabase(
+            databaseName,
+            databaseServerId,
+            databaseTypeId,
+            Status.Active,
+            affectDatabase,
+            false
+        );
 
     public async Task<int> AddDatabase(
         string databaseName,
@@ -91,7 +107,15 @@ internal class DatabaseService(
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
-    ) => UpdateDatabase(databaseId, databaseName, databaseServerId, databaseTypeId, false, databaseStatus);
+    ) =>
+        UpdateDatabase(
+            databaseId,
+            databaseName,
+            databaseServerId,
+            databaseTypeId,
+            false,
+            databaseStatus
+        );
 
     public Task UpdateDatabase(int databaseId, int databaseServerId) =>
         UpdateDatabase(databaseId, string.Empty, databaseServerId, 0, false);

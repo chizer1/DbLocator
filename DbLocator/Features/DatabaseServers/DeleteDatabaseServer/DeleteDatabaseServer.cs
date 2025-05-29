@@ -66,7 +66,7 @@ internal class DeleteDatabaseServerHandler(
                 .AnyAsync(d => d.DatabaseServerId == request.DatabaseServerId, cancellationToken)
         )
             throw new InvalidOperationException(
-                "Cannot delete database server because it is in use by one or more databases"
+                $"Cannot delete database server '{databaseServer.DatabaseServerName}' because it is in use by one or more databases"
             );
 
         dbContext.Set<DatabaseServerEntity>().Remove(databaseServer);

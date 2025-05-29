@@ -12,6 +12,7 @@ namespace DbLocator.Features.DatabaseServers.UpdateDatabaseServerNetwork;
 /// </summary>
 internal record UpdateDatabaseServerNetworkCommand(
     int DatabaseServerId,
+    string HostName,
     string FullyQualifiedDomainName,
     string IpAddress
 );
@@ -28,9 +29,18 @@ internal sealed class UpdateDatabaseServerNetworkCommandValidator
             .GreaterThan(0)
             .WithMessage("Database Server Id must be greater than 0.");
 
+        RuleFor(x => x.HostName)
+            .MaximumLength(255)
+            .WithMessage("Host Name cannot be more than 255 characters.");
+
         RuleFor(x => x.FullyQualifiedDomainName)
             .MaximumLength(100)
-            .WithMessage("Fully Qualified Domain Name cannot be more than 100 characters.");
+            .WithMessage("Fully Qualified Domain Name cannot be more than 100 characters.")
+            .Matches(@"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63})*\.[A-Za-z]{2,}$")
+            .When(x => !string.IsNullOrEmpty(x.FullyQualifiedDomainName))
+            .WithMessage(
+                "FQDN must be a valid domain name format (e.g., example.com, sub.example.com)"
+            );
 
         RuleFor(x => x.IpAddress)
             .MaximumLength(15)
@@ -59,6 +69,20 @@ internal class UpdateDatabaseServerNetworkHandler(
             cancellationToken
         );
 
+        // Additional FQDN validation
+        if (!string.IsNullOrEmpty(request.FullyQualifiedDomainName))
+        {
+            var fqdnRegex = new System.Text.RegularExpressions.Regex(
+                @"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63})*\.[A-Za-z]{2,}$"
+            );
+            if (!fqdnRegex.IsMatch(request.FullyQualifiedDomainName))
+            {
+                throw new ValidationException(
+                    "FQDN must be a valid domain name format (e.g., example.com, sub.example.com)"
+                );
+            }
+        }
+
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
         var databaseServer =
@@ -71,6 +95,9 @@ internal class UpdateDatabaseServerNetworkHandler(
             ?? throw new KeyNotFoundException(
                 $"Database Server with ID {request.DatabaseServerId} not found."
             );
+
+        if (!string.IsNullOrEmpty(request.HostName))
+            databaseServer.DatabaseServerHostName = request.HostName;
 
         if (!string.IsNullOrEmpty(request.FullyQualifiedDomainName))
             databaseServer.DatabaseServerFullyQualifiedDomainName =

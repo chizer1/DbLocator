@@ -46,7 +46,7 @@ internal class DeleteTenantHandler(
                 .AnyAsync(c => c.TenantId == command.TenantId, cancellationToken)
         )
             throw new InvalidOperationException(
-                "Cannot delete tenant because it is in use by one or more connections"
+                $"Cannot delete tenant '{tenant.TenantName}' because it is in use by one or more connections"
             );
 
         dbContext.Set<TenantEntity>().Remove(tenant);

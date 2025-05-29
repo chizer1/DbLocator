@@ -62,6 +62,12 @@ internal class UpdateDatabaseHandler(
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
+        // First verify that the database type exists
+        var databaseType = await dbContext
+            .Set<DatabaseTypeEntity>()
+            .FirstOrDefaultAsync(dt => dt.DatabaseTypeId == request.DatabaseTypeId, cancellationToken)
+            ?? throw new KeyNotFoundException($"Database type with ID {request.DatabaseTypeId} not found");
+
         var database =
             await dbContext
                 .Set<DatabaseEntity>()
@@ -78,7 +84,7 @@ internal class UpdateDatabaseHandler(
                 dbContext,
                 $"alter database [{oldDbName}] modify name = [{newDbName}]",
                 database.DatabaseServer.IsLinkedServer,
-                database.DatabaseServer.DatabaseServerHostName
+                database.DatabaseServer.DatabaseServerHostName ?? database.DatabaseServer.DatabaseServerName
             );
         }
 
@@ -99,7 +105,7 @@ internal class UpdateDatabaseHandler(
         return new Database(
             database.DatabaseId,
             database.DatabaseName,
-            new DatabaseType(database.DatabaseTypeId, database.DatabaseType.DatabaseTypeName),
+            new DatabaseType(databaseType.DatabaseTypeId, databaseType.DatabaseTypeName),
             new DatabaseServer(
                 database.DatabaseServerId,
                 database.DatabaseServer.DatabaseServerName,
