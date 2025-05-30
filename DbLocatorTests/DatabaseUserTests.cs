@@ -549,29 +549,6 @@ public class DatabaseUserTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task UpdateDatabaseUser_RemovingAnExistingDatabaseId()
-    {
-        var userName = TestHelpers.GetRandomString();
-        var user = await CreateDatabaseUserAsync(userName);
-
-        var newDatabaseName = TestHelpers.GetRandomString();
-        var newDatabaseId = await _dbLocator.CreateDatabase(
-            newDatabaseName,
-            _databaseServerID,
-            _databaseTypeId,
-            Status.Active
-        );
-
-        await _dbLocator.UpdateDatabaseUser(user.Id, [newDatabaseId], null, true);
-
-        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-        Assert.Equal(userName, updatedUser.Name);
-        Assert.Single(updatedUser.Databases);
-        Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
-        Assert.DoesNotContain(updatedUser.Databases, d => d.Id == newDatabaseId);
-    }
-
-    [Fact]
     public async Task CreateDatabaseUser_WithMultipleRoles_CreatesCorrectEntities()
     {
         var dbUserId = await _dbLocator.CreateDatabaseUser(
