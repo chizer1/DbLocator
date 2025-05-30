@@ -7,14 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseServers.UpdateDatabaseServerName;
 
-/// <summary>
-/// Represents a command to update a database server's name.
-/// </summary>
 internal record UpdateDatabaseServerNameCommand(int DatabaseServerId, string Name);
 
-/// <summary>
-/// Validates the UpdateDatabaseServerNameCommand.
-/// </summary>
 internal sealed class UpdateDatabaseServerNameCommandValidator
     : AbstractValidator<UpdateDatabaseServerNameCommand>
 {
@@ -32,9 +26,6 @@ internal sealed class UpdateDatabaseServerNameCommandValidator
     }
 }
 
-/// <summary>
-/// Handles the UpdateDatabaseServerNameCommand and updates a database server's name.
-/// </summary>
 internal class UpdateDatabaseServerNameHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     DbLocatorCache? cache = null
@@ -91,5 +82,3 @@ internal class UpdateDatabaseServerNameHandler(
         }
     }
 }
-
-#nullable disable

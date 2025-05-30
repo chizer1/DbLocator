@@ -44,7 +44,6 @@ internal class DeleteDatabaseHandler(
                 .FirstOrDefaultAsync(d => d.DatabaseId == request.Id, cancellationToken)
             ?? throw new KeyNotFoundException($"Database with ID {request.Id} not found.");
 
-        // Check if database has any connections
         var hasConnections = await dbContext
             .Set<ConnectionEntity>()
             .AnyAsync(c => c.DatabaseId == request.Id, cancellationToken);
@@ -78,5 +77,3 @@ internal class DeleteDatabaseHandler(
         }
     }
 }
-
-#nullable disable

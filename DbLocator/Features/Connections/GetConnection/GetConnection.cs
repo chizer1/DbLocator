@@ -64,12 +64,27 @@ internal class GetConnectionHandler(
     {
         await new GetConnectionQueryValidator().ValidateAndThrowAsync(request, cancellationToken);
 
+        if (_cache != null)
+        {
+            var rolesString = string.Join(",", request.Roles!);
+            var queryString =
+                @$"TenantId:{request.TenantId},
+                DatabaseTypeId:{request.DatabaseTypeId},
+                ConnectionId:{request.ConnectionId},
+                TenantCode:{request.TenantCode},
+                Roles:{rolesString}";
+            var cacheKey = $"connection:{queryString}";
+
+            var cachedConnectionString = await _cache.GetCachedData<string>(cacheKey);
+            if (cachedConnectionString != null)
+                return new SqlConnection(cachedConnectionString);
+        }
+
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var connection = await GetConnectionEntity(request, dbContext, cancellationToken);
-        if (connection == null)
-            throw new KeyNotFoundException("Connection not found.");
-
+        var connection =
+            await GetConnectionEntity(request, dbContext, cancellationToken)
+            ?? throw new KeyNotFoundException("Connection not found.");
         var connectionString = await GetConnectionString(
             connection,
             request.Roles!,
@@ -77,6 +92,21 @@ internal class GetConnectionHandler(
             dbContext,
             cancellationToken
         );
+
+        if (_cache != null)
+        {
+            var rolesString = string.Join(",", request.Roles!);
+            var queryString =
+                @$"TenantId:{request.TenantId},
+                DatabaseTypeId:{request.DatabaseTypeId},
+                ConnectionId:{request.ConnectionId},
+                TenantCode:{request.TenantCode},
+                Roles:{rolesString}";
+            var cacheKey = $"connection:{queryString}";
+
+            await _cache.CacheConnectionString(cacheKey, connectionString);
+        }
+
         return new SqlConnection(connectionString);
     }
 
@@ -127,20 +157,13 @@ internal class GetConnectionHandler(
         var server = connection.Database.DatabaseServer;
         var database = connection.Database;
 
-        // Get the server name using a fallback mechanism
         var serverName = server.DatabaseServerFullyQualifiedDomainName;
         if (string.IsNullOrEmpty(serverName))
-        {
             serverName = server.DatabaseServerHostName;
-        }
         if (string.IsNullOrEmpty(serverName))
-        {
             serverName = server.DatabaseServerIpaddress;
-        }
         if (string.IsNullOrEmpty(serverName))
-        {
             serverName = server.DatabaseServerName;
-        }
         if (string.IsNullOrEmpty(serverName))
         {
             throw new InvalidOperationException(
@@ -158,9 +181,9 @@ internal class GetConnectionHandler(
             ConnectTimeout = 30
         };
 
-        var user = await GetUserForRoles(connection, roles, dbContext, cancellationToken);
-        if (user == null)
-            throw new InvalidOperationException(
+        var user =
+            await GetUserForRoles(connection, roles, dbContext, cancellationToken)
+            ?? throw new InvalidOperationException(
                 $"No user found with the specified roles for database {database.DatabaseName}"
             );
 
@@ -189,5 +212,3 @@ internal class GetConnectionHandler(
             .FirstOrDefaultAsync(cancellationToken);
     }
 }
-
-#nullable disable

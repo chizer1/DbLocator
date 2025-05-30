@@ -62,7 +62,6 @@ internal class UpdateDatabaseHandler(
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
-        // First verify that the database type exists
         var databaseType =
             await dbContext
                 .Set<DatabaseTypeEntity>()
@@ -126,5 +125,3 @@ internal class UpdateDatabaseHandler(
         );
     }
 }
-
-#nullable disable

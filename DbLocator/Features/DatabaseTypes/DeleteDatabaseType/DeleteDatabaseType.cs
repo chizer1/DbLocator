@@ -71,5 +71,3 @@ internal class DeleteDatabaseTypeHandler(
         }
     }
 }
-
-#nullable disable

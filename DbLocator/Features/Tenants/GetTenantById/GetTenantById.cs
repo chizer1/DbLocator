@@ -61,5 +61,3 @@ internal class GetTenantByIdHandler(
         return tenant;
     }
 }
-
-#nullable disable

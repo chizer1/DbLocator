@@ -75,5 +75,3 @@ internal class GetDatabaseHandler(
         return result;
     }
 }
-
-#nullable disable

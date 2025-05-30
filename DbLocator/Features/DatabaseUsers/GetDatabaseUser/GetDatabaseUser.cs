@@ -40,9 +40,7 @@ internal class GetDatabaseUserHandler(
         {
             var cachedData = await _cache.GetCachedData<DatabaseUser>(cacheKey);
             if (cachedData != null)
-            {
                 return cachedData;
-            }
         }
 
         var databaseUser = await GetDatabaseUserFromDatabase(
@@ -51,10 +49,7 @@ internal class GetDatabaseUserHandler(
         );
 
         if (_cache != null)
-        {
             await _cache.CacheData(cacheKey, databaseUser);
-        }
-
         return databaseUser;
     }
 
@@ -65,22 +60,19 @@ internal class GetDatabaseUserHandler(
     {
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var databaseUserEntity = await dbContext
-            .Set<DatabaseUserEntity>()
-            .AsNoTracking()
-            .Include(u => u.Databases)
-            .ThenInclude(ud => ud.Database)
-            .ThenInclude(d => d.DatabaseServer)
-            .Include(u => u.Databases)
-            .ThenInclude(ud => ud.Database)
-            .ThenInclude(d => d.DatabaseType)
-            .Include(u => u.UserRoles)
-            .FirstOrDefaultAsync(u => u.DatabaseUserId == databaseUserId, cancellationToken);
-
-        if (databaseUserEntity == null)
-        {
-            throw new KeyNotFoundException($"Database user with ID {databaseUserId} not found.");
-        }
+        var databaseUserEntity =
+            await dbContext
+                .Set<DatabaseUserEntity>()
+                .AsNoTracking()
+                .Include(u => u.Databases)
+                .ThenInclude(ud => ud.Database)
+                .ThenInclude(d => d.DatabaseServer)
+                .Include(u => u.Databases)
+                .ThenInclude(ud => ud.Database)
+                .ThenInclude(d => d.DatabaseType)
+                .Include(u => u.UserRoles)
+                .FirstOrDefaultAsync(u => u.DatabaseUserId == databaseUserId, cancellationToken)
+            ?? throw new KeyNotFoundException($"Database user with ID {databaseUserId} not found.");
 
         return new DatabaseUser(
             databaseUserEntity.DatabaseUserId,
@@ -115,5 +107,3 @@ internal class GetDatabaseUserHandler(
         );
     }
 }
-
-#nullable disable

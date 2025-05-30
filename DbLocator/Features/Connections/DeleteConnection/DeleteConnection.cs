@@ -39,12 +39,13 @@ internal class DeleteConnectionHandler(
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var connection = await dbContext
-            .Set<ConnectionEntity>()
-            .FirstOrDefaultAsync(c => c.ConnectionId == request.ConnectionId, cancellationToken);
-
-        if (connection == null)
-            throw new KeyNotFoundException($"Connection with ID {request.ConnectionId} not found.");
+        var connection =
+            await dbContext
+                .Set<ConnectionEntity>()
+                .FirstOrDefaultAsync(c => c.ConnectionId == request.ConnectionId, cancellationToken)
+            ?? throw new KeyNotFoundException(
+                $"Connection with ID {request.ConnectionId} not found."
+            );
 
         dbContext.Set<ConnectionEntity>().Remove(connection);
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -53,5 +54,3 @@ internal class DeleteConnectionHandler(
             await _cache.Remove("connections");
     }
 }
-
-#nullable disable

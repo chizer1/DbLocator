@@ -61,5 +61,3 @@ internal class CreateDatabaseTypeHandler(
         return databaseType.DatabaseTypeId;
     }
 }
-
-#nullable disable

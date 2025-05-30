@@ -152,8 +152,8 @@ internal class DbLocatorCache(IDistributedCache? cache)
         DatabaseRole[]? roles
     )
     {
-        //if (tenantId != null && !cacheKey.Contains($"TenantId:{tenantId}"))
-        //    return false;
+        if (tenantId != null && !cacheKey.Contains($"TenantId:{tenantId}"))
+            return false;
 
         if (databaseTypeId != null && !cacheKey.Contains($"DatabaseTypeId:{databaseTypeId}"))
             return false;

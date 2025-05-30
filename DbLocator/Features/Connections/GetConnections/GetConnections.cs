@@ -12,10 +12,7 @@ internal record GetConnectionsQuery;
 
 internal sealed class GetConnectionsQueryValidator : AbstractValidator<GetConnectionsQuery>
 {
-    internal GetConnectionsQueryValidator()
-    {
-        // No validation rules needed for empty query
-    }
+    internal GetConnectionsQueryValidator() { }
 }
 
 internal class GetConnectionsHandler(
@@ -86,5 +83,3 @@ internal class GetConnectionsHandler(
         return connections;
     }
 }
-
-#nullable disable

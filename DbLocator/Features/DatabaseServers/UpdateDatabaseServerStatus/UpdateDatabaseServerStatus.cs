@@ -7,14 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseServers.UpdateDatabaseServerStatus;
 
-/// <summary>
-/// Represents a command to update a database server's linked server status.
-/// </summary>
 internal record UpdateDatabaseServerStatusCommand(int DatabaseServerId, bool IsLinkedServer);
 
-/// <summary>
-/// Validates the UpdateDatabaseServerStatusCommand.
-/// </summary>
 internal sealed class UpdateDatabaseServerStatusCommandValidator
     : AbstractValidator<UpdateDatabaseServerStatusCommand>
 {
@@ -26,9 +20,6 @@ internal sealed class UpdateDatabaseServerStatusCommandValidator
     }
 }
 
-/// <summary>
-/// Handles the UpdateDatabaseServerStatusCommand and updates a database server's linked server status.
-/// </summary>
 internal class UpdateDatabaseServerStatusHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     DbLocatorCache? cache = null
@@ -71,5 +62,3 @@ internal class UpdateDatabaseServerStatusHandler(
         }
     }
 }
-
-#nullable disable

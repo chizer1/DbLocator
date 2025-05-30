@@ -12,10 +12,7 @@ internal record GetDatabaseTypesQuery;
 
 internal sealed class GetDatabaseTypesQueryValidator : AbstractValidator<GetDatabaseTypesQuery>
 {
-    internal GetDatabaseTypesQueryValidator()
-    {
-        // No validation rules needed for empty query
-    }
+    internal GetDatabaseTypesQueryValidator() { }
 }
 
 internal class GetDatabaseTypesHandler(
@@ -61,5 +58,3 @@ internal class GetDatabaseTypesHandler(
         return result;
     }
 }
-
-#nullable disable

@@ -13,7 +13,7 @@ internal record UpdateDatabaseUserCommand(
     int[] DatabaseIds,
     string? UserName,
     string? UserPassword,
-    bool affectDatabase = true
+    bool AffectDatabase = true
 );
 
 internal sealed class UpdateDatabaseUserCommandValidator
@@ -110,10 +110,9 @@ internal class UpdateDatabaseUserHandler(
         dbContext.Update(databaseUserEntity);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        if (!request.affectDatabase)
+        if (!request.AffectDatabase)
             return;
 
-        // Handle adding/removing databases
         var currentDatabaseIds = databaseUserEntity.Databases.Select(d => d.DatabaseId).ToList();
         var databasesToAdd = request.DatabaseIds.Except(currentDatabaseIds).ToList();
         var databasesToRemove = currentDatabaseIds.Except(request.DatabaseIds).ToList();
@@ -122,7 +121,6 @@ internal class UpdateDatabaseUserHandler(
 
         var commands = new List<string>();
 
-        // Get all databases for the user after the update
         var updatedDatabases = await dbContext
             .Set<DatabaseEntity>()
             .Include(d => d.DatabaseServer)
@@ -190,5 +188,3 @@ internal class UpdateDatabaseUserHandler(
         }
     }
 }
-
-#nullable disable

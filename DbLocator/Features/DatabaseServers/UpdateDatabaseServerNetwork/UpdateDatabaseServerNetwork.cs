@@ -7,9 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseServers.UpdateDatabaseServerNetwork;
 
-/// <summary>
-/// Represents a command to update a database server's network information.
-/// </summary>
 internal record UpdateDatabaseServerNetworkCommand(
     int DatabaseServerId,
     string HostName,
@@ -17,9 +14,6 @@ internal record UpdateDatabaseServerNetworkCommand(
     string IpAddress
 );
 
-/// <summary>
-/// Validates the UpdateDatabaseServerNetworkCommand.
-/// </summary>
 internal sealed class UpdateDatabaseServerNetworkCommandValidator
     : AbstractValidator<UpdateDatabaseServerNetworkCommand>
 {
@@ -48,9 +42,6 @@ internal sealed class UpdateDatabaseServerNetworkCommandValidator
     }
 }
 
-/// <summary>
-/// Handles the UpdateDatabaseServerNetworkCommand and updates a database server's network information.
-/// </summary>
 internal class UpdateDatabaseServerNetworkHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     DbLocatorCache? cache = null
@@ -69,7 +60,6 @@ internal class UpdateDatabaseServerNetworkHandler(
             cancellationToken
         );
 
-        // Additional FQDN validation
         if (!string.IsNullOrEmpty(request.FullyQualifiedDomainName))
         {
             var fqdnRegex = new System.Text.RegularExpressions.Regex(
@@ -116,5 +106,3 @@ internal class UpdateDatabaseServerNetworkHandler(
         }
     }
 }
-
-#nullable disable

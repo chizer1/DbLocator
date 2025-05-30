@@ -8,14 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseServers.GetDatabaseServerById;
 
-/// <summary>
-/// Represents a query to get a database server by its ID.
-/// </summary>
 internal record GetDatabaseServerByIdQuery(int DatabaseServerId);
 
-/// <summary>
-/// Validates the GetDatabaseServerByIdQuery.
-/// </summary>
 internal sealed class GetDatabaseServerByIdQueryValidator
     : AbstractValidator<GetDatabaseServerByIdQuery>
 {
@@ -27,9 +21,6 @@ internal sealed class GetDatabaseServerByIdQueryValidator
     }
 }
 
-/// <summary>
-/// Handles the GetDatabaseServerByIdQuery and returns the corresponding database server.
-/// </summary>
 internal class GetDatabaseServerByIdHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     DbLocatorCache? cache = null
@@ -86,5 +77,3 @@ internal class GetDatabaseServerByIdHandler(
         return result;
     }
 }
-
-#nullable disable

@@ -75,9 +75,7 @@ internal class DeleteDatabaseUserHandler(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         if (_cache != null)
-        {
             await _cache.Remove("databaseUsers");
-        }
     }
 
     private static async Task DropDatabaseUserAsync(
@@ -89,38 +87,20 @@ internal class DeleteDatabaseUserHandler(
         var uName = Sql.SanitizeSqlIdentifier(databaseUser.UserName);
         var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
 
-        // First drop the database user
-        try
-        {
-            await Sql.ExecuteSqlCommandAsync(
-                dbContext,
-                $"use [{dbName}]; drop user [{uName}]",
-                database.DatabaseServer.IsLinkedServer,
-                database.DatabaseServer.DatabaseServerHostName
-                    ?? database.DatabaseServer.DatabaseServerName
-            );
-        }
-        catch (Exception)
-        {
-            // Ignore errors when dropping user - it might not exist
-        }
+        await Sql.ExecuteSqlCommandAsync(
+            dbContext,
+            $"use [{dbName}]; drop user [{uName}]",
+            database.DatabaseServer.IsLinkedServer,
+            database.DatabaseServer.DatabaseServerHostName
+                ?? database.DatabaseServer.DatabaseServerName
+        );
 
-        // Then try to drop the login
-        try
-        {
-            await Sql.ExecuteSqlCommandAsync(
-                dbContext,
-                $"drop login [{uName}]",
-                database.DatabaseServer.IsLinkedServer,
-                database.DatabaseServer.DatabaseServerHostName
-                    ?? database.DatabaseServer.DatabaseServerName
-            );
-        }
-        catch (Exception)
-        {
-            // Ignore errors when dropping login - it might not exist
-        }
+        await Sql.ExecuteSqlCommandAsync(
+            dbContext,
+            $"drop login [{uName}]",
+            database.DatabaseServer.IsLinkedServer,
+            database.DatabaseServer.DatabaseServerHostName
+                ?? database.DatabaseServer.DatabaseServerName
+        );
     }
 }
-
-#nullable disable

@@ -55,7 +55,6 @@ internal class UpdateDatabaseTypeHandler(
                 $"Database type with ID {request.DatabaseTypeId} not found"
             );
 
-        // Check if the new name is already in use by another database type
         if (
             await dbContext
                 .Set<DatabaseTypeEntity>()
@@ -85,5 +84,3 @@ internal class UpdateDatabaseTypeHandler(
         }
     }
 }
-
-#nullable disable

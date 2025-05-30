@@ -115,5 +115,3 @@ internal class CreateDatabaseUserRoleHandler(
         }
     }
 }
-
-#nullable disable

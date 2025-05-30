@@ -12,15 +12,9 @@ internal record GetDatabaseServersQuery;
 
 internal sealed class GetDatabaseServersQueryValidator : AbstractValidator<GetDatabaseServersQuery>
 {
-    internal GetDatabaseServersQueryValidator()
-    {
-        // No validation rules needed for empty query
-    }
+    internal GetDatabaseServersQueryValidator() { }
 }
 
-/// <summary>
-/// Handles the ListDatabaseServersQuery and returns all database servers.
-/// </summary>
 internal class GetDatabaseServersHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     DbLocatorCache? cache = null
@@ -71,5 +65,3 @@ internal class GetDatabaseServersHandler(
         return result;
     }
 }
-
-#nullable disable

@@ -7,9 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseServers.CreateDatabaseServer;
 
-/// <summary>
-/// Represents a command to create a new database server.
-/// </summary>
 internal record CreateDatabaseServerCommand(
     string Name,
     string HostName,
@@ -18,9 +15,6 @@ internal record CreateDatabaseServerCommand(
     bool IsLinkedServer
 );
 
-/// <summary>
-/// Validates the CreateDatabaseServerCommand.
-/// </summary>
 internal sealed class CreateDatabaseServerCommandValidator
     : AbstractValidator<CreateDatabaseServerCommand>
 {
@@ -61,9 +55,6 @@ internal sealed class CreateDatabaseServerCommandValidator
     }
 }
 
-/// <summary>
-/// Handles the CreateDatabaseServerCommand and creates a new database server.
-/// </summary>
 internal class CreateDatabaseServerHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     DbLocatorCache? cache = null
@@ -143,5 +134,3 @@ internal class CreateDatabaseServerHandler(
         return databaseServer.DatabaseServerId;
     }
 }
-
-#nullable disable

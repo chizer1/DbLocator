@@ -7,14 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseServers.DeleteDatabaseServer;
 
-/// <summary>
-/// Represents a command to delete a database server.
-/// </summary>
 internal record DeleteDatabaseServerCommand(int DatabaseServerId);
 
-/// <summary>
-/// Validates the DeleteDatabaseServerCommand.
-/// </summary>
 internal sealed class DeleteDatabaseServerCommandValidator
     : AbstractValidator<DeleteDatabaseServerCommand>
 {
@@ -26,9 +20,6 @@ internal sealed class DeleteDatabaseServerCommandValidator
     }
 }
 
-/// <summary>
-/// Handles the DeleteDatabaseServerCommand and deletes a database server.
-/// </summary>
 internal class DeleteDatabaseServerHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     DbLocatorCache? cache = null
@@ -79,5 +70,3 @@ internal class DeleteDatabaseServerHandler(
         }
     }
 }
-
-#nullable disable

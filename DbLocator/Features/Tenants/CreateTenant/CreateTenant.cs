@@ -70,5 +70,3 @@ internal class CreateTenantHandler(
         return tenant.TenantId;
     }
 }
-
-#nullable disable

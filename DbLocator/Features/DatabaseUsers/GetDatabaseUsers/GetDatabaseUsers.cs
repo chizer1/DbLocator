@@ -38,17 +38,13 @@ internal class GetDatabaseUsersHandler(
         {
             var cachedData = await _cache.GetCachedData<List<DatabaseUser>>(cacheKey);
             if (cachedData != null)
-            {
                 return cachedData;
-            }
         }
 
         var databaseUsers = await GetDatabaseUsersFromDatabase(cancellationToken);
 
         if (_cache != null)
-        {
             await _cache.CacheData(cacheKey, databaseUsers);
-        }
 
         return databaseUsers;
     }
@@ -110,5 +106,3 @@ internal class GetDatabaseUsersHandler(
         return databaseUsers;
     }
 }
-
-#nullable disable

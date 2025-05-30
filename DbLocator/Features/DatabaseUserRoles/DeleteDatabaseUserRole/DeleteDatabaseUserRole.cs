@@ -11,7 +11,7 @@ namespace DbLocator.Features.DatabaseUserRoles.DeleteDatabaseUserRole;
 internal record DeleteDatabaseUserRoleCommand(
     int DatabaseUserId,
     DatabaseRole UserRole,
-    bool affectDatabase = true
+    bool AffectDatabase = true
 );
 
 internal sealed class DeleteDatabaseUserRoleCommandValidator
@@ -78,10 +78,8 @@ internal class DeleteDatabaseUserRoleHandler(
             await _cache.TryClearConnectionStringFromCache(roles: [request.UserRole]);
         }
 
-        if (!request.affectDatabase)
-        {
+        if (!request.AffectDatabase)
             return;
-        }
 
         await DropDatabaseUserRole(dbContext, databaseUserRoleEntity, cancellationToken);
     }
@@ -121,5 +119,3 @@ internal class DeleteDatabaseUserRoleHandler(
         }
     }
 }
-
-#nullable disable

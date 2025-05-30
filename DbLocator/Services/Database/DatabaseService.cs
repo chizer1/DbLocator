@@ -70,7 +70,7 @@ internal class DatabaseService(
         bool useTrustedConnection = false
     )
     {
-        var database = await _createDatabase.Handle(
+        return await _createDatabase.Handle(
             new CreateDatabaseCommand(
                 databaseName,
                 databaseServerId,
@@ -80,7 +80,6 @@ internal class DatabaseService(
                 databaseStatus
             )
         );
-        return database.Id;
     }
 
     public Task DeleteDatabase(int databaseId) => DeleteDatabase(databaseId, true);
@@ -93,7 +92,8 @@ internal class DatabaseService(
     public async Task<List<Domain.Database>> GetDatabases()
     {
         var databases = await _getDatabases.Handle(new GetDatabasesQuery());
-        return databases.ToList();
+
+        return [.. databases];
     }
 
     public async Task<Domain.Database> GetDatabase(int databaseId)

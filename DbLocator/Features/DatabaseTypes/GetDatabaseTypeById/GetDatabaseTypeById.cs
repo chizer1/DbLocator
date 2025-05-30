@@ -71,5 +71,3 @@ internal class GetDatabaseTypeByIdHandler(
         return result;
     }
 }
-
-#nullable disable

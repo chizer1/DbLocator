@@ -47,7 +47,7 @@ internal class CreateDatabaseHandler(
     private readonly IDbContextFactory<DbLocatorContext> _dbContextFactory = dbContextFactory;
     private readonly DbLocatorCache? _cache = cache;
 
-    public async Task<Database> Handle(
+    public async Task<int> Handle(
         CreateDatabaseCommand request,
         CancellationToken cancellationToken = default
     )
@@ -98,22 +98,6 @@ internal class CreateDatabaseHandler(
         if (_cache != null)
             await _cache.Remove("databases");
 
-        return new Database(
-            savedEntity.DatabaseId,
-            savedEntity.DatabaseName,
-            new DatabaseType(savedEntity.DatabaseTypeId, savedEntity.DatabaseType.DatabaseTypeName),
-            new DatabaseServer(
-                savedEntity.DatabaseServerId,
-                savedEntity.DatabaseServer.DatabaseServerName,
-                savedEntity.DatabaseServer.DatabaseServerHostName,
-                savedEntity.DatabaseServer.DatabaseServerIpaddress,
-                savedEntity.DatabaseServer.DatabaseServerFullyQualifiedDomainName,
-                savedEntity.DatabaseServer.IsLinkedServer
-            ),
-            (Status)savedEntity.DatabaseStatusId,
-            savedEntity.UseTrustedConnection
-        );
+        return savedEntity.DatabaseId;
     }
 }
-
-#nullable disable

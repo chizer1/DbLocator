@@ -1,6 +1,5 @@
 #nullable enable
 
-using System.Text.Json;
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Utilities;

@@ -11,7 +11,7 @@ internal record AddDatabaseUserCommand(
     string UserName,
     string UserPassword,
     int[] DatabaseIds,
-    bool affectDatabase = true
+    bool AffectDatabase = true
 );
 
 internal sealed class AddDatabaseUserCommandValidator : AbstractValidator<AddDatabaseUserCommand>
@@ -85,7 +85,7 @@ internal class AddDatabaseUserHandler(
         await dbContext.Set<DatabaseUserEntity>().AddAsync(databaseUser, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        if (request.affectDatabase)
+        if (request.AffectDatabase)
         {
             var databaseServers = await dbContext
                 .Set<DatabaseEntity>()
@@ -95,7 +95,6 @@ internal class AddDatabaseUserHandler(
                 .ToListAsync(cancellationToken);
 
             var processedServers = new HashSet<int>();
-
             foreach (var databaseServer in databaseServers)
             {
                 await Sql.ExecuteSqlCommandAsync(
@@ -124,7 +123,7 @@ internal class AddDatabaseUserHandler(
             .AddRangeAsync(databaseUserDatabases, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        if (request.affectDatabase)
+        if (request.AffectDatabase)
         {
             foreach (var databaseId in request.DatabaseIds)
             {
@@ -140,9 +139,7 @@ internal class AddDatabaseUserHandler(
         }
 
         if (_cache != null)
-        {
             await _cache.Remove("databaseUsers");
-        }
 
         return databaseUserId;
     }
@@ -172,5 +169,3 @@ internal class AddDatabaseUserHandler(
         );
     }
 }
-
-#nullable disable
