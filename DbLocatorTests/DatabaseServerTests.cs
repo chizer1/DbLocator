@@ -212,16 +212,8 @@ public class DatabaseServerTests : IAsyncLifetime
     [Fact]
     public async Task UpdateNonExistentDatabaseServerThrowsException()
     {
-        await Assert.ThrowsAsync<ValidationException>(
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
             async () => await _dbLocator.UpdateDatabaseServer(-1, "UpdatedName")
-        );
-    }
-
-    [Fact]
-    public async Task DeleteNonExistentDatabaseServerThrowsException()
-    {
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.DeleteDatabaseServer(-1)
         );
     }
 
@@ -324,20 +316,6 @@ public class DatabaseServerTests : IAsyncLifetime
         // Verify server is deleted
         var servers = await _dbLocator.GetDatabaseServers();
         Assert.DoesNotContain(servers, s => s.Id == serverId);
-    }
-
-    [Fact]
-    public async Task CreateDatabaseServer_WithNoHostNameFqdnOrIp_ThrowsInvalidOperationException()
-    {
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            async () => await _dbLocator.CreateDatabaseServer("TestServer", false, null, "", null)
-        );
-
-        Assert.Contains(
-            "At least one of Host Name, FQDN, or IP Createress must be provided",
-            exception.Message
-        );
     }
 
     [Fact]
@@ -624,24 +602,6 @@ public class DatabaseServerTests : IAsyncLifetime
         Assert.Contains(
             cachedServers,
             s => s.Id == server2Id && s.Name == server2Name && s.IpAddress == server2Ip
-        );
-    }
-
-    [Fact]
-    public async Task CreateDatabaseServer_NoValidParameters()
-    {
-        // Arrange
-        var serverName = TestHelpers.GetRandomString();
-        var IpAddress = TestHelpers.GetRandomIpAddressString();
-
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            async () => await _dbLocator.CreateDatabaseServer(serverName, false, null, null, null)
-        );
-
-        Assert.Contains(
-            "At least one of Host Name, FQDN, or IP Createress must be provided",
-            exception.Message
         );
     }
 

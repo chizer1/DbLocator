@@ -119,26 +119,26 @@ internal class DatabaseService(
         );
 
     public Task UpdateDatabase(int databaseId, int databaseServerId) =>
-        UpdateDatabase(databaseId, string.Empty, databaseServerId, 0, false);
+        UpdateDatabase(databaseId, null, databaseServerId, null, null);
 
     public Task UpdateDatabase(int databaseId, byte databaseTypeId) =>
-        UpdateDatabase(databaseId, string.Empty, 0, databaseTypeId, false);
+        UpdateDatabase(databaseId, null, null, databaseTypeId, null);
 
     public Task UpdateDatabase(int databaseId, string databaseName) =>
-        UpdateDatabase(databaseId, databaseName, 0, 0, false);
+        UpdateDatabase(databaseId, databaseName, null, null, null);
 
     public Task UpdateDatabase(int databaseId, Status databaseStatus) =>
-        UpdateDatabase(databaseId, string.Empty, 0, 0, false, databaseStatus);
+        UpdateDatabase(databaseId, null, null, null, null, databaseStatus);
 
     public Task UpdateDatabase(int databaseId, bool useTrustedConnection) =>
-        UpdateDatabase(databaseId, string.Empty, 0, 0, useTrustedConnection);
+        UpdateDatabase(databaseId, null, null, null, useTrustedConnection);
 
     private async Task UpdateDatabase(
         int databaseId,
-        string databaseName,
-        int databaseServerId,
-        byte databaseTypeId,
-        bool useTrustedConnection,
+        string? databaseName,
+        int? databaseServerId,
+        byte? databaseTypeId,
+        bool? useTrustedConnection,
         Status? status = null
     )
     {

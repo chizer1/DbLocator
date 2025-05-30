@@ -185,7 +185,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task GetNonExistentConnection_ThrowsKeyNotFoundException()
     {
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<KeyNotFoundException>(
             async () => await _dbLocator.GetConnection(-1, Array.Empty<DatabaseRole>())
         );
     }
@@ -240,7 +240,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var tenantName = TestHelpers.GetRandomString();
         var tenantId = await _dbLocator.CreateTenant(tenantName);
 
-        var nonExistentDatabaseId = -1;
+        var nonExistentDatabaseId = 999999; // Using a positive but non-existent ID
         var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
             async () => await _dbLocator.CreateConnection(tenantId, nonExistentDatabaseId)
         );

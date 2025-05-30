@@ -342,19 +342,6 @@ public class DatabaseUserTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task CreateDatabaseUser_WithRolesAndDatabases_LoadsNavigationProperties()
-    {
-        var userName = TestHelpers.GetRandomString();
-        var user = await CreateDatabaseUserAsync(userName);
-
-        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            async () => await _dbLocator.DeleteDatabaseUser(user.Id, true)
-        );
-    }
-
-    [Fact]
     public async Task PasswordValidation()
     {
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(

@@ -81,7 +81,7 @@ internal class CreateDatabaseServerHandler(
                 .AnyAsync(ds => ds.DatabaseServerName == request.Name, cancellationToken)
         )
             throw new InvalidOperationException(
-                $"Database server with name \"{request.Name}\" already exists"
+                $"Database Server Name '{request.Name}' already exists"
             );
         if (
             !string.IsNullOrWhiteSpace(request.HostName)
@@ -113,7 +113,7 @@ internal class CreateDatabaseServerHandler(
                 .AnyAsync(ds => ds.DatabaseServerIpaddress == request.IpAddress, cancellationToken)
         )
             throw new InvalidOperationException(
-                $"Database server with IP address \"{request.IpAddress}\" already exists"
+                $"Database server with IP address '{request.IpAddress}' already exists"
             );
 
         var databaseServer = new DatabaseServerEntity

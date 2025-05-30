@@ -314,7 +314,7 @@ public class DatabaseTests
         var dbName = TestHelpers.GetRandomString();
         var database = await CreateDatabaseAsync(dbName);
 
-        await Assert.ThrowsAsync<KeyNotFoundException>(
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
             async () => await _dbLocator.UpdateDatabase(database.Id, 2387)
         );
     }
