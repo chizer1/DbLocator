@@ -562,7 +562,7 @@ public class DatabaseUserTests : IAsyncLifetime
             Status.Active
         );
 
-        await _dbLocator.UpdateDatabaseUser(user.Id, [newDatabaseId], user.Name, true);
+        await _dbLocator.UpdateDatabaseUser(user.Id, [newDatabaseId], null, true);
 
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
         Assert.Equal(userName, updatedUser.Name);

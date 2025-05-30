@@ -355,7 +355,7 @@ public class DatabaseServerTests : IAsyncLifetime
         var existingServer = await _dbLocator.CreateDatabaseServer(
             "DuplicateHostTestServer1",
             false,
-            null,
+            "duplicate-host",
             "192.168.1.201",
             null
         );
@@ -366,14 +366,14 @@ public class DatabaseServerTests : IAsyncLifetime
                 await _dbLocator.CreateDatabaseServer(
                     "DuplicateHostTestServer2",
                     false,
-                    null,
+                    "duplicate-host",
                     "192.168.1.202",
                     null
                 )
         );
 
         Assert.Contains(
-            "Database Server Host Name 'DuplicateHostTestServer1' already exists",
+            "Database server with host name \"duplicate-host\" already exists",
             exception.Message
         );
     }
