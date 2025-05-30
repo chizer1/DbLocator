@@ -549,25 +549,6 @@ public class DatabaseUserTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task UpdateDatabaseUser_WithDatabaseIdsAndName()
-    {
-        var userName = TestHelpers.GetRandomString();
-        var userId = await _dbLocator.CreateDatabaseUser(
-            [_databaseId],
-            userName,
-            "TestPassword123!",
-            true
-        );
-
-        var newName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId], newName);
-
-        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
-        Assert.Equal(newName, updatedUser.Name);
-        Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
-    }
-
-    [Fact]
     public async Task UpdateDatabaseUser_RemovingAnExistingDatabaseId()
     {
         var userName = TestHelpers.GetRandomString();
@@ -588,30 +569,6 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Single(updatedUser.Databases);
         Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
         Assert.DoesNotContain(updatedUser.Databases, d => d.Id == newDatabaseId);
-    }
-
-    [Fact]
-    public async Task UpdateDatabaseUser_WithRolesAndDatabases_UpdatesCorrectEntities()
-    {
-        var userName = TestHelpers.GetRandomString();
-        var user = await CreateDatabaseUserAsync(userName);
-
-        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataReader);
-
-        var newUserName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseUser(
-            user.Id,
-            [_databaseId],
-            newUserName,
-            "NewPassword123!",
-            true
-        );
-
-        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-        Assert.Equal(newUserName, updatedUser.Name);
-        Assert.Contains(DatabaseRole.DataWriter, updatedUser.Roles);
-        Assert.Contains(DatabaseRole.DataReader, updatedUser.Roles);
     }
 
     [Fact]

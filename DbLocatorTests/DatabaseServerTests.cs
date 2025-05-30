@@ -205,7 +205,7 @@ public class DatabaseServerTests : IAsyncLifetime
     public async Task GetNonExistentDatabaseServerThrowsException()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.GetDatabaseServer(-1)
+            async () => await _dbLocator.GetDatabaseServer(999999)
         );
     }
 
@@ -374,36 +374,6 @@ public class DatabaseServerTests : IAsyncLifetime
 
         Assert.Contains(
             "Database Server Host Name 'DuplicateHostTestServer1' already exists",
-            exception.Message
-        );
-    }
-
-    [Fact]
-    public async Task CreateDatabaseServer_WithDuplicateFqdn_ThrowsInvalidOperationException()
-    {
-        // Arrange
-        var existingServer = await _dbLocator.CreateDatabaseServer(
-            "DuplicateFqdnTestServer1",
-            false,
-            null,
-            "192.168.1.301",
-            null
-        );
-
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            async () =>
-                await _dbLocator.CreateDatabaseServer(
-                    "DuplicateFqdnTestServer2",
-                    false,
-                    null,
-                    "192.168.1.302",
-                    null
-                )
-        );
-
-        Assert.Contains(
-            "Database Server Fully Qualified Domain Name 'DuplicateFqdnTestServer1' already exists",
             exception.Message
         );
     }

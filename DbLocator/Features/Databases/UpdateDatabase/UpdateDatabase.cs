@@ -40,7 +40,10 @@ internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateD
         RuleFor(x => x.DatabaseTypeId)
             .GreaterThan(0)
             .When(x => x.DatabaseTypeId.HasValue)
-            .WithMessage("Database type ID must be greater than zero");
+            .WithMessage("Database type ID must be greater than zero")
+            .LessThanOrEqualTo(byte.MaxValue)
+            .When(x => x.DatabaseTypeId.HasValue)
+            .WithMessage("Database type ID must be less than or equal to 255");
 
         RuleFor(x => x.Status)
             .IsInEnum()
