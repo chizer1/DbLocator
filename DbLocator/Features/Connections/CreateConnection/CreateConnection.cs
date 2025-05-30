@@ -35,12 +35,22 @@ internal class CreateConnectionHandler(
         CancellationToken cancellationToken = default
     )
     {
+        await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
+
+        // Check if tenant exists first
+        var tenantExists = await context
+            .Set<TenantEntity>()
+            .AnyAsync(t => t.TenantId == request.TenantId, cancellationToken);
+
+        if (!tenantExists)
+            throw new KeyNotFoundException($"Tenant with ID {request.TenantId} not found");
+
+        // Now validate the request
         await new CreateConnectionCommandValidator().ValidateAndThrowAsync(
             request,
             cancellationToken
         );
 
-        await using var context = await _contextFactory.CreateDbContextAsync(cancellationToken);
         await ValidateRequest(request, context, cancellationToken);
 
         var connection = new ConnectionEntity

@@ -250,8 +250,8 @@ internal class GetConnectionHandler(
             ConnectTimeout = 30
         };
 
-        // Only try to get a user if roles are specified
-        if (roles != null && roles.Length > 0)
+        // Only try to get a user if roles are specified and not using trusted connection
+        if (roles != null && roles.Length > 0 && !database.UseTrustedConnection)
         {
             var user = await GetUserForRoles(connection, roles, dbContext, cancellationToken);
             if (user == null)
@@ -261,11 +261,8 @@ internal class GetConnectionHandler(
                 );
             }
 
-            if (!database.UseTrustedConnection)
-            {
-                builder.UserID = user.UserName;
-                builder.Password = encryption.Decrypt(user.UserPassword);
-            }
+            builder.UserID = user.UserName;
+            builder.Password = encryption.Decrypt(user.UserPassword);
         }
 
         return builder.ConnectionString;

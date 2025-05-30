@@ -54,137 +54,62 @@ internal class UpdateDatabaseUserHandler(
         CancellationToken cancellationToken = default
     )
     {
-        await new UpdateDatabaseUserCommandValidator().ValidateAndThrowAsync(
-            request,
-            cancellationToken
-        );
-
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var databaseUserEntity =
+        var user =
             await dbContext
                 .Set<DatabaseUserEntity>()
-                .Include(du => du.UserRoles)
-                .Include(du => du.Databases)
-                .FirstOrDefaultAsync(
-                    d => d.DatabaseUserId == request.DatabaseUserId,
-                    cancellationToken
-                )
-            ?? throw new KeyNotFoundException(
-                $"Database user with ID {request.DatabaseUserId} not found"
-            );
+                .Include(u => u.Databases)
+                .FirstOrDefaultAsync(u => u.DatabaseUserId == request.DatabaseUserId, cancellationToken)
+            ?? throw new KeyNotFoundException($"Database user with ID {request.DatabaseUserId} not found.");
 
-        if (string.IsNullOrWhiteSpace(request.UserName))
-            throw new ArgumentNullException(
-                nameof(request.UserName),
-                "Database user name is required"
-            );
-
-        if (
-            (
+        if (request.UserName != null)
+        {
+            if (
                 await dbContext
                     .Set<DatabaseUserEntity>()
-                    .Where(u => u.UserName == request.UserName)
-                    .AnyAsync(cancellationToken)
+                    .AnyAsync(
+                        u => u.UserName == request.UserName && u.DatabaseUserId != request.DatabaseUserId,
+                        cancellationToken
+                    )
             )
-            && databaseUserEntity.UserName != request.UserName
-        )
-        {
-            throw new InvalidOperationException(
-                $"Database user with name \"{request.UserName}\" already exists"
-            );
+                throw new InvalidOperationException(
+                    $"Database user with name \"{request.UserName}\" already exists"
+                );
+
+            user.UserName = request.UserName;
         }
 
-        var oldDatabaseUserName = databaseUserEntity.UserName;
-        var oldDatabasePassword = _encryption.Decrypt(databaseUserEntity.UserPassword);
-        var oldDatabaseRoles = databaseUserEntity
-            .UserRoles.Select(dr => (DatabaseRole)dr.DatabaseRoleId)
-            .ToList();
-
-        if (!string.IsNullOrEmpty(request.UserName))
-            databaseUserEntity.UserName = request.UserName;
-
-        if (!string.IsNullOrEmpty(request.UserPassword))
-            databaseUserEntity.UserPassword = _encryption.Encrypt(request.UserPassword);
-
-        dbContext.Update(databaseUserEntity);
-        await dbContext.SaveChangesAsync(cancellationToken);
-
-        if (!request.AffectDatabase)
-            return;
-
-        var currentDatabaseIds = databaseUserEntity.Databases.Select(d => d.DatabaseId).ToList();
-        var databasesToAdd = request.DatabaseIds.Except(currentDatabaseIds).ToList();
-        var databasesToRemove = currentDatabaseIds.Except(request.DatabaseIds).ToList();
-
-        await dbContext.SaveChangesAsync(cancellationToken);
-
-        var commands = new List<string>();
-
-        var updatedDatabases = await dbContext
-            .Set<DatabaseEntity>()
-            .Include(d => d.DatabaseServer)
-            .Where(d => request.DatabaseIds.Contains(d.DatabaseId))
-            .ToListAsync(cancellationToken);
-
-        foreach (var database in updatedDatabases)
+        if (request.UserPassword != null)
         {
-            if (oldDatabaseUserName != request.UserName && !string.IsNullOrEmpty(request.UserName))
+            user.UserPassword = _encryption.Encrypt(request.UserPassword);
+        }
+
+        if (request.DatabaseIds != null)
+        {
+            user.Databases.Clear();
+            foreach (var databaseId in request.DatabaseIds)
             {
-                var sanitizedOldUserName = Sql.SanitizeSqlIdentifier(
-                    oldDatabaseUserName
-                        ?? throw new InvalidOperationException("Database user name cannot be null")
-                );
-                var sanitizedNewUserName = Sql.SanitizeSqlIdentifier(
-                    request.UserName
-                        ?? throw new InvalidOperationException("Database user name cannot be null")
-                );
-                var sanitizedDbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
+                var database = await dbContext
+                    .Set<DatabaseEntity>()
+                    .FirstOrDefaultAsync(d => d.DatabaseId == databaseId, cancellationToken);
 
-                commands.Add(
-                    $"use [{sanitizedDbName}]; alter user [{sanitizedOldUserName}] with name = [{sanitizedNewUserName}]"
-                );
-                commands.Add(
-                    $"alter login [{sanitizedOldUserName}] with name = [{sanitizedNewUserName}]"
-                );
-            }
+                if (database == null)
+                    throw new KeyNotFoundException($"Database with ID {databaseId} not found.");
 
-            if (
-                oldDatabasePassword != request.UserPassword
-                && !string.IsNullOrEmpty(request.UserPassword)
-            )
-            {
-                var sanitizedUserName = Sql.SanitizeSqlIdentifier(
-                    request.UserName
-                        ?? throw new InvalidOperationException("Database user name cannot be null")
-                );
-                var sanitizedPassword = request.UserPassword;
-
-                commands.Add(
-                    $"alter login [{sanitizedUserName}] with password = '{sanitizedPassword}'"
-                );
-            }
-
-            for (var i = 0; i < commands.Count; i++)
-            {
-                await Sql.ExecuteSqlCommandAsync(
-                    dbContext,
-                    commands[i],
-                    database.DatabaseServer.IsLinkedServer,
-                    database.DatabaseServer.DatabaseServerHostName
-                );
+                user.Databases.Add(database);
             }
         }
+
+        dbContext.Update(user);
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         if (_cache != null)
         {
             await _cache.Remove("databaseUsers");
-
-            var roles = databaseUserEntity
-                .UserRoles.Select(ur => (DatabaseRole)ur.DatabaseRoleId)
-                .ToArray();
-
-            await _cache.TryClearConnectionStringFromCache(roles: roles);
+            await _cache.Remove($"database-user-id-{request.DatabaseUserId}");
+            await _cache.Remove("connections");
+            await _cache.TryClearConnectionStringFromCache(databaseUserId: request.DatabaseUserId);
         }
     }
 }

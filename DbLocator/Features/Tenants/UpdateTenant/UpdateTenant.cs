@@ -63,68 +63,76 @@ internal class UpdateTenantHandler(
     private readonly DbLocatorCache? _cache = cache;
 
     public async Task Handle(
-        UpdateTenantCommand command,
+        UpdateTenantCommand request,
         CancellationToken cancellationToken = default
     )
     {
-        await new UpdateTenantCommandValidator().ValidateAndThrowAsync(command, cancellationToken);
-
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
         var tenant =
             await dbContext
                 .Set<TenantEntity>()
-                .FirstOrDefaultAsync(c => c.TenantId == command.TenantId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Tenant '{command.TenantId}' not found.");
+                .FirstOrDefaultAsync(t => t.TenantId == request.TenantId, cancellationToken)
+            ?? throw new KeyNotFoundException($"Tenant with ID {request.TenantId} not found.");
 
-        if (command.TenantName != null)
+        // Only validate if we have a valid request
+        if (request.TenantName != null || request.TenantCode != null || request.TenantStatus.HasValue)
+        {
+            await new UpdateTenantCommandValidator().ValidateAndThrowAsync(
+                request,
+                cancellationToken
+            );
+        }
+
+        if (request.TenantName != null)
         {
             if (
                 await dbContext
                     .Set<TenantEntity>()
                     .AnyAsync(
-                        t =>
-                            t.TenantName == command.TenantName
-                            && t.TenantId != command.TenantId,
+                        t => t.TenantName == request.TenantName && t.TenantId != request.TenantId,
                         cancellationToken
                     )
             )
                 throw new InvalidOperationException(
-                    $"Tenant with name \"{command.TenantName}\" already exists"
+                    $"Tenant with name \"{request.TenantName}\" already exists"
                 );
-            tenant.TenantName = command.TenantName;
+
+            tenant.TenantName = request.TenantName;
         }
 
-        if (command.TenantCode != null)
+        if (request.TenantCode != null)
         {
             if (
                 await dbContext
                     .Set<TenantEntity>()
                     .AnyAsync(
-                        t =>
-                            t.TenantCode == command.TenantCode
-                            && t.TenantId != command.TenantId,
+                        t => t.TenantCode == request.TenantCode && t.TenantId != request.TenantId,
                         cancellationToken
                     )
             )
                 throw new InvalidOperationException(
-                    $"Tenant with code \"{command.TenantCode}\" already exists"
+                    $"Tenant with code \"{request.TenantCode}\" already exists"
                 );
-            tenant.TenantCode = command.TenantCode;
+
+            tenant.TenantCode = request.TenantCode;
         }
 
-        if (command.TenantStatus.HasValue)
-            tenant.TenantStatusId = (byte)command.TenantStatus.Value;
+        if (request.TenantStatus.HasValue)
+        {
+            tenant.TenantStatusId = (byte)request.TenantStatus.Value;
+        }
 
-        dbContext.Set<TenantEntity>().Update(tenant);
+        dbContext.Update(tenant);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         if (_cache != null)
         {
             await _cache.Remove("tenants");
+            await _cache.Remove($"tenant-id-{request.TenantId}");
+            await _cache.Remove($"tenant-code-{tenant.TenantCode}");
             await _cache.Remove("connections");
-            await _cache.TryClearConnectionStringFromCache(tenantCode: tenant.TenantCode);
-            await _cache.TryClearConnectionStringFromCache(tenantId: tenant.TenantId);
+            await _cache.TryClearConnectionStringFromCache(tenantId: request.TenantId);
         }
     }
 }
