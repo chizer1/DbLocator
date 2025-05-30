@@ -108,7 +108,14 @@ internal class DatabaseServerService(
     public async Task UpdateDatabaseServer(int databaseServerId, bool isLinkedServer)
     {
         await _updateDatabaseServer.Handle(
-            new UpdateDatabaseServerCommand(databaseServerId, null, null, null, null, isLinkedServer)
+            new UpdateDatabaseServerCommand(
+                databaseServerId,
+                null,
+                null,
+                null,
+                null,
+                isLinkedServer
+            )
         );
     }
 }

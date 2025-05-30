@@ -61,9 +61,7 @@ internal sealed class UpdateDatabaseServerCommandValidator
                 || x.IpAddress != null
                 || x.IsLinkedServer.HasValue
             )
-            .WithMessage(
-                "At least one field must be provided for update"
-            );
+            .WithMessage("At least one field must be provided for update");
     }
 }
 
@@ -157,7 +155,7 @@ internal class UpdateDatabaseServerHandler(
                     .AnyAsync(
                         ds =>
                             ds.DatabaseServerFullyQualifiedDomainName
-                            == request.FullyQualifiedDomainName
+                                == request.FullyQualifiedDomainName
                             && ds.DatabaseServerId != request.DatabaseServerId,
                         cancellationToken
                     )
@@ -165,7 +163,8 @@ internal class UpdateDatabaseServerHandler(
                 throw new InvalidOperationException(
                     $"Database server with FQDN \"{request.FullyQualifiedDomainName}\" already exists"
                 );
-            databaseServer.DatabaseServerFullyQualifiedDomainName = request.FullyQualifiedDomainName;
+            databaseServer.DatabaseServerFullyQualifiedDomainName =
+                request.FullyQualifiedDomainName;
         }
 
         if (request.IpAddress != null)
@@ -199,4 +198,4 @@ internal class UpdateDatabaseServerHandler(
             await _cache.Remove($"databaseServer-id-{request.DatabaseServerId}");
         }
     }
-} 
+}

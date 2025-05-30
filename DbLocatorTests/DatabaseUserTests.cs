@@ -130,7 +130,11 @@ public class DatabaseUserTests : IAsyncLifetime
     public async Task CreateDatabaseUser_WithDatabaseIdsNameAndPassword_CreatesUser()
     {
         var userName = TestHelpers.GetRandomString();
-        var userId = await _dbLocator.CreateDatabaseUser([_databaseId], userName, "TestPassword123!");
+        var userId = await _dbLocator.CreateDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!"
+        );
 
         var user = (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
         Assert.Equal(userName, user.Name);
@@ -159,7 +163,12 @@ public class DatabaseUserTests : IAsyncLifetime
 
         await Assert.ThrowsAsync<InvalidOperationException>(
             async () =>
-                await _dbLocator.CreateDatabaseUser([_databaseId], user.Name, "TestPassword123!", true)
+                await _dbLocator.CreateDatabaseUser(
+                    [_databaseId],
+                    user.Name,
+                    "TestPassword123!",
+                    true
+                )
         );
     }
 

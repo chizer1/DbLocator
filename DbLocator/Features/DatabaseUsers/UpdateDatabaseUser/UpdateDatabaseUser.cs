@@ -1,7 +1,6 @@
 #nullable enable
 
 using DbLocator.Db;
-using DbLocator.Domain;
 using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -60,8 +59,13 @@ internal class UpdateDatabaseUserHandler(
             await dbContext
                 .Set<DatabaseUserEntity>()
                 .Include(u => u.Databases)
-                .FirstOrDefaultAsync(u => u.DatabaseUserId == request.DatabaseUserId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Database user with ID {request.DatabaseUserId} not found.");
+                .FirstOrDefaultAsync(
+                    u => u.DatabaseUserId == request.DatabaseUserId,
+                    cancellationToken
+                )
+            ?? throw new KeyNotFoundException(
+                $"Database user with ID {request.DatabaseUserId} not found."
+            );
 
         if (request.UserName != null)
         {
@@ -69,7 +73,9 @@ internal class UpdateDatabaseUserHandler(
                 await dbContext
                     .Set<DatabaseUserEntity>()
                     .AnyAsync(
-                        u => u.UserName == request.UserName && u.DatabaseUserId != request.DatabaseUserId,
+                        u =>
+                            u.UserName == request.UserName
+                            && u.DatabaseUserId != request.DatabaseUserId,
                         cancellationToken
                     )
             )
@@ -81,23 +87,25 @@ internal class UpdateDatabaseUserHandler(
         }
 
         if (request.UserPassword != null)
-        {
             user.UserPassword = _encryption.Encrypt(request.UserPassword);
-        }
 
         if (request.DatabaseIds != null)
         {
             user.Databases.Clear();
             foreach (var databaseId in request.DatabaseIds)
             {
-                var database = await dbContext
-                    .Set<DatabaseEntity>()
-                    .FirstOrDefaultAsync(d => d.DatabaseId == databaseId, cancellationToken);
-
-                if (database == null)
-                    throw new KeyNotFoundException($"Database with ID {databaseId} not found.");
-
-                user.Databases.Add(database);
+                var database =
+                    await dbContext
+                        .Set<DatabaseEntity>()
+                        .FirstOrDefaultAsync(d => d.DatabaseId == databaseId, cancellationToken)
+                    ?? throw new KeyNotFoundException($"Database with ID {databaseId} not found.");
+                user.Databases.Add(
+                    new DatabaseUserDatabaseEntity
+                    {
+                        DatabaseId = database.DatabaseId,
+                        DatabaseUserId = user.DatabaseUserId
+                    }
+                );
             }
         }
 
@@ -109,7 +117,7 @@ internal class UpdateDatabaseUserHandler(
             await _cache.Remove("databaseUsers");
             await _cache.Remove($"database-user-id-{request.DatabaseUserId}");
             await _cache.Remove("connections");
-            await _cache.TryClearConnectionStringFromCache(databaseUserId: request.DatabaseUserId);
+            await _cache.TryClearConnectionStringFromCache(user.DatabaseUserId);
         }
     }
 }

@@ -61,9 +61,16 @@ internal class GetConnectionHandler(
     )
     {
         // Only validate if we have a valid request
-        if (request.ConnectionId.HasValue || request.TenantId.HasValue || !string.IsNullOrEmpty(request.TenantCode))
+        if (
+            request.ConnectionId.HasValue
+            || request.TenantId.HasValue
+            || !string.IsNullOrEmpty(request.TenantCode)
+        )
         {
-            await new GetConnectionQueryValidator().ValidateAndThrowAsync(request, cancellationToken);
+            await new GetConnectionQueryValidator().ValidateAndThrowAsync(
+                request,
+                cancellationToken
+            );
         }
         else
         {
@@ -135,7 +142,9 @@ internal class GetConnectionHandler(
 
         if (request.DatabaseTypeId.HasValue && request.DatabaseTypeId.Value <= 0)
         {
-            throw new KeyNotFoundException($"Database type with ID {request.DatabaseTypeId} not found.");
+            throw new KeyNotFoundException(
+                $"Database type with ID {request.DatabaseTypeId} not found."
+            );
         }
 
         // Check if tenant exists
@@ -173,7 +182,9 @@ internal class GetConnectionHandler(
 
             if (!databaseTypeExists)
             {
-                throw new KeyNotFoundException($"Database type with ID {request.DatabaseTypeId} not found.");
+                throw new KeyNotFoundException(
+                    $"Database type with ID {request.DatabaseTypeId} not found."
+                );
             }
         }
 
@@ -284,7 +295,9 @@ internal class GetConnectionHandler(
         // If roles are specified, filter by roles
         if (roles != null && roles.Length > 0)
         {
-            query = query.Where(du => du.UserRoles.Any(ur => roles.Contains((DatabaseRole)ur.DatabaseRoleId)));
+            query = query.Where(du =>
+                du.UserRoles.Any(ur => roles.Contains((DatabaseRole)ur.DatabaseRoleId))
+            );
         }
 
         var user = await query.FirstOrDefaultAsync(cancellationToken);

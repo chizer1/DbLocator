@@ -43,14 +43,8 @@ internal sealed class UpdateTenantCommandValidator : AbstractValidator<UpdateTen
             .WithMessage("Tenant Status is invalid.");
 
         RuleFor(x => x)
-            .Must(x =>
-                x.TenantName != null
-                || x.TenantCode != null
-                || x.TenantStatus.HasValue
-            )
-            .WithMessage(
-                "At least one field must be provided for update"
-            );
+            .Must(x => x.TenantName != null || x.TenantCode != null || x.TenantStatus.HasValue)
+            .WithMessage("At least one field must be provided for update");
     }
 }
 
@@ -76,7 +70,11 @@ internal class UpdateTenantHandler(
             ?? throw new KeyNotFoundException($"Tenant with ID {request.TenantId} not found.");
 
         // Only validate if we have a valid request
-        if (request.TenantName != null || request.TenantCode != null || request.TenantStatus.HasValue)
+        if (
+            request.TenantName != null
+            || request.TenantCode != null
+            || request.TenantStatus.HasValue
+        )
         {
             await new UpdateTenantCommandValidator().ValidateAndThrowAsync(
                 request,

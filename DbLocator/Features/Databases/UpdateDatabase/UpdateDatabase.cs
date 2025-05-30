@@ -126,7 +126,10 @@ internal class UpdateDatabaseHandler(
         return new Database(
             database.DatabaseId,
             database.DatabaseName,
-            new DatabaseType(database.DatabaseType.DatabaseTypeId, database.DatabaseType.DatabaseTypeName),
+            new DatabaseType(
+                database.DatabaseType.DatabaseTypeId,
+                database.DatabaseType.DatabaseTypeName
+            ),
             new DatabaseServer(
                 database.DatabaseServerId,
                 database.DatabaseServer.DatabaseServerName,
