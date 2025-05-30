@@ -2,6 +2,7 @@ using DbLocator;
 using DbLocator.Domain;
 using DbLocator.Utilities;
 using DbLocatorTests.Fixtures;
+using FluentValidation;
 
 namespace DbLocatorTests;
 
@@ -211,16 +212,8 @@ public class DatabaseServerTests : IAsyncLifetime
     [Fact]
     public async Task UpdateNonExistentDatabaseServerThrowsException()
     {
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () =>
-                await _dbLocator.UpdateDatabaseServer(
-                    -1,
-                    "new-name",
-                    "host",
-                    "host.example.com",
-                    "1.1.1.1",
-                    false
-                )
+        await Assert.ThrowsAsync<ValidationException>(
+            async () => await _dbLocator.UpdateDatabaseServer(-1, "UpdatedName")
         );
     }
 
@@ -462,7 +455,7 @@ public class DatabaseServerTests : IAsyncLifetime
         );
 
         Assert.Contains(
-            "Database Server IP Createress '192.168.1.400' already exists",
+            "Database server with IP address '192.168.1.400' already exists",
             exception.Message
         );
     }

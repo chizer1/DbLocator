@@ -255,11 +255,15 @@ internal class GetConnectionHandler(
         {
             DataSource = serverName,
             InitialCatalog = database.DatabaseName,
-            IntegratedSecurity = database.UseTrustedConnection,
             Encrypt = true,
             TrustServerCertificate = true,
             ConnectTimeout = 30
         };
+
+        if (database.UseTrustedConnection)
+        {
+            builder["Integrated Security"] = "True";
+        }
 
         // Only try to get a user if roles are specified and not using trusted connection
         if (roles != null && roles.Length > 0 && !database.UseTrustedConnection)

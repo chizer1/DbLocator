@@ -59,6 +59,22 @@ internal class CreateDatabaseHandler(
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
+        // Validate that database server exists
+        var server = await dbContext
+            .Set<DatabaseServerEntity>()
+            .FirstOrDefaultAsync(s => s.DatabaseServerId == request.DatabaseServerId, cancellationToken);
+
+        if (server == null)
+            throw new KeyNotFoundException($"Database server with ID {request.DatabaseServerId} not found");
+
+        // Validate that database type exists
+        var type = await dbContext
+            .Set<DatabaseTypeEntity>()
+            .FirstOrDefaultAsync(t => t.DatabaseTypeId == request.DatabaseTypeId, cancellationToken);
+
+        if (type == null)
+            throw new KeyNotFoundException($"Database type with ID {request.DatabaseTypeId} not found");
+
         var databaseEntity = new DatabaseEntity
         {
             DatabaseName = request.DatabaseName,

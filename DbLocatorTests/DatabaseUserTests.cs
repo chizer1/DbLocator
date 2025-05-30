@@ -379,7 +379,7 @@ public class DatabaseUserTests : IAsyncLifetime
     public async Task DeleteDatabaseUserRole_NonExistentUser_ThrowsKeyNotFoundException()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.DeleteDatabaseUserRole(-1, DatabaseRole.DataWriter)
+            async () => await _dbLocator.DeleteDatabaseUserRole(999999, DatabaseRole.DataWriter)
         );
     }
 

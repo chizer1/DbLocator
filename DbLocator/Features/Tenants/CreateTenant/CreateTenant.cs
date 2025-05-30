@@ -50,7 +50,7 @@ internal class CreateTenantHandler(
                 .Set<TenantEntity>()
                 .AnyAsync(c => c.TenantName == command.TenantName, cancellationToken)
         )
-            throw new InvalidOperationException(
+            throw new ArgumentException(
                 $"Tenant with name \"{command.TenantName}\" already exists"
             );
 

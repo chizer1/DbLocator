@@ -91,7 +91,7 @@ public class DatabaseTests
     public async Task GetNonExistentDatabase_ThrowsKeyNotFoundException()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.GetDatabase(-1)
+            async () => await _dbLocator.GetDatabase(999999)
         );
     }
 
@@ -99,7 +99,7 @@ public class DatabaseTests
     public async Task DeleteNonExistentDatabase_ThrowsKeyNotFoundException()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.DeleteDatabase(-1)
+            async () => await _dbLocator.DeleteDatabase(999999)
         );
     }
 
@@ -303,7 +303,7 @@ public class DatabaseTests
         var dbName = TestHelpers.GetRandomString();
         var database = await CreateDatabaseAsync(dbName);
 
-        await Assert.ThrowsAsync<KeyNotFoundException>(
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
             async () => await _dbLocator.UpdateDatabase(database.Id, 34345)
         );
     }

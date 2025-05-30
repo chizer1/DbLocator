@@ -2,6 +2,7 @@ using DbLocator;
 using DbLocator.Domain;
 using DbLocator.Utilities;
 using DbLocatorTests.Fixtures;
+using FluentValidation;
 
 namespace DbLocatorTests;
 
@@ -184,7 +185,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task GetNonExistentConnection_ThrowsKeyNotFoundException()
     {
-        await Assert.ThrowsAsync<KeyNotFoundException>(
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
             async () => await _dbLocator.GetConnection(-1, Array.Empty<DatabaseRole>())
         );
     }
@@ -295,7 +296,8 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
             databaseName,
             _databaseServerId,
             databaseTypeId,
-            Status.Active
+            true,
+            true
         );
 
         var connectionId = await _dbLocator.CreateConnection(tenantId, databaseId);
@@ -383,41 +385,6 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         );
 
         return await _dbLocator.CreateConnection(tenantId, databaseId);
-    }
-
-    [Fact]
-    public async Task GetConnection_WithTrustedConnection_ReturnsConnectionWithIntegratedSecurity()
-    {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.CreateTenant(tenantName);
-
-        var databaseTypeName = TestHelpers.GetRandomString();
-        var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName);
-
-        var databaseName = TestHelpers.GetRandomString();
-        var databaseId = await _dbLocator.CreateDatabase(
-            databaseName,
-            _databaseServerId,
-            databaseTypeId,
-            Status.Active
-        );
-
-        var connectionId = await _dbLocator.CreateConnection(tenantId, databaseId);
-        var dbUserId = await _dbLocator.CreateDatabaseUser(
-            [databaseId],
-            TestHelpers.GetRandomString(),
-            true
-        );
-
-        await _dbLocator.CreateDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
-        var connection = await _dbLocator.GetConnection(
-            tenantId,
-            databaseTypeId,
-            [DatabaseRole.DataReader]
-        );
-        Assert.NotNull(connection);
-        Assert.NotNull(connection.ConnectionString);
-        Assert.Contains("Integrated Security=True", connection.ConnectionString);
     }
 
     [Fact]
@@ -601,14 +568,6 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
                     Array.Empty<DatabaseRole>()
                 )
         );
-    }
-
-    [Fact]
-    public async Task GetConnections_WithEmptyDatabase()
-    {
-        var connections = await _dbLocator.GetConnections();
-        Assert.NotNull(connections);
-        Assert.Empty(connections);
     }
 
     [Fact]

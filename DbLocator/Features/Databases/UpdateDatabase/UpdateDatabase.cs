@@ -91,16 +91,33 @@ internal class UpdateDatabaseHandler(
                 );
         }
 
+        if (request.DatabaseServerId.HasValue)
+        {
+            var databaseServer =
+                await dbContext
+                    .Set<DatabaseServerEntity>()
+                    .FirstOrDefaultAsync(
+                        ds => ds.DatabaseServerId == request.DatabaseServerId,
+                        cancellationToken
+                    )
+                ?? throw new KeyNotFoundException(
+                    $"Database server with ID {request.DatabaseServerId} not found"
+                );
+        }
+
         if (request.AffectDatabase && request.Name != null && database.DatabaseName != request.Name)
         {
             var oldDbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
             var newDbName = Sql.SanitizeSqlIdentifier(request.Name);
+            var serverName = database.DatabaseServer.DatabaseServerHostName 
+                ?? database.DatabaseServer.DatabaseServerName 
+                ?? throw new InvalidOperationException("Database server must have either a host name or server name");
+                
             await Sql.ExecuteSqlCommandAsync(
                 dbContext,
                 $"alter database [{oldDbName}] modify name = [{newDbName}]",
                 database.DatabaseServer.IsLinkedServer,
-                database.DatabaseServer.DatabaseServerHostName
-                    ?? database.DatabaseServer.DatabaseServerName
+                serverName
             );
         }
 
