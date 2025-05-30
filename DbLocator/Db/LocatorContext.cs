@@ -80,7 +80,7 @@ internal class DbLocatorContext(DbContextOptions<DbLocatorContext> options) : Db
                 .HasOne(e => e.User)
                 .WithMany(u => u.Databases)
                 .HasForeignKey(e => e.DatabaseUserId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DatabaseUserDatabase_DatabaseUser");
 
             entity
