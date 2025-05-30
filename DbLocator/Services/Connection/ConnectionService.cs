@@ -21,7 +21,7 @@ internal class ConnectionService(
     private readonly GetConnectionHandler _getConnection = new(contextFactory, encryption, cache);
     private readonly GetConnectionsHandler _getConnections = new(contextFactory, cache);
 
-    public async Task<int> AddConnection(int tenantId, int databaseId)
+    public async Task<int> CreateConnection(int tenantId, int databaseId)
     {
         return await _createConnection.Handle(new CreateConnectionCommand(tenantId, databaseId));
     }

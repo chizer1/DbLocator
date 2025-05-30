@@ -14,13 +14,13 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
     private readonly int _databaseServerID = dbLocatorFixture.LocalhostServerId;
 
     [Fact]
-    public async Task AddMultipleDatabaseTypesAndSearchByKeyWord()
+    public async Task CreateMultipleDatabaseTypesAndSearchByKeyWord()
     {
         var databaseTypeName1 = TestHelpers.GetRandomString();
-        var databaseTypeId1 = await _dbLocator.AddDatabaseType(databaseTypeName1);
+        var databaseTypeId1 = await _dbLocator.CreateDatabaseType(databaseTypeName1);
 
         var databaseTypeName2 = TestHelpers.GetRandomString();
-        var databaseTypeId2 = await _dbLocator.AddDatabaseType(databaseTypeName2);
+        var databaseTypeId2 = await _dbLocator.CreateDatabaseType(databaseTypeName2);
 
         var databaseTypes = (await _dbLocator.GetDatabaseTypes())
             .Where(x => x.Name == databaseTypeName1)
@@ -31,10 +31,10 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
     }
 
     [Fact]
-    public async Task AddAndDeleteDatabaseType()
+    public async Task CreateAndDeleteDatabaseType()
     {
         var databaseTypeName = TestHelpers.GetRandomString();
-        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName);
 
         await _dbLocator.DeleteDatabaseType(databaseTypeId);
         var databaseTypes = (await _dbLocator.GetDatabaseTypes())
@@ -45,10 +45,10 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
     }
 
     [Fact]
-    public async Task AddAndUpdateDatabaseType()
+    public async Task CreateAndUpdateDatabaseType()
     {
         var databaseTypeName1 = TestHelpers.GetRandomString();
-        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName1);
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName1);
 
         var databaseTypeName2 = TestHelpers.GetRandomString();
         await _dbLocator.UpdateDatabaseType(databaseTypeId, databaseTypeName2);
@@ -68,7 +68,7 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
     public async Task VerifyDatabaseTypesAreCached()
     {
         var databaseTypeName = TestHelpers.GetRandomString();
-        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName);
 
         var databaseTypes = await _dbLocator.GetDatabaseTypes();
         Assert.Contains(databaseTypes, db => db.Name == databaseTypeName);
@@ -82,7 +82,7 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
     public async Task GetDatabaseTypeById()
     {
         var databaseTypeName = TestHelpers.GetRandomString();
-        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName);
 
         var databaseType = await _dbLocator.GetDatabaseType(databaseTypeId);
         Assert.NotNull(databaseType);
@@ -91,22 +91,22 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
     }
 
     [Fact]
-    public async Task CannotAddDuplicateDatabaseTypeName()
+    public async Task CannotCreateDuplicateDatabaseTypeName()
     {
         var databaseTypeName = TestHelpers.GetRandomString();
-        await _dbLocator.AddDatabaseType(databaseTypeName);
+        await _dbLocator.CreateDatabaseType(databaseTypeName);
 
         await Assert.ThrowsAsync<InvalidOperationException>(
-            async () => await _dbLocator.AddDatabaseType(databaseTypeName)
+            async () => await _dbLocator.CreateDatabaseType(databaseTypeName)
         );
     }
 
     [Fact]
-    public async Task CannotAddDatabaseTypeWithNameTooLong()
+    public async Task CannotCreateDatabaseTypeWithNameTooLong()
     {
         var longName = new string('a', 21); // Max length is 20
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(
-            async () => await _dbLocator.AddDatabaseType(longName)
+            async () => await _dbLocator.CreateDatabaseType(longName)
         );
     }
 
@@ -114,11 +114,11 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
     public async Task CannotDeleteDatabaseTypeInUse()
     {
         var databaseTypeName = TestHelpers.GetRandomString();
-        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName);
 
         // Create a database using this type
         var databaseName = TestHelpers.GetRandomString();
-        await _dbLocator.AddDatabase(
+        await _dbLocator.CreateDatabase(
             databaseName,
             _databaseServerID,
             databaseTypeId,
@@ -158,7 +158,7 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
     public async Task CannotUpdateDatabaseTypeWithNameTooLong()
     {
         var databaseTypeName = TestHelpers.GetRandomString();
-        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName);
 
         var longName = new string('a', 21); // Max length is 20
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(
@@ -170,10 +170,10 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
     public async Task CannotUpdateDatabaseTypeToDuplicateName()
     {
         var databaseTypeName1 = TestHelpers.GetRandomString();
-        var databaseTypeId1 = await _dbLocator.AddDatabaseType(databaseTypeName1);
+        var databaseTypeId1 = await _dbLocator.CreateDatabaseType(databaseTypeName1);
 
         var databaseTypeName2 = TestHelpers.GetRandomString();
-        var databaseTypeId2 = await _dbLocator.AddDatabaseType(databaseTypeName2);
+        var databaseTypeId2 = await _dbLocator.CreateDatabaseType(databaseTypeName2);
 
         await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.UpdateDatabaseType(databaseTypeId2, databaseTypeName1)
@@ -185,7 +185,7 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
     {
         // Arrange
         var typeName = TestHelpers.GetRandomString();
-        var typeId = await _dbLocator.AddDatabaseType(typeName);
+        var typeId = await _dbLocator.CreateDatabaseType(typeName);
 
         // Get type to populate cache
         var type = await _dbLocator.GetDatabaseType(typeId);

@@ -23,17 +23,17 @@ internal class TenantService(
     private readonly GetTenantByCodeHandler _getTenantByCode = new(dbContextFactory, cache);
     private readonly UpdateTenantHandler _updateTenant = new(dbContextFactory, cache);
 
-    public async Task<int> AddTenant(string tenantName)
+    public async Task<int> CreateTenant(string tenantName)
     {
         return await _createTenant.Handle(new CreateTenantCommand(tenantName, null, Status.Active));
     }
 
-    public async Task<int> AddTenant(string tenantName, Status tenantStatus)
+    public async Task<int> CreateTenant(string tenantName, Status tenantStatus)
     {
         return await _createTenant.Handle(new CreateTenantCommand(tenantName, null, tenantStatus));
     }
 
-    public async Task<int> AddTenant(string tenantName, string tenantCode, Status tenantStatus)
+    public async Task<int> CreateTenant(string tenantName, string tenantCode, Status tenantStatus)
     {
         return await _createTenant.Handle(
             new CreateTenantCommand(tenantName, tenantCode, tenantStatus)

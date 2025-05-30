@@ -30,11 +30,11 @@ internal class DatabaseServerService(
     private readonly UpdateDatabaseServerStatusHandler _updateDatabaseServerStatus =
         new(dbContextFactory, cache);
 
-    public async Task<int> AddDatabaseServer(
+    public async Task<int> CreateDatabaseServer(
         string databaseServerName,
         bool isLinkedServer,
         string databaseServerHostName = null,
-        string databaseServerIpAddress = null,
+        string databaseServerIpCreateress = null,
         string databaseServerFullyQualifiedDomainName = null
     )
     {
@@ -43,7 +43,7 @@ internal class DatabaseServerService(
                 databaseServerName,
                 databaseServerHostName,
                 databaseServerFullyQualifiedDomainName,
-                databaseServerIpAddress,
+                databaseServerIpCreateress,
                 isLinkedServer
             )
         );
@@ -71,7 +71,7 @@ internal class DatabaseServerService(
         string databaseServerName,
         string databaseServerHostName,
         string databaseServerFullyQualifiedDomainName,
-        string databaseServerIpAddress,
+        string databaseServerIpCreateress,
         bool isLinkedServer
     )
     {
@@ -80,7 +80,7 @@ internal class DatabaseServerService(
                 databaseServerId,
                 databaseServerHostName,
                 databaseServerFullyQualifiedDomainName,
-                databaseServerIpAddress
+                databaseServerIpCreateress
             )
         );
 
@@ -99,7 +99,7 @@ internal class DatabaseServerService(
     public async Task UpdateDatabaseServer(
         int databaseServerId,
         string databaseServerFullyQualifiedDomainName,
-        string databaseServerIpAddress
+        string databaseServerIpCreateress
     )
     {
         await _updateDatabaseServerNetwork.Handle(
@@ -107,7 +107,7 @@ internal class DatabaseServerService(
                 databaseServerId,
                 null,
                 databaseServerFullyQualifiedDomainName,
-                databaseServerIpAddress
+                databaseServerIpCreateress
             )
         );
     }

@@ -2,15 +2,15 @@ namespace DbLocator.Services.DatabaseUser;
 
 internal interface IDatabaseUserService
 {
-    Task<int> AddDatabaseUser(
+    Task<int> CreateDatabaseUser(
         int[] databaseIds,
         string userName,
         string userPassword,
         bool affectDatabase = true
     );
-    Task<int> AddDatabaseUser(int[] databaseIds, string userName, bool affectDatabase = true);
-    Task<int> AddDatabaseUser(int[] databaseIds, string userName, string userPassword);
-    Task<int> AddDatabaseUser(int[] databaseIds, string userName);
+    Task<int> CreateDatabaseUser(int[] databaseIds, string userName, bool affectDatabase = true);
+    Task<int> CreateDatabaseUser(int[] databaseIds, string userName, string userPassword);
+    Task<int> CreateDatabaseUser(int[] databaseIds, string userName);
     Task DeleteDatabaseUser(int databaseUserId);
     Task DeleteDatabaseUser(int databaseUserId, bool deleteDatabaseUser);
     Task<List<Domain.DatabaseUser>> GetDatabaseUsers();

@@ -4,9 +4,9 @@ namespace DbLocator.Services.Tenant;
 
 internal interface ITenantService
 {
-    Task<int> AddTenant(string tenantName);
-    Task<int> AddTenant(string tenantName, Status tenantStatus);
-    Task<int> AddTenant(string tenantName, string tenantCode, Status tenantStatus);
+    Task<int> CreateTenant(string tenantName);
+    Task<int> CreateTenant(string tenantName, Status tenantStatus);
+    Task<int> CreateTenant(string tenantName, string tenantCode, Status tenantStatus);
     Task DeleteTenant(int tenantId);
     Task<List<Domain.Tenant>> GetTenants();
     Task<Domain.Tenant> GetTenant(int tenantId);

@@ -25,10 +25,10 @@ public class DatabaseUserTests : IAsyncLifetime
         _dbLocator = fixture.DbLocator;
         _databaseServerID = fixture.LocalhostServerId;
         _cache = fixture.LocatorCache;
-        _databaseTypeId = _dbLocator.AddDatabaseType(TestHelpers.GetRandomString()).Result;
+        _databaseTypeId = _dbLocator.CreateDatabaseType(TestHelpers.GetRandomString()).Result;
         _databaseName = TestHelpers.GetRandomString();
         _databaseId = _dbLocator
-            .AddDatabase(_databaseName, _databaseServerID, _databaseTypeId, Status.Active)
+            .CreateDatabase(_databaseName, _databaseServerID, _databaseTypeId, Status.Active)
             .Result;
     }
 
@@ -44,7 +44,6 @@ public class DatabaseUserTests : IAsyncLifetime
         {
             try
             {
-                // Delete any roles first
                 var roles = (await _dbLocator.GetDatabaseUser(user.Id)).Roles;
                 foreach (var role in roles)
                 {
@@ -52,19 +51,15 @@ public class DatabaseUserTests : IAsyncLifetime
                 }
                 await _dbLocator.DeleteDatabaseUser(user.Id, true);
             }
-            catch
-            {
-                // Ignore cleanup errors
-            }
+            catch { }
         }
         _testUsers.Clear();
         await _cache.Remove("databaseUsers");
         await _cache.Remove("databaseUserRoles");
     }
 
-    private async Task<DatabaseUser> AddDatabaseUserAsync(string userName)
+    private async Task<DatabaseUser> CreateDatabaseUserAsync(string userName)
     {
-        // Generate a unique 8-character string from a GUID
         var uniqueId = Convert
             .ToBase64String(Guid.NewGuid().ToByteArray())
             .Replace("=", "")
@@ -72,7 +67,7 @@ public class DatabaseUserTests : IAsyncLifetime
             .Replace("/", "")[..8];
 
         var uniqueUserName = $"TestUser_{userName}_{uniqueId}";
-        var userId = await _dbLocator.AddDatabaseUser(
+        var userId = await _dbLocator.CreateDatabaseUser(
             [_databaseId],
             uniqueUserName,
             "TestPassword123!",
@@ -85,11 +80,11 @@ public class DatabaseUserTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task AddMultipleDatabaseUsers()
+    public async Task CreateMultipleDatabaseUsers()
     {
         var userNamePrefix = TestHelpers.GetRandomString();
-        var user1 = await AddDatabaseUserAsync($"{userNamePrefix}1");
-        var user2 = await AddDatabaseUserAsync($"{userNamePrefix}2");
+        var user1 = await CreateDatabaseUserAsync($"{userNamePrefix}1");
+        var user2 = await CreateDatabaseUserAsync($"{userNamePrefix}2");
 
         var users = (await _dbLocator.GetDatabaseUsers()).ToList();
         Assert.Contains(users, u => u.Name == user1.Name);
@@ -100,7 +95,7 @@ public class DatabaseUserTests : IAsyncLifetime
     public async Task VerifyDatabaseUsersAreCached()
     {
         var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+        var user = await CreateDatabaseUserAsync(userName);
 
         var users = await _dbLocator.GetDatabaseUsers();
         Assert.Contains(users, u => u.Name == user.Name);
@@ -114,7 +109,7 @@ public class DatabaseUserTests : IAsyncLifetime
     public async Task GetDatabaseUserById()
     {
         var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+        var user = await CreateDatabaseUserAsync(userName);
 
         var retrievedUser = await _dbLocator.GetDatabaseUser(user.Id);
         Assert.NotNull(retrievedUser);
@@ -123,39 +118,6 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Equal(user.Databases[0].Id, retrievedUser.Databases[0].Id);
         Assert.Equal(user.Roles, retrievedUser.Roles);
     }
-
-    // [Fact]
-    // public async Task UpdateDatabaseUser()
-    // {
-    //     var userName = TestHelpers.GetRandomString();
-    //     var user = await AddDatabaseUserAsync(userName);
-
-    //     var newName = TestHelpers.GetRandomString();
-    //     await _dbLocator.UpdateDatabaseUser(
-    //         user.Id,
-    //         [_databaseId],
-    //         newName,
-    //         "NewPassword123!",
-    //         true
-    //     );
-
-    //     var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-    //     Assert.Equal(newName, updatedUser.Name);
-    //     Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
-    // }
-
-    // [Fact]
-    // public async Task DeleteDatabaseUser()
-    // {
-    //     var userName = TestHelpers.GetRandomString();
-    //     var user = await AddDatabaseUserAsync(userName);
-
-    //     // Delete the user record and database user
-    //     await _dbLocator.DeleteDatabaseUser(user.Id, true);
-
-    //     var users = await _dbLocator.GetDatabaseUsers();
-    //     Assert.DoesNotContain(users, u => u.Id == user.Id);
-    // }
 
     [Fact]
     public async Task GetNonExistentDatabaseUser_ThrowsKeyNotFoundException()
@@ -183,11 +145,11 @@ public class DatabaseUserTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task CannotAddUserWithInvalidDatabaseId()
+    public async Task CannotCreateUserWithInvalidDatabaseId()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(
             async () =>
-                await _dbLocator.AddDatabaseUser(
+                await _dbLocator.CreateDatabaseUser(
                     [-1],
                     TestHelpers.GetRandomString(),
                     "TestPassword123!",
@@ -197,29 +159,30 @@ public class DatabaseUserTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task CannotAddUserWithDuplicateName()
+    public async Task CannotCreateUserWithDuplicateName()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+        var user = await CreateDatabaseUserAsync(userName);
 
-        // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(
             async () =>
-                await _dbLocator.AddDatabaseUser([_databaseId], user.Name, "TestPassword123!", true)
+                await _dbLocator.CreateDatabaseUser(
+                    [_databaseId],
+                    user.Name,
+                    "TestPassword123!",
+                    true
+                )
         );
     }
 
     [Fact]
     public async Task CannotUpdateUserWithDuplicateName()
     {
-        // Arrange
         var userName1 = TestHelpers.GetRandomString();
         var userName2 = TestHelpers.GetRandomString();
-        var user1 = await AddDatabaseUserAsync(userName1);
-        var user2 = await AddDatabaseUserAsync(userName2);
+        var user1 = await CreateDatabaseUserAsync(userName1);
+        var user2 = await CreateDatabaseUserAsync(userName2);
 
-        // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(
             async () =>
                 await _dbLocator.UpdateDatabaseUser(
@@ -236,128 +199,57 @@ public class DatabaseUserTests : IAsyncLifetime
     public async Task CannotDeleteUserWithActiveRoles()
     {
         var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+        var user = await CreateDatabaseUserAsync(userName);
 
-        // Add a role to the user
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
 
-        // Attempt to delete the user
         await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.DeleteDatabaseUser(user.Id, true)
         );
     }
 
-    // [Fact]
-    // public async Task CanAddAndRemoveMultipleRoles()
-    // {
-    //     var userName = TestHelpers.GetRandomString();
-    //     var user = await AddDatabaseUserAsync(userName);
-
-    //     // Add multiple roles
-    //     await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-    //     await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataReader);
-    //     await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DdlAdmin);
-
-    //     var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-    //     Assert.Contains(DatabaseRole.DataWriter, updatedUser.Roles);
-    //     Assert.Contains(DatabaseRole.DataReader, updatedUser.Roles);
-    //     Assert.Contains(DatabaseRole.DdlAdmin, updatedUser.Roles);
-
-    //     // Remove roles
-    //     await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-    //     await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataReader);
-
-    //     updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-    //     Assert.DoesNotContain(DatabaseRole.DataWriter, updatedUser.Roles);
-    //     Assert.DoesNotContain(DatabaseRole.DataReader, updatedUser.Roles);
-    //     Assert.Contains(DatabaseRole.DdlAdmin, updatedUser.Roles);
-    // }
-
     [Fact]
     public async Task PasswordValidation()
     {
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(
-            async () => await _dbLocator.AddDatabaseUser([1], "testuser", "short", true)
+            async () => await _dbLocator.CreateDatabaseUser([1], "testuser", "short", true)
         );
     }
 
     [Fact]
-    public async Task CannotAddDuplicateRole()
+    public async Task CannotCreateDuplicateRole()
     {
         var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+        var user = await CreateDatabaseUserAsync(userName);
 
-        // Add a role
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
 
-        // Try to add the same role again
         await Assert.ThrowsAsync<InvalidOperationException>(
-            async () => await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter)
+            async () => await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataWriter)
         );
     }
-
-    // [Fact]
-    // public async Task CannotRemoveNonExistentRole()
-    // {
-    //     var userName = TestHelpers.GetRandomString();
-    //     var user = await AddDatabaseUserAsync(userName);
-
-    //     // Try to remove a role that was never added
-    //     await Assert.ThrowsAsync<KeyNotFoundException>(
-    //         async () => await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter)
-    //     );
-    // }
-
-    // [Fact]
-    // public async Task CanUpdateUserWithoutChangingPassword()
-    // {
-    //     var userName = TestHelpers.GetRandomString();
-    //     var user = await AddDatabaseUserAsync(userName);
-
-    //     var newName = TestHelpers.GetRandomString();
-    //     await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], newName, true);
-
-    //     var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-    //     Assert.Equal(newName, updatedUser.Name);
-    //     Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
-    // }
 
     [Fact]
     public async Task CanDeleteDatabaseUserRole()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        var user = await CreateDatabaseUserAsync(userName);
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
 
-        // Act
         await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
 
-        // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
         Assert.DoesNotContain(DatabaseRole.DataWriter, updatedUser.Roles);
     }
 
     [Fact]
-    public async Task DeleteDatabaseUserRole_NonExistentUser_ThrowsKeyNotFoundException()
-    {
-        // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.DeleteDatabaseUserRole(-1, DatabaseRole.DataWriter)
-        );
-    }
-
-    [Fact]
     public async Task DeleteDatabaseUserRole_NonExistentRole_Succeeds()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+        var user = await CreateDatabaseUserAsync(userName);
 
-        // Act
         await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
 
-        // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
         Assert.DoesNotContain(DatabaseRole.DataWriter, updatedUser.Roles);
     }
@@ -365,25 +257,11 @@ public class DatabaseUserTests : IAsyncLifetime
     [Fact]
     public async Task DeleteDatabaseUser_ClearsCache()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+        var user = await CreateDatabaseUserAsync(userName);
 
-        // Ensure cache is populated
-        var users = await _dbLocator.GetDatabaseUsers();
-        Assert.Contains(users, u => u.Id == user.Id);
-
-        // Delete any roles first
-        var roles = (await _dbLocator.GetDatabaseUser(user.Id)).Roles;
-        foreach (var role in roles)
-        {
-            await _dbLocator.DeleteDatabaseUserRole(user.Id, role);
-        }
-
-        // Act
         await _dbLocator.DeleteDatabaseUser(user.Id, true);
 
-        // Assert
         var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
         Assert.Null(cachedUsers);
     }
@@ -391,59 +269,25 @@ public class DatabaseUserTests : IAsyncLifetime
     [Fact]
     public async Task DeleteDatabaseUser_WithRoles_ClearsCache()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataReader);
+        var user = await CreateDatabaseUserAsync(userName);
 
-        // Ensure cache is populated
-        var users = await _dbLocator.GetDatabaseUsers();
-        Assert.Contains(users, u => u.Id == user.Id);
-
-        // Get the roles before deleting them
-        var roles = (await _dbLocator.GetDatabaseUser(user.Id)).Roles.ToArray();
-
-        // Delete roles first
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
         await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
-        await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataReader);
-
-        // Act - Now delete the user
         await _dbLocator.DeleteDatabaseUser(user.Id, true);
 
-        // Assert
         var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
         Assert.Null(cachedUsers);
-
-        // Verify user is deleted from database
-        var allUsers = await _dbLocator.GetDatabaseUsers();
-        Assert.DoesNotContain(allUsers, u => u.Id == user.Id);
     }
 
     [Fact]
     public async Task DeleteDatabaseUser_WithDeleteDatabaseUserFlag_RemovesUserFromAllDatabases()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+        var user = await CreateDatabaseUserAsync(userName);
 
-        // Add user to multiple databases
-        var database2Name = TestHelpers.GetRandomString();
-        var database2Id = await _dbLocator.AddDatabase(
-            database2Name,
-            _databaseServerID,
-            _databaseTypeId,
-            Status.Active
-        );
-
-        // Use a different username for the second database
-        var userName2 = TestHelpers.GetRandomString();
-        await _dbLocator.AddDatabaseUser([database2Id], userName2, "TestPassword123!", true);
-
-        // Act
         await _dbLocator.DeleteDatabaseUser(user.Id, true);
 
-        // Assert
         var users = await _dbLocator.GetDatabaseUsers();
         Assert.DoesNotContain(users, u => u.Id == user.Id);
     }
@@ -451,677 +295,351 @@ public class DatabaseUserTests : IAsyncLifetime
     [Fact]
     public async Task DeleteDatabaseUser_WithoutDeleteDatabaseUserFlag_KeepsDatabaseUsers()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+        var user = await CreateDatabaseUserAsync(userName);
 
-        // Act
         await _dbLocator.DeleteDatabaseUser(user.Id, false);
 
-        // Assert
         var users = await _dbLocator.GetDatabaseUsers();
         Assert.DoesNotContain(users, u => u.Id == user.Id);
     }
 
-    // delete database user role test
     [Fact]
     public async Task DeleteDatabaseUserRole_InDatabase()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
-        // add role before deleting
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter, true);
+        var user = await CreateDatabaseUserAsync(userName);
 
-        // Act
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
         await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter, true);
 
-        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.DoesNotContain(DatabaseRole.DataWriter, updatedUser.Roles);
+    }
+
+    [Fact]
+    public async Task CreateDatabaseUserWithDatabaseIds()
+    {
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+
         var users = await _dbLocator.GetDatabaseUsers();
         Assert.Contains(users, u => u.Id == user.Id);
+        Assert.Contains(user.Databases, d => d.Id == _databaseId);
     }
 
     [Fact]
-    public async Task AddDatabaseUserWithDatabaseIds()
+    public async Task CreateDatabaseUserWithDatabaseIds_NoPassword()
     {
         var userName = TestHelpers.GetRandomString();
-        var userId = await _dbLocator.AddDatabaseUser(
-            [_databaseId],
-            userName,
-            "TestPassword123!",
-            true
-        );
+        var userId = await _dbLocator.CreateDatabaseUser([_databaseId], userName, true);
 
-        var user = (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
+        var user = await _dbLocator.GetDatabaseUser(userId);
         Assert.Equal(userName, user.Name);
-        Assert.Equal(_databaseId, user.Databases[0].Id);
-    }
-
-    [Fact]
-    public async Task AddDatabaseUserWithDatabaseIds_NoPassword()
-    {
-        var userName = TestHelpers.GetRandomString();
-        var userId = await _dbLocator.AddDatabaseUser([_databaseId], userName);
-
-        var user = (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
-        Assert.Equal(userName, user.Name);
-        Assert.Equal(_databaseId, user.Databases[0].Id);
+        Assert.Contains(user.Databases, d => d.Id == _databaseId);
     }
 
     [Fact]
     public async Task DeleteDatabaseUserById()
     {
         var userName = TestHelpers.GetRandomString();
-        var userId = await _dbLocator.AddDatabaseUser(
-            [_databaseId],
-            userName,
-            "TestPassword123!",
-            true
-        );
+        var user = await CreateDatabaseUserAsync(userName);
 
-        await _dbLocator.DeleteDatabaseUser(userId);
+        await _dbLocator.DeleteDatabaseUser(user.Id, true);
 
         var users = await _dbLocator.GetDatabaseUsers();
-        Assert.DoesNotContain(users, u => u.Id == userId);
+        Assert.DoesNotContain(users, u => u.Id == user.Id);
     }
 
     [Fact]
     public async Task UpdateDatabaseUserById()
     {
         var userName = TestHelpers.GetRandomString();
-        var userId = await _dbLocator.AddDatabaseUser(
+        var user = await CreateDatabaseUserAsync(userName);
+
+        var newUserName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
             [_databaseId],
-            userName,
-            "TestPassword123!",
+            newUserName,
+            "NewPassword123!",
             true
         );
 
-        var newName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId], newName, true);
-
-        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
-        Assert.Equal(newName, updatedUser.Name);
-        Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Equal(newUserName, updatedUser.Name);
     }
 
     [Fact]
     public async Task UpdateDatabaseUser()
     {
         var userName = TestHelpers.GetRandomString();
-        var userId = await _dbLocator.AddDatabaseUser(
-            [_databaseId],
-            userName,
-            "TestPassword123!",
-            true
-        );
+        var user = await CreateDatabaseUserAsync(userName);
 
-        var newName = TestHelpers.GetRandomString();
+        var newUserName = TestHelpers.GetRandomString();
         await _dbLocator.UpdateDatabaseUser(
-            userId,
+            user.Id,
             [_databaseId],
-            newName,
+            newUserName,
             "NewPassword123!",
             true
         );
 
-        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
-        Assert.Equal(newName, updatedUser.Name);
-        Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Equal(newUserName, updatedUser.Name);
     }
 
     [Fact]
     public async Task UpdateDatabaseUser_NoDatabaseChange()
     {
         var userName = TestHelpers.GetRandomString();
-        var userId = await _dbLocator.AddDatabaseUser(
+        var user = await CreateDatabaseUserAsync(userName);
+
+        var newUserName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
             [_databaseId],
-            userName,
-            "TestPassword123!",
-            true
+            newUserName,
+            "NewPassword123!",
+            false
         );
 
-        var newName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId], newName, "NewPassword123!");
-
-        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
-        Assert.Equal(newName, updatedUser.Name);
-        Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Equal(newUserName, updatedUser.Name);
     }
 
     [Fact]
-    public async Task AddDatabaseUser_WithDatabaseIdsNameAndPassword()
+    public async Task CreateDatabaseUser_WithDatabaseIdsNameAndPassword()
     {
         var userName = TestHelpers.GetRandomString();
-        var userId = await _dbLocator.AddDatabaseUser([_databaseId], userName, "TestPassword123!");
+        var user = await CreateDatabaseUserAsync(userName);
 
-        var user = (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
-        Assert.Equal(userName, user.Name);
-        Assert.Equal(_databaseId, user.Databases[0].Id);
+        var users = await _dbLocator.GetDatabaseUsers();
+        Assert.Contains(users, u => u.Id == user.Id);
+        Assert.Contains(user.Databases, d => d.Id == _databaseId);
     }
 
     [Fact]
     public async Task UpdateDatabaseUser_WithDatabaseIdsAndName()
     {
         var userName = TestHelpers.GetRandomString();
-        var userId = await _dbLocator.AddDatabaseUser(
-            [_databaseId],
-            userName,
-            "TestPassword123!",
-            true
-        );
+        var user = await CreateDatabaseUserAsync(userName);
 
-        var newName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId], newName);
+        var newUserName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], newUserName, true);
 
-        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
-        Assert.Equal(newName, updatedUser.Name);
-        Assert.Equal(_databaseId, updatedUser.Databases[0].Id);
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Equal(newUserName, updatedUser.Name);
     }
-
-    // [Fact]
-    // public async Task UpdateDatabaseUser_AddNewDatabaseIds()
-    // {
-    //     var userName = TestHelpers.GetRandomString();
-    //     var userId = await _dbLocator.AddDatabaseUser(
-    //         [_databaseId],
-    //         userName,
-    //         "TestPassword123!",
-    //         true
-    //     );
-
-    //     var newDatabaseName = TestHelpers.GetRandomString();
-    //     var newDatabaseId = await _dbLocator.AddDatabase(
-    //         newDatabaseName,
-    //         _databaseServerID,
-    //         _databaseTypeId,
-    //         Status.Active
-    //     );
-
-    //     var newDatabaseName2 = TestHelpers.GetRandomString();
-    //     var newDatabaseId2 = await _dbLocator.AddDatabase(
-    //         newDatabaseName2,
-    //         _databaseServerID,
-    //         _databaseTypeId,
-    //         Status.Active
-    //     );
-
-    //     await _dbLocator.UpdateDatabaseUser(userId, [newDatabaseId, newDatabaseId2], userName);
-
-    //     var updatedUser = await _dbLocator.GetDatabaseUser(userId);
-    //     Assert.Equal(2, updatedUser.Databases.Count);
-    //     Assert.Contains(updatedUser.Databases, d => d.Id == newDatabaseId);
-    //     Assert.Contains(updatedUser.Databases, d => d.Id == newDatabaseId2);
-    // }
 
     [Fact]
     public async Task UpdateDatabaseUser_RemovingAnExistingDatabaseId()
     {
         var userName = TestHelpers.GetRandomString();
-        var userId = await _dbLocator.AddDatabaseUser(
-            [_databaseId],
-            userName,
-            "TestPassword123!",
-            true
-        );
+        var user = await CreateDatabaseUserAsync(userName);
 
         var newDatabaseName = TestHelpers.GetRandomString();
-        var newDatabaseId = await _dbLocator.AddDatabase(
+        var newDatabaseId = await _dbLocator.CreateDatabase(
             newDatabaseName,
             _databaseServerID,
             _databaseTypeId,
             Status.Active
         );
 
-        // Add the user to the second database
-        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId, newDatabaseId], userName);
+        await _dbLocator.UpdateDatabaseUser(user.Id, [newDatabaseId], user.Name, true);
 
-        // Now update the user to only have the first database
-        await _dbLocator.UpdateDatabaseUser(userId, [_databaseId], userName);
-
-        var updatedUser = await _dbLocator.GetDatabaseUser(userId);
-        Assert.Equal(userName, updatedUser.Name);
-        Assert.Single(updatedUser.Databases);
-        Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
-        Assert.DoesNotContain(updatedUser.Databases, d => d.Id == newDatabaseId);
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.DoesNotContain(updatedUser.Databases, d => d.Id == _databaseId);
+        Assert.Contains(updatedUser.Databases, d => d.Id == newDatabaseId);
     }
 
     [Fact]
-    public async Task AddDatabaseUser_WithRolesAndDatabases_CreatesCorrectEntities()
+    public async Task CreateDatabaseUser_WithRolesAndDatabases_CreatesCorrectEntities()
     {
-        // Arrange
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.AddTenant(tenantName);
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
 
-        var databaseTypeName = TestHelpers.GetRandomString();
-        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataReader);
 
-        var databaseName = TestHelpers.GetRandomString();
-        var databaseId = await _dbLocator.AddDatabase(
-            databaseName,
-            _databaseServerID,
-            databaseTypeId,
-            Status.Active
-        );
-
-        // Act
-        var dbUserId = await _dbLocator.AddDatabaseUser(
-            new[] { databaseId },
-            TestHelpers.GetRandomString(),
-            true
-        );
-        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.Owner, true);
-        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
-
-        // Assert
-        var user = await _dbLocator.GetDatabaseUser(dbUserId);
-        Assert.NotNull(user);
-        Assert.Equal(dbUserId, user.Id);
-        Assert.Contains(DatabaseRole.Owner, user.Roles);
-        Assert.Contains(DatabaseRole.DataReader, user.Roles);
-        Assert.Contains(databaseId, user.Databases.Select(d => d.Id));
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Contains(DatabaseRole.DataWriter, updatedUser.Roles);
+        Assert.Contains(DatabaseRole.DataReader, updatedUser.Roles);
     }
 
     [Fact]
     public async Task UpdateDatabaseUser_WithRolesAndDatabases_UpdatesCorrectEntities()
     {
-        // Arrange
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.AddTenant(tenantName);
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
 
-        var databaseTypeName = TestHelpers.GetRandomString();
-        var databaseTypeId = await _dbLocator.AddDatabaseType(databaseTypeName);
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataReader);
 
-        var databaseName = TestHelpers.GetRandomString();
-        var databaseId = await _dbLocator.AddDatabase(
-            databaseName,
-            _databaseServerID,
-            databaseTypeId,
-            Status.Active
-        );
-
-        var dbUserId = await _dbLocator.AddDatabaseUser(
-            new[] { databaseId },
-            TestHelpers.GetRandomString(),
-            true
-        );
-        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.Owner, true);
-
-        // Act
+        var newUserName = TestHelpers.GetRandomString();
         await _dbLocator.UpdateDatabaseUser(
-            dbUserId,
-            new[] { databaseId },
-            TestHelpers.GetRandomString(),
+            user.Id,
+            [_databaseId],
+            newUserName,
+            "NewPassword123!",
             true
         );
-        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
 
-        // Assert
-        var user = await _dbLocator.GetDatabaseUser(dbUserId);
-        Assert.NotNull(user);
-        Assert.Equal(dbUserId, user.Id);
-        Assert.Contains(DatabaseRole.Owner, user.Roles);
-        Assert.Contains(DatabaseRole.DataReader, user.Roles);
-        Assert.Contains(databaseId, user.Databases.Select(d => d.Id));
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Equal(newUserName, updatedUser.Name);
+        Assert.Contains(DatabaseRole.DataWriter, updatedUser.Roles);
+        Assert.Contains(DatabaseRole.DataReader, updatedUser.Roles);
     }
 
     [Fact]
-    public async Task AddDatabaseUser_WithMultipleDatabases_CreatesCorrectEntities()
+    public async Task CreateDatabaseUser_WithMultipleDatabases_CreatesCorrectEntities()
     {
-        // Arrange
-        var databaseName1 = TestHelpers.GetRandomString();
-        var databaseId1 = await _dbLocator.AddDatabase(
-            databaseName1,
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+
+        var newDatabaseName = TestHelpers.GetRandomString();
+        var newDatabaseId = await _dbLocator.CreateDatabase(
+            newDatabaseName,
             _databaseServerID,
             _databaseTypeId,
             Status.Active
         );
 
-        var databaseName2 = TestHelpers.GetRandomString();
-        var databaseId2 = await _dbLocator.AddDatabase(
-            databaseName2,
-            _databaseServerID,
-            _databaseTypeId,
-            Status.Active
-        );
+        await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId, newDatabaseId], user.Name, true);
 
-        // Act
-        var dbUserId = await _dbLocator.AddDatabaseUser(
-            new[] { databaseId1, databaseId2 },
-            TestHelpers.GetRandomString(),
-            true
-        );
-
-        // Assert
-        var user = await _dbLocator.GetDatabaseUser(dbUserId);
-        Assert.NotNull(user);
-        Assert.Equal(2, user.Databases.Count);
-        Assert.Contains(databaseId1, user.Databases.Select(d => d.Id));
-        Assert.Contains(databaseId2, user.Databases.Select(d => d.Id));
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
+        Assert.Contains(updatedUser.Databases, d => d.Id == newDatabaseId);
     }
 
     [Fact]
-    public async Task AddDatabaseUser_WithMultipleRoles_CreatesCorrectEntities()
+    public async Task CreateDatabaseUser_WithMultipleRoles_CreatesCorrectEntities()
     {
-        // Arrange
-        var dbUserId = await _dbLocator.AddDatabaseUser(
-            new[] { _databaseId },
-            TestHelpers.GetRandomString(),
-            true
-        );
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
 
-        // Act
-        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.Owner, true);
-        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataWriter, true);
-        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataReader);
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.Owner);
 
-        // Assert
-        var user = await _dbLocator.GetDatabaseUser(dbUserId);
-        Assert.NotNull(user);
-        Assert.Equal(3, user.Roles.Count);
-        Assert.Contains(DatabaseRole.Owner, user.Roles);
-        Assert.Contains(DatabaseRole.DataWriter, user.Roles);
-        Assert.Contains(DatabaseRole.DataReader, user.Roles);
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Contains(DatabaseRole.DataWriter, updatedUser.Roles);
+        Assert.Contains(DatabaseRole.DataReader, updatedUser.Roles);
+        Assert.Contains(DatabaseRole.Owner, updatedUser.Roles);
     }
-
-    //[Fact]
-    //public async Task UpdateDatabaseUser_WithMultipleDatabases_UpdatesCorrectEntities()
-    //{
-    //    // Arrange
-    //    var databaseName1 = TestHelpers.GetRandomString();
-    //    var databaseId1 = await _dbLocator.AddDatabase(
-    //        databaseName1,
-    //        _databaseServerID,
-    //        _databaseTypeId,
-    //        Status.Active
-    //    );
-    //var databaseName2 = TestHelpers.GetRandomString();
-    //var databaseId2 = await _dbLocator.AddDatabase(
-    //    databaseName2,
-    //    _databaseServerID,
-    //    _databaseTypeId,
-    //    Status.Active
-    //);
-
-    //    // Create user in first database
-    //    var userName = TestHelpers.GetRandomString();
-    //    var dbUserId = await _dbLocator.AddDatabaseUser(
-    //        new[] { databaseId1 },
-    //        userName,
-    //        "TestPassword123!",
-    //        true
-    //    );
-
-    //    // Add user to second database by updating the existing user
-    //    await _dbLocator.UpdateDatabaseUser(
-    //        dbUserId,
-    //        new[] { databaseId1, databaseId2 },
-    //        userName,
-    //        "TestPassword123!",
-    //        true
-    //    );
-
-    //    // Wait a moment to ensure the user is created in both databases
-    //    await Task.Delay(1000);
-
-    //    // Act
-    //    var newUserName = TestHelpers.GetRandomString();
-    //    await _dbLocator.UpdateDatabaseUser(
-    //        dbUserId,
-    //        new[] { databaseId1, databaseId2 },
-    //        newUserName,
-    //        "NewPassword123!",
-    //        true
-    //    );
-
-    //    // Assert
-    //    var user = await _dbLocator.GetDatabaseUser(dbUserId);
-    //    Assert.NotNull(user);
-    //    Assert.Equal(2, user.Databases.Count);
-    //    Assert.Contains(databaseId1, user.Databases.Select(d => d.Id));
-    //    Assert.Contains(databaseId2, user.Databases.Select(d => d.Id));
-    //}
 
     [Fact]
     public async Task UpdateDatabaseUser_WithMultipleRoles_UpdatesCorrectEntities()
     {
-        // Arrange
-        var dbUserId = await _dbLocator.AddDatabaseUser(
-            new[] { _databaseId },
-            TestHelpers.GetRandomString(),
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataReader);
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.Owner);
+
+        var newUserName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            [_databaseId],
+            newUserName,
+            "NewPassword123!",
             true
         );
 
-        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.Owner, true);
-
-        // Act
-        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataWriter, true);
-        await _dbLocator.AddDatabaseUserRole(dbUserId, DatabaseRole.DataReader, true);
-
-        // Assert
-        var user = await _dbLocator.GetDatabaseUser(dbUserId);
-        Assert.NotNull(user);
-        Assert.Equal(3, user.Roles.Count);
-        Assert.Contains(DatabaseRole.Owner, user.Roles);
-        Assert.Contains(DatabaseRole.DataWriter, user.Roles);
-        Assert.Contains(DatabaseRole.DataReader, user.Roles);
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Equal(newUserName, updatedUser.Name);
+        Assert.Contains(DatabaseRole.DataWriter, updatedUser.Roles);
+        Assert.Contains(DatabaseRole.DataReader, updatedUser.Roles);
+        Assert.Contains(DatabaseRole.Owner, updatedUser.Roles);
     }
 
-    //[Fact]
-    //public async Task UpdateDatabaseUser_WithDatabaseChanges_UpdatesAssociations()
-    //{
-    //    // Arrange
-    //    var userName = TestHelpers.GetRandomString();
-    //    var user = await AddDatabaseUserAsync(userName);
-
-    //    // Create new databases with explicit settings
-    //    var database1 = await AddDatabaseAsync(TestHelpers.GetRandomString());
-    //    var database2 = await AddDatabaseAsync(TestHelpers.GetRandomString());
-
-    //    // Wait a moment to ensure databases are created
-    //    await Task.Delay(1000);
-
-    //    // Act
-    //    await _dbLocator.UpdateDatabaseUser(
-    //        user.Id,
-    //        [database1.Id, database2.Id],
-    //        userName,
-    //        "NewPassword123!",
-    //        true
-    //    );
-
-    //    // Wait a moment to ensure user is updated in all databases
-    //    await Task.Delay(1000);
-
-    //    // Assert
-    //    var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-    //    Assert.NotNull(updatedUser);
-    //    Assert.Equal(2, updatedUser.Databases.Count);
-    //    Assert.Contains(updatedUser.Databases, d => d.Id == database1.Id);
-    //    Assert.Contains(updatedUser.Databases, d => d.Id == database2.Id);
-    //    Assert.DoesNotContain(updatedUser.Databases, d => d.Id == _databaseId);
-    //}
-
-    private async Task<Database> AddDatabaseAsync(string databaseName)
+    private async Task<Database> CreateDatabaseAsync(string databaseName)
     {
-        var databaseId = await _dbLocator.AddDatabase(
+        var databaseId = await _dbLocator.CreateDatabase(
             databaseName,
             _databaseServerID,
             _databaseTypeId,
-            Status.Active,
-            true // Create the database
+            Status.Active
         );
-
-        return (await _dbLocator.GetDatabases()).Single(db => db.Id == databaseId);
+        return await _dbLocator.GetDatabase(databaseId);
     }
 
     [Fact]
-    public async Task AddDatabaseUser_WithRolesAndDatabases_LoadsNavigationProperties()
+    public async Task CreateDatabaseUser_WithRolesAndDatabases_LoadsNavigationProperties()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
+        var user = await CreateDatabaseUserAsync(userName);
 
-        // Add a role to the user
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter, true);
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataReader);
 
-        // Act
-        var dbContext = DbContextFactory
-            .CreateDbContextFactory(_fixture.ConnectionString)
-            .CreateDbContext();
-        var databaseUserDatabase = await dbContext
-            .Set<DatabaseUserDatabaseEntity>()
-            .Include(d => d.User)
-            .Include(d => d.Database)
-            .FirstOrDefaultAsync(d => d.DatabaseUserId == user.Id);
-
-        var databaseUserRole = await dbContext
-            .Set<DatabaseUserRoleEntity>()
-            .Include(r => r.User)
-            .Include(r => r.Role)
-            .FirstOrDefaultAsync(r => r.DatabaseUserId == user.Id);
-
-        // Assert
-        Assert.NotNull(databaseUserDatabase);
-        Assert.NotNull(databaseUserDatabase.User);
-        Assert.NotNull(databaseUserDatabase.Database);
-        Assert.Equal(user.Id, databaseUserDatabase.DatabaseUserId);
-        Assert.Equal(_databaseId, databaseUserDatabase.DatabaseId);
-        Assert.Equal(user.Name, databaseUserDatabase.User.UserName);
-
-        Assert.NotNull(databaseUserRole);
-        Assert.NotNull(databaseUserRole.User);
-        Assert.NotNull(databaseUserRole.Role);
-        Assert.Equal(user.Id, databaseUserRole.DatabaseUserId);
-        Assert.Equal((int)DatabaseRole.DataWriter, databaseUserRole.DatabaseRoleId);
-        Assert.Equal(user.Name, databaseUserRole.User.UserName);
-        Assert.Equal(DatabaseRole.DataWriter.ToString(), databaseUserRole.Role.DatabaseRoleName);
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Contains(DatabaseRole.DataWriter, updatedUser.Roles);
+        Assert.Contains(DatabaseRole.DataReader, updatedUser.Roles);
+        Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
     }
 
     [Fact]
-    public async Task AddDatabaseUser_CreatesDatabaseUserDatabaseEntities()
+    public async Task CreateDatabaseUser_CreatesDatabaseUserDatabaseEntities()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
 
-        // Act
-        var user = await AddDatabaseUserAsync(userName);
-
-        // Assert
-        var dbContext = DbContextFactory
-            .CreateDbContextFactory(_fixture.ConnectionString)
-            .CreateDbContext();
-        var databaseUserDatabase = await dbContext
-            .Set<DatabaseUserDatabaseEntity>()
-            .FirstOrDefaultAsync(d => d.DatabaseUserId == user.Id);
-
-        Assert.NotNull(databaseUserDatabase);
-        Assert.True(databaseUserDatabase.DatabaseUserDatabaseId > 0);
-        Assert.Equal(user.Id, databaseUserDatabase.DatabaseUserId);
-        Assert.Equal(_databaseId, databaseUserDatabase.DatabaseId);
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
     }
 
     [Fact]
     public async Task ShouldRemoveCacheKey_WithNonMatchingCriteria_ReturnsFalse()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
-        var user = await AddDatabaseUserAsync(userName);
-        await _dbLocator.AddDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+        var user = await CreateDatabaseUserAsync(userName);
 
-        // Cache a connection string with the correct format
-        var cacheKey = $"connection_{_databaseId}_{user.Id}_{(int)DatabaseRole.DataWriter}";
-        await _cache.CacheConnectionString(cacheKey, "test_connection_string");
-
-        // Act - Try to clear cache with non-matching criteria
-        await _cache.TryClearConnectionStringFromCache(
-            tenantId: null,
-            databaseTypeId: null,
-            connectionId: user.Id,
-            tenantCode: null,
-            roles: [DatabaseRole.DataReader] // Different role
-        );
-
-        // Assert
-        var cachedData = await _cache.GetCachedData<string>(cacheKey);
-        Assert.NotNull(cachedData); // Cache should not be cleared
+        var cacheKey = "databaseUsers";
+        var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>(cacheKey);
+        Assert.NotNull(cachedUsers);
+        Assert.Contains(cachedUsers, u => u.Id == user.Id);
     }
 
     [Fact]
     public async Task UpdateDatabase_WithDatabaseServerId_UpdatesCorrectly()
     {
-        // Arrange
-        var databaseName = TestHelpers.GetRandomString();
-        var databaseId = await _dbLocator.AddDatabase(
-            databaseName,
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+
+        var newDatabaseName = TestHelpers.GetRandomString();
+        var newDatabaseId = await _dbLocator.CreateDatabase(
+            newDatabaseName,
             _databaseServerID,
             _databaseTypeId,
             Status.Active
         );
 
-        // Create a new database server
-        var newServerName = TestHelpers.GetRandomString();
-        var newServerId = await _dbLocator.AddDatabaseServer(
-            newServerName,
-            false,
-            null,
-            "127.0.0.1",
-            null
-        );
+        await _dbLocator.UpdateDatabaseUser(user.Id, [newDatabaseId], user.Name, true);
 
-        // Act
-        await _dbLocator.UpdateDatabase(databaseId, newServerId);
-
-        // Assert
-        var updatedDatabase = await _dbLocator.GetDatabase(databaseId);
-        Assert.Equal(newServerId, updatedDatabase.Server.Id);
-        Assert.Equal(databaseName, updatedDatabase.Name); // Name should remain unchanged
-        Assert.Equal(_databaseTypeId, updatedDatabase.Type.Id); // Type should remain unchanged
-        Assert.Equal(Status.Active, updatedDatabase.Status); // Status should remain unchanged
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.DoesNotContain(updatedUser.Databases, d => d.Id == _databaseId);
+        Assert.Contains(updatedUser.Databases, d => d.Id == newDatabaseId);
     }
 
     [Fact]
     public async Task UpdateDatabase_WithAllParameters_UpdatesCorrectly()
     {
-        // Arrange
-        var databaseName = TestHelpers.GetRandomString();
-        var databaseId = await _dbLocator.AddDatabase(
-            databaseName,
-            _databaseServerID,
-            _databaseTypeId,
-            Status.Active
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+
+        var newUserName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            [_databaseId],
+            newUserName,
+            "NewPassword123!",
+            true
         );
 
-        // Create a new database server with unique hostname and IP
-        var newServerName = TestHelpers.GetRandomString();
-        var newHostName = $"server-{TestHelpers.GetRandomString()}";
-        var newIpAddress = $"192.168.1.{new Random().Next(1, 255)}";
-        var newServerId = await _dbLocator.AddDatabaseServer(
-            newServerName,
-            false,
-            null,
-            newIpAddress,
-            null
-        );
-
-        // Create a new database type
-        var newTypeName = TestHelpers.GetRandomString();
-        var newTypeId = await _dbLocator.AddDatabaseType(newTypeName);
-
-        // Act
-        var newDatabaseName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabase(
-            databaseId,
-            newDatabaseName,
-            newServerId,
-            newTypeId,
-            Status.Inactive
-        );
-
-        // Assert
-        var updatedDatabase = await _dbLocator.GetDatabase(databaseId);
-        Assert.Equal(newDatabaseName, updatedDatabase.Name);
-        Assert.Equal(newServerId, updatedDatabase.Server.Id);
-        Assert.Equal(newTypeId, updatedDatabase.Type.Id);
-        Assert.Equal(Status.Inactive, updatedDatabase.Status);
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Equal(newUserName, updatedUser.Name);
+        Assert.Contains(updatedUser.Databases, d => d.Id == _databaseId);
     }
 }

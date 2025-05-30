@@ -17,7 +17,7 @@ internal class DatabaseUserRoleService(
     private readonly DeleteDatabaseUserRoleHandler _deleteDatabaseUserRole =
         new(dbContextFactory, cache);
 
-    public async Task AddDatabaseUserRole(
+    public async Task CreateDatabaseUserRole(
         int databaseUserId,
         DatabaseRole userRole,
         bool updateUser
@@ -28,7 +28,7 @@ internal class DatabaseUserRoleService(
         );
     }
 
-    public async Task AddDatabaseUserRole(int databaseUserId, DatabaseRole userRole)
+    public async Task CreateDatabaseUserRole(int databaseUserId, DatabaseRole userRole)
     {
         await _createDatabaseUserRole.Handle(
             new CreateDatabaseUserRoleCommand(databaseUserId, userRole, true)

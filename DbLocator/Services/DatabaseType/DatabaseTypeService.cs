@@ -20,7 +20,7 @@ internal class DatabaseTypeService(
     private readonly GetDatabaseTypeByIdHandler _getDatabaseTypeById = new(dbContextFactory, cache);
     private readonly UpdateDatabaseTypeHandler _updateDatabaseType = new(dbContextFactory, cache);
 
-    public async Task<byte> AddDatabaseType(string databaseTypeName)
+    public async Task<byte> CreateDatabaseType(string databaseTypeName)
     {
         return await _createDatabaseType.Handle(new CreateDatabaseTypeCommand(databaseTypeName));
     }

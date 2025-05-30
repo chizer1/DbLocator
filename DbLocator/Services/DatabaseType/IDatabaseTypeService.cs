@@ -2,7 +2,7 @@ namespace DbLocator.Services.DatabaseType;
 
 internal interface IDatabaseTypeService
 {
-    Task<byte> AddDatabaseType(string databaseTypeName);
+    Task<byte> CreateDatabaseType(string databaseTypeName);
     Task DeleteDatabaseType(byte databaseTypeId);
     Task<List<Domain.DatabaseType>> GetDatabaseTypes();
     Task<Domain.DatabaseType> GetDatabaseType(byte databaseTypeId);

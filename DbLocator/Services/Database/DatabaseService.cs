@@ -23,21 +23,22 @@ internal class DatabaseService(
     private readonly GetDatabasesHandler _getDatabases = new(dbContextFactory, cache);
     private readonly UpdateDatabaseHandler _updateDatabase = new(dbContextFactory, cache);
 
-    public Task<int> AddDatabase(
+    public Task<int> CreateDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
-    ) => AddDatabase(databaseName, databaseServerId, databaseTypeId, databaseStatus, true, false);
+    ) =>
+        CreateDatabase(databaseName, databaseServerId, databaseTypeId, databaseStatus, true, false);
 
-    public Task<int> AddDatabase(
+    public Task<int> CreateDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus,
         bool affectDatabase = true
     ) =>
-        AddDatabase(
+        CreateDatabase(
             databaseName,
             databaseServerId,
             databaseTypeId,
@@ -46,13 +47,13 @@ internal class DatabaseService(
             false
         );
 
-    public Task<int> AddDatabase(
+    public Task<int> CreateDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
         bool affectDatabase = true
     ) =>
-        AddDatabase(
+        CreateDatabase(
             databaseName,
             databaseServerId,
             databaseTypeId,
@@ -61,7 +62,7 @@ internal class DatabaseService(
             false
         );
 
-    public async Task<int> AddDatabase(
+    public async Task<int> CreateDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,

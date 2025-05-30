@@ -2,11 +2,11 @@ namespace DbLocator.Services.DatabaseServer;
 
 internal interface IDatabaseServerService
 {
-    Task<int> AddDatabaseServer(
+    Task<int> CreateDatabaseServer(
         string databaseServerName,
         bool isLinkedServer,
         string databaseServerHostName = null,
-        string databaseServerIpAddress = null,
+        string databaseServerIpCreateress = null,
         string databaseServerFullyQualifiedDomainName = null
     );
     Task DeleteDatabaseServer(int databaseServerId);
@@ -17,14 +17,14 @@ internal interface IDatabaseServerService
         string databaseServerName,
         string databaseServerHostName,
         string databaseServerFullyQualifiedDomainName,
-        string databaseServerIpAddress,
+        string databaseServerIpCreateress,
         bool isLinkedServer
     );
     Task UpdateDatabaseServer(int databaseServerId, string databaseServerName);
     Task UpdateDatabaseServer(
         int databaseServerId,
         string databaseServerFullyQualifiedDomainName,
-        string databaseServerIpAddress
+        string databaseServerIpCreateress
     );
     Task UpdateDatabaseServer(int databaseServerId, bool isLinkedServer);
 }

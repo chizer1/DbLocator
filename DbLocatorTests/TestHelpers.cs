@@ -21,7 +21,7 @@ public static class TestHelpers
         var random = new Random();
         var bytes = new byte[4];
         random.NextBytes(bytes);
-        bytes[0] = (byte)(bytes[0] & 0x7F); // Ensure the first byte is less than 128 for IPv4
+        bytes[0] = (byte)(bytes[0] & 0x7F);
         return new IPAddress(bytes);
     }
 

@@ -4,26 +4,26 @@ namespace DbLocator.Services.Database;
 
 internal interface IDatabaseService
 {
-    Task<int> AddDatabase(
+    Task<int> CreateDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus
     );
-    Task<int> AddDatabase(
+    Task<int> CreateDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus,
         bool affectDatabase = true
     );
-    Task<int> AddDatabase(
+    Task<int> CreateDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
         bool affectDatabase = true
     );
-    Task<int> AddDatabase(
+    Task<int> CreateDatabase(
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,

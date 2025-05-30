@@ -5,18 +5,19 @@ using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace DbLocator.Features.DatabaseUsers.AddDatabaseUser;
+namespace DbLocator.Features.DatabaseUsers.CreateDatabaseUser;
 
-internal record AddDatabaseUserCommand(
+internal record CreateDatabaseUserCommand(
     string UserName,
     string UserPassword,
     int[] DatabaseIds,
     bool AffectDatabase = true
 );
 
-internal sealed class AddDatabaseUserCommandValidator : AbstractValidator<AddDatabaseUserCommand>
+internal sealed class CreateDatabaseUserCommandValidator
+    : AbstractValidator<CreateDatabaseUserCommand>
 {
-    internal AddDatabaseUserCommandValidator()
+    internal CreateDatabaseUserCommandValidator()
     {
         RuleFor(x => x.UserName).NotEmpty().WithMessage("User name is required.");
 
@@ -30,7 +31,7 @@ internal sealed class AddDatabaseUserCommandValidator : AbstractValidator<AddDat
     }
 }
 
-internal class AddDatabaseUserHandler(
+internal class CreateDatabaseUserHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     Encryption encryption,
     DbLocatorCache? cache
@@ -41,11 +42,11 @@ internal class AddDatabaseUserHandler(
     private readonly DbLocatorCache? _cache = cache;
 
     public async Task<int> Handle(
-        AddDatabaseUserCommand request,
+        CreateDatabaseUserCommand request,
         CancellationToken cancellationToken = default
     )
     {
-        await new AddDatabaseUserCommandValidator().ValidateAndThrowAsync(
+        await new CreateDatabaseUserCommandValidator().ValidateAndThrowAsync(
             request,
             cancellationToken
         );
