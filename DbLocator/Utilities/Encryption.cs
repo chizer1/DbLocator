@@ -5,8 +5,15 @@ namespace DbLocator.Utilities;
 
 internal class Encryption(string encryptionKey)
 {
+    /// <summary>
+    /// Encrypts the specified plain text using AES encryption with the provided encryption key.
+    /// </summary>
+    /// <param name="plainText">The plain text to encrypt.</param>
+    /// <returns>The encrypted text as a Base64-encoded string, or the original plain text if the encryption key is null or empty.</returns>
     public string Encrypt(string plainText)
     {
+        if (plainText == null)
+            throw new ArgumentNullException(nameof(plainText), "Plain text is required");
         if (string.IsNullOrEmpty(encryptionKey))
             return plainText;
 
@@ -23,6 +30,11 @@ internal class Encryption(string encryptionKey)
         return Convert.ToBase64String(encryptedBytes);
     }
 
+    /// <summary>
+    /// Decrypts the specified encrypted text using AES decryption with the provided encryption key.
+    /// </summary>
+    /// <param name="encryptedText">The encrypted text as a Base64-encoded string.</param>
+    /// <returns>The decrypted plain text, or the original encrypted text if the encryption key is null or empty.</returns>
     public string Decrypt(string encryptedText)
     {
         if (string.IsNullOrEmpty(encryptionKey))
@@ -36,7 +48,15 @@ internal class Encryption(string encryptionKey)
         aes.IV = ivBytes;
 
         using var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-        byte[] encryptedBytes = Convert.FromBase64String(encryptedText);
+        byte[] encryptedBytes;
+        try
+        {
+            encryptedBytes = Convert.FromBase64String(encryptedText);
+        }
+        catch (FormatException)
+        {
+            throw new FormatException("Invalid Base64 string");
+        }
         byte[] decryptedBytes = decryptor.TransformFinalBlock(
             encryptedBytes,
             0,

@@ -57,12 +57,12 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
 
         var databaseServerName = TestHelpers.GetRandomString();
         var databaseServerHostName = "localhost";
-        LocalhostServerId = await DbLocator.AddDatabaseServer(
+        LocalhostServerId = await DbLocator.CreateDatabaseServer(
             databaseServerName,
+            false,
+            null,
             databaseServerHostName,
-            null,
-            null,
-            false
+            null
         );
     }
 

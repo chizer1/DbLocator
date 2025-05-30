@@ -21,6 +21,11 @@ internal static partial class PasswordGenerator
     [GeneratedRegex(@"[\W_]")]
     private static partial Regex SpecialCharRegex();
 
+    /// <summary>
+    /// Generates a random password of the specified length that meets complexity requirements.
+    /// </summary>
+    /// <param name="length">The desired length of the password (minimum 8, maximum 50).</param>
+    /// <returns>A randomly generated password string that includes uppercase, lowercase, digits, and special characters.</returns>
     internal static string GenerateRandomPassword(int length)
     {
         length = Math.Clamp(length, 8, 50);
@@ -42,11 +47,9 @@ internal static partial class PasswordGenerator
             rng.GetBytes(randomBytes);
         }
 
-        StringBuilder result = new StringBuilder(length);
+        StringBuilder result = new(length);
         foreach (byte b in randomBytes)
-        {
             result.Append(ValidChars[b % ValidChars.Length]);
-        }
 
         return result.ToString();
     }
