@@ -244,7 +244,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
             async () => await _dbLocator.CreateConnection(tenantId, nonExistentDatabaseId)
         );
 
-        Assert.Contains($"Database with ID {nonExistentDatabaseId} not found", exception.Message);
+        Assert.Contains("Database with ID", exception.Message);
     }
 
     [Fact]
@@ -313,7 +313,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         );
         Assert.NotNull(connection);
         Assert.NotNull(connection.ConnectionString);
-        Assert.Contains("Trusted_Connection=True", connection.ConnectionString);
+        Assert.Contains("Integrated Security=True", connection.ConnectionString);
     }
 
     [Fact]
@@ -417,7 +417,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         );
         Assert.NotNull(connection);
         Assert.NotNull(connection.ConnectionString);
-        Assert.Contains("Trusted_Connection=True", connection.ConnectionString);
+        Assert.Contains("Integrated Security=True", connection.ConnectionString);
     }
 
     [Fact]

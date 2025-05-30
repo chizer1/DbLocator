@@ -203,7 +203,7 @@ public class DatabaseServerTests : IAsyncLifetime
     [Fact]
     public async Task GetNonExistentDatabaseServerThrowsException()
     {
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<KeyNotFoundException>(
             async () => await _dbLocator.GetDatabaseServer(-1)
         );
     }
@@ -337,7 +337,7 @@ public class DatabaseServerTests : IAsyncLifetime
     public async Task CreateDatabaseServer_WithNoHostNameFqdnOrIp_ThrowsInvalidOperationException()
     {
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.CreateDatabaseServer("TestServer", false, null, "", null)
         );
 
@@ -642,7 +642,7 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.CreateDatabaseServer(serverName, false, null, null, null)
         );
 
@@ -667,7 +667,7 @@ public class DatabaseServerTests : IAsyncLifetime
         );
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () =>
                 await _dbLocator.UpdateDatabaseServer(serverId, null, null, null, null, false)
         );
