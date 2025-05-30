@@ -71,27 +71,18 @@ public partial class Locator
         );
         _databaseUserRoleService = new DatabaseUserRoleService(dbContextFactory, dbLocatorCache);
         _tenantService = new TenantService(dbContextFactory, dbLocatorCache);
+
+        SqlConnection = new SqlConnection(dbLocatorConnectionString);
     }
 
     /// <summary>
     /// Applies database migrations to ensure the database schema is up-to-date.
     /// </summary>
-    /// <param name="dbLocatorConnectionString">The connection string for the DbLocator database.</param>
-    private static void ApplyMigrations(string connectionString, string provider)
+    /// <param name="connectionString">The connection string for the DbLocator database.</param>
+    private static void ApplyMigrations(string connectionString)
     {
         var optionsBuilder = new DbContextOptionsBuilder<DbLocatorContext>();
-        
-        // Configure the context based on the provider
-        switch (provider.ToLowerInvariant())
-        {
-            case "postgresql":
-                optionsBuilder.UseNpgsql(connectionString);
-                break;
-            case "sqlserver":
-            default:
-                optionsBuilder.UseSqlServer(connectionString);
-                break;
-        }
+        optionsBuilder.UseSqlServer(connectionString);
 
         using var dbLocator = new DbLocatorContext(optionsBuilder.Options);
         dbLocator.Database.Migrate();
