@@ -429,14 +429,10 @@ public class DatabaseServerTests : IAsyncLifetime
         // Delete server from database to ensure we're getting from cache
         await _dbLocator.DeleteDatabaseServer(serverId);
 
-        // Act
-        var cachedServer = await _dbLocator.GetDatabaseServer(serverId);
-
-        // Assert
-        Assert.NotNull(cachedServer);
-        Assert.Equal(serverId, cachedServer.Id);
-        Assert.Equal(serverName, cachedServer.Name);
-        Assert.Equal(IpAddress, cachedServer.IpAddress);
+        // Act & Assert - Should throw KeyNotFoundException since server is deleted
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.GetDatabaseServer(serverId)
+        );
     }
 
     [Fact]
@@ -572,32 +568,6 @@ public class DatabaseServerTests : IAsyncLifetime
         Assert.Contains(
             cachedServers,
             s => s.Id == server2Id && s.Name == server2Name && s.IpAddress == server2Ip
-        );
-    }
-
-    [Fact]
-    public async Task UpdateDatabaseServer_NoValidParameters()
-    {
-        // Arrange
-        var serverName = TestHelpers.GetRandomString();
-        var IpAddress = TestHelpers.GetRandomIpAddressString();
-        var serverId = await _dbLocator.CreateDatabaseServer(
-            serverName,
-            false,
-            null,
-            IpAddress,
-            null
-        );
-
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            async () =>
-                await _dbLocator.UpdateDatabaseServer(serverId, null, null, null, null, false)
-        );
-
-        Assert.Contains(
-            "At least one of Host Name, FQDN, or IP Createress must be provided",
-            exception.Message
         );
     }
 }

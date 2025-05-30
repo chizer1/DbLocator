@@ -91,7 +91,15 @@ internal class UpdateDatabaseUserHandler(
 
         if (request.DatabaseIds != null)
         {
-            user.Databases.Clear();
+            // Remove existing database relationships
+            var existingDatabases = await dbContext
+                .Set<DatabaseUserDatabaseEntity>()
+                .Where(d => d.DatabaseUserId == user.DatabaseUserId)
+                .ToListAsync(cancellationToken);
+            dbContext.Set<DatabaseUserDatabaseEntity>().RemoveRange(existingDatabases);
+            await dbContext.SaveChangesAsync(cancellationToken);
+
+            // Add new database relationships
             foreach (var databaseId in request.DatabaseIds)
             {
                 var database =
@@ -99,12 +107,14 @@ internal class UpdateDatabaseUserHandler(
                         .Set<DatabaseEntity>()
                         .FirstOrDefaultAsync(d => d.DatabaseId == databaseId, cancellationToken)
                     ?? throw new KeyNotFoundException($"Database with ID {databaseId} not found.");
-                user.Databases.Add(
+                
+                await dbContext.Set<DatabaseUserDatabaseEntity>().AddAsync(
                     new DatabaseUserDatabaseEntity
                     {
                         DatabaseId = database.DatabaseId,
                         DatabaseUserId = user.DatabaseUserId
-                    }
+                    },
+                    cancellationToken
                 );
             }
         }
