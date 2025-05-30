@@ -32,22 +32,27 @@ internal class DeleteConnectionHandler(
         CancellationToken cancellationToken = default
     )
     {
+        await using var dbContext = _dbContextFactory.CreateDbContext();
+
+        // Check if connection exists first
+        var connectionExists = await dbContext
+            .Set<ConnectionEntity>()
+            .AnyAsync(c => c.ConnectionId == request.ConnectionId, cancellationToken);
+
+        if (!connectionExists)
+            throw new KeyNotFoundException($"Connection with ID {request.ConnectionId} not found.");
+
+        // Now validate the request
         await new DeleteConnectionCommandValidator().ValidateAndThrowAsync(
             request,
             cancellationToken
         );
 
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        var connection = await dbContext
+            .Set<ConnectionEntity>()
+            .FirstOrDefaultAsync(c => c.ConnectionId == request.ConnectionId, cancellationToken);
 
-        var connection =
-            await dbContext
-                .Set<ConnectionEntity>()
-                .FirstOrDefaultAsync(c => c.ConnectionId == request.ConnectionId, cancellationToken)
-            ?? throw new KeyNotFoundException(
-                $"Connection with ID {request.ConnectionId} not found."
-            );
-
-        dbContext.Set<ConnectionEntity>().Remove(connection);
+        dbContext.Set<ConnectionEntity>().Remove(connection!);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         if (_cache != null)

@@ -86,7 +86,7 @@ internal class CreateConnectionHandler(
             );
 
         if (connectionExists)
-            throw new InvalidOperationException(
+            throw new ArgumentException(
                 $"Connection already exists between tenant with ID {request.TenantId} and database with ID {request.DatabaseId}"
             );
     }

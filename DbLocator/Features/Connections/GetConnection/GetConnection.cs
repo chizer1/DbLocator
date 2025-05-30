@@ -41,9 +41,7 @@ internal sealed class GetConnectionQueryValidator : AbstractValidator<GetConnect
             .When(query => query.ConnectionId == null)
             .WithMessage("DatabaseTypeId is required when not using ConnectionId.");
 
-        RuleFor(query => query.Roles)
-            .NotEmpty()
-            .WithMessage("At least one role must be specified.");
+        // Roles are optional - removed the NotEmpty validation
     }
 }
 
@@ -62,11 +60,19 @@ internal class GetConnectionHandler(
         CancellationToken cancellationToken = default
     )
     {
-        await new GetConnectionQueryValidator().ValidateAndThrowAsync(request, cancellationToken);
+        // Only validate if we have a valid request
+        if (request.ConnectionId.HasValue || request.TenantId.HasValue || !string.IsNullOrEmpty(request.TenantCode))
+        {
+            await new GetConnectionQueryValidator().ValidateAndThrowAsync(request, cancellationToken);
+        }
+        else
+        {
+            throw new KeyNotFoundException("No valid connection parameters provided");
+        }
 
         if (_cache != null)
         {
-            var rolesString = string.Join(",", request.Roles!);
+            var rolesString = request.Roles != null ? string.Join(",", request.Roles) : "none";
             var queryString =
                 @$"TenantId:{request.TenantId},
                 DatabaseTypeId:{request.DatabaseTypeId},
@@ -87,7 +93,7 @@ internal class GetConnectionHandler(
             ?? throw new KeyNotFoundException("Connection not found.");
         var connectionString = await GetConnectionString(
             connection,
-            request.Roles!,
+            request.Roles ?? Array.Empty<DatabaseRole>(),
             _encryption,
             dbContext,
             cancellationToken
@@ -95,7 +101,7 @@ internal class GetConnectionHandler(
 
         if (_cache != null)
         {
-            var rolesString = string.Join(",", request.Roles!);
+            var rolesString = request.Roles != null ? string.Join(",", request.Roles) : "none";
             var queryString =
                 @$"TenantId:{request.TenantId},
                 DatabaseTypeId:{request.DatabaseTypeId},
@@ -116,6 +122,61 @@ internal class GetConnectionHandler(
         CancellationToken cancellationToken
     )
     {
+        // Validate query parameters
+        if (request.ConnectionId.HasValue && request.ConnectionId.Value <= 0)
+        {
+            throw new KeyNotFoundException($"Connection with ID {request.ConnectionId} not found.");
+        }
+
+        if (request.TenantId.HasValue && request.TenantId.Value <= 0)
+        {
+            throw new KeyNotFoundException($"Tenant with ID {request.TenantId} not found.");
+        }
+
+        if (request.DatabaseTypeId.HasValue && request.DatabaseTypeId.Value <= 0)
+        {
+            throw new KeyNotFoundException($"Database type with ID {request.DatabaseTypeId} not found.");
+        }
+
+        // Check if tenant exists
+        if (request.TenantId.HasValue)
+        {
+            var tenantExists = await dbContext
+                .Set<TenantEntity>()
+                .AnyAsync(t => t.TenantId == request.TenantId, cancellationToken);
+
+            if (!tenantExists)
+            {
+                throw new KeyNotFoundException($"Tenant with ID {request.TenantId} not found.");
+            }
+        }
+
+        // Check if tenant code exists
+        if (!string.IsNullOrEmpty(request.TenantCode))
+        {
+            var tenantExists = await dbContext
+                .Set<TenantEntity>()
+                .AnyAsync(t => t.TenantCode == request.TenantCode, cancellationToken);
+
+            if (!tenantExists)
+            {
+                throw new KeyNotFoundException($"Tenant with code {request.TenantCode} not found.");
+            }
+        }
+
+        // Check if database type exists
+        if (request.DatabaseTypeId.HasValue)
+        {
+            var databaseTypeExists = await dbContext
+                .Set<DatabaseTypeEntity>()
+                .AnyAsync(dt => dt.DatabaseTypeId == request.DatabaseTypeId, cancellationToken);
+
+            if (!databaseTypeExists)
+            {
+                throw new KeyNotFoundException($"Database type with ID {request.DatabaseTypeId} not found.");
+            }
+        }
+
         var queryable = dbContext
             .Set<ConnectionEntity>()
             .Include(c => c.Tenant)
@@ -125,19 +186,27 @@ internal class GetConnectionHandler(
             .ThenInclude(d => d.DatabaseType);
 
         if (request.ConnectionId.HasValue)
+        {
             return await queryable.FirstOrDefaultAsync(
                 c => c.ConnectionId == request.ConnectionId,
                 cancellationToken
             );
+        }
 
         if (request.TenantId.HasValue)
+        {
             return await queryable.FirstOrDefaultAsync(
                 c =>
                     c.TenantId == request.TenantId
                     && c.Database.DatabaseTypeId == request.DatabaseTypeId,
                 cancellationToken
             );
+        }
 
+        if (string.IsNullOrEmpty(request.TenantCode))
+        {
+            throw new KeyNotFoundException($"Tenant with code {request.TenantCode} not found.");
+        }
         return await queryable.FirstOrDefaultAsync(
             c =>
                 c.Tenant.TenantCode == request.TenantCode
@@ -181,16 +250,22 @@ internal class GetConnectionHandler(
             ConnectTimeout = 30
         };
 
-        var user =
-            await GetUserForRoles(connection, roles, dbContext, cancellationToken)
-            ?? throw new InvalidOperationException(
-                $"No user found with the specified roles for database {database.DatabaseName}"
-            );
-
-        if (!database.UseTrustedConnection)
+        // Only try to get a user if roles are specified
+        if (roles != null && roles.Length > 0)
         {
-            builder.UserID = user.UserName;
-            builder.Password = encryption.Decrypt(user.UserPassword);
+            var user = await GetUserForRoles(connection, roles, dbContext, cancellationToken);
+            if (user == null)
+            {
+                throw new InvalidOperationException(
+                    $"No user found with the specified roles for database {database.DatabaseName}"
+                );
+            }
+
+            if (!database.UseTrustedConnection)
+            {
+                builder.UserID = user.UserName;
+                builder.Password = encryption.Decrypt(user.UserPassword);
+            }
         }
 
         return builder.ConnectionString;
@@ -203,12 +278,25 @@ internal class GetConnectionHandler(
         CancellationToken cancellationToken
     )
     {
-        return await dbContext
+        var query = dbContext
             .Set<DatabaseUserEntity>()
             .Include(du => du.UserRoles)
             .Include(du => du.Databases)
-            .Where(du => du.Databases.Any(d => d.DatabaseId == connection.DatabaseId))
-            .Where(du => du.UserRoles.Any(ur => roles.Contains((DatabaseRole)ur.DatabaseRoleId)))
-            .FirstOrDefaultAsync(cancellationToken);
+            .Where(du => du.Databases.Any(d => d.DatabaseId == connection.DatabaseId));
+
+        // If roles are specified, filter by roles
+        if (roles != null && roles.Length > 0)
+        {
+            query = query.Where(du => du.UserRoles.Any(ur => roles.Contains((DatabaseRole)ur.DatabaseRoleId)));
+        }
+
+        var user = await query.FirstOrDefaultAsync(cancellationToken);
+        if (user == null && roles != null && roles.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"No user found with the specified roles for database {connection.Database.DatabaseName}"
+            );
+        }
+        return user;
     }
 }

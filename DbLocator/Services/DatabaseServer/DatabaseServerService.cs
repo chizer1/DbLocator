@@ -3,9 +3,7 @@ using DbLocator.Features.DatabaseServers.CreateDatabaseServer;
 using DbLocator.Features.DatabaseServers.DeleteDatabaseServer;
 using DbLocator.Features.DatabaseServers.GetDatabaseServerById;
 using DbLocator.Features.DatabaseServers.GetDatabaseServers;
-using DbLocator.Features.DatabaseServers.UpdateDatabaseServerName;
-using DbLocator.Features.DatabaseServers.UpdateDatabaseServerNetwork;
-using DbLocator.Features.DatabaseServers.UpdateDatabaseServerStatus;
+using DbLocator.Features.DatabaseServers.UpdateDatabaseServer;
 using DbLocator.Utilities;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,11 +21,7 @@ internal class DatabaseServerService(
     private readonly GetDatabaseServersHandler _getDatabaseServers = new(dbContextFactory, cache);
     private readonly GetDatabaseServerByIdHandler _getDatabaseServerById =
         new(dbContextFactory, cache);
-    private readonly UpdateDatabaseServerNameHandler _updateDatabaseServerName =
-        new(dbContextFactory, cache);
-    private readonly UpdateDatabaseServerNetworkHandler _updateDatabaseServerNetwork =
-        new(dbContextFactory, cache);
-    private readonly UpdateDatabaseServerStatusHandler _updateDatabaseServerStatus =
+    private readonly UpdateDatabaseServerHandler _updateDatabaseServer =
         new(dbContextFactory, cache);
 
     public async Task<int> CreateDatabaseServer(
@@ -75,24 +69,22 @@ internal class DatabaseServerService(
         bool isLinkedServer
     )
     {
-        await _updateDatabaseServerNetwork.Handle(
-            new UpdateDatabaseServerNetworkCommand(
+        await _updateDatabaseServer.Handle(
+            new UpdateDatabaseServerCommand(
                 databaseServerId,
+                databaseServerName,
                 databaseServerHostName,
                 databaseServerFullyQualifiedDomainName,
-                databaseServerIpCreateress
+                databaseServerIpCreateress,
+                isLinkedServer
             )
-        );
-
-        await _updateDatabaseServerStatus.Handle(
-            new UpdateDatabaseServerStatusCommand(databaseServerId, isLinkedServer)
         );
     }
 
     public async Task UpdateDatabaseServer(int databaseServerId, string databaseServerName)
     {
-        await _updateDatabaseServerName.Handle(
-            new UpdateDatabaseServerNameCommand(databaseServerId, databaseServerName)
+        await _updateDatabaseServer.Handle(
+            new UpdateDatabaseServerCommand(databaseServerId, databaseServerName)
         );
     }
 
@@ -102,9 +94,10 @@ internal class DatabaseServerService(
         string databaseServerIpCreateress
     )
     {
-        await _updateDatabaseServerNetwork.Handle(
-            new UpdateDatabaseServerNetworkCommand(
+        await _updateDatabaseServer.Handle(
+            new UpdateDatabaseServerCommand(
                 databaseServerId,
+                null,
                 null,
                 databaseServerFullyQualifiedDomainName,
                 databaseServerIpCreateress
@@ -114,8 +107,8 @@ internal class DatabaseServerService(
 
     public async Task UpdateDatabaseServer(int databaseServerId, bool isLinkedServer)
     {
-        await _updateDatabaseServerStatus.Handle(
-            new UpdateDatabaseServerStatusCommand(databaseServerId, isLinkedServer)
+        await _updateDatabaseServer.Handle(
+            new UpdateDatabaseServerCommand(databaseServerId, null, null, null, null, isLinkedServer)
         );
     }
 }

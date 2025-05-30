@@ -10,26 +10,47 @@ namespace DbLocator.Features.Tenants.UpdateTenant;
 
 internal record UpdateTenantCommand(
     int TenantId,
-    string TenantName,
-    string TenantCode,
-    Status? TenantStatus
+    string? TenantName = null,
+    string? TenantCode = null,
+    Status? TenantStatus = null
 );
 
 internal sealed class UpdateTenantCommandValidator : AbstractValidator<UpdateTenantCommand>
 {
     internal UpdateTenantCommandValidator()
     {
-        RuleFor(x => x.TenantId).NotEmpty().WithMessage("Tenant Id is required.");
+        RuleFor(x => x.TenantId).GreaterThan(0).WithMessage("Tenant Id must be greater than 0.");
 
         RuleFor(x => x.TenantName)
+            .NotEmpty()
+            .When(x => x.TenantName != null)
+            .WithMessage("Tenant Name is required.")
             .MaximumLength(50)
+            .When(x => x.TenantName != null)
             .WithMessage("Tenant Name cannot be more than 50 characters.");
 
         RuleFor(x => x.TenantCode)
+            .NotEmpty()
+            .When(x => x.TenantCode != null)
+            .WithMessage("Tenant Code is required.")
             .MaximumLength(10)
+            .When(x => x.TenantCode != null)
             .WithMessage("Tenant Code cannot be more than 10 characters.");
 
-        RuleFor(x => x.TenantStatus).IsInEnum().WithMessage("Tenant Status is invalid.");
+        RuleFor(x => x.TenantStatus)
+            .IsInEnum()
+            .When(x => x.TenantStatus.HasValue)
+            .WithMessage("Tenant Status is invalid.");
+
+        RuleFor(x => x)
+            .Must(x =>
+                x.TenantName != null
+                || x.TenantCode != null
+                || x.TenantStatus.HasValue
+            )
+            .WithMessage(
+                "At least one field must be provided for update"
+            );
     }
 }
 
@@ -56,11 +77,41 @@ internal class UpdateTenantHandler(
                 .FirstOrDefaultAsync(c => c.TenantId == command.TenantId, cancellationToken)
             ?? throw new KeyNotFoundException($"Tenant '{command.TenantId}' not found.");
 
-        if (!string.IsNullOrEmpty(command.TenantName))
+        if (command.TenantName != null)
+        {
+            if (
+                await dbContext
+                    .Set<TenantEntity>()
+                    .AnyAsync(
+                        t =>
+                            t.TenantName == command.TenantName
+                            && t.TenantId != command.TenantId,
+                        cancellationToken
+                    )
+            )
+                throw new InvalidOperationException(
+                    $"Tenant with name \"{command.TenantName}\" already exists"
+                );
             tenant.TenantName = command.TenantName;
+        }
 
-        if (!string.IsNullOrEmpty(command.TenantCode))
+        if (command.TenantCode != null)
+        {
+            if (
+                await dbContext
+                    .Set<TenantEntity>()
+                    .AnyAsync(
+                        t =>
+                            t.TenantCode == command.TenantCode
+                            && t.TenantId != command.TenantId,
+                        cancellationToken
+                    )
+            )
+                throw new InvalidOperationException(
+                    $"Tenant with code \"{command.TenantCode}\" already exists"
+                );
             tenant.TenantCode = command.TenantCode;
+        }
 
         if (command.TenantStatus.HasValue)
             tenant.TenantStatusId = (byte)command.TenantStatus.Value;
