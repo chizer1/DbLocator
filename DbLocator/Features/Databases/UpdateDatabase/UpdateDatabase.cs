@@ -112,10 +112,13 @@ internal class UpdateDatabaseHandler(
         {
             var oldDbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
             var newDbName = Sql.SanitizeSqlIdentifier(request.Name);
-            var serverName = database.DatabaseServer.DatabaseServerHostName 
-                ?? database.DatabaseServer.DatabaseServerName 
-                ?? throw new InvalidOperationException("Database server must have either a host name or server name");
-                
+            var serverName =
+                database.DatabaseServer.DatabaseServerHostName
+                ?? database.DatabaseServer.DatabaseServerName
+                ?? throw new InvalidOperationException(
+                    "Database server must have either a host name or server name"
+                );
+
             await Sql.ExecuteSqlCommandAsync(
                 dbContext,
                 $"alter database [{oldDbName}] modify name = [{newDbName}]",

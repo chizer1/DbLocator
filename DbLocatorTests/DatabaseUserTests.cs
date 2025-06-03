@@ -713,12 +713,7 @@ public class DatabaseUserTests : IAsyncLifetime
 
         // Act
         var newUserName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseUser(
-            user.Id,
-            [newDatabaseId],
-            newUserName,
-            true
-        );
+        await _dbLocator.UpdateDatabaseUser(user.Id, [newDatabaseId], newUserName, true);
 
         // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
@@ -747,11 +742,7 @@ public class DatabaseUserTests : IAsyncLifetime
 
         // Act
         var newUserName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseUser(
-            user.Id,
-            [newDatabaseId],
-            newUserName
-        );
+        await _dbLocator.UpdateDatabaseUser(user.Id, [newDatabaseId], newUserName);
 
         // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
@@ -820,7 +811,13 @@ public class DatabaseUserTests : IAsyncLifetime
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
-            async () => await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], TestHelpers.GetRandomString(), "short")
+            async () =>
+                await _dbLocator.UpdateDatabaseUser(
+                    user.Id,
+                    [_databaseId],
+                    TestHelpers.GetRandomString(),
+                    "short"
+                )
         );
 
         Assert.Contains("Password must be at least 8 characters long", exception.Message);

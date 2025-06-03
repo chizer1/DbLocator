@@ -64,10 +64,16 @@ internal class UpdateDatabaseUserHandler(
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var user = await dbContext
-            .Set<DatabaseUserEntity>()
-            .FirstOrDefaultAsync(u => u.DatabaseUserId == request.DatabaseUserId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Database user with ID {request.DatabaseUserId} not found");
+        var user =
+            await dbContext
+                .Set<DatabaseUserEntity>()
+                .FirstOrDefaultAsync(
+                    u => u.DatabaseUserId == request.DatabaseUserId,
+                    cancellationToken
+                )
+            ?? throw new KeyNotFoundException(
+                $"Database user with ID {request.DatabaseUserId} not found"
+            );
 
         if (request.UserName != null)
         {
@@ -115,15 +121,17 @@ internal class UpdateDatabaseUserHandler(
                         .Set<DatabaseEntity>()
                         .FirstOrDefaultAsync(d => d.DatabaseId == databaseId, cancellationToken)
                     ?? throw new KeyNotFoundException($"Database with ID {databaseId} not found.");
-                
-                await dbContext.Set<DatabaseUserDatabaseEntity>().AddAsync(
-                    new DatabaseUserDatabaseEntity
-                    {
-                        DatabaseId = database.DatabaseId,
-                        DatabaseUserId = user.DatabaseUserId
-                    },
-                    cancellationToken
-                );
+
+                await dbContext
+                    .Set<DatabaseUserDatabaseEntity>()
+                    .AddAsync(
+                        new DatabaseUserDatabaseEntity
+                        {
+                            DatabaseId = database.DatabaseId,
+                            DatabaseUserId = user.DatabaseUserId
+                        },
+                        cancellationToken
+                    );
             }
         }
 

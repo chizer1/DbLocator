@@ -17,8 +17,21 @@ using Microsoft.Extensions.Caching.Distributed;
 namespace DbLocator;
 
 /// <summary>
-/// The Locator class provides methods to interact with the DbLocator database.
-/// Including operations for tenants, connections, databases, database servers, database users, database user roles, and database types.
+/// The Locator class serves as the main entry point for interacting with the DbLocator database management system.
+/// It provides a comprehensive set of methods and services for managing various aspects of database infrastructure:
+///
+/// <list type="bullet">
+///     <item><description>Tenant Management: Create, update, and manage multi-tenant database environments</description></item>
+///     <item><description>Connection Management: Handle database connections with support for encryption of sensitive data</description></item>
+///     <item><description>Database Operations: Manage database creation, configuration, and maintenance</description></item>
+///     <item><description>Server Management: Configure and monitor database servers</description></item>
+///     <item><description>User Management: Handle database user accounts and permissions</description></item>
+///     <item><description>Role Management: Manage database user roles and access control</description></item>
+///     <item><description>Database Type Management: Support for different database types and configurations</description></item>
+/// </list>
+///
+/// The class implements caching mechanisms for improved performance and supports encryption for sensitive data.
+/// All operations are performed through dedicated services that handle specific aspects of database management.
 /// </summary>
 public partial class Locator
 {
@@ -31,17 +44,23 @@ public partial class Locator
     private readonly ITenantService _tenantService;
 
     /// <summary>
-    /// Get a sql connection for the DbLocator database.
+    /// Gets a SQL connection instance for direct interaction with the DbLocator database.
+    /// This connection is initialized during the constructor and can be used for custom SQL operations
+    /// that are not covered by the standard service methods.
     /// </summary>
+    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when the connection fails.</exception>
     public SqlConnection SqlConnection { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Locator"/> class.
+    /// Initializes a new instance of the <see cref="Locator"/> class with the specified configuration.
+    /// This constructor sets up all necessary services and connections for database management.
     /// </summary>
-    /// <param name="dbLocatorConnectionString">The connection string for the DbLocator database.</param>
-    /// <param name="encryptionKey">The encryption key for encrypting and decrypting sensitive data (optional).</param>
-    /// <param name="distributedCache">The distributed cache for caching data (optional).</param>
-    /// <exception cref="ArgumentException">Thrown when the connection string is null or whitespace.</exception>
+    /// <param name="dbLocatorConnectionString">The connection string for the DbLocator database. Must be a valid SQL Server connection string.</param>
+    /// <param name="encryptionKey">The encryption key used for encrypting and decrypting sensitive data. If not provided, encryption features will be disabled.</param>
+    /// <param name="distributedCache">An optional distributed cache implementation for caching database operations. If provided, improves performance by reducing database load.</param>
+    /// <exception cref="ArgumentException">Thrown when the connection string is null, empty, or contains only whitespace.</exception>
+    /// <exception cref="SqlException">Thrown when there is an error establishing the database connection or when the connection string is invalid.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when there is an error applying database migrations or when the database schema is incompatible.</exception>
     public Locator(
         string dbLocatorConnectionString,
         string encryptionKey = null,
@@ -76,9 +95,14 @@ public partial class Locator
     }
 
     /// <summary>
-    /// Applies database migrations to ensure the database schema is up-to-date.
+    /// Applies database migrations to ensure the database schema is up-to-date with the latest version.
+    /// This method is called during initialization to guarantee that the database structure matches
+    /// the current application version.
     /// </summary>
-    /// <param name="connectionString">The connection string for the DbLocator database.</param>
+    /// <param name="connectionString">The connection string for the DbLocator database. Must be a valid SQL Server connection string.</param>
+    /// <exception cref="ArgumentException">Thrown when the connection string is invalid or malformed.</exception>
+    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when the database is not accessible.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when there is an error applying migrations, such as when the database is in an inconsistent state.</exception>
     private static void ApplyMigrations(string connectionString)
     {
         var optionsBuilder = new DbContextOptionsBuilder<DbLocatorContext>();
