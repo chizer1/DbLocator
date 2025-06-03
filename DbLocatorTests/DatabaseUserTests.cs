@@ -789,11 +789,11 @@ public class DatabaseUserTests : IAsyncLifetime
         var user = await CreateDatabaseUserAsync(userName);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
+        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
             async () => await _dbLocator.UpdateDatabaseUser(-1, [_databaseId], "NewName")
         );
 
-        Assert.Contains("Database user with ID -1 not found", exception.Message);
+        Assert.Contains("Database User Id must be greater than 0", exception.Message);
     }
 
     [Fact]
@@ -819,7 +819,7 @@ public class DatabaseUserTests : IAsyncLifetime
         var user = await CreateDatabaseUserAsync(userName);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
             async () => await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], TestHelpers.GetRandomString(), "short")
         );
 
