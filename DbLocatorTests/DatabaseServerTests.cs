@@ -642,7 +642,6 @@ public class DatabaseServerTests : IAsyncLifetime
         );
 
         // Act
-        var newIsLinkedServer = true;
         // Since there's no direct way to update only IsLinkedServer, we need to update name to preserve other properties
         await _dbLocator.UpdateDatabaseServer(serverId, serverName);
 
