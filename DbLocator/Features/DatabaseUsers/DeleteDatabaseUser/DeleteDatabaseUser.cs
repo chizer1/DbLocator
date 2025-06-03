@@ -75,7 +75,12 @@ internal class DeleteDatabaseUserHandler(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         if (_cache != null)
+        {
             await _cache.Remove("databaseUsers");
+            await _cache.Remove($"database-user-id-{request.DatabaseUserId}");
+            await _cache.Remove("connections");
+            await _cache.TryClearConnectionStringFromCache(request.DatabaseUserId);
+        }
     }
 
     private static async Task DropDatabaseUserAsync(

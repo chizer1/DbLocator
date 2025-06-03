@@ -26,14 +26,15 @@ internal sealed class UpdateDatabaseUserCommandValidator
 
         RuleFor(x => x.UserName)
             .NotEmpty()
-            .When(x => !string.IsNullOrEmpty(x.UserName))
+            .When(x => x.UserName != null)
             .WithMessage("User name cannot be empty.");
 
         RuleFor(x => x.UserPassword)
             .NotEmpty()
-            .When(x => !string.IsNullOrEmpty(x.UserPassword))
+            .When(x => x.UserPassword != null)
+            .WithMessage("Password cannot be empty.")
             .MinimumLength(8)
-            .When(x => !string.IsNullOrEmpty(x.UserPassword))
+            .When(x => x.UserPassword != null)
             .WithMessage("Password must be at least 8 characters long.");
     }
 }

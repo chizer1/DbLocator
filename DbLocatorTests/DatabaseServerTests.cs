@@ -136,8 +136,8 @@ public class DatabaseServerTests : IAsyncLifetime
 
         var newName = TestHelpers.GetRandomString();
         var newIpAddress = TestHelpers.GetRandomIpAddressString();
-        var newHostName = "updated-host";
-        var newFqdn = "updated-host.example.com";
+        var newHostName = $"updated-host-{TestHelpers.GetRandomString()}";
+        var newFqdn = $"{newHostName}.example.com";
 
         await _dbLocator.UpdateDatabaseServer(
             serverId,
