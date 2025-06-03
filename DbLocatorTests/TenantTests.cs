@@ -288,4 +288,34 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
         Assert.Equal(cachedTenants[0].Code, cachedData[0].Code);
         Assert.Equal(cachedTenants[0].Status, cachedData[0].Status);
     }
+
+    [Fact]
+    public async Task UpdateTenant_WithAllProperties()
+    {
+        // Arrange
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantCode = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
+
+        // Act
+        var newName = TestHelpers.GetRandomString();
+        var newCode = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateTenant(tenantId, newName, newCode, Status.Inactive);
+
+        // Assert
+        var updatedTenant = await _dbLocator.GetTenant(tenantId);
+        Assert.NotNull(updatedTenant);
+        Assert.Equal(newName, updatedTenant.Name);
+        Assert.Equal(newCode, updatedTenant.Code);
+        Assert.Equal(Status.Inactive, updatedTenant.Status);
+
+        // Verify cache is updated
+        var cachedTenants = await _cache.GetCachedData<List<Tenant>>("tenants");
+        Assert.NotNull(cachedTenants);
+        var cachedTenant = cachedTenants.FirstOrDefault(t => t.Id == tenantId);
+        Assert.NotNull(cachedTenant);
+        Assert.Equal(newName, cachedTenant.Name);
+        Assert.Equal(newCode, cachedTenant.Code);
+        Assert.Equal(Status.Inactive, cachedTenant.Status);
+    }
 }

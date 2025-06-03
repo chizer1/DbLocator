@@ -404,4 +404,36 @@ public class DatabaseTests
         var cachedData = await _cache.GetCachedData<string>(cacheKey);
         Assert.Null(cachedData);
     }
+
+    [Fact]
+    public async Task CreateDatabase_WithAffectDatabaseFalse_DoesNotCreatePhysicalDatabase()
+    {
+        // Arrange
+        var dbName = TestHelpers.GetRandomString();
+
+        // Act
+        var databaseId = await _dbLocator.CreateDatabase(
+            dbName,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active,
+            false
+        );
+
+        // Assert
+        var database = await _dbLocator.GetDatabase(databaseId);
+        Assert.NotNull(database);
+        Assert.Equal(dbName, database.Name);
+        Assert.Equal(_databaseServerID, database.Server.Id);
+        Assert.Equal(_databaseTypeId, database.Type.Id);
+        Assert.Equal(Status.Active, database.Status);
+
+        // Verify the database exists in DbLocator but not physically
+        using var connection = _dbLocator.SqlConnection;
+        await connection.OpenAsync();
+        using var command = connection.CreateCommand();
+        command.CommandText = $"SELECT database_id FROM sys.databases WHERE name = '{dbName}'";
+        var result = await command.ExecuteScalarAsync();
+        Assert.Null(result); // Database should not exist physically
+    }
 }

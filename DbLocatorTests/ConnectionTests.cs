@@ -2,7 +2,6 @@ using DbLocator;
 using DbLocator.Domain;
 using DbLocator.Utilities;
 using DbLocatorTests.Fixtures;
-using FluentValidation;
 
 namespace DbLocatorTests;
 

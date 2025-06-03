@@ -570,4 +570,115 @@ public class DatabaseServerTests : IAsyncLifetime
             s => s.Id == server2Id && s.Name == server2Name && s.IpAddress == server2Ip
         );
     }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_PreservesExistingProperties()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var hostName = "test-host";
+        var fqdn = "test-host.example.com";
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var isLinkedServer = true;
+
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            isLinkedServer,
+            hostName,
+            ipAddress,
+            fqdn
+        );
+
+        // Act
+        var newName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseServer(serverId, newName);
+
+        // Assert
+        var updatedServer = await _dbLocator.GetDatabaseServer(serverId);
+        Assert.NotNull(updatedServer);
+        Assert.Equal(newName, updatedServer.Name);
+        Assert.Equal(hostName, updatedServer.HostName);
+        Assert.Equal(fqdn, updatedServer.FullyQualifiedDomainName);
+        Assert.Equal(ipAddress, updatedServer.IpAddress);
+        Assert.Equal(isLinkedServer, updatedServer.IsLinkedServer);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_OnlyFqdnAndIpAddress()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var hostName = "test-host";
+        var fqdn = "test-host.example.com";
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var isLinkedServer = true;
+
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            isLinkedServer,
+            hostName,
+            ipAddress,
+            fqdn
+        );
+
+        // Act
+        var newFqdn = "updated-host.example.com";
+        var newIpAddress = TestHelpers.GetRandomIpAddressString();
+        await _dbLocator.UpdateDatabaseServer(
+            serverId,
+            serverName,
+            hostName,
+            newFqdn,
+            newIpAddress,
+            isLinkedServer
+        );
+
+        // Assert
+        var updatedServer = await _dbLocator.GetDatabaseServer(serverId);
+        Assert.NotNull(updatedServer);
+        Assert.Equal(serverName, updatedServer.Name);
+        Assert.Equal(hostName, updatedServer.HostName);
+        Assert.Equal(newFqdn, updatedServer.FullyQualifiedDomainName);
+        Assert.Equal(newIpAddress, updatedServer.IpAddress);
+        Assert.Equal(isLinkedServer, updatedServer.IsLinkedServer);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_OnlyIsLinkedServer()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var hostName = "test-host";
+        var fqdn = "test-host.example.com";
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var initialIsLinkedServer = false;
+
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            initialIsLinkedServer,
+            hostName,
+            ipAddress,
+            fqdn
+        );
+
+        // Act
+        var newIsLinkedServer = true;
+        await _dbLocator.UpdateDatabaseServer(
+            serverId,
+            serverName,
+            hostName,
+            fqdn,
+            ipAddress,
+            newIsLinkedServer
+        );
+
+        // Assert
+        var updatedServer = await _dbLocator.GetDatabaseServer(serverId);
+        Assert.NotNull(updatedServer);
+        Assert.Equal(serverName, updatedServer.Name);
+        Assert.Equal(hostName, updatedServer.HostName);
+        Assert.Equal(fqdn, updatedServer.FullyQualifiedDomainName);
+        Assert.Equal(ipAddress, updatedServer.IpAddress);
+        Assert.Equal(newIsLinkedServer, updatedServer.IsLinkedServer);
+    }
 }

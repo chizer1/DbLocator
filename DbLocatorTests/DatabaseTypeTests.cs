@@ -2,7 +2,6 @@ using DbLocator;
 using DbLocator.Domain;
 using DbLocator.Utilities;
 using DbLocatorTests.Fixtures;
-using Xunit;
 
 namespace DbLocatorTests;
 
@@ -183,21 +182,16 @@ public class DatabaseTypeTests(DbLocatorFixture dbLocatorFixture)
     [Fact]
     public async Task GetDatabaseType_ReturnsCachedData()
     {
-        // Arrange
         var typeName = TestHelpers.GetRandomString();
         var typeId = await _dbLocator.CreateDatabaseType(typeName);
 
-        // Get type to populate cache
         var type = await _dbLocator.GetDatabaseType(typeId);
         Assert.NotNull(type);
 
-        // Delete type from database to ensure we're getting from cache
         await _dbLocator.DeleteDatabaseType(typeId);
 
-        // Act
         var cachedType = await _dbLocator.GetDatabaseType(typeId);
 
-        // Assert
         Assert.NotNull(cachedType);
         Assert.Equal(typeId, cachedType.Id);
         Assert.Equal(typeName, cachedType.Name);

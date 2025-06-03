@@ -694,4 +694,167 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.Equal(newTypeId, updatedDatabase.Type.Id);
         Assert.Equal(Status.Inactive, updatedDatabase.Status);
     }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithNewDatabasesAndUsername()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+
+        // Create a new database
+        var newDatabaseName = TestHelpers.GetRandomString();
+        var newDatabaseId = await _dbLocator.CreateDatabase(
+            newDatabaseName,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        // Act
+        var newUserName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            [newDatabaseId],
+            newUserName,
+            true
+        );
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.NotNull(updatedUser);
+        Assert.Equal(newUserName, updatedUser.Name);
+        Assert.Single(updatedUser.Databases);
+        Assert.Equal(newDatabaseId, updatedUser.Databases[0].Id);
+        Assert.Equal(newDatabaseName, updatedUser.Databases[0].Name);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithNewDatabasesAndUsernameOnly()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+
+        // Create a new database
+        var newDatabaseName = TestHelpers.GetRandomString();
+        var newDatabaseId = await _dbLocator.CreateDatabase(
+            newDatabaseName,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active
+        );
+
+        // Act
+        var newUserName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            [newDatabaseId],
+            newUserName
+        );
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.NotNull(updatedUser);
+        Assert.Equal(newUserName, updatedUser.Name);
+        Assert.Single(updatedUser.Databases);
+        Assert.Equal(newDatabaseId, updatedUser.Databases[0].Id);
+        Assert.Equal(newDatabaseName, updatedUser.Databases[0].Name);
+    }
+
+    [Fact]
+    public async Task DeleteDatabaseUser_WithDefaultParameters()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+
+        // Act
+        await _dbLocator.DeleteDatabaseUser(user.Id);
+
+        // Assert
+        var users = await _dbLocator.GetDatabaseUsers();
+        Assert.DoesNotContain(users, u => u.Id == user.Id);
+
+        // Verify cache is cleared
+        var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
+        Assert.Null(cachedUsers);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithInvalidUserId_ThrowsValidationException()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+            async () => await _dbLocator.UpdateDatabaseUser(-1, [_databaseId], "NewName")
+        );
+
+        Assert.Contains("Database User Id must be greater than 0", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithEmptyUserName_ThrowsValidationException()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+            async () => await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], "")
+        );
+
+        Assert.Contains("User name cannot be empty", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithShortPassword_ThrowsValidationException()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+            async () => await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], "NewName", "short")
+        );
+
+        Assert.Contains("Password must be at least 8 characters long", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithEmptyPassword_ThrowsValidationException()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+            async () => await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], "NewName", "")
+        );
+
+        Assert.Contains("Password must be at least 8 characters long", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithValidPassword_Succeeds()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+
+        // Act
+        var newName = TestHelpers.GetRandomString();
+        var newPassword = "ValidPassword123!";
+        await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], newName, newPassword);
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Equal(newName, updatedUser.Name);
+    }
 }

@@ -16,7 +16,7 @@ public partial class Locator
     /// <param name="userPassword">
     /// The password for the user.
     /// </param>
-    /// <param name="AffectDatabase">
+    /// <param name="affectDatabase">
     /// A flag indicating whether to perform DDL operations on the database server. If not provided, defaults to true.
     /// </param>
     /// <returns>
@@ -32,14 +32,14 @@ public partial class Locator
         int[] databaseIds,
         string userName,
         string userPassword,
-        bool AffectDatabase = true
+        bool affectDatabase = true
     )
     {
         return await _databaseUserService.CreateDatabaseUser(
             databaseIds,
             userName,
             userPassword,
-            AffectDatabase
+            affectDatabase
         );
     }
 
@@ -53,7 +53,7 @@ public partial class Locator
     /// <param name="userName">
     /// The user name for the new database user.
     /// </param>
-    /// <param name="AffectDatabase">
+    /// <param name="affectDatabase">
     /// A flag indicating whether to perform DDL operations on the database server. If not provided, defaults to true.
     /// </param>
     /// <returns>
@@ -68,12 +68,10 @@ public partial class Locator
     public async Task<int> CreateDatabaseUser(
         int[] databaseIds,
         string userName,
-        bool AffectDatabase = true
+        bool affectDatabase = true
     )
     {
-        if (string.IsNullOrWhiteSpace(userName))
-            throw new ArgumentException("Database user name is required", nameof(userName));
-        return await _databaseUserService.CreateDatabaseUser(databaseIds, userName, AffectDatabase);
+        return await _databaseUserService.CreateDatabaseUser(databaseIds, userName, affectDatabase);
     }
 
     /// <summary>
