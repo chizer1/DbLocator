@@ -1,6 +1,12 @@
 using System.Runtime.CompilerServices;
 using DbLocator.Db;
-using DbLocator.Library;
+using DbLocator.Services.Connection;
+using DbLocator.Services.Database;
+using DbLocator.Services.DatabaseServer;
+using DbLocator.Services.DatabaseType;
+using DbLocator.Services.DatabaseUser;
+using DbLocator.Services.DatabaseUserRole;
+using DbLocator.Services.Tenant;
 using DbLocator.Utilities;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -16,13 +22,13 @@ namespace DbLocator;
 /// </summary>
 public partial class Locator
 {
-    private readonly Connections _connections;
-    private readonly Databases _databases;
-    private readonly DatabaseUsers _databaseUsers;
-    private readonly DatabaseUserRoles _databaseUserRoles;
-    private readonly DatabaseServers _databaseServers;
-    private readonly DatabaseTypes _databaseTypes;
-    private readonly Tenants _tenants;
+    private readonly IConnectionService _connectionService;
+    private readonly IDatabaseService _databaseService;
+    private readonly IDatabaseUserService _databaseUserService;
+    private readonly IDatabaseUserRoleService _databaseUserRoleService;
+    private readonly IDatabaseServerService _databaseServerService;
+    private readonly IDatabaseTypeService _databaseTypeService;
+    private readonly ITenantService _tenantService;
 
     /// <summary>
     /// Get a sql connection for the DbLocator database.
@@ -44,7 +50,7 @@ public partial class Locator
     {
         if (string.IsNullOrWhiteSpace(dbLocatorConnectionString))
             throw new ArgumentException(
-                "DbLocator connection string is required.",
+                "Connection string is required",
                 nameof(dbLocatorConnectionString)
             );
 
@@ -52,16 +58,19 @@ public partial class Locator
 
         var dbContextFactory = DbContextFactory.CreateDbContextFactory(dbLocatorConnectionString);
         var encryption = new Encryption(encryptionKey);
-
         var dbLocatorCache = new DbLocatorCache(distributedCache);
 
-        _connections = new Connections(dbContextFactory, encryption, dbLocatorCache);
-        _databases = new Databases(dbContextFactory, dbLocatorCache);
-        _databaseServers = new DatabaseServers(dbContextFactory, dbLocatorCache);
-        _databaseUsers = new DatabaseUsers(dbContextFactory, encryption, dbLocatorCache);
-        _databaseUserRoles = new DatabaseUserRoles(dbContextFactory, dbLocatorCache);
-        _databaseTypes = new DatabaseTypes(dbContextFactory, dbLocatorCache);
-        _tenants = new Tenants(dbContextFactory, dbLocatorCache);
+        _connectionService = new ConnectionService(dbContextFactory, dbLocatorCache, encryption);
+        _databaseService = new DatabaseService(dbContextFactory, dbLocatorCache);
+        _databaseServerService = new DatabaseServerService(dbContextFactory, dbLocatorCache);
+        _databaseTypeService = new DatabaseTypeService(dbContextFactory, dbLocatorCache);
+        _databaseUserService = new DatabaseUserService(
+            dbContextFactory,
+            encryption,
+            dbLocatorCache
+        );
+        _databaseUserRoleService = new DatabaseUserRoleService(dbContextFactory, dbLocatorCache);
+        _tenantService = new TenantService(dbContextFactory, dbLocatorCache);
 
         SqlConnection = new SqlConnection(dbLocatorConnectionString);
     }
@@ -69,15 +78,13 @@ public partial class Locator
     /// <summary>
     /// Applies database migrations to ensure the database schema is up-to-date.
     /// </summary>
-    /// <param name="dbLocatorConnectionString">The connection string for the DbLocator database.</param>
-    private static void ApplyMigrations(string dbLocatorConnectionString)
+    /// <param name="connectionString">The connection string for the DbLocator database.</param>
+    private static void ApplyMigrations(string connectionString)
     {
-        using var dbLocator = new DbLocatorContext(
-            new DbContextOptionsBuilder<DbLocatorContext>()
-                .UseSqlServer(dbLocatorConnectionString)
-                .Options
-        );
+        var optionsBuilder = new DbContextOptionsBuilder<DbLocatorContext>();
+        optionsBuilder.UseSqlServer(connectionString);
 
+        using var dbLocator = new DbLocatorContext(optionsBuilder.Options);
         dbLocator.Database.Migrate();
     }
 }

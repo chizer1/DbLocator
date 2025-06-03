@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using DbLocator;
 using DbLocator.Domain;
 using DbLocator.Utilities;
@@ -19,13 +18,13 @@ public class DatabaseTests
         _dbLocator = dbLocatorFixture.DbLocator;
         _databaseServerID = dbLocatorFixture.LocalhostServerId;
         _cache = dbLocatorFixture.LocatorCache;
-        _databaseTypeId = _dbLocator.AddDatabaseType(TestHelpers.GetRandomString()).Result;
+        _databaseTypeId = _dbLocator.CreateDatabaseType(TestHelpers.GetRandomString()).Result;
     }
 
-    private async Task<Database> AddDatabaseAsync(string databaseName)
+    private async Task<Database> CreateDatabaseAsync(string databaseName)
     {
         var databaseUser = $"{databaseName}_App";
-        var databaseId = await _dbLocator.AddDatabase(
+        var databaseId = await _dbLocator.CreateDatabase(
             databaseName,
             _databaseServerID,
             _databaseTypeId,
@@ -36,11 +35,11 @@ public class DatabaseTests
     }
 
     [Fact]
-    public async Task AddMultipleDatabasesAndSearchByKeyWord()
+    public async Task CreateMultipleDatabasesAndSearchByKeyWord()
     {
         var dbNamePrefix = TestHelpers.GetRandomString();
-        var database1 = await AddDatabaseAsync($"{dbNamePrefix}1");
-        var database2 = await AddDatabaseAsync($"{dbNamePrefix}2");
+        var database1 = await CreateDatabaseAsync($"{dbNamePrefix}1");
+        var database2 = await CreateDatabaseAsync($"{dbNamePrefix}2");
 
         var databases = (await _dbLocator.GetDatabases()).ToList();
         Assert.Contains(databases, db => db.Name == database1.Name);
@@ -51,7 +50,7 @@ public class DatabaseTests
     public async Task VerifyDatabasesAreCached()
     {
         var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+        var database = await CreateDatabaseAsync(dbName);
 
         var databases = await _dbLocator.GetDatabases();
         Assert.Contains(databases, db => db.Name == database.Name);
@@ -65,7 +64,7 @@ public class DatabaseTests
     public async Task GetDatabaseById()
     {
         var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+        var database = await CreateDatabaseAsync(dbName);
 
         var retrievedDatabase = await _dbLocator.GetDatabase(database.Id);
         Assert.NotNull(retrievedDatabase);
@@ -80,7 +79,7 @@ public class DatabaseTests
     public async Task DeleteDatabase()
     {
         var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+        var database = await CreateDatabaseAsync(dbName);
 
         await _dbLocator.DeleteDatabase(database.Id);
 
@@ -91,8 +90,8 @@ public class DatabaseTests
     [Fact]
     public async Task GetNonExistentDatabase_ThrowsKeyNotFoundException()
     {
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
-            async () => await _dbLocator.GetDatabase(-1)
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.GetDatabase(999999)
         );
     }
 
@@ -100,7 +99,7 @@ public class DatabaseTests
     public async Task DeleteNonExistentDatabase_ThrowsKeyNotFoundException()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.DeleteDatabase(-1)
+            async () => await _dbLocator.DeleteDatabase(999999)
         );
     }
 
@@ -108,14 +107,12 @@ public class DatabaseTests
     public async Task CannotDeleteDatabaseWithActiveConnections()
     {
         var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+        var database = await CreateDatabaseAsync(dbName);
 
-        // Add a tenant and create a connection to the database
         var tenantName = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.AddTenant(tenantName);
-        await _dbLocator.AddConnection(tenantId, database.Id);
+        var tenantId = await _dbLocator.CreateTenant(tenantName);
+        await _dbLocator.CreateConnection(tenantId, database.Id);
 
-        // Attempt to delete the database
         await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _dbLocator.DeleteDatabase(database.Id)
         );
@@ -125,14 +122,14 @@ public class DatabaseTests
     public async Task CannotUpdateDatabaseWithInvalidServerId()
     {
         var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+        var database = await CreateDatabaseAsync(dbName);
 
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(
             async () =>
                 await _dbLocator.UpdateDatabase(
                     database.Id,
                     "new-name",
-                    -1, // Invalid server ID
+                    -1,
                     _databaseTypeId,
                     Status.Active
                 )
@@ -143,68 +140,54 @@ public class DatabaseTests
     public async Task CannotUpdateDatabaseWithInvalidTypeId()
     {
         var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+        var database = await CreateDatabaseAsync(dbName);
 
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        await Assert.ThrowsAsync<KeyNotFoundException>(
             async () =>
                 await _dbLocator.UpdateDatabase(
                     database.Id,
                     "new-name",
                     _databaseServerID,
-                    255, // Invalid type ID
+                    255,
                     Status.Active
                 )
         );
     }
 
     [Fact]
-    public async Task AddDatabase_WithNonExistentServer_ThrowsValidationException()
+    public async Task CreateDatabase_WithNonExistentServer_ThrowsValidationException()
     {
         var dbName = TestHelpers.GetRandomString();
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () =>
-                await _dbLocator.AddDatabase(
-                    dbName,
-                    77, // Non-existent server ID
-                    _databaseTypeId,
-                    Status.Active
-                )
+            async () => await _dbLocator.CreateDatabase(dbName, 77, _databaseTypeId, Status.Active)
         );
     }
 
     [Fact]
-    public async Task AddDatabase_WithNonExistentDatabaseType_ThrowsValidationException()
+    public async Task CreateDatabase_WithNonExistentDatabaseType_ThrowsValidationException()
     {
         var dbName = TestHelpers.GetRandomString();
         var newIpAddress = TestHelpers.GetRandomIpAddressString();
-        var newHostName = "testhostname";
-        var newFqdn = "testhostname.example.com";
 
-        var dbServerId = await _dbLocator.AddDatabaseServer(
+        var dbServerId = await _dbLocator.CreateDatabaseServer(
             "testservername",
+            false,
+            null,
             newIpAddress,
-            newHostName,
-            newFqdn,
-            false
+            null
         );
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () =>
-                await _dbLocator.AddDatabase(
-                    dbName,
-                    dbServerId,
-                    56, // Non-existent database type ID
-                    Status.Active
-                )
+            async () => await _dbLocator.CreateDatabase(dbName, dbServerId, 56, Status.Active)
         );
     }
 
     [Fact]
-    public async Task AddDatabase_WithDbNameServerIdAndTypeId()
+    public async Task CreateDatabase_WithDbNameServerIdAndTypeId()
     {
         var dbName = TestHelpers.GetRandomString();
-        var databaseId = await _dbLocator.AddDatabase(
+        var databaseId = await _dbLocator.CreateDatabase(
             dbName,
             _databaseServerID,
             _databaseTypeId,
@@ -219,10 +202,10 @@ public class DatabaseTests
     }
 
     [Fact]
-    public async Task AddDatabase_WithDbNameServerIdAndTypeIdAndCreate()
+    public async Task CreateDatabase_WithDbNameServerIdAndTypeIdAndCreate()
     {
         var dbName = TestHelpers.GetRandomString();
-        var databaseId = await _dbLocator.AddDatabase(
+        var databaseId = await _dbLocator.CreateDatabase(
             dbName,
             _databaseServerID,
             _databaseTypeId,
@@ -240,18 +223,16 @@ public class DatabaseTests
     public async Task UpdateDatabase_ServerId()
     {
         var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+        var database = await CreateDatabaseAsync(dbName);
 
         var newIpAddress = TestHelpers.GetRandomIpAddressString();
-        var newHostName = "testserver987name";
-        var newFqdn = "testservername987.example.com";
 
-        var newServerId = await _dbLocator.AddDatabaseServer(
+        var newServerId = await _dbLocator.CreateDatabaseServer(
             "testservername987",
+            false,
+            null,
             newIpAddress,
-            newHostName,
-            newFqdn,
-            false
+            null
         );
 
         await _dbLocator.UpdateDatabase(database.Id, newServerId);
@@ -265,10 +246,10 @@ public class DatabaseTests
     public async Task UpdateDatabase_TypeId()
     {
         var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+        var database = await CreateDatabaseAsync(dbName);
 
         var newDatabaseTypeName = TestHelpers.GetRandomString();
-        var newDatabaseTypeId = await _dbLocator.AddDatabaseType(newDatabaseTypeName);
+        var newDatabaseTypeId = await _dbLocator.CreateDatabaseType(newDatabaseTypeName);
 
         await _dbLocator.UpdateDatabase(database.Id, newDatabaseTypeId);
 
@@ -281,7 +262,7 @@ public class DatabaseTests
     public async Task UpdateDatabase_DatabaseName()
     {
         var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+        var database = await CreateDatabaseAsync(dbName);
 
         var newDatabaseName = TestHelpers.GetRandomString();
         await _dbLocator.UpdateDatabase(database.Id, newDatabaseName);
@@ -295,7 +276,7 @@ public class DatabaseTests
     public async Task UpdateDatabase_UpdateStatus()
     {
         var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+        var database = await CreateDatabaseAsync(dbName);
 
         await _dbLocator.UpdateDatabase(database.Id, Status.Inactive);
 
@@ -308,7 +289,7 @@ public class DatabaseTests
     public async Task DeleteDatabase_DeleteDatabase()
     {
         var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+        var database = await CreateDatabaseAsync(dbName);
 
         await _dbLocator.DeleteDatabase(database.Id, true);
 
@@ -316,12 +297,11 @@ public class DatabaseTests
         Assert.DoesNotContain(databases, db => db.Id == database.Id);
     }
 
-    // update database, but not using real db server id to throw error
     [Fact]
     public async Task UpdateDatabase_WithInvalidDatabaseServerId()
     {
         var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+        var database = await CreateDatabaseAsync(dbName);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
             async () => await _dbLocator.UpdateDatabase(database.Id, 34345)
@@ -332,7 +312,7 @@ public class DatabaseTests
     public async Task UpdateDatabase_WithInvalidDatabaseTypeId()
     {
         var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
+        var database = await CreateDatabaseAsync(dbName);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
             async () => await _dbLocator.UpdateDatabase(database.Id, 2387)
@@ -340,22 +320,19 @@ public class DatabaseTests
     }
 
     [Fact]
-    public async Task AddDatabase_WithTrustedConnection_CreatesDatabaseWithTrustedConnection()
+    public async Task CreateDatabase_WithTrustedConnection_CreatesDatabaseWithTrustedConnection()
     {
-        // Arrange
         var dbName = TestHelpers.GetRandomString();
-        var databaseId = await _dbLocator.AddDatabase(
+        var databaseId = await _dbLocator.CreateDatabase(
             dbName,
             _databaseServerID,
             _databaseTypeId,
-            true, // Create database
-            true // Use trusted connection
+            true,
+            true
         );
 
-        // Act
         var database = await _dbLocator.GetDatabase(databaseId);
 
-        // Assert
         Assert.NotNull(database);
         Assert.Equal(dbName, database.Name);
         Assert.Equal(_databaseServerID, database.Server.Id);
@@ -366,15 +343,12 @@ public class DatabaseTests
     [Fact]
     public async Task UpdateDatabase_WithTrustedConnection_UpdatesDatabaseTrustedConnection()
     {
-        // Arrange
         var dbName = TestHelpers.GetRandomString();
-        var database = await AddDatabaseAsync(dbName);
-        Assert.False(database.UseTrustedConnection); // Initial state
+        var database = await CreateDatabaseAsync(dbName);
+        Assert.False(database.UseTrustedConnection);
 
-        // Act
-        await _dbLocator.UpdateDatabase(database.Id, true); // Enable trusted connection
+        await _dbLocator.UpdateDatabase(database.Id, true);
 
-        // Assert
         var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
         Assert.NotNull(updatedDatabase);
         Assert.True(updatedDatabase.UseTrustedConnection);
@@ -383,14 +357,11 @@ public class DatabaseTests
     [Fact]
     public async Task CacheData_WithStringData_CachesStringDirectly()
     {
-        // Arrange
         var cacheKey = "test_string_cache";
         var stringData = "test string data";
 
-        // Act
         await _cache.CacheData(cacheKey, stringData);
 
-        // Assert
         var cachedData = await _cache.GetCachedData<string>(cacheKey);
         Assert.Equal(stringData, cachedData);
     }
@@ -398,7 +369,6 @@ public class DatabaseTests
     [Fact]
     public async Task TryClearConnectionStringFromCache_WithTenantCode_RemovesMatchingKeys()
     {
-        // Arrange
         var tenantCode = TestHelpers.GetRandomString();
         var queryString =
             @$"TenantId:,
@@ -409,10 +379,8 @@ public class DatabaseTests
         var cacheKey = $"connection:{queryString}";
         await _cache.CacheConnectionString(cacheKey, "test connection string");
 
-        // Act
         await _cache.TryClearConnectionStringFromCache(tenantCode: tenantCode);
 
-        // Assert
         var cachedData = await _cache.GetCachedData<string>(cacheKey);
         Assert.Null(cachedData);
     }
@@ -420,7 +388,6 @@ public class DatabaseTests
     [Fact]
     public async Task TryClearConnectionStringFromCache_WithDatabaseRoles_RemovesMatchingKeys()
     {
-        // Arrange
         var roles = new[] { DatabaseRole.DataReader, DatabaseRole.DataWriter };
         var rolesString = string.Join(",", roles);
         var queryString =
@@ -432,11 +399,41 @@ public class DatabaseTests
         var cacheKey = $"connection:{queryString}";
         await _cache.CacheConnectionString(cacheKey, "test connection string");
 
-        // Act
         await _cache.TryClearConnectionStringFromCache(roles: roles);
 
-        // Assert
         var cachedData = await _cache.GetCachedData<string>(cacheKey);
         Assert.Null(cachedData);
+    }
+
+    [Fact]
+    public async Task CreateDatabase_WithAffectDatabaseFalse_DoesNotCreatePhysicalDatabase()
+    {
+        // Arrange
+        var dbName = TestHelpers.GetRandomString();
+
+        // Act
+        var databaseId = await _dbLocator.CreateDatabase(
+            dbName,
+            _databaseServerID,
+            _databaseTypeId,
+            Status.Active,
+            false
+        );
+
+        // Assert
+        var database = await _dbLocator.GetDatabase(databaseId);
+        Assert.NotNull(database);
+        Assert.Equal(dbName, database.Name);
+        Assert.Equal(_databaseServerID, database.Server.Id);
+        Assert.Equal(_databaseTypeId, database.Type.Id);
+        Assert.Equal(Status.Active, database.Status);
+
+        // Verify the database exists in DbLocator but not physically
+        using var connection = _dbLocator.SqlConnection;
+        await connection.OpenAsync();
+        using var command = connection.CreateCommand();
+        command.CommandText = $"SELECT database_id FROM sys.databases WHERE name = '{dbName}'";
+        var result = await command.ExecuteScalarAsync();
+        Assert.Null(result); // Database should not exist physically
     }
 }
