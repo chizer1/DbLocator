@@ -54,7 +54,17 @@ internal class GetTenantsHandler(
             .ToList();
 
         if (_cache != null)
+        {
             await _cache.CacheData(cacheKey, tenants);
+            foreach (var tenant in tenants)
+            {
+                await _cache.CacheData($"tenant-id-{tenant.Id}", tenant);
+                if (tenant.Code != null)
+                {
+                    await _cache.CacheData($"tenant-code-{tenant.Code}", tenant);
+                }
+            }
+        }
 
         return tenants;
     }

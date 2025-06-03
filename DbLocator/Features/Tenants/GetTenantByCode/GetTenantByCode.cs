@@ -56,7 +56,18 @@ internal class GetTenantByCodeHandler(
         );
 
         if (_cache != null)
+        {
             await _cache.CacheData(cacheKey, tenant);
+            await _cache.CacheData($"tenant-id-{tenant.Id}", tenant);
+            var tenants = await _cache.GetCachedData<List<Tenant>>("tenants") ?? [];
+            var existingTenant = tenants.FirstOrDefault(t => t.Id == tenant.Id);
+            if (existingTenant != null)
+            {
+                tenants.Remove(existingTenant);
+            }
+            tenants.Add(tenant);
+            await _cache.CacheData("tenants", tenants);
+        }
 
         return tenant;
     }

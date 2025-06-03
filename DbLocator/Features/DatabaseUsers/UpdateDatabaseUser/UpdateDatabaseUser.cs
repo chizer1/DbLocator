@@ -57,21 +57,17 @@ internal class UpdateDatabaseUserHandler(
         CancellationToken cancellationToken = default
     )
     {
-        await new UpdateDatabaseUserCommandValidator().ValidateAndThrowAsync(request, cancellationToken);
+        await new UpdateDatabaseUserCommandValidator().ValidateAndThrowAsync(
+            request,
+            cancellationToken
+        );
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var user =
-            await dbContext
-                .Set<DatabaseUserEntity>()
-                .Include(u => u.Databases)
-                .FirstOrDefaultAsync(
-                    u => u.DatabaseUserId == request.DatabaseUserId,
-                    cancellationToken
-                )
-            ?? throw new KeyNotFoundException(
-                $"Database user with ID {request.DatabaseUserId} not found."
-            );
+        var user = await dbContext
+            .Set<DatabaseUserEntity>()
+            .FirstOrDefaultAsync(u => u.DatabaseUserId == request.DatabaseUserId, cancellationToken)
+            ?? throw new KeyNotFoundException($"Database user with ID {request.DatabaseUserId} not found");
 
         if (request.UserName != null)
         {
@@ -93,7 +89,13 @@ internal class UpdateDatabaseUserHandler(
         }
 
         if (request.UserPassword != null)
+        {
+            if (request.UserPassword.Length < 8)
+            {
+                throw new InvalidOperationException("Password must be at least 8 characters long");
+            }
             user.UserPassword = _encryption.Encrypt(request.UserPassword);
+        }
 
         if (request.DatabaseIds != null)
         {

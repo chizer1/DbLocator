@@ -121,11 +121,19 @@ internal class UpdateTenantHandler(
             {
                 await _cache.Remove($"tenant-code-{tenant.TenantCode}");
             }
+            if (request.TenantCode != null)
+            {
+                await _cache.Remove($"tenant-code-{request.TenantCode}");
+            }
             await _cache.Remove("connections");
             await _cache.TryClearConnectionStringFromCache(tenantId: request.TenantId);
             if (tenant.TenantCode != null)
             {
                 await _cache.TryClearConnectionStringFromCache(tenantCode: tenant.TenantCode);
+            }
+            if (request.TenantCode != null)
+            {
+                await _cache.TryClearConnectionStringFromCache(tenantCode: request.TenantCode);
             }
         }
     }
