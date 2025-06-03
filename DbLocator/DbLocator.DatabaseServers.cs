@@ -17,7 +17,7 @@ public partial class Locator
     /// <param name="databaseServerHostName">
     /// The host name of the database server.
     /// </param>
-    /// <param name="databaseServerIpCreateress">
+    /// <param name="databaseServerIpAddress">
     /// The IP Createress of the database server.
     /// </param>
     /// <param name="databaseServerFullyQualifiedDomainName">
@@ -33,7 +33,7 @@ public partial class Locator
         string databaseServerName,
         bool isLinkedServer,
         string databaseServerHostName = null,
-        string databaseServerIpCreateress = null,
+        string databaseServerIpAddress = null,
         string databaseServerFullyQualifiedDomainName = null
     )
     {
@@ -41,7 +41,7 @@ public partial class Locator
             databaseServerName,
             isLinkedServer,
             databaseServerHostName,
-            databaseServerIpCreateress,
+            databaseServerIpAddress,
             databaseServerFullyQualifiedDomainName
         );
     }
@@ -55,56 +55,6 @@ public partial class Locator
     public async Task<List<DatabaseServer>> GetDatabaseServers()
     {
         return await _databaseServerService.GetDatabaseServers();
-    }
-
-    /// <summary>
-    /// Updates an existing database server. At least one of the following fields must be provided:
-    /// Database Server Host Name, Database Server Fully Qualified Domain Name, or Database Server IP Createress.
-    /// </summary>
-    /// <param name="databaseServerId">
-    /// The ID of the database server to be updated.
-    /// </param>
-    /// <param name="databaseServerName">
-    /// The new name for the database server.
-    /// </param>
-    /// <param name="databaseServerHostName">
-    /// The new host name for the database server.
-    /// </param>
-    /// <param name="databaseServerFullyQualifiedDomainName">
-    /// The new fully qualified domain name (FQDN) for the database server.
-    /// </param>
-    /// <param name="databaseServerIpCreateress">
-    /// The new IP Createress for the database server.
-    /// </param>
-    /// <param name="isLinkedServer">
-    /// Indicates whether this server is linked to another server (e.g., the DbLocator database server).
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">
-    /// Thrown when the specified database server is not found.
-    /// </exception>
-    /// <exception cref="ArgumentException">
-    /// Thrown when no valid server identifier is provided for the update.
-    /// </exception>
-    public async Task UpdateDatabaseServer(
-        int databaseServerId,
-        string databaseServerName,
-        string databaseServerHostName,
-        string databaseServerFullyQualifiedDomainName,
-        string databaseServerIpCreateress,
-        bool isLinkedServer
-    )
-    {
-        await _databaseServerService.UpdateDatabaseServer(
-            databaseServerId,
-            databaseServerName,
-            databaseServerHostName,
-            databaseServerFullyQualifiedDomainName,
-            databaseServerIpCreateress,
-            isLinkedServer
-        );
     }
 
     /// <summary>
@@ -181,7 +131,7 @@ public partial class Locator
     /// <param name="databaseServerFullyQualifiedDomainName">
     /// The new fully qualified domain name (FQDN) for the database server.
     /// </param>
-    /// <param name="databaseServerIpCreateress">
+    /// <param name="databaseServerIpAddress">
     /// The new IP Createress for the database server.
     /// </param>
     /// <returns>
@@ -193,7 +143,7 @@ public partial class Locator
     public async Task UpdateDatabaseServer(
         int databaseServerId,
         string databaseServerFullyQualifiedDomainName,
-        string databaseServerIpCreateress
+        string databaseServerIpAddress
     )
     {
         var server = await _databaseServerService.GetDatabaseServer(databaseServerId);
@@ -202,36 +152,8 @@ public partial class Locator
             server.Name,
             server.HostName,
             databaseServerFullyQualifiedDomainName,
-            databaseServerIpCreateress,
+            databaseServerIpAddress,
             server.IsLinkedServer
-        );
-    }
-
-    /// <summary>
-    /// Updates the linked server status of an existing database server.
-    /// </summary>
-    /// <param name="databaseServerId">
-    /// The ID of the database server to be updated.
-    /// </param>
-    /// <param name="isLinkedServer">
-    /// Indicates whether this server is linked to another server (e.g., the DbLocator database server).
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">
-    /// Thrown when the specified database server is not found.
-    /// </exception>
-    public async Task UpdateDatabaseServer(int databaseServerId, bool isLinkedServer)
-    {
-        var server = await _databaseServerService.GetDatabaseServer(databaseServerId);
-        await _databaseServerService.UpdateDatabaseServer(
-            databaseServerId,
-            server.Name,
-            server.HostName,
-            server.FullyQualifiedDomainName,
-            server.IpAddress,
-            isLinkedServer
         );
     }
 }

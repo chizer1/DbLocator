@@ -35,11 +35,4 @@ internal interface IDatabaseUserService
         string databaseUserPassword
     );
     Task UpdateDatabaseUser(int databaseUserId, int[] databaseIds, string databaseUserName);
-    Task UpdateDatabaseUser(
-        int databaseUserId,
-        string databaseUserName,
-        string databaseUserPassword
-    );
-    Task UpdateDatabaseUser(int databaseUserId, string databaseUserName);
-    Task UpdateDatabaseUser(int databaseUserId, int[] databaseIds);
 }

@@ -28,7 +28,7 @@ internal class DatabaseServerService(
         string databaseServerName,
         bool isLinkedServer,
         string databaseServerHostName = null,
-        string databaseServerIpCreateress = null,
+        string databaseServerIpAdress = null,
         string databaseServerFullyQualifiedDomainName = null
     )
     {
@@ -37,7 +37,7 @@ internal class DatabaseServerService(
                 databaseServerName,
                 databaseServerHostName,
                 databaseServerFullyQualifiedDomainName,
-                databaseServerIpCreateress,
+                databaseServerIpAdress,
                 isLinkedServer
             )
         );
@@ -65,7 +65,7 @@ internal class DatabaseServerService(
         string databaseServerName,
         string databaseServerHostName,
         string databaseServerFullyQualifiedDomainName,
-        string databaseServerIpCreateress,
+        string databaseServerIpAddress,
         bool isLinkedServer
     )
     {
@@ -75,45 +75,7 @@ internal class DatabaseServerService(
                 databaseServerName,
                 databaseServerHostName,
                 databaseServerFullyQualifiedDomainName,
-                databaseServerIpCreateress,
-                isLinkedServer
-            )
-        );
-    }
-
-    public async Task UpdateDatabaseServer(int databaseServerId, string databaseServerName)
-    {
-        await _updateDatabaseServer.Handle(
-            new UpdateDatabaseServerCommand(databaseServerId, databaseServerName)
-        );
-    }
-
-    public async Task UpdateDatabaseServer(
-        int databaseServerId,
-        string databaseServerFullyQualifiedDomainName,
-        string databaseServerIpCreateress
-    )
-    {
-        await _updateDatabaseServer.Handle(
-            new UpdateDatabaseServerCommand(
-                databaseServerId,
-                null,
-                null,
-                databaseServerFullyQualifiedDomainName,
-                databaseServerIpCreateress
-            )
-        );
-    }
-
-    public async Task UpdateDatabaseServer(int databaseServerId, bool isLinkedServer)
-    {
-        await _updateDatabaseServer.Handle(
-            new UpdateDatabaseServerCommand(
-                databaseServerId,
-                null,
-                null,
-                null,
-                null,
+                databaseServerIpAddress,
                 isLinkedServer
             )
         );

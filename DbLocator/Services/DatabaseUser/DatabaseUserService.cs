@@ -161,35 +161,4 @@ internal class DatabaseUserService(
             )
         );
     }
-
-    public async Task UpdateDatabaseUser(
-        int databaseUserId,
-        string databaseUserName,
-        string databaseUserPassword
-    )
-    {
-        await _updateDatabaseUser.Handle(
-            new UpdateDatabaseUserCommand(
-                databaseUserId,
-                [],
-                databaseUserName,
-                databaseUserPassword,
-                true
-            )
-        );
-    }
-
-    public async Task UpdateDatabaseUser(int databaseUserId, string databaseUserName)
-    {
-        await _updateDatabaseUser.Handle(
-            new UpdateDatabaseUserCommand(databaseUserId, [], databaseUserName, null, true)
-        );
-    }
-
-    public async Task UpdateDatabaseUser(int databaseUserId, int[] databaseIds)
-    {
-        await _updateDatabaseUser.Handle(
-            new UpdateDatabaseUserCommand(databaseUserId, [.. databaseIds], null, null, true)
-        );
-    }
 }

@@ -6,7 +6,7 @@ internal interface IDatabaseServerService
         string databaseServerName,
         bool isLinkedServer,
         string databaseServerHostName = null,
-        string databaseServerIpCreateress = null,
+        string databaseServerIpAddress = null,
         string databaseServerFullyQualifiedDomainName = null
     );
     Task DeleteDatabaseServer(int databaseServerId);
@@ -17,14 +17,7 @@ internal interface IDatabaseServerService
         string databaseServerName,
         string databaseServerHostName,
         string databaseServerFullyQualifiedDomainName,
-        string databaseServerIpCreateress,
+        string databaseServerIpAddress,
         bool isLinkedServer
     );
-    Task UpdateDatabaseServer(int databaseServerId, string databaseServerName);
-    Task UpdateDatabaseServer(
-        int databaseServerId,
-        string databaseServerFullyQualifiedDomainName,
-        string databaseServerIpCreateress
-    );
-    Task UpdateDatabaseServer(int databaseServerId, bool isLinkedServer);
 }

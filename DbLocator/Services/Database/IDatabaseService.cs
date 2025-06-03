@@ -8,25 +8,6 @@ internal interface IDatabaseService
         string databaseName,
         int databaseServerId,
         byte databaseTypeId,
-        Status databaseStatus
-    );
-    Task<int> CreateDatabase(
-        string databaseName,
-        int databaseServerId,
-        byte databaseTypeId,
-        Status databaseStatus,
-        bool affectDatabase = true
-    );
-    Task<int> CreateDatabase(
-        string databaseName,
-        int databaseServerId,
-        byte databaseTypeId,
-        bool affectDatabase = true
-    );
-    Task<int> CreateDatabase(
-        string databaseName,
-        int databaseServerId,
-        byte databaseTypeId,
         Status databaseStatus,
         bool affectDatabase = true,
         bool useTrustedConnection = false
