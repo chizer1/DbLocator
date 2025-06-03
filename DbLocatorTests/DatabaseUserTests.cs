@@ -789,11 +789,11 @@ public class DatabaseUserTests : IAsyncLifetime
         var user = await CreateDatabaseUserAsync(userName);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+        var exception = await Assert.ThrowsAsync<KeyNotFoundException>(
             async () => await _dbLocator.UpdateDatabaseUser(-1, [_databaseId], "NewName")
         );
 
-        Assert.Contains("Database User Id must be greater than 0", exception.Message);
+        Assert.Contains("Database user with ID -1 not found", exception.Message);
     }
 
     [Fact]
@@ -819,8 +819,8 @@ public class DatabaseUserTests : IAsyncLifetime
         var user = await CreateDatabaseUserAsync(userName);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
-            async () => await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], "NewName", "short")
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], TestHelpers.GetRandomString(), "short")
         );
 
         Assert.Contains("Password must be at least 8 characters long", exception.Message);

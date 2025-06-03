@@ -100,8 +100,8 @@ public class DatabaseServerTests : IAsyncLifetime
     {
         var serverName = TestHelpers.GetRandomString();
         var IpAddress = TestHelpers.GetRandomIpAddressString();
-        var hostName = "test-host";
-        var fqdn = "test-host.example.com";
+        var hostName = TestHelpers.GetRandomString();
+        var fqdn = $"{hostName}.example.com";
         var isLinkedServer = true;
 
         var serverId = await _dbLocator.CreateDatabaseServer(
@@ -576,8 +576,8 @@ public class DatabaseServerTests : IAsyncLifetime
     {
         // Arrange
         var serverName = TestHelpers.GetRandomString();
-        var hostName = "test-host";
-        var fqdn = "test-host.example.com";
+        var hostName = TestHelpers.GetRandomString();
+        var fqdn = $"{hostName}.example.com";
         var ipAddress = TestHelpers.GetRandomIpAddressString();
         var isLinkedServer = true;
 
@@ -608,8 +608,8 @@ public class DatabaseServerTests : IAsyncLifetime
     {
         // Arrange
         var serverName = TestHelpers.GetRandomString();
-        var hostName = "test-host";
-        var fqdn = "test-host.example.com";
+        var hostName = TestHelpers.GetRandomString();
+        var fqdn = $"{hostName}.example.com";
         var ipAddress = TestHelpers.GetRandomIpAddressString();
         var isLinkedServer = true;
 
@@ -648,8 +648,8 @@ public class DatabaseServerTests : IAsyncLifetime
     {
         // Arrange
         var serverName = TestHelpers.GetRandomString();
-        var hostName = "test-host";
-        var fqdn = "test-host.example.com";
+        var hostName = TestHelpers.GetRandomString();
+        var fqdn = $"{hostName}.example.com";
         var ipAddress = TestHelpers.GetRandomIpAddressString();
         var initialIsLinkedServer = false;
 
