@@ -27,7 +27,10 @@ internal sealed class UpdateDatabaseUserCommandValidator
         RuleFor(x => x.UserName)
             .NotEmpty()
             .When(x => x.UserName != null)
-            .WithMessage("User name cannot be empty.");
+            .WithMessage("User name cannot be empty.")
+            .Must(x => !string.IsNullOrWhiteSpace(x))
+            .When(x => x.UserName != null)
+            .WithMessage("User name cannot be empty or whitespace.");
 
         RuleFor(x => x.UserPassword)
             .NotEmpty()
@@ -54,6 +57,8 @@ internal class UpdateDatabaseUserHandler(
         CancellationToken cancellationToken = default
     )
     {
+        await new UpdateDatabaseUserCommandValidator().ValidateAndThrowAsync(request, cancellationToken);
+
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
         var user =

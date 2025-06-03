@@ -61,6 +61,8 @@ internal class UpdateTenantHandler(
         CancellationToken cancellationToken = default
     )
     {
+        await new UpdateTenantCommandValidator().ValidateAndThrowAsync(request, cancellationToken);
+
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
         var tenant =
@@ -68,19 +70,6 @@ internal class UpdateTenantHandler(
                 .Set<TenantEntity>()
                 .FirstOrDefaultAsync(t => t.TenantId == request.TenantId, cancellationToken)
             ?? throw new KeyNotFoundException($"Tenant with ID {request.TenantId} not found.");
-
-        // Only validate if we have a valid request
-        if (
-            request.TenantName != null
-            || request.TenantCode != null
-            || request.TenantStatus.HasValue
-        )
-        {
-            await new UpdateTenantCommandValidator().ValidateAndThrowAsync(
-                request,
-                cancellationToken
-            );
-        }
 
         if (request.TenantName != null)
         {

@@ -77,7 +77,7 @@ internal class DeleteDatabaseUserHandler(
         if (_cache != null)
         {
             await _cache.Remove("databaseUsers");
-            await _cache.Remove($"database-user-id-{request.DatabaseUserId}");
+            await _cache.Remove($"databaseUser-{request.DatabaseUserId}");
             await _cache.Remove("connections");
             await _cache.TryClearConnectionStringFromCache(request.DatabaseUserId);
         }
