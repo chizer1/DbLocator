@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.Databases.DeleteDatabase;
 
-internal record DeleteDatabaseCommand(int Id, bool AffectDatabase = true);
+internal record DeleteDatabaseCommand(int Id, bool? AffectDatabase);
 
 internal sealed class DeleteDatabaseCommandValidator : AbstractValidator<DeleteDatabaseCommand>
 {
@@ -55,7 +55,7 @@ internal class DeleteDatabaseHandler(
             );
         }
 
-        if (request.AffectDatabase)
+        if (request.AffectDatabase ?? true)
         {
             var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
             await Sql.ExecuteSqlCommandAsync(

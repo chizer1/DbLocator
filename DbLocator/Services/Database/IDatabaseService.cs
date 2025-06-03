@@ -1,3 +1,4 @@
+#nullable enable
 using DbLocator.Domain;
 
 namespace DbLocator.Services.Database;
@@ -12,20 +13,15 @@ internal interface IDatabaseService
         bool affectDatabase = true,
         bool useTrustedConnection = false
     );
-    Task DeleteDatabase(int databaseId);
-    Task DeleteDatabase(int databaseId, bool deleteDatabase);
+    Task DeleteDatabase(int databaseId, bool? affectDatabase);
     Task<List<Domain.Database>> GetDatabases();
     Task<Domain.Database> GetDatabase(int databaseId);
     Task UpdateDatabase(
         int databaseId,
-        string databaseName,
-        int databaseServerId,
-        byte databaseTypeId,
-        Status databaseStatus
+        string? databaseName,
+        int? databaseServerId,
+        byte? databaseTypeId,
+        bool? useTrustedConnection,
+        Status? status
     );
-    Task UpdateDatabase(int databaseId, int databaseServerId);
-    Task UpdateDatabase(int databaseId, byte databaseTypeId);
-    Task UpdateDatabase(int databaseId, string databaseName);
-    Task UpdateDatabase(int databaseId, Status databaseStatus);
-    Task UpdateDatabase(int databaseId, bool useTrustedConnection);
 }

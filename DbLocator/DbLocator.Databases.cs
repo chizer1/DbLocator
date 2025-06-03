@@ -253,198 +253,6 @@ public partial class Locator
     }
 
     /// <summary>
-    /// Updates all properties of an existing database.
-    /// This method allows for comprehensive modification of a database's configuration,
-    /// including its name, server, type, and status. All changes are validated before
-    /// being applied to ensure system integrity.
-    /// </summary>
-    /// <param name="databaseId">
-    /// The unique identifier of the database to be updated.
-    /// This ID must correspond to an existing database in the system.
-    /// </param>
-    /// <param name="databaseName">
-    /// The new name for the database. Must be a valid SQL Server database name.
-    /// The name should follow SQL Server naming conventions and should not contain special characters.
-    /// </param>
-    /// <param name="databaseServerId">
-    /// The unique identifier of the new database server. This ID must correspond to
-    /// an existing database server in the system.
-    /// </param>
-    /// <param name="databaseTypeId">
-    /// The unique identifier of the new database type. This determines the category
-    /// and intended use of the database.
-    /// </param>
-    /// <param name="databaseStatus">
-    /// The new status for the database (e.g., Active, Inactive).
-    /// This status determines the database's availability and usage.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task completes when
-    /// all database properties have been successfully updated.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when the specified database, server, or type does not exist in the system.</exception>
-    /// <exception cref="ArgumentException">Thrown when the database name is null, empty, or invalid, or when attempting to update with invalid parameters.</exception>
-    /// <exception cref="ValidationException">Thrown when the database name violates business validation rules or when the database configuration is invalid.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when a database with the same name already exists on the server or when the update operation is not allowed.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when the update operation fails.</exception>
-    public async Task UpdateDatabase(
-        int databaseId,
-        string databaseName,
-        int databaseServerId,
-        byte databaseTypeId,
-        Status databaseStatus
-    )
-    {
-        await _databaseService.UpdateDatabase(
-            databaseId,
-            databaseName,
-            databaseServerId,
-            databaseTypeId,
-            databaseStatus
-        );
-    }
-
-    /// <summary>
-    /// Updates the server assignment for an existing database.
-    /// This method allows for moving a database to a different server while maintaining
-    /// all other database properties. The operation includes validation to ensure the
-    /// server change is valid and safe.
-    /// </summary>
-    /// <param name="databaseId">
-    /// The unique identifier of the database to be updated.
-    /// This ID must correspond to an existing database in the system.
-    /// </param>
-    /// <param name="databaseServerId">
-    /// The unique identifier of the new database server. This ID must correspond to
-    /// an existing database server in the system.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task completes when
-    /// the database server has been successfully updated.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when the specified database or server does not exist in the system.</exception>
-    /// <exception cref="ArgumentException">Thrown when the server ID is invalid.</exception>
-    /// <exception cref="ValidationException">Thrown when the server change violates validation rules.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the server change is not allowed or when the database is in use.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when the update operation fails.</exception>
-    public async Task UpdateDatabase(int databaseId, int databaseServerId)
-    {
-        await _databaseService.UpdateDatabase(databaseId, databaseServerId);
-    }
-
-    /// <summary>
-    /// Updates the type of an existing database.
-    /// This method allows for changing the logical type of a database (e.g., from Operational
-    /// to Analytical) while maintaining all other database properties. The operation includes
-    /// validation to ensure the type change is valid and safe.
-    /// </summary>
-    /// <param name="databaseId">
-    /// The unique identifier of the database to be updated.
-    /// This ID must correspond to an existing database in the system.
-    /// </param>
-    /// <param name="databaseTypeId">
-    /// The unique identifier of the new database type. This determines the category
-    /// and intended use of the database.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task completes when
-    /// the database type has been successfully updated.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when the specified database or type does not exist in the system.</exception>
-    /// <exception cref="ArgumentException">Thrown when the type ID is invalid.</exception>
-    /// <exception cref="ValidationException">Thrown when the type change violates validation rules.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the type change is not allowed or when the database is in use.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when the update operation fails.</exception>
-    public async Task UpdateDatabase(int databaseId, byte databaseTypeId)
-    {
-        await _databaseService.UpdateDatabase(databaseId, databaseTypeId);
-    }
-
-    /// <summary>
-    /// Updates the name of an existing database.
-    /// This method allows for renaming a database while maintaining all other database
-    /// properties. The operation includes validation to ensure the new name is valid
-    /// and not already in use.
-    /// </summary>
-    /// <param name="databaseId">
-    /// The unique identifier of the database to be updated.
-    /// This ID must correspond to an existing database in the system.
-    /// </param>
-    /// <param name="databaseName">
-    /// The new name for the database. Must be a valid SQL Server database name.
-    /// The name should follow SQL Server naming conventions and should not contain special characters.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task completes when
-    /// the database name has been successfully updated.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when the specified database does not exist in the system.</exception>
-    /// <exception cref="ArgumentException">Thrown when the database name is null, empty, or invalid.</exception>
-    /// <exception cref="ValidationException">Thrown when the database name violates business validation rules.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when a database with the same name already exists or when the database is in use.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when the update operation fails.</exception>
-    public async Task UpdateDatabase(int databaseId, string databaseName)
-    {
-        await _databaseService.UpdateDatabase(databaseId, databaseName);
-    }
-
-    /// <summary>
-    /// Updates the status of an existing database.
-    /// This method allows for changing the operational status of a database (e.g., from
-    /// Active to Inactive) while maintaining all other database properties. The operation
-    /// includes validation to ensure the status change is valid and safe.
-    /// </summary>
-    /// <param name="databaseId">
-    /// The unique identifier of the database to be updated.
-    /// This ID must correspond to an existing database in the system.
-    /// </param>
-    /// <param name="databaseStatus">
-    /// The new status for the database (e.g., Active, Inactive).
-    /// This status determines the database's availability and usage.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task completes when
-    /// the database status has been successfully updated.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when the specified database does not exist in the system.</exception>
-    /// <exception cref="ArgumentException">Thrown when the status value is invalid.</exception>
-    /// <exception cref="ValidationException">Thrown when the status change violates validation rules.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the status change is not allowed or when the database is in use.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when the update operation fails.</exception>
-    public async Task UpdateDatabase(int databaseId, Status databaseStatus)
-    {
-        await _databaseService.UpdateDatabase(databaseId, databaseStatus);
-    }
-
-    /// <summary>
-    /// Updates the trusted connection setting for an existing database.
-    /// This method allows for changing the authentication method of a database between
-    /// Windows authentication and SQL Server authentication. The operation includes
-    /// validation to ensure the change is valid and safe.
-    /// </summary>
-    /// <param name="databaseId">
-    /// The unique identifier of the database to be updated.
-    /// This ID must correspond to an existing database in the system.
-    /// </param>
-    /// <param name="useTrustedConnection">
-    /// A flag indicating whether to use Windows authentication for the database connection.
-    /// If set to true, the database will be configured to use Windows authentication instead
-    /// of SQL Server authentication.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task completes when
-    /// the trusted connection setting has been successfully updated.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when the specified database does not exist in the system.</exception>
-    /// <exception cref="ValidationException">Thrown when the authentication change violates validation rules.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the authentication change is not allowed or when the database is in use.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when the update operation fails.</exception>
-    public async Task UpdateDatabase(int databaseId, bool useTrustedConnection)
-    {
-        await _databaseService.UpdateDatabase(databaseId, useTrustedConnection);
-    }
-
-    /// <summary>
     /// Deletes a database from the system without physical removal.
     /// This method removes the database from the DbLocator system while keeping the
     /// physical database intact on the server. This is useful for temporarily removing
@@ -493,5 +301,56 @@ public partial class Locator
     public async Task DeleteDatabase(int databaseId, bool deleteDatabase)
     {
         await _databaseService.DeleteDatabase(databaseId, deleteDatabase);
+    }
+
+#nullable enable
+    /// <summary>
+    /// Updates an existing database with the specified configuration.
+    /// This method allows updating all properties of a database, including its name, server, type,
+    /// trusted connection setting, and status. Only the provided parameters will be updated; others will remain unchanged.
+    /// </summary>
+    /// <param name="databaseId">
+    /// The unique identifier of the database to be updated. This ID must correspond to an existing database in the system.
+    /// </param>
+    /// <param name="databaseName">
+    /// The new name for the database. If null, the name will not be changed.
+    /// </param>
+    /// <param name="databaseServerId">
+    /// The unique identifier of the database server where the database will be moved. If null, the server will not be changed.
+    /// </param>
+    /// <param name="databaseTypeId">
+    /// The unique identifier of the database type. If null, the type will not be changed.
+    /// </param>
+    /// <param name="useTrustedConnection">
+    /// A flag indicating whether to use Windows authentication for the database connection. If null, this setting will not be changed.
+    /// </param>
+    /// <param name="status">
+    /// The new status of the database (e.g., Active, Inactive). If null, the status will not be changed.
+    /// </param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task completes when the database has been successfully updated.
+    /// </returns>
+    /// <exception cref="KeyNotFoundException">Thrown when the specified database does not exist in the system.</exception>
+    /// <exception cref="ArgumentException">Thrown when the parameters are invalid or violate business rules.</exception>
+    /// <exception cref="ValidationException">Thrown when the update violates validation rules.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the update operation is not allowed.</exception>
+    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when the update operation fails.</exception>
+    public async Task UpdateDatabase(
+        int databaseId,
+        string? databaseName,
+        int? databaseServerId,
+        byte? databaseTypeId,
+        bool? useTrustedConnection,
+        Status? status
+    )
+    {
+        await _databaseService.UpdateDatabase(
+            databaseId,
+            databaseName,
+            databaseServerId,
+            databaseTypeId,
+            useTrustedConnection,
+            status
+        );
     }
 }

@@ -1,3 +1,5 @@
+#nullable enable
+
 using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.Connections.CreateConnection;
@@ -32,31 +34,15 @@ internal class ConnectionService(
     }
 
     public async Task<SqlConnection> GetConnection(
-        int tenantId,
-        int databaseTypeId,
-        DatabaseRole[] roles
+        int? tenantId = null,
+        int? databaseTypeId = null,
+        int? connectionId = null,
+        string? tenantCode = null,
+        DatabaseRole[]? roles = null
     )
     {
         return await _getConnection.Handle(
-            new GetConnectionQuery(tenantId, databaseTypeId, null, null, roles)
-        );
-    }
-
-    public async Task<SqlConnection> GetConnection(int connectionId, DatabaseRole[] roles)
-    {
-        return await _getConnection.Handle(
-            new GetConnectionQuery(null, null, connectionId, null, roles)
-        );
-    }
-
-    public async Task<SqlConnection> GetConnection(
-        string tenantCode,
-        int databaseTypeId,
-        DatabaseRole[] roles
-    )
-    {
-        return await _getConnection.Handle(
-            new GetConnectionQuery(null, databaseTypeId, null, tenantCode, roles)
+            new GetConnectionQuery(tenantId, databaseTypeId, connectionId, tenantCode, roles)
         );
     }
 

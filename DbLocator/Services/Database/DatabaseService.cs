@@ -44,11 +44,9 @@ internal class DatabaseService(
         );
     }
 
-    public Task DeleteDatabase(int databaseId) => DeleteDatabase(databaseId, true);
-
-    public async Task DeleteDatabase(int databaseId, bool deleteDatabase)
+    public async Task DeleteDatabase(int databaseId, bool? deleteDatabase = true)
     {
-        await _deleteDatabase.Handle(new DeleteDatabaseCommand(databaseId));
+        await _deleteDatabase.Handle(new DeleteDatabaseCommand(databaseId, deleteDatabase));
     }
 
     public async Task<List<Domain.Database>> GetDatabases()
@@ -63,38 +61,7 @@ internal class DatabaseService(
         return await _getDatabase.Handle(new GetDatabaseQuery(databaseId));
     }
 
-    public Task UpdateDatabase(
-        int databaseId,
-        string databaseName,
-        int databaseServerId,
-        byte databaseTypeId,
-        Status databaseStatus
-    ) =>
-        UpdateDatabase(
-            databaseId,
-            databaseName,
-            databaseServerId,
-            databaseTypeId,
-            false,
-            databaseStatus
-        );
-
-    public Task UpdateDatabase(int databaseId, int databaseServerId) =>
-        UpdateDatabase(databaseId, null, databaseServerId, null, null);
-
-    public Task UpdateDatabase(int databaseId, byte databaseTypeId) =>
-        UpdateDatabase(databaseId, null, null, databaseTypeId, null);
-
-    public Task UpdateDatabase(int databaseId, string databaseName) =>
-        UpdateDatabase(databaseId, databaseName, null, null, null);
-
-    public Task UpdateDatabase(int databaseId, Status databaseStatus) =>
-        UpdateDatabase(databaseId, null, null, null, null, databaseStatus);
-
-    public Task UpdateDatabase(int databaseId, bool useTrustedConnection) =>
-        UpdateDatabase(databaseId, null, null, null, useTrustedConnection);
-
-    private async Task UpdateDatabase(
+    public async Task UpdateDatabase(
         int databaseId,
         string? databaseName,
         int? databaseServerId,

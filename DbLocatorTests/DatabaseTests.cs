@@ -131,6 +131,7 @@ public class DatabaseTests
                     "new-name",
                     -1,
                     _databaseTypeId,
+                    null,
                     Status.Active
                 )
         );
@@ -149,6 +150,7 @@ public class DatabaseTests
                     "new-name",
                     _databaseServerID,
                     255,
+                    false,
                     Status.Active
                 )
         );
@@ -235,7 +237,7 @@ public class DatabaseTests
             null
         );
 
-        await _dbLocator.UpdateDatabase(database.Id, newServerId);
+        await _dbLocator.UpdateDatabase(database.Id, null, newServerId, null, null, null);
 
         var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
         Assert.NotNull(updatedDatabase);
@@ -251,7 +253,7 @@ public class DatabaseTests
         var newDatabaseTypeName = TestHelpers.GetRandomString();
         var newDatabaseTypeId = await _dbLocator.CreateDatabaseType(newDatabaseTypeName);
 
-        await _dbLocator.UpdateDatabase(database.Id, newDatabaseTypeId);
+        await _dbLocator.UpdateDatabase(database.Id, null, null, newDatabaseTypeId, null, null);
 
         var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
         Assert.NotNull(updatedDatabase);
@@ -265,7 +267,7 @@ public class DatabaseTests
         var database = await CreateDatabaseAsync(dbName);
 
         var newDatabaseName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabase(database.Id, newDatabaseName);
+        await _dbLocator.UpdateDatabase(database.Id, newDatabaseName, null, null, null, null);
 
         var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
         Assert.NotNull(updatedDatabase);
@@ -278,7 +280,7 @@ public class DatabaseTests
         var dbName = TestHelpers.GetRandomString();
         var database = await CreateDatabaseAsync(dbName);
 
-        await _dbLocator.UpdateDatabase(database.Id, Status.Inactive);
+        await _dbLocator.UpdateDatabase(database.Id, null, null, null, null, Status.Inactive);
 
         var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
         Assert.NotNull(updatedDatabase);
@@ -304,7 +306,7 @@ public class DatabaseTests
         var database = await CreateDatabaseAsync(dbName);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.UpdateDatabase(database.Id, 34345)
+            async () => await _dbLocator.UpdateDatabase(database.Id, null, 34345, null, null, null)
         );
     }
 
@@ -315,7 +317,7 @@ public class DatabaseTests
         var database = await CreateDatabaseAsync(dbName);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.UpdateDatabase(database.Id, 2387)
+            async () => await _dbLocator.UpdateDatabase(database.Id, null, null, unchecked((byte)2387), null, null)
         );
     }
 
@@ -347,7 +349,7 @@ public class DatabaseTests
         var database = await CreateDatabaseAsync(dbName);
         Assert.False(database.UseTrustedConnection);
 
-        await _dbLocator.UpdateDatabase(database.Id, true);
+        await _dbLocator.UpdateDatabase(database.Id, null, null, null, true, null);
 
         var updatedDatabase = await _dbLocator.GetDatabase(database.Id);
         Assert.NotNull(updatedDatabase);

@@ -48,7 +48,7 @@ public partial class Locator
     /// <exception cref="SqlException">Thrown when there is an error establishing the connection to the database server.</exception>
     public async Task<SqlConnection> GetConnection(int connectionId, DatabaseRole[]? roles = null)
     {
-        return await _connectionService.GetConnection(connectionId, roles);
+        return await _connectionService.GetConnection(null, null, connectionId, null, roles);
     }
 
     /// <summary>
@@ -83,7 +83,7 @@ public partial class Locator
         DatabaseRole[]? roles = null
     )
     {
-        return await _connectionService.GetConnection(tenantId, databaseTypeId, roles);
+        return await _connectionService.GetConnection(tenantId, databaseTypeId, null, null, roles);
     }
 
     /// <summary>
@@ -119,7 +119,13 @@ public partial class Locator
         DatabaseRole[]? roles = null
     )
     {
-        return await _connectionService.GetConnection(tenantCode, databaseTypeId, roles);
+        return await _connectionService.GetConnection(
+            null,
+            null,
+            databaseTypeId,
+            tenantCode,
+            roles
+        );
     }
 
     /// <summary>

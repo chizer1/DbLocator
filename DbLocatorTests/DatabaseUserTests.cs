@@ -645,7 +645,7 @@ public class DatabaseUserTests : IAsyncLifetime
             null
         );
 
-        await _dbLocator.UpdateDatabase(databaseId, newServerId);
+        await _dbLocator.UpdateDatabase(databaseId, null, newServerId, null, null, null);
 
         var updatedDatabase = await _dbLocator.GetDatabase(databaseId);
         Assert.Equal(newServerId, updatedDatabase.Server.Id);
@@ -685,6 +685,7 @@ public class DatabaseUserTests : IAsyncLifetime
             newDatabaseName,
             newServerId,
             newTypeId,
+            null,
             Status.Inactive
         );
 
