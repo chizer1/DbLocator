@@ -772,13 +772,13 @@ public class DatabaseUserTests : IAsyncLifetime
         // Act
         await _dbLocator.DeleteDatabaseUser(user.Id);
 
-        // Assert
-        var users = await _dbLocator.GetDatabaseUsers();
-        Assert.DoesNotContain(users, u => u.Id == user.Id);
-
         // Verify cache is cleared
         var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
         Assert.Null(cachedUsers);
+
+        // Assert
+        var users = await _dbLocator.GetDatabaseUsers();
+        Assert.DoesNotContain(users, u => u.Id == user.Id);
     }
 
     [Fact]
