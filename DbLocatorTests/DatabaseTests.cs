@@ -230,12 +230,12 @@ public class DatabaseTests
         var database = await CreateDatabaseAsync(dbName);
 
         var newIpAddress = TestHelpers.GetRandomIpAddressString();
-
+        var newFqdn = $"{TestHelpers.GetRandomString()}.example.com";
         var newServerId = await _dbLocator.CreateDatabaseServer(
             "testservername987",
             null,
             newIpAddress,
-            "test.example.com",
+            newFqdn,
             false
         );
 
