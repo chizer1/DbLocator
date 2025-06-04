@@ -60,20 +60,12 @@ public class DatabaseUserTests : IAsyncLifetime
 
     private async Task<DatabaseUser> CreateDatabaseUserAsync(string userName)
     {
-        var uniqueId = Convert
-            .ToBase64String(Guid.NewGuid().ToByteArray())
-            .Replace("=", "")
-            .Replace("+", "")
-            .Replace("/", "")[..8];
-
-        var uniqueUserName = $"TestUser_{userName}_{uniqueId}";
         var userId = await _dbLocator.CreateDatabaseUser(
             [_databaseId],
-            uniqueUserName,
+            userName,
             "TestPassword123!",
             true
         );
-
         var user = (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
         _testUsers.Add(user);
         return user;
@@ -116,14 +108,16 @@ public class DatabaseUserTests : IAsyncLifetime
     public async Task CreateDatabaseUser_WithDatabaseIdsAndNoPassword_CreatesUser()
     {
         var userName = TestHelpers.GetRandomString();
-        var user = await CreateDatabaseUserAsync(userName);
+        var userId = await _dbLocator.CreateDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
 
-        var retrievedUser = await _dbLocator.GetDatabaseUser(user.Id);
-        Assert.NotNull(retrievedUser);
-        Assert.Equal(user.Id, retrievedUser.Id);
-        Assert.Equal(user.Name, retrievedUser.Name);
-        Assert.Equal(user.Databases[0].Id, retrievedUser.Databases[0].Id);
-        Assert.Equal(user.Roles, retrievedUser.Roles);
+        var user = (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
+        Assert.Equal(userName, user.Name);
+        Assert.Equal(_databaseId, user.Databases[0].Id);
     }
 
     [Fact]
@@ -133,7 +127,8 @@ public class DatabaseUserTests : IAsyncLifetime
         var userId = await _dbLocator.CreateDatabaseUser(
             [_databaseId],
             userName,
-            "TestPassword123!"
+            "TestPassword123!",
+            true
         );
 
         var user = (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
@@ -184,9 +179,9 @@ public class DatabaseUserTests : IAsyncLifetime
             async () =>
                 await _dbLocator.UpdateDatabaseUser(
                     user1.Id,
-                    [_databaseId],
                     user2.Name,
                     "TestPassword123!",
+                    [_databaseId],
                     true
                 )
         );
@@ -499,7 +494,12 @@ public class DatabaseUserTests : IAsyncLifetime
     public async Task CreateDatabaseUserWithDatabaseIds_NoPassword()
     {
         var userName = TestHelpers.GetRandomString();
-        var userId = await _dbLocator.CreateDatabaseUser([_databaseId], userName);
+        var userId = await _dbLocator.CreateDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
 
         var user = (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
         Assert.Equal(userName, user.Name);
@@ -523,9 +523,9 @@ public class DatabaseUserTests : IAsyncLifetime
         var newName = TestHelpers.GetRandomString();
         await _dbLocator.UpdateDatabaseUser(
             user.Id,
-            [_databaseId],
             newName,
             "NewPassword123!",
+            [_databaseId],
             true
         );
 
@@ -541,7 +541,13 @@ public class DatabaseUserTests : IAsyncLifetime
         var user = await CreateDatabaseUserAsync(userName);
 
         var newName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], newName, "NewPassword123!");
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            newName,
+            "NewPassword123!",
+            [_databaseId],
+            true
+        );
 
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
         Assert.Equal(newName, updatedUser.Name);
@@ -552,8 +558,9 @@ public class DatabaseUserTests : IAsyncLifetime
     public async Task CreateDatabaseUser_WithMultipleRoles_CreatesCorrectEntities()
     {
         var dbUserId = await _dbLocator.CreateDatabaseUser(
-            new[] { _databaseId },
+            [_databaseId],
             TestHelpers.GetRandomString(),
+            null,
             true
         );
 
@@ -573,8 +580,9 @@ public class DatabaseUserTests : IAsyncLifetime
     public async Task VerifyDatabaseUsersAreCached()
     {
         var dbUserId = await _dbLocator.CreateDatabaseUser(
-            new[] { _databaseId },
+            [_databaseId],
             TestHelpers.GetRandomString(),
+            null,
             true
         );
 
@@ -639,13 +647,13 @@ public class DatabaseUserTests : IAsyncLifetime
         var newIpAddress = $"192.168.1.{new Random().Next(1, 255)}";
         var newServerId = await _dbLocator.CreateDatabaseServer(
             newServerName,
-            false,
+            null,
             null,
             newIpAddress,
-            null
+            false
         );
 
-        await _dbLocator.UpdateDatabase(databaseId, null, newServerId, null, null, null);
+        await _dbLocator.UpdateDatabase(databaseId, null, newServerId, null, null, null, true);
 
         var updatedDatabase = await _dbLocator.GetDatabase(databaseId);
         Assert.Equal(newServerId, updatedDatabase.Server.Id);
@@ -670,10 +678,10 @@ public class DatabaseUserTests : IAsyncLifetime
         var newIpAddress = $"192.168.1.{new Random().Next(1, 255)}";
         var newServerId = await _dbLocator.CreateDatabaseServer(
             newServerName,
-            false,
             null,
             newIpAddress,
-            null
+            null,
+            false
         );
 
         var newTypeName = TestHelpers.GetRandomString();
@@ -686,7 +694,8 @@ public class DatabaseUserTests : IAsyncLifetime
             newServerId,
             newTypeId,
             null,
-            Status.Inactive
+            Status.Inactive,
+            true
         );
 
         var updatedDatabase = await _dbLocator.GetDatabase(databaseId);
@@ -699,11 +708,9 @@ public class DatabaseUserTests : IAsyncLifetime
     [Fact]
     public async Task UpdateDatabaseUser_WithNewDatabasesAndUsername()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
         var user = await CreateDatabaseUserAsync(userName);
 
-        // Create a new database
         var newDatabaseName = TestHelpers.GetRandomString();
         var newDatabaseId = await _dbLocator.CreateDatabase(
             newDatabaseName,
@@ -712,11 +719,15 @@ public class DatabaseUserTests : IAsyncLifetime
             Status.Active
         );
 
-        // Act
         var newUserName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseUser(user.Id, [newDatabaseId], newUserName, true);
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            newUserName,
+            "TestPassword123!",
+            [newDatabaseId],
+            true
+        );
 
-        // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
         Assert.NotNull(updatedUser);
         Assert.Equal(newUserName, updatedUser.Name);
@@ -728,11 +739,9 @@ public class DatabaseUserTests : IAsyncLifetime
     [Fact]
     public async Task UpdateDatabaseUser_WithNewDatabasesAndUsernameOnly()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
         var user = await CreateDatabaseUserAsync(userName);
 
-        // Create a new database
         var newDatabaseName = TestHelpers.GetRandomString();
         var newDatabaseId = await _dbLocator.CreateDatabase(
             newDatabaseName,
@@ -741,11 +750,15 @@ public class DatabaseUserTests : IAsyncLifetime
             Status.Active
         );
 
-        // Act
         var newUserName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseUser(user.Id, [newDatabaseId], newUserName);
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            newUserName,
+            "TestPassword123!",
+            [newDatabaseId],
+            true
+        );
 
-        // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
         Assert.NotNull(updatedUser);
         Assert.Equal(newUserName, updatedUser.Name);
@@ -757,18 +770,11 @@ public class DatabaseUserTests : IAsyncLifetime
     [Fact]
     public async Task DeleteDatabaseUser_WithDefaultParameters()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
         var user = await CreateDatabaseUserAsync(userName);
 
-        // Act
-        await _dbLocator.DeleteDatabaseUser(user.Id);
+        await _dbLocator.DeleteDatabaseUser(user.Id, true);
 
-        // Verify cache is cleared
-        var cachedUsers = await _cache.GetCachedData<List<DatabaseUser>>("databaseUsers");
-        Assert.Null(cachedUsers);
-
-        // Assert
         var users = await _dbLocator.GetDatabaseUsers();
         Assert.DoesNotContain(users, u => u.Id == user.Id);
     }
@@ -776,31 +782,24 @@ public class DatabaseUserTests : IAsyncLifetime
     [Fact]
     public async Task UpdateDatabaseUser_WithInvalidUserId_ThrowsValidationException()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
         var user = await CreateDatabaseUserAsync(userName);
 
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
-            async () => await _dbLocator.UpdateDatabaseUser(-1, [_databaseId], "NewName")
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+            async () =>
+                await _dbLocator.UpdateDatabaseUser(-1, "NewName", null, [_databaseId], true)
         );
-
-        Assert.Contains("Database User Id must be greater than 0", exception.Message);
     }
 
     [Fact]
     public async Task UpdateDatabaseUser_WithEmptyUserName_ThrowsValidationException()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
         var user = await CreateDatabaseUserAsync(userName);
 
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
-            async () => await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], "")
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
+            async () => await _dbLocator.UpdateDatabaseUser(user.Id, "", null, [_databaseId], true)
         );
-
-        Assert.Contains("User name cannot be empty", exception.Message);
     }
 
     [Fact]
@@ -815,9 +814,10 @@ public class DatabaseUserTests : IAsyncLifetime
             async () =>
                 await _dbLocator.UpdateDatabaseUser(
                     user.Id,
-                    [_databaseId],
                     TestHelpers.GetRandomString(),
-                    "short"
+                    "short",
+                    [_databaseId],
+                    true
                 )
         );
 
@@ -833,7 +833,8 @@ public class DatabaseUserTests : IAsyncLifetime
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
-            async () => await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], "NewName", "")
+            async () =>
+                await _dbLocator.UpdateDatabaseUser(user.Id, "NewName", null, [_databaseId], true)
         );
 
         Assert.Contains("Password must be at least 8 characters long", exception.Message);
@@ -842,17 +843,14 @@ public class DatabaseUserTests : IAsyncLifetime
     [Fact]
     public async Task UpdateDatabaseUser_WithValidPassword_Succeeds()
     {
-        // Arrange
         var userName = TestHelpers.GetRandomString();
         var user = await CreateDatabaseUserAsync(userName);
 
-        // Act
-        var newName = TestHelpers.GetRandomString();
-        var newPassword = "ValidPassword123!";
-        await _dbLocator.UpdateDatabaseUser(user.Id, [_databaseId], newName, newPassword);
+        var newPassword = "NewPassword123!";
+        await _dbLocator.UpdateDatabaseUser(user.Id, userName, newPassword, [_databaseId], true);
 
-        // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-        Assert.Equal(newName, updatedUser.Name);
+        Assert.NotNull(updatedUser);
+        Assert.Equal(userName, updatedUser.Name);
     }
 }

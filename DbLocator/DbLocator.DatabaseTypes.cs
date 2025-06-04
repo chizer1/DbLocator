@@ -13,7 +13,7 @@ namespace DbLocator;
 /// - Deletion of database types
 ///
 /// The database type management system supports:
-/// - Different database technologies (SQL Server, MySQL, PostgreSQL, etc.)
+/// - SQL Server database categorization (e.g., Operational, Analytical, Reporting)
 /// - Type-specific configuration and validation
 /// - Version compatibility tracking
 /// - Database type dependencies

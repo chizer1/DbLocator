@@ -166,14 +166,13 @@ public partial class Locator
     /// This includes permission issues, connection problems, or database-specific errors.</exception>
     public async Task UpdateDatabaseServer(int databaseServerId, string databaseServerName)
     {
-        var server = await _databaseServerService.GetDatabaseServer(databaseServerId);
         await _databaseServerService.UpdateDatabaseServer(
             databaseServerId,
             databaseServerName,
-            server.HostName,
-            server.FullyQualifiedDomainName,
-            server.IpAddress,
-            server.IsLinkedServer
+            null,
+            null,
+            null,
+            null
         );
     }
 
@@ -212,14 +211,13 @@ public partial class Locator
         string databaseServerIpAddress
     )
     {
-        var server = await _databaseServerService.GetDatabaseServer(databaseServerId);
         await _databaseServerService.UpdateDatabaseServer(
             databaseServerId,
-            server.Name,
-            server.HostName,
+            null,
+            null,
             databaseServerFullyQualifiedDomainName,
             databaseServerIpAddress,
-            server.IsLinkedServer
+            null
         );
     }
 }

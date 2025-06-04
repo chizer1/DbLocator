@@ -30,8 +30,16 @@ namespace DbLocator;
 ///     <item><description>Database Type Management: Support for different database types and configurations</description></item>
 /// </list>
 ///
-/// The class implements caching mechanisms for improved performance and supports encryption for sensitive data.
+/// The class implements several key features:
+/// <list type="bullet">
+///     <item><description>Distributed Caching: Improves performance by caching frequently accessed data using the provided IDistributedCache implementation</description></item>
+///     <item><description>Data Encryption: Secures sensitive information using the provided encryption key for all data-at-rest operations</description></item>
+///     <item><description>Connection Pooling: Efficiently manages database connections through connection pooling</description></item>
+///     <item><description>Automatic Migrations: Ensures database schema is always up-to-date with the latest version</description></item>
+/// </list>
+///
 /// All operations are performed through dedicated services that handle specific aspects of database management.
+/// The class is designed to be thread-safe and can be used in multi-threaded environments.
 /// </summary>
 public partial class Locator
 {
@@ -47,6 +55,9 @@ public partial class Locator
     /// Gets a SQL connection instance for direct interaction with the DbLocator database.
     /// This connection is initialized during the constructor and can be used for custom SQL operations
     /// that are not covered by the standard service methods.
+    ///
+    /// Note: This connection is created during initialization and should be disposed of by the caller
+    /// when no longer needed. The connection is not automatically managed by the class.
     /// </summary>
     /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when the connection fails.</exception>
     public SqlConnection SqlConnection { get; }

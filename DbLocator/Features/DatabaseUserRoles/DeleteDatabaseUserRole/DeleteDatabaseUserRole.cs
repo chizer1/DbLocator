@@ -65,9 +65,7 @@ internal class DeleteDatabaseUserRoleHandler(
             );
 
         if (databaseUserRoleEntity == null)
-        {
             return;
-        }
 
         dbContext.Set<DatabaseUserRoleEntity>().Remove(databaseUserRoleEntity);
         await dbContext.SaveChangesAsync(cancellationToken);

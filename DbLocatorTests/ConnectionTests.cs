@@ -100,6 +100,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var dbUserId = await _dbLocator.CreateDatabaseUser(
             [databaseId],
             TestHelpers.GetRandomString(),
+            "TestPassword123!",
             true
         );
 
@@ -134,6 +135,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var dbUserId = await _dbLocator.CreateDatabaseUser(
             [databaseId],
             TestHelpers.GetRandomString(),
+            "TestPassword123!",
             true
         );
 
@@ -204,6 +206,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var dbUserId = await _dbLocator.CreateDatabaseUser(
             [connectionId],
             TestHelpers.GetRandomString(),
+            "TestPassword123!",
             true
         );
 
@@ -268,6 +271,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var dbUserId = await _dbLocator.CreateDatabaseUser(
             [databaseId],
             TestHelpers.GetRandomString(),
+            "TestPassword123!",
             true
         );
 
@@ -303,6 +307,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var dbUserId = await _dbLocator.CreateDatabaseUser(
             [databaseId],
             TestHelpers.GetRandomString(),
+            "TestPassword123!",
             true
         );
 
@@ -461,6 +466,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var dbUserId = await _dbLocator.CreateDatabaseUser(
             [databaseId],
             TestHelpers.GetRandomString(),
+            "TestPassword123!",
             true
         );
 
@@ -502,6 +508,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var dbUserId = await _dbLocator.CreateDatabaseUser(
             [databaseId],
             TestHelpers.GetRandomString(),
+            "TestPassword123!",
             true
         );
 
@@ -532,6 +539,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var dbUserId = await _dbLocator.CreateDatabaseUser(
             [databaseId],
             TestHelpers.GetRandomString(),
+            "TestPassword123!",
             true
         );
 

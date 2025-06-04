@@ -59,7 +59,7 @@ internal class CreateDatabaseUserHandler(
             )
             .ToList();
 
-        if (nonExistentDatabaseIds.Any())
+        if (nonExistentDatabaseIds.Count != 0)
         {
             throw new KeyNotFoundException(
                 $"Database(s) not found with ID(s): {string.Join(", ", nonExistentDatabaseIds)}"

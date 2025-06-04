@@ -92,7 +92,7 @@ public partial class Locator
     /// or database-specific errors.</exception>
     public async Task CreateDatabaseUserRole(int databaseUserId, DatabaseRole userRole)
     {
-        await _databaseUserRoleService.CreateDatabaseUserRole(databaseUserId, userRole);
+        await _databaseUserRoleService.CreateDatabaseUserRole(databaseUserId, userRole, false);
     }
 
     /// <summary>
@@ -109,7 +109,7 @@ public partial class Locator
     /// The <see cref="DatabaseRole"/> to be removed from the database user. This role
     /// must be currently assigned to the user and will be validated before removal.
     /// </param>
-    /// <param name="deleteDatabaseUserRole">
+    /// <param name="affectDatabase">
     /// A flag indicating whether to remove the role from the database servers.
     /// When true, the role will be removed both from the DbLocator system and from the
     /// actual database servers. When false, the role will only be removed from the
@@ -132,13 +132,13 @@ public partial class Locator
     public async Task DeleteDatabaseUserRole(
         int databaseUserId,
         DatabaseRole userRole,
-        bool deleteDatabaseUserRole
+        bool affectDatabase
     )
     {
         await _databaseUserRoleService.DeleteDatabaseUserRole(
             databaseUserId,
             userRole,
-            deleteDatabaseUserRole
+            affectDatabase
         );
     }
 

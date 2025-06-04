@@ -4,7 +4,7 @@ using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Features.Databases.CreateDatabase;
 using DbLocator.Features.Databases.DeleteDatabase;
-using DbLocator.Features.Databases.GetDatabase;
+using DbLocator.Features.Databases.GetDatabaseById;
 using DbLocator.Features.Databases.GetDatabases;
 using DbLocator.Features.Databases.UpdateDatabase;
 using DbLocator.Utilities;
@@ -19,7 +19,7 @@ internal class DatabaseService(
 {
     private readonly CreateDatabaseHandler _createDatabase = new(dbContextFactory, cache);
     private readonly DeleteDatabaseHandler _deleteDatabase = new(dbContextFactory, cache);
-    private readonly GetDatabaseHandler _getDatabase = new(dbContextFactory, cache);
+    private readonly GetDatabaseByIdHandler _getDatabaseById = new(dbContextFactory, cache);
     private readonly GetDatabasesHandler _getDatabases = new(dbContextFactory, cache);
     private readonly UpdateDatabaseHandler _updateDatabase = new(dbContextFactory, cache);
 
@@ -58,7 +58,7 @@ internal class DatabaseService(
 
     public async Task<Domain.Database> GetDatabase(int databaseId)
     {
-        return await _getDatabase.Handle(new GetDatabaseQuery(databaseId));
+        return await _getDatabaseById.Handle(new GetDatabaseByIdQuery(databaseId));
     }
 
     public async Task UpdateDatabase(

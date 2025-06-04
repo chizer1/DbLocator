@@ -3,7 +3,7 @@
 using DbLocator.Db;
 using DbLocator.Features.DatabaseUsers.CreateDatabaseUser;
 using DbLocator.Features.DatabaseUsers.DeleteDatabaseUser;
-using DbLocator.Features.DatabaseUsers.GetDatabaseUser;
+using DbLocator.Features.DatabaseUsers.GetDatabaseUserById;
 using DbLocator.Features.DatabaseUsers.GetDatabaseUsers;
 using DbLocator.Features.DatabaseUsers.UpdateDatabaseUser;
 using DbLocator.Utilities;
@@ -20,7 +20,7 @@ internal class DatabaseUserService(
     private readonly CreateDatabaseUserHandler _CreateDatabaseUser =
         new(dbContextFactory, encryption, cache);
     private readonly DeleteDatabaseUserHandler _deleteDatabaseUser = new(dbContextFactory, cache);
-    private readonly GetDatabaseUserHandler _getDatabaseUser = new(dbContextFactory, cache);
+    private readonly GetDatabaseUserByIdHandler _getDatabaseUserById = new(dbContextFactory, cache);
     private readonly GetDatabaseUsersHandler _getDatabaseUsers = new(dbContextFactory, cache);
     private readonly UpdateDatabaseUserHandler _updateDatabaseUser =
         new(dbContextFactory, encryption, cache);
@@ -53,7 +53,7 @@ internal class DatabaseUserService(
 
     public async Task<Domain.DatabaseUser> GetDatabaseUser(int databaseUserId)
     {
-        return await _getDatabaseUser.Handle(new GetDatabaseUserQuery(databaseUserId));
+        return await _getDatabaseUserById.Handle(new GetDatabaseUserByIdQuery(databaseUserId));
     }
 
     public async Task UpdateDatabaseUser(

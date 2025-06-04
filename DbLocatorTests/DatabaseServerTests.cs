@@ -35,10 +35,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var databaseServerIpAddress = TestHelpers.GetRandomIpAddressString();
         await _dbLocator.CreateDatabaseServer(
             databaseServerName,
-            false,
             null,
             databaseServerIpAddress,
-            null
+            null,
+            false
         );
 
         var databaseServers = (await _dbLocator.GetDatabaseServers())
@@ -55,10 +55,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var databaseServerIpAddress = TestHelpers.GetRandomIpAddressString();
         var databaseServerId = await _dbLocator.CreateDatabaseServer(
             databaseServerName,
-            false,
             null,
             databaseServerIpAddress,
-            null
+            null,
+            false
         );
 
         await _dbLocator.DeleteDatabaseServer(databaseServerId);
@@ -75,10 +75,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var databaseServerIpAddress = TestHelpers.GetRandomIpAddressString();
         var databaseServerId = await _dbLocator.CreateDatabaseServer(
             databaseServerName,
-            false,
             null,
             databaseServerIpAddress,
-            null
+            null,
+            false
         );
 
         var databaseServers = (await _dbLocator.GetDatabaseServers())
@@ -106,10 +106,10 @@ public class DatabaseServerTests : IAsyncLifetime
 
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            isLinkedServer,
             hostName,
             IpAddress,
-            fqdn
+            fqdn,
+            isLinkedServer
         );
 
         var server = (await _dbLocator.GetDatabaseServers()).Single(s => s.Id == serverId);
@@ -128,10 +128,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         var newName = TestHelpers.GetRandomString();
@@ -150,10 +150,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         // Create a database to the server
@@ -175,10 +175,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         var server = await _dbLocator.GetDatabaseServer(serverId);
@@ -210,10 +210,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var databaseServerIpAddress = TestHelpers.GetRandomIpAddressString();
         var databaseServerId = await _dbLocator.CreateDatabaseServer(
             databaseServerName,
-            false,
             null,
             databaseServerIpAddress,
-            null
+            null,
+            false
         );
 
         // Ensure cache is populated by getting the servers
@@ -242,10 +242,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         // Create a database to the server
@@ -277,10 +277,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         // Create a database to the server
@@ -311,10 +311,10 @@ public class DatabaseServerTests : IAsyncLifetime
         // Arrange
         var existingServer = await _dbLocator.CreateDatabaseServer(
             "DuplicateNameTestServer",
-            false,
             null,
             "192.168.1.101",
-            null
+            null,
+            false
         );
 
         // Act & Assert
@@ -322,10 +322,10 @@ public class DatabaseServerTests : IAsyncLifetime
             async () =>
                 await _dbLocator.CreateDatabaseServer(
                     "DuplicateNameTestServer",
-                    false,
                     null,
                     "192.168.1.102",
-                    null
+                    null,
+                    false
                 )
         );
 
@@ -341,10 +341,10 @@ public class DatabaseServerTests : IAsyncLifetime
         // Arrange
         var existingServer = await _dbLocator.CreateDatabaseServer(
             "DuplicateHostTestServer1",
-            false,
             "duplicate-host",
             "192.168.1.201",
-            null
+            null,
+            false
         );
 
         // Act & Assert
@@ -352,10 +352,10 @@ public class DatabaseServerTests : IAsyncLifetime
             async () =>
                 await _dbLocator.CreateDatabaseServer(
                     "DuplicateHostTestServer2",
-                    false,
                     "duplicate-host",
                     "192.168.1.202",
-                    null
+                    null,
+                    false
                 )
         );
 
@@ -371,10 +371,10 @@ public class DatabaseServerTests : IAsyncLifetime
         // Arrange
         var existingServer = await _dbLocator.CreateDatabaseServer(
             "DuplicateIpTestServer1",
-            false,
             null,
             "192.168.1.400",
-            null
+            null,
+            false
         );
 
         // Act & Assert
@@ -382,10 +382,10 @@ public class DatabaseServerTests : IAsyncLifetime
             async () =>
                 await _dbLocator.CreateDatabaseServer(
                     "DuplicateIpTestServer2",
-                    false,
                     null,
                     "192.168.1.400",
-                    null
+                    null,
+                    false
                 )
         );
 
@@ -403,10 +403,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         // Get server to populate cache
@@ -430,10 +430,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         // Get servers to populate cache
@@ -458,10 +458,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         // Clear cache
@@ -490,10 +490,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         // Set cache to null
@@ -522,20 +522,20 @@ public class DatabaseServerTests : IAsyncLifetime
         var server1Ip = TestHelpers.GetRandomIpAddressString();
         var server1Id = await _dbLocator.CreateDatabaseServer(
             server1Name,
-            false,
             null,
             server1Ip,
-            null
+            null,
+            false
         );
 
         var server2Name = TestHelpers.GetRandomString();
         var server2Ip = TestHelpers.GetRandomIpAddressString();
         var server2Id = await _dbLocator.CreateDatabaseServer(
             server2Name,
-            false,
             null,
             server2Ip,
-            null
+            null,
+            false
         );
 
         // Get servers to populate cache
@@ -570,10 +570,10 @@ public class DatabaseServerTests : IAsyncLifetime
 
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            isLinkedServer,
             hostName,
             ipAddress,
-            fqdn
+            fqdn,
+            isLinkedServer
         );
 
         // Act
@@ -602,10 +602,10 @@ public class DatabaseServerTests : IAsyncLifetime
 
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            isLinkedServer,
             hostName,
             ipAddress,
-            fqdn
+            fqdn,
+            isLinkedServer
         );
 
         // Act
@@ -635,10 +635,10 @@ public class DatabaseServerTests : IAsyncLifetime
 
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            initialIsLinkedServer,
             hostName,
             ipAddress,
-            fqdn
+            fqdn,
+            initialIsLinkedServer
         );
 
         // Act

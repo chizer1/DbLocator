@@ -40,8 +40,6 @@ internal sealed class GetConnectionQueryValidator : AbstractValidator<GetConnect
             .NotEmpty()
             .When(query => query.ConnectionId == null)
             .WithMessage("DatabaseTypeId is required when not using ConnectionId.");
-
-        // Roles are optional - removed the NotEmpty validation
     }
 }
 
@@ -60,7 +58,6 @@ internal class GetConnectionHandler(
         CancellationToken cancellationToken = default
     )
     {
-        // Only validate if we have a valid request
         if (
             request.ConnectionId.HasValue
             || request.TenantId.HasValue
