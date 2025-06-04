@@ -10,9 +10,9 @@ namespace DbLocator.Features.Tenants.UpdateTenant;
 
 internal record UpdateTenantCommand(
     int TenantId,
-    string? TenantName = null,
-    string? TenantCode = null,
-    Status? TenantStatus = null
+    string? TenantName,
+    string? TenantCode,
+    Status? TenantStatus
 );
 
 internal sealed class UpdateTenantCommandValidator : AbstractValidator<UpdateTenantCommand>

@@ -9,10 +9,10 @@ namespace DbLocator.Features.DatabaseUsers.UpdateDatabaseUser;
 
 internal record UpdateDatabaseUserCommand(
     int DatabaseUserId,
-    int[] DatabaseIds,
+    int[]? DatabaseIds,
     string? UserName,
     string? UserPassword,
-    bool AffectDatabase = true
+    bool? AffectDatabase
 );
 
 internal sealed class UpdateDatabaseUserCommandValidator

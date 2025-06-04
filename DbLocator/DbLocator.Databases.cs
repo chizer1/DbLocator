@@ -327,6 +327,10 @@ public partial class Locator
     /// <param name="status">
     /// The new status of the database (e.g., Active, Inactive). If null, the status will not be changed.
     /// </param>
+    /// <param name="affectDatabase">
+    /// A flag indicating whether to perform DDL operations on the database server.
+    /// If set to false, the database will only be registered in the system without being physically created.
+    /// </param>
     /// <returns>
     /// A task that represents the asynchronous operation. The task completes when the database has been successfully updated.
     /// </returns>
@@ -341,7 +345,8 @@ public partial class Locator
         int? databaseServerId,
         byte? databaseTypeId,
         bool? useTrustedConnection,
-        Status? status
+        Status? status,
+        bool? affectDatabase
     )
     {
         await _databaseService.UpdateDatabase(
@@ -350,7 +355,8 @@ public partial class Locator
             databaseServerId,
             databaseTypeId,
             useTrustedConnection,
-            status
+            status,
+            affectDatabase
         );
     }
 }

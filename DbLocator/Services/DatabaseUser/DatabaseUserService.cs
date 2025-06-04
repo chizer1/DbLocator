@@ -1,3 +1,5 @@
+#nullable enable
+
 using DbLocator.Db;
 using DbLocator.Features.DatabaseUsers.CreateDatabaseUser;
 using DbLocator.Features.DatabaseUsers.DeleteDatabaseUser;
@@ -27,56 +29,20 @@ internal class DatabaseUserService(
         int[] databaseIds,
         string userName,
         string userPassword,
-        bool affectDatabase = true
+        bool affectDatabase
     )
     {
+        var password = userPassword ?? PasswordGenerator.GenerateRandomPassword(25);
+
         return await _CreateDatabaseUser.Handle(
-            new CreateDatabaseUserCommand(userName, userPassword, databaseIds, affectDatabase)
+            new CreateDatabaseUserCommand(userName, password, databaseIds, affectDatabase)
         );
     }
 
-    public async Task<int> CreateDatabaseUser(
-        int[] databaseIds,
-        string userName,
-        bool affectDatabase = true
-    )
-    {
-        var userPassword = PasswordGenerator.GenerateRandomPassword(25);
-
-        return await _CreateDatabaseUser.Handle(
-            new CreateDatabaseUserCommand(userName, userPassword, databaseIds, affectDatabase)
-        );
-    }
-
-    public async Task<int> CreateDatabaseUser(
-        int[] databaseIds,
-        string userName,
-        string userPassword
-    )
-    {
-        return await _CreateDatabaseUser.Handle(
-            new CreateDatabaseUserCommand(userName, userPassword, databaseIds, true)
-        );
-    }
-
-    public async Task<int> CreateDatabaseUser(int[] databaseIds, string userName)
-    {
-        var userPassword = PasswordGenerator.GenerateRandomPassword(25);
-
-        return await _CreateDatabaseUser.Handle(
-            new CreateDatabaseUserCommand(userName, userPassword, databaseIds, true)
-        );
-    }
-
-    public async Task DeleteDatabaseUser(int databaseUserId)
-    {
-        await _deleteDatabaseUser.Handle(new DeleteDatabaseUserCommand(databaseUserId, true));
-    }
-
-    public async Task DeleteDatabaseUser(int databaseUserId, bool deleteDatabaseUser)
+    public async Task DeleteDatabaseUser(int databaseUserId, bool? affectDatabase)
     {
         await _deleteDatabaseUser.Handle(
-            new DeleteDatabaseUserCommand(databaseUserId, deleteDatabaseUser)
+            new DeleteDatabaseUserCommand(databaseUserId, affectDatabase ?? true)
         );
     }
 
@@ -92,72 +58,19 @@ internal class DatabaseUserService(
 
     public async Task UpdateDatabaseUser(
         int databaseUserId,
-        int[] databaseIds,
-        string databaseUserName,
-        string databaseUserPassword,
-        bool updateDatabase
+        string? userName,
+        string? userPassword,
+        int[]? databaseIds,
+        bool? affectDatabase
     )
     {
         await _updateDatabaseUser.Handle(
             new UpdateDatabaseUserCommand(
                 databaseUserId,
-                [.. databaseIds],
-                databaseUserName,
-                databaseUserPassword,
-                updateDatabase
-            )
-        );
-    }
-
-    public async Task UpdateDatabaseUser(
-        int databaseUserId,
-        int[] databaseIds,
-        string databaseUserName,
-        bool updateDatabase
-    )
-    {
-        await _updateDatabaseUser.Handle(
-            new UpdateDatabaseUserCommand(
-                databaseUserId,
-                [.. databaseIds],
-                databaseUserName,
-                null,
-                updateDatabase
-            )
-        );
-    }
-
-    public async Task UpdateDatabaseUser(
-        int databaseUserId,
-        int[] databaseIds,
-        string databaseUserName,
-        string databaseUserPassword
-    )
-    {
-        await _updateDatabaseUser.Handle(
-            new UpdateDatabaseUserCommand(
-                databaseUserId,
-                [.. databaseIds],
-                databaseUserName,
-                databaseUserPassword,
-                true
-            )
-        );
-    }
-
-    public async Task UpdateDatabaseUser(
-        int databaseUserId,
-        int[] databaseIds,
-        string databaseUserName
-    )
-    {
-        await _updateDatabaseUser.Handle(
-            new UpdateDatabaseUserCommand(
-                databaseUserId,
-                [.. databaseIds],
-                databaseUserName,
-                null,
-                true
+                databaseIds ?? [],
+                userName ?? throw new ArgumentNullException(nameof(userName)),
+                userPassword,
+                affectDatabase ?? true
             )
         );
     }

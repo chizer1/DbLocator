@@ -1,3 +1,5 @@
+#nullable enable
+
 using DbLocator.Domain;
 using FluentValidation;
 using Microsoft.Data.SqlClient;
@@ -37,13 +39,14 @@ public partial class Locator
     /// </param>
     /// <param name="userPassword">
     /// The password for the new user. This should meet the database system's password
-    /// complexity requirements and security policies.
+    /// complexity requirements and security policies. If null, the password must be
+    /// set later using the UpdateDatabaseUser method.
     /// </param>
     /// <param name="affectDatabase">
     /// A flag indicating whether to perform DDL operations on the database server.
     /// When true, the user will be created both in the DbLocator system and on the
     /// actual database servers. When false, the user will only be registered in the
-    /// DbLocator system.
+    /// DbLocator system. Defaults to true.
     /// </param>
     /// <returns>
     /// The unique identifier of the newly created database user. This ID can be used
@@ -61,7 +64,7 @@ public partial class Locator
         int[] databaseIds,
         string userName,
         string userPassword,
-        bool affectDatabase = true
+        bool affectDatabase
     )
     {
         return await _databaseUserService.CreateDatabaseUser(
@@ -70,114 +73,6 @@ public partial class Locator
             userPassword,
             affectDatabase
         );
-    }
-
-    /// <summary>
-    /// Creates a new database user without specifying a password.
-    /// This method establishes a new database user that can access multiple databases,
-    /// but does not set an initial password. The password must be set later using the
-    /// UpdateDatabaseUser method.
-    /// </summary>
-    /// <param name="databaseIds">
-    /// The unique identifiers of the databases to which the user will be assigned.
-    /// These IDs must correspond to existing databases in the system. The user will
-    /// be granted appropriate permissions on each specified database.
-    /// </param>
-    /// <param name="userName">
-    /// The name of the user to be created. This should be a unique identifier that
-    /// follows the database system's naming conventions and security requirements.
-    /// </param>
-    /// <param name="affectDatabase">
-    /// A flag indicating whether to perform DDL operations on the database server.
-    /// When true, the user will be created both in the DbLocator system and on the
-    /// actual database servers. When false, the user will only be registered in the
-    /// DbLocator system.
-    /// </param>
-    /// <returns>
-    /// The unique identifier of the newly created database user. This ID can be used
-    /// to reference the user in future operations and is used internally by the system.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when any of the specified database IDs are not found.
-    /// This indicates that one or more databases do not exist in the system.</exception>
-    /// <exception cref="ValidationException">Thrown when the user name violates validation rules.
-    /// This includes checks for proper formatting and length requirements.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when DDL operations fail.
-    /// This includes permission issues, connection problems, or database-specific errors.</exception>
-    public async Task<int> CreateDatabaseUser(
-        int[] databaseIds,
-        string userName,
-        bool affectDatabase = true
-    )
-    {
-        return await _databaseUserService.CreateDatabaseUser(databaseIds, userName, affectDatabase);
-    }
-
-    /// <summary>
-    /// Creates a new database user with the specified password.
-    /// This method establishes a new database user that can access multiple databases
-    /// with the provided credentials. The user will be created both in the DbLocator system
-    /// and on the actual database servers.
-    /// </summary>
-    /// <param name="databaseIds">
-    /// The unique identifiers of the databases to which the user will be assigned.
-    /// These IDs must correspond to existing databases in the system. The user will
-    /// be granted appropriate permissions on each specified database.
-    /// </param>
-    /// <param name="userName">
-    /// The name of the user to be created. This should be a unique identifier that
-    /// follows the database system's naming conventions and security requirements.
-    /// </param>
-    /// <param name="userPassword">
-    /// The password for the new user. This should meet the database system's password
-    /// complexity requirements and security policies.
-    /// </param>
-    /// <returns>
-    /// The unique identifier of the newly created database user. This ID can be used
-    /// to reference the user in future operations and is used internally by the system.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when any of the specified database IDs are not found.
-    /// This indicates that one or more databases do not exist in the system.</exception>
-    /// <exception cref="ValidationException">Thrown when the user name or password violates validation rules.
-    /// This includes checks for proper formatting, length, and complexity requirements.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when DDL operations fail.
-    /// This includes permission issues, connection problems, or database-specific errors.</exception>
-    public async Task<int> CreateDatabaseUser(
-        int[] databaseIds,
-        string userName,
-        string userPassword
-    )
-    {
-        return await _databaseUserService.CreateDatabaseUser(databaseIds, userName, userPassword);
-    }
-
-    /// <summary>
-    /// Creates a new database user with minimal configuration.
-    /// This method establishes a new database user that can access multiple databases,
-    /// but does not set an initial password or perform DDL operations. The password must
-    /// be set later using the UpdateDatabaseUser method.
-    /// </summary>
-    /// <param name="databaseIds">
-    /// The unique identifiers of the databases to which the user will be assigned.
-    /// These IDs must correspond to existing databases in the system. The user will
-    /// be granted appropriate permissions on each specified database.
-    /// </param>
-    /// <param name="userName">
-    /// The name of the user to be created. This should be a unique identifier that
-    /// follows the database system's naming conventions and security requirements.
-    /// </param>
-    /// <returns>
-    /// The unique identifier of the newly created database user. This ID can be used
-    /// to reference the user in future operations and is used internally by the system.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when any of the specified database IDs are not found.
-    /// This indicates that one or more databases do not exist in the system.</exception>
-    /// <exception cref="ValidationException">Thrown when the user name violates validation rules.
-    /// This includes checks for proper formatting and length requirements.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when DDL operations fail.
-    /// This includes permission issues, connection problems, or database-specific errors.</exception>
-    public async Task<int> CreateDatabaseUser(int[] databaseIds, string userName)
-    {
-        return await _databaseUserService.CreateDatabaseUser(databaseIds, userName);
     }
 
     /// <summary>
@@ -218,19 +113,14 @@ public partial class Locator
     }
 
     /// <summary>
-    /// Updates all properties of an existing database user.
-    /// This method allows changing the user's name, password, and database assignments in a single operation.
+    /// Updates an existing database user with the specified properties.
+    /// This method allows changing any combination of the user's name, password, and database assignments.
     /// The operation can optionally update the user on the actual database servers.
     /// </summary>
     /// <param name="databaseUserId">
     /// The unique identifier of the database user to be updated. This ID must correspond to an
     /// existing database user in the system.
     /// </param>
-    /// <param name="databaseIds">
-    /// The unique identifiers of the databases to which the user will be assigned.
-    /// These IDs must correspond to existing databases in the system. The user's permissions
-    /// will be updated on each specified database.
-    /// </param>
     /// <param name="databaseUserName">
     /// The new name for the database user. This should be a unique identifier that
     /// follows the database system's naming conventions and security requirements.
@@ -239,7 +129,12 @@ public partial class Locator
     /// The new password for the database user. This should meet the database system's password
     /// complexity requirements and security policies.
     /// </param>
-    /// <param name="updateDatabase">
+    /// <param name="databaseIds">
+    /// The unique identifiers of the databases to which the user will be assigned.
+    /// These IDs must correspond to existing databases in the system. The user's permissions
+    /// will be updated on each specified database.
+    /// </param>
+    /// <param name="affectDatabase">
     /// A flag indicating whether to perform DDL operations on the database server.
     /// When true, the user will be updated both in the DbLocator system and on the
     /// actual database servers. When false, the user will only be updated in the
@@ -257,157 +152,18 @@ public partial class Locator
     /// This includes permission issues, connection problems, or database-specific errors.</exception>
     public async Task UpdateDatabaseUser(
         int databaseUserId,
-        int[] databaseIds,
-        string databaseUserName,
-        string databaseUserPassword,
-        bool updateDatabase
+        string? databaseUserName,
+        string? databaseUserPassword,
+        int[]? databaseIds,
+        bool? affectDatabase
     )
     {
         await _databaseUserService.UpdateDatabaseUser(
             databaseUserId,
-            databaseIds,
             databaseUserName,
             databaseUserPassword,
-            updateDatabase
-        );
-    }
-
-    /// <summary>
-    /// Updates the name and database assignments of an existing database user.
-    /// This method allows changing the user's name and database assignments, but does not
-    /// modify the user's password. The operation can optionally update the user on the
-    /// actual database servers.
-    /// </summary>
-    /// <param name="databaseUserId">
-    /// The unique identifier of the database user to be updated. This ID must correspond to an
-    /// existing database user in the system.
-    /// </param>
-    /// <param name="databaseIds">
-    /// The unique identifiers of the databases to which the user will be assigned.
-    /// These IDs must correspond to existing databases in the system. The user's permissions
-    /// will be updated on each specified database.
-    /// </param>
-    /// <param name="databaseUserName">
-    /// The new name for the database user. This should be a unique identifier that
-    /// follows the database system's naming conventions and security requirements.
-    /// </param>
-    /// <param name="updateDatabase">
-    /// A flag indicating whether to perform DDL operations on the database server.
-    /// When true, the user will be updated both in the DbLocator system and on the
-    /// actual database servers. When false, the user will only be updated in the
-    /// DbLocator system.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task completes when the user
-    /// has been successfully updated.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when the specified database user or any of the databases are not found.
-    /// This indicates that the user or one or more databases do not exist in the system.</exception>
-    /// <exception cref="ValidationException">Thrown when the new user name violates validation rules.
-    /// This includes checks for proper formatting and length requirements.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when DDL operations fail.
-    /// This includes permission issues, connection problems, or database-specific errors.</exception>
-    public async Task UpdateDatabaseUser(
-        int databaseUserId,
-        int[] databaseIds,
-        string databaseUserName,
-        bool updateDatabase
-    )
-    {
-        await _databaseUserService.UpdateDatabaseUser(
-            databaseUserId,
             databaseIds,
-            databaseUserName,
-            updateDatabase
-        );
-    }
-
-    /// <summary>
-    /// Updates the name, password, and database assignments of an existing database user.
-    /// This method allows changing all user properties except for the database update flag,
-    /// which is set to true by default.
-    /// </summary>
-    /// <param name="databaseUserId">
-    /// The unique identifier of the database user to be updated. This ID must correspond to an
-    /// existing database user in the system.
-    /// </param>
-    /// <param name="databaseIds">
-    /// The unique identifiers of the databases to which the user will be assigned.
-    /// These IDs must correspond to existing databases in the system. The user's permissions
-    /// will be updated on each specified database.
-    /// </param>
-    /// <param name="databaseUserName">
-    /// The new name for the database user. This should be a unique identifier that
-    /// follows the database system's naming conventions and security requirements.
-    /// </param>
-    /// <param name="databaseUserPassword">
-    /// The new password for the database user. This should meet the database system's password
-    /// complexity requirements and security policies.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task completes when the user
-    /// has been successfully updated.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when the specified database user or any of the databases are not found.
-    /// This indicates that the user or one or more databases do not exist in the system.</exception>
-    /// <exception cref="ValidationException">Thrown when the new user name or password violates validation rules.
-    /// This includes checks for proper formatting, length, and complexity requirements.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when DDL operations fail.
-    /// This includes permission issues, connection problems, or database-specific errors.</exception>
-    public async Task UpdateDatabaseUser(
-        int databaseUserId,
-        int[] databaseIds,
-        string databaseUserName,
-        string databaseUserPassword
-    )
-    {
-        await _databaseUserService.UpdateDatabaseUser(
-            databaseUserId,
-            databaseIds,
-            databaseUserName,
-            databaseUserPassword
-        );
-    }
-
-    /// <summary>
-    /// Updates the name and database assignments of an existing database user.
-    /// This method allows changing the user's name and database assignments, but does not
-    /// modify the user's password. The operation will update the user both in the DbLocator
-    /// system and on the actual database servers.
-    /// </summary>
-    /// <param name="databaseUserId">
-    /// The unique identifier of the database user to be updated. This ID must correspond to an
-    /// existing database user in the system.
-    /// </param>
-    /// <param name="databaseIds">
-    /// The unique identifiers of the databases to which the user will be assigned.
-    /// These IDs must correspond to existing databases in the system. The user's permissions
-    /// will be updated on each specified database.
-    /// </param>
-    /// <param name="databaseUserName">
-    /// The new name for the database user. This should be a unique identifier that
-    /// follows the database system's naming conventions and security requirements.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task completes when the user
-    /// has been successfully updated.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when the specified database user or any of the databases are not found.
-    /// This indicates that the user or one or more databases do not exist in the system.</exception>
-    /// <exception cref="ValidationException">Thrown when the new user name violates validation rules.
-    /// This includes checks for proper formatting and length requirements.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when DDL operations fail.
-    /// This includes permission issues, connection problems, or database-specific errors.</exception>
-    public async Task UpdateDatabaseUser(
-        int databaseUserId,
-        int[] databaseIds,
-        string databaseUserName
-    )
-    {
-        await _databaseUserService.UpdateDatabaseUser(
-            databaseUserId,
-            databaseIds,
-            databaseUserName
+            affectDatabase
         );
     }
 
@@ -437,27 +193,5 @@ public partial class Locator
     public async Task DeleteDatabaseUser(int databaseUserId, bool deleteDatabaseUser)
     {
         await _databaseUserService.DeleteDatabaseUser(databaseUserId, deleteDatabaseUser);
-    }
-
-    /// <summary>
-    /// Deletes a database user from both the system and the database servers.
-    /// This method permanently removes a database user from both the DbLocator system
-    /// and the actual database servers. The operation is irreversible.
-    /// </summary>
-    /// <param name="databaseUserId">
-    /// The unique identifier of the database user to be deleted. This ID must correspond to an
-    /// existing database user in the system.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task completes when the user
-    /// has been successfully deleted.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when no database user is found with the given ID.
-    /// This indicates that the user does not exist in the system.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when DDL operations fail.
-    /// This includes permission issues, connection problems, or database-specific errors.</exception>
-    public async Task DeleteDatabaseUser(int databaseUserId)
-    {
-        await _databaseUserService.DeleteDatabaseUser(databaseUserId);
     }
 }

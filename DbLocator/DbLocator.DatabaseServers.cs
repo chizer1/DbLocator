@@ -61,18 +61,18 @@ public partial class Locator
     /// This includes permission issues, connection problems, or database-specific errors.</exception>
     public async Task<int> CreateDatabaseServer(
         string databaseServerName,
-        bool isLinkedServer,
-        string databaseServerHostName = null,
-        string databaseServerIpAddress = null,
-        string databaseServerFullyQualifiedDomainName = null
+        string databaseServerHostName,
+        string databaseServerIpAddress,
+        string databaseServerFullyQualifiedDomainName,
+        bool isLinkedServer
     )
     {
         return await _databaseServerService.CreateDatabaseServer(
             databaseServerName,
-            isLinkedServer,
             databaseServerHostName,
             databaseServerIpAddress,
-            databaseServerFullyQualifiedDomainName
+            databaseServerFullyQualifiedDomainName,
+            isLinkedServer
         );
     }
 

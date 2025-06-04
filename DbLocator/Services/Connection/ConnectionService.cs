@@ -34,11 +34,11 @@ internal class ConnectionService(
     }
 
     public async Task<SqlConnection> GetConnection(
-        int? tenantId = null,
-        int? databaseTypeId = null,
-        int? connectionId = null,
-        string? tenantCode = null,
-        DatabaseRole[]? roles = null
+        int? tenantId,
+        int? databaseTypeId,
+        int? connectionId,
+        string? tenantCode,
+        DatabaseRole[]? roles
     )
     {
         return await _getConnection.Handle(
@@ -49,6 +49,7 @@ internal class ConnectionService(
     public async Task<List<Domain.Connection>> GetConnections()
     {
         var connections = await _getConnections.Handle(new GetConnectionsQuery());
-        return connections.ToList();
+
+        return [.. connections];
     }
 }

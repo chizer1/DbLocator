@@ -10,11 +10,11 @@ using Microsoft.EntityFrameworkCore;
 namespace DbLocator.Features.Connections.GetConnection;
 
 internal record GetConnectionQuery(
-    int? TenantId = null,
-    int? DatabaseTypeId = null,
-    int? ConnectionId = null,
-    string? TenantCode = null,
-    DatabaseRole[]? Roles = null
+    int? TenantId,
+    int? DatabaseTypeId,
+    int? ConnectionId,
+    string? TenantCode,
+    DatabaseRole[]? Roles
 );
 
 internal sealed class GetConnectionQueryValidator : AbstractValidator<GetConnectionQuery>

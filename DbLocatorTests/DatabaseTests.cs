@@ -317,7 +317,15 @@ public class DatabaseTests
         var database = await CreateDatabaseAsync(dbName);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.UpdateDatabase(database.Id, null, null, unchecked((byte)2387), null, null)
+            async () =>
+                await _dbLocator.UpdateDatabase(
+                    database.Id,
+                    null,
+                    null,
+                    unchecked((byte)2387),
+                    null,
+                    null
+                )
         );
     }
 

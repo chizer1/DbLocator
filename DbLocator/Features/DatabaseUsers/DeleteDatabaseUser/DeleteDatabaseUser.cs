@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseUsers.DeleteDatabaseUser;
 
-internal record DeleteDatabaseUserCommand(int DatabaseUserId, bool DeleteDatabaseUser);
+internal record DeleteDatabaseUserCommand(int DatabaseUserId, bool? DeleteDatabaseUser);
 
 internal sealed class DeleteDatabaseUserCommandValidator
     : AbstractValidator<DeleteDatabaseUserCommand>
@@ -51,7 +51,7 @@ internal class DeleteDatabaseUserHandler(
 
         var databaseUserDatabases = databaseUserEntity.Databases.ToList();
 
-        if (request.DeleteDatabaseUser)
+        if (request.DeleteDatabaseUser ?? true)
         {
             var databases = await dbContext
                 .Set<DatabaseUserDatabaseEntity>()

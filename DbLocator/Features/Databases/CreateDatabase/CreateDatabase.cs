@@ -12,9 +12,9 @@ internal record CreateDatabaseCommand(
     string DatabaseName,
     int DatabaseServerId,
     int DatabaseTypeId,
-    bool AffectDatabase = true,
-    bool UseTrustedConnection = false,
-    Status Status = Status.Active
+    bool AffectDatabase,
+    bool UseTrustedConnection,
+    Status Status
 );
 
 internal sealed class CreateDatabaseCommandValidator : AbstractValidator<CreateDatabaseCommand>

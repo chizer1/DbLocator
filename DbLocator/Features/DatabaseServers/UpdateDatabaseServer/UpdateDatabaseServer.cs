@@ -9,11 +9,11 @@ namespace DbLocator.Features.DatabaseServers.UpdateDatabaseServer;
 
 internal record UpdateDatabaseServerCommand(
     int DatabaseServerId,
-    string? Name = null,
-    string? HostName = null,
-    string? FullyQualifiedDomainName = null,
-    string? IpAddress = null,
-    bool? IsLinkedServer = null
+    string? Name,
+    string? HostName,
+    string? FullyQualifiedDomainName,
+    string? IpAddress,
+    bool? IsLinkedServer
 );
 
 internal sealed class UpdateDatabaseServerCommandValidator

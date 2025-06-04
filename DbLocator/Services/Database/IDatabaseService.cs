@@ -1,4 +1,5 @@
 #nullable enable
+
 using DbLocator.Domain;
 
 namespace DbLocator.Services.Database;
@@ -22,6 +23,7 @@ internal interface IDatabaseService
         int? databaseServerId,
         byte? databaseTypeId,
         bool? useTrustedConnection,
-        Status? status
+        Status? status,
+        bool? affectDatabase
     );
 }

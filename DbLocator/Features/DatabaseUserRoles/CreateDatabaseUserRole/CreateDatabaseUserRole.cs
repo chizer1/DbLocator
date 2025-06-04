@@ -11,7 +11,7 @@ namespace DbLocator.Features.DatabaseUserRoles.CreateDatabaseUserRole;
 internal record CreateDatabaseUserRoleCommand(
     int DatabaseUserId,
     DatabaseRole UserRole,
-    bool affectDatabase = true
+    bool AffectDatabase
 );
 
 internal sealed class CreateDatabaseUserRoleCommandValidator
@@ -73,7 +73,7 @@ internal class CreateDatabaseUserRoleHandler(
         await dbContext.Set<DatabaseUserRoleEntity>().AddAsync(databaseUserRole, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        if (request.affectDatabase)
+        if (request.AffectDatabase)
             await CreateDatabaseUserRole(dbContext, user, request, cancellationToken);
 
         if (_cache != null)

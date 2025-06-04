@@ -28,8 +28,8 @@ internal class DatabaseService(
         int databaseServerId,
         byte databaseTypeId,
         Status databaseStatus,
-        bool affectDatabase = true,
-        bool useTrustedConnection = false
+        bool affectDatabase,
+        bool useTrustedConnection
     )
     {
         return await _createDatabase.Handle(
@@ -44,9 +44,9 @@ internal class DatabaseService(
         );
     }
 
-    public async Task DeleteDatabase(int databaseId, bool? deleteDatabase = true)
+    public async Task DeleteDatabase(int databaseId, bool? affectDatabase = true)
     {
-        await _deleteDatabase.Handle(new DeleteDatabaseCommand(databaseId, deleteDatabase));
+        await _deleteDatabase.Handle(new DeleteDatabaseCommand(databaseId, affectDatabase));
     }
 
     public async Task<List<Domain.Database>> GetDatabases()
@@ -67,7 +67,8 @@ internal class DatabaseService(
         int? databaseServerId,
         byte? databaseTypeId,
         bool? useTrustedConnection,
-        Status? status = null
+        Status? status,
+        bool? affectDatabase
     )
     {
         await _updateDatabase.Handle(
@@ -77,7 +78,8 @@ internal class DatabaseService(
                 databaseServerId,
                 databaseTypeId,
                 useTrustedConnection,
-                status ?? Status.Active
+                status,
+                affectDatabase
             )
         );
     }

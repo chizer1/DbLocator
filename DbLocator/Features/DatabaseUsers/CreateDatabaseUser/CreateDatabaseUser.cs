@@ -11,7 +11,7 @@ internal record CreateDatabaseUserCommand(
     string UserName,
     string UserPassword,
     int[] DatabaseIds,
-    bool AffectDatabase = true
+    bool AffectDatabase
 );
 
 internal sealed class CreateDatabaseUserCommandValidator
