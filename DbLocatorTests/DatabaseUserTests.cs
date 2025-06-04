@@ -834,7 +834,7 @@ public class DatabaseUserTests : IAsyncLifetime
         // Act & Assert
         var exception = await Assert.ThrowsAsync<FluentValidation.ValidationException>(
             async () =>
-                await _dbLocator.UpdateDatabaseUser(user.Id, "NewName", null, [_databaseId], true)
+                await _dbLocator.UpdateDatabaseUser(user.Id, "NewName", "", [_databaseId], true)
         );
 
         Assert.Contains("Password must be at least 8 characters long", exception.Message);

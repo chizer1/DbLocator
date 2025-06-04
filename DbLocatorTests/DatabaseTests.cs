@@ -177,7 +177,7 @@ public class DatabaseTests
         var dbServerId = await _dbLocator.CreateDatabaseServer(
             "testservername",
             null,
-            null,
+            "test.example.com",
             newIpAddress,
             false
         );
@@ -234,7 +234,7 @@ public class DatabaseTests
         var newServerId = await _dbLocator.CreateDatabaseServer(
             "testservername987",
             null,
-            null,
+            "test.example.com",
             newIpAddress,
             false
         );
