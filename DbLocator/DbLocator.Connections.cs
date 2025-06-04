@@ -121,8 +121,8 @@ public partial class Locator
     {
         return await _connectionService.GetConnection(
             null,
-            null,
             databaseTypeId,
+            null,
             tenantCode,
             roles
         );

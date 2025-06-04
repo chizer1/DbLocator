@@ -648,8 +648,8 @@ public class DatabaseUserTests : IAsyncLifetime
         var newServerId = await _dbLocator.CreateDatabaseServer(
             newServerName,
             null,
-            null,
             newIpAddress,
+            null,
             false
         );
 
