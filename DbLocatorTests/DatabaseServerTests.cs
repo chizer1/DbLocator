@@ -945,7 +945,8 @@ public class DatabaseServerTests : IAsyncLifetime
     {
         // Arrange
         var serverName = TestHelpers.GetRandomString();
-        var serverId = await _dbLocator.CreateDatabaseServer(serverName, null, null, null, false);
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var serverId = await _dbLocator.CreateDatabaseServer(serverName, null, ipAddress, null, false);
 
         // Act - First call should cache the data
         var server1 = await _dbLocator.GetDatabaseServer(serverId);
