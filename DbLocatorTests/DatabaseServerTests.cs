@@ -850,11 +850,8 @@ public class DatabaseServerTests : IAsyncLifetime
     [Fact]
     public async Task UpdateDatabaseServer_WithNonExistentServer_ThrowsKeyNotFoundException()
     {
-        // Act & Assert
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () =>
-                await _dbLocator.UpdateDatabaseServer(999999, "NewName", null, null, null, null)
-        );
+        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            await _dbLocator.UpdateDatabaseServer(999999, "NewName", null, null, null, null));
     }
 
     [Fact]

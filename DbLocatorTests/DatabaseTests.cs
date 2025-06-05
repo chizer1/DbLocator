@@ -488,4 +488,13 @@ public class DatabaseTests
         Assert.Equal(cachedDatabase.Status, result.Status);
         Assert.Equal(cachedDatabase.UseTrustedConnection, result.UseTrustedConnection);
     }
+
+    [Fact]
+    public async Task DbLocatorCache_Remove_RemovesItem()
+    {
+        await _cache.CacheData("test-key", "test-value");
+        await _cache.Remove("test-key");
+        var value = await _cache.GetCachedData<string>("test-key");
+        Assert.Null(value);
+    }
 }

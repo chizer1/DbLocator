@@ -771,4 +771,48 @@ public class DatabaseUserTests : IAsyncLifetime
         Assert.NotNull(updatedUser);
         Assert.Equal(userName, updatedUser.Name);
     }
+
+    [Fact]
+    public void DatabaseUserDatabaseEntity_UserProperty_CanBeSetAndRead()
+    {
+        var entity = new DatabaseUserDatabaseEntity();
+        var user = new DatabaseUserEntity();
+        entity.User = user;
+        Assert.Same(user, entity.User);
+    }
+
+    [Fact]
+    public void DatabaseUserRoleEntity_UserAndRoleProperties_CanBeSetAndRead()
+    {
+        var entity = new DatabaseUserRoleEntity();
+        var user = new DatabaseUserEntity();
+        var role = new DatabaseRoleEntity();
+        entity.User = user;
+        entity.Role = role;
+        Assert.Same(user, entity.User);
+        Assert.Same(role, entity.Role);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithShortPassword_ThrowsInvalidOperationException()
+    {
+        var user = await CreateTestUser();
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await _dbLocator.UpdateDatabaseUser(user.Id, "NewName", "short", [_databaseId], true));
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithNonExistentDatabase_ThrowsKeyNotFoundException()
+    {
+        var user = await CreateTestUser();
+        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            await _dbLocator.UpdateDatabaseUser(user.Id, "NewName", "ValidPassword1!", [999999], true));
+    }
+
+    [Fact]
+    public async Task DeleteDatabaseUserRole_NonExistentUser_ThrowsKeyNotFoundException()
+    {
+        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            await _dbLocator.DeleteDatabaseUserRole(999999, DatabaseRole.DataWriter));
+    }
 }

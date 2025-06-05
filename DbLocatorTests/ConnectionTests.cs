@@ -671,4 +671,48 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
                 )
         );
     }
+
+    [Fact]
+    public void ConnectionEntity_TenantProperty_CanBeSetAndRead()
+    {
+        var entity = new ConnectionEntity();
+        var tenant = new TenantEntity();
+        entity.Tenant = tenant;
+        Assert.Same(tenant, entity.Tenant);
+    }
+
+    [Theory]
+    [InlineData(-999, 1, null)] // Non-existent tenant ID
+    [InlineData(1, -999, null)] // Non-existent database type
+    public async Task GetConnection_WithInvalidIds_ThrowsKeyNotFoundException(int tenantId, int databaseTypeId, string tenantCode)
+    {
+        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            await _dbLocator.GetConnection(tenantId, databaseTypeId, tenantCode));
+    }
+
+    [Fact]
+    public async Task GetConnection_WithNonExistentTenantCode_ThrowsKeyNotFoundException()
+    {
+        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            await _dbLocator.GetConnection("NonExistentCode", 1, null));
+    }
+
+    [Fact]
+    public async Task GetConnection_WithNoValidServerIdentifier_ThrowsInvalidOperationException()
+    {
+        // Setup a connection with all server name fields null/empty
+        // ...mock or create such a server...
+        // This is a placeholder; implement with your mocking framework
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await _dbLocator.GetConnection(1, 1, null));
+    }
+
+    [Fact]
+    public async Task GetConnection_WithNoUserForRoles_ThrowsInvalidOperationException()
+    {
+        // Setup a connection with roles that have no user
+        // This is a placeholder; implement with your mocking framework
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await _dbLocator.GetConnection(1, 1, new[] { DatabaseRole.Admin }));
+    }
 }
