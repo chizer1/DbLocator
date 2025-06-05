@@ -713,7 +713,7 @@ public class DatabaseServerTests : IAsyncLifetime
     public async Task UpdateDatabaseServer_WithDuplicateHostName_ThrowsInvalidOperationException()
     {
         // Arrange
-        var hostName = "duplicate-host";
+        var hostName = $"duplicate-host-{Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10)}"; // ensure < 50 chars
         var server1Id = await _dbLocator.CreateDatabaseServer(
             TestHelpers.GetRandomString(),
             hostName,
