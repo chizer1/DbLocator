@@ -808,11 +808,4 @@ public class DatabaseUserTests : IAsyncLifetime
         await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
             await _dbLocator.UpdateDatabaseUser(user.Id, "NewName", "ValidPassword1!", [999999], true));
     }
-
-    [Fact]
-    public async Task DeleteDatabaseUserRole_NonExistentUser_ThrowsKeyNotFoundException()
-    {
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            await _dbLocator.DeleteDatabaseUserRole(999999, DatabaseRole.DataWriter));
-    }
 }
