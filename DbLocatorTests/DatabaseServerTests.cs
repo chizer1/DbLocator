@@ -618,7 +618,7 @@ public class DatabaseServerTests : IAsyncLifetime
         // Act
         var newFqdn = "updated-host.example.com";
         var newIpAddress = TestHelpers.GetRandomIpAddressString();
-        await _dbLocator.UpdateDatabaseServer(serverId, newFqdn, newIpAddress, null, null, null);
+        await _dbLocator.UpdateDatabaseServer(serverId, null, null, newFqdn, newIpAddress, null);
 
         // Assert
         var updatedServer = await _dbLocator.GetDatabaseServer(serverId);
@@ -681,9 +681,9 @@ public class DatabaseServerTests : IAsyncLifetime
             async () =>
                 await _dbLocator.UpdateDatabaseServer(
                     serverId,
+                    null,
+                    null,
                     "invalid-fqdn",
-                    null,
-                    null,
                     null,
                     null
                 )
@@ -821,7 +821,7 @@ public class DatabaseServerTests : IAsyncLifetime
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () =>
-                await _dbLocator.UpdateDatabaseServer(server2Id, null, ipAddress, null, null, null)
+                await _dbLocator.UpdateDatabaseServer(server2Id, null, null, null, ipAddress, null)
         );
 
         Assert.Contains(
