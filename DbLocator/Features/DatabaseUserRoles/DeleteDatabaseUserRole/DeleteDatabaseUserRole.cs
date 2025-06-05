@@ -22,10 +22,6 @@ internal sealed class DeleteDatabaseUserRoleCommandValidator
         RuleFor(x => x.DatabaseUserId)
             .GreaterThan(0)
             .WithMessage("Database User Id must be greater than 0.");
-
-        RuleFor(x => x.UserRole)
-            .IsInEnum()
-            .WithMessage("UserRole must be a valid DatabaseRole enum value.");
     }
 }
 
@@ -49,65 +45,62 @@ internal class DeleteDatabaseUserRoleHandler(
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var databaseUserEntity =
+        var user =
             await dbContext
                 .Set<DatabaseUserEntity>()
-                .FindAsync(new object[] { request.DatabaseUserId }, cancellationToken)
-            ?? throw new KeyNotFoundException("Database user not found.");
-
-        var databaseUserRoleEntity = await dbContext
-            .Set<DatabaseUserRoleEntity>()
-            .FirstOrDefaultAsync(
-                ur =>
-                    ur.DatabaseUserId == request.DatabaseUserId
-                    && ur.DatabaseRoleId == (int)request.UserRole,
-                cancellationToken
+                .Include(u => u.UserRoles)
+                .Where(u => u.DatabaseUserId == request.DatabaseUserId)
+                .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new KeyNotFoundException(
+                $"Database User Id '{request.DatabaseUserId}' not found."
             );
 
-        if (databaseUserRoleEntity == null)
-            return;
+        var existingRole = user.UserRoles.FirstOrDefault(ur =>
+            ur.DatabaseRoleId == (int)request.UserRole
+        );
 
-        dbContext.Set<DatabaseUserRoleEntity>().Remove(databaseUserRoleEntity);
+        if (existingRole == null)
+            throw new InvalidOperationException(
+                $"User '{user.UserName}' does not have role '{request.UserRole}'."
+            );
+
+        dbContext.Set<DatabaseUserRoleEntity>().Remove(existingRole);
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        if (request.AffectDatabase ?? true)
+            await DeleteDatabaseUserRole(dbContext, user, request, cancellationToken);
 
         if (_cache != null)
         {
             await _cache.Remove("databaseUsers");
             await _cache.TryClearConnectionStringFromCache(roles: [request.UserRole]);
         }
-
-        await DropDatabaseUserRole(dbContext, databaseUserRoleEntity, cancellationToken);
     }
 
-    private static async Task DropDatabaseUserRole(
+    private static async Task DeleteDatabaseUserRole(
         DbLocatorContext dbContext,
-        DatabaseUserRoleEntity databaseUserRoleEntity,
+        DatabaseUserEntity user,
+        DeleteDatabaseUserRoleCommand request,
         CancellationToken cancellationToken
     )
     {
-        var user =
-            await dbContext
-                .Set<DatabaseUserEntity>()
-                .Include(u => u.Databases)
-                .ThenInclude(d => d.Database)
-                .ThenInclude(db => db.DatabaseServer)
-                .FirstOrDefaultAsync(
-                    u => u.DatabaseUserId == databaseUserRoleEntity.DatabaseUserId,
-                    cancellationToken
-                ) ?? throw new KeyNotFoundException("Database user not found.");
+        var databases = await dbContext
+            .Set<DatabaseUserDatabaseEntity>()
+            .Include(dud => dud.Database)
+            .Include(dud => dud.Database.DatabaseServer)
+            .Where(dud => dud.DatabaseUserId == user.DatabaseUserId)
+            .Select(dud => dud.Database)
+            .ToListAsync(cancellationToken);
 
-        var roleName =
-            Enum.GetName((DatabaseRole)databaseUserRoleEntity.DatabaseRoleId)?.ToLower()
-            ?? throw new InvalidOperationException("Invalid role name.");
-
-        var databases = user.Databases.Select(d => d.Database).ToList();
         foreach (var database in databases)
         {
+            var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
             var userName = Sql.SanitizeSqlIdentifier(user.UserName);
+            var roleName = Sql.SanitizeSqlIdentifier($"db_{request.UserRole.ToString().ToLower()}");
 
             await Sql.ExecuteSqlCommandAsync(
                 dbContext,
-                $"use [{database.DatabaseName}]; exec sp_droprolemember 'db_{roleName}', '{userName}'",
+                $"use [{dbName}]; exec sp_droprolemember '{roleName}', '{userName}';",
                 database.DatabaseServer.IsLinkedServer,
                 database.DatabaseServer.DatabaseServerHostName
             );
