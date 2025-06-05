@@ -320,4 +320,42 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
         Assert.Equal(newCode, cachedTenant.Code);
         Assert.Equal(Status.Inactive, cachedTenant.Status);
     }
+
+    [Fact]
+    public async Task UpdateTenant_ToDuplicateName_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var tenantName1 = TestHelpers.GetRandomString();
+        var tenantCode1 = TestHelpers.GetRandomString();
+        var tenantId1 = await _dbLocator.CreateTenant(tenantName1, tenantCode1, Status.Active);
+
+        var tenantName2 = TestHelpers.GetRandomString();
+        var tenantCode2 = TestHelpers.GetRandomString();
+        var tenantId2 = await _dbLocator.CreateTenant(tenantName2, tenantCode2, Status.Active);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.UpdateTenant(tenantId2, tenantName1, tenantCode2)
+        );
+        Assert.Contains($"Tenant with name \"{tenantName1}\" already exists", ex.Message);
+    }
+
+    [Fact]
+    public async Task UpdateTenant_ToDuplicateCode_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var tenantName1 = TestHelpers.GetRandomString();
+        var tenantCode1 = TestHelpers.GetRandomString();
+        var tenantId1 = await _dbLocator.CreateTenant(tenantName1, tenantCode1, Status.Active);
+
+        var tenantName2 = TestHelpers.GetRandomString();
+        var tenantCode2 = TestHelpers.GetRandomString();
+        var tenantId2 = await _dbLocator.CreateTenant(tenantName2, tenantCode2, Status.Active);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.UpdateTenant(tenantId2, tenantName2, tenantCode1)
+        );
+        Assert.Contains($"Tenant with code \"{tenantCode1}\" already exists", ex.Message);
+    }
 }
