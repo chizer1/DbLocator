@@ -364,6 +364,10 @@ public class DatabaseUserTests : IAsyncLifetime
         var userName = TestHelpers.GetRandomString();
         var user = await CreateDatabaseUserAsync(userName);
 
+        // First create the role
+        await _dbLocator.CreateDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
+
+        // Then try to delete it
         await _dbLocator.DeleteDatabaseUserRole(user.Id, DatabaseRole.DataWriter);
 
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
