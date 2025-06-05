@@ -34,9 +34,9 @@ internal sealed class UpdateDatabaseServerCommandValidator
             .WithMessage("Database Server Name cannot be more than 50 characters.");
 
         RuleFor(x => x.HostName)
-            .MaximumLength(255)
+            .MaximumLength(50)
             .When(x => x.HostName != null)
-            .WithMessage("Host Name cannot be more than 255 characters.");
+            .WithMessage("Host Name cannot be more than 50 characters.");
 
         RuleFor(x => x.FullyQualifiedDomainName)
             .MaximumLength(100)

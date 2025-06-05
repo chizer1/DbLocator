@@ -37,9 +37,9 @@ internal class DatabaseServerService(
         return await _createDatabaseServer.Handle(
             new CreateDatabaseServerCommand(
                 databaseServerName,
-                databaseServerHostName ?? string.Empty,
-                databaseServerFullyQualifiedDomainName ?? string.Empty,
-                databaseServerIpAddress ?? string.Empty,
+                databaseServerHostName,
+                databaseServerFullyQualifiedDomainName,
+                databaseServerIpAddress,
                 isLinkedServer
             )
         );
