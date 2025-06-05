@@ -948,7 +948,7 @@ public class DatabaseServerTests : IAsyncLifetime
         var serverId = await _dbLocator.CreateDatabaseServer(serverName, null, null, null, false);
 
         // Act - First call should cache the data
-        var server1 = await _dbLocator.GetDatabaseServerById(serverId);
+        var server1 = await _dbLocator.GetDatabaseServer(serverId);
         Assert.NotNull(server1);
 
         // Verify data is cached
@@ -958,7 +958,7 @@ public class DatabaseServerTests : IAsyncLifetime
         Assert.Equal(serverName, cachedData.Name);
 
         // Act - Second call should return cached data
-        var server2 = await _dbLocator.GetDatabaseServerById(serverId);
+        var server2 = await _dbLocator.GetDatabaseServer(serverId);
         Assert.NotNull(server2);
         Assert.Equal(serverId, server2.Id);
         Assert.Equal(serverName, server2.Name);
