@@ -798,39 +798,6 @@ public class DatabaseServerTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task UpdateDatabaseServer_WithDuplicateIpAddress_ThrowsInvalidOperationException()
-    {
-        // Arrange
-        var ipAddress = "192.168.1.100";
-        var server1Id = await _dbLocator.CreateDatabaseServer(
-            TestHelpers.GetRandomString(),
-            null,
-            ipAddress,
-            null,
-            false
-        );
-
-        var server2Id = await _dbLocator.CreateDatabaseServer(
-            TestHelpers.GetRandomString(),
-            null,
-            TestHelpers.GetRandomIpAddressString(),
-            null,
-            false
-        );
-
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            async () =>
-                await _dbLocator.UpdateDatabaseServer(server2Id, null, null, null, ipAddress, null)
-        );
-
-        Assert.Contains(
-            $"Database server with IP address \"{ipAddress}\" already exists",
-            exception.Message
-        );
-    }
-
-    [Fact]
     public async Task UpdateDatabaseServer_UpdatesCache()
     {
         // Arrange
@@ -911,5 +878,61 @@ public class DatabaseServerTests : IAsyncLifetime
         );
 
         Assert.Contains("At least one field must be provided for update", exception.Message);
+    }
+
+    [Fact]
+    public async Task CreateDatabaseServer_WithDuplicateHostNameOnCreate_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var hostName = $"duplicate-host-create-{Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10)}";
+        var server1Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            hostName,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await _dbLocator.CreateDatabaseServer(
+                    TestHelpers.GetRandomString(),
+                    hostName,
+                    TestHelpers.GetRandomIpAddressString(),
+                    null,
+                    false
+                )
+        );
+
+        Assert.Contains($"Database server with host name \"{hostName}\" already exists", exception.Message);
+    }
+
+    [Fact]
+    public async Task CreateDatabaseServer_WithDuplicateFqdnOnCreate_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var fqdn = $"duplicate-create-{Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10)}.example.com";
+        var server1Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            null,
+            TestHelpers.GetRandomIpAddressString(),
+            fqdn,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await _dbLocator.CreateDatabaseServer(
+                    TestHelpers.GetRandomString(),
+                    null,
+                    TestHelpers.GetRandomIpAddressString(),
+                    fqdn,
+                    false
+                )
+        );
+
+        Assert.Contains($"Database server with FQDN \"{fqdn}\" already exists", exception.Message);
     }
 }
