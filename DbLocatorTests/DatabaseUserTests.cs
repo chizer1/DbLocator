@@ -71,6 +71,18 @@ public class DatabaseUserTests : IAsyncLifetime
         return user;
     }
 
+    private async Task<DatabaseUser> CreateTestUser()
+    {
+        var userName = TestHelpers.GetRandomString();
+        var userId = await _dbLocator.CreateDatabaseUser(
+            [_databaseId],
+            userName,
+            "TestPassword123!",
+            true
+        );
+        return (await _dbLocator.GetDatabaseUsers()).Single(u => u.Id == userId);
+    }
+
     [Fact]
     public async Task CreateDatabaseUser_CreatesDatabaseUserDatabaseEntities()
     {
@@ -797,15 +809,31 @@ public class DatabaseUserTests : IAsyncLifetime
     public async Task UpdateDatabaseUser_WithShortPassword_ThrowsInvalidOperationException()
     {
         var user = await CreateTestUser();
-        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await _dbLocator.UpdateDatabaseUser(user.Id, "NewName", "short", [_databaseId], true));
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await _dbLocator.UpdateDatabaseUser(
+                    user.Id,
+                    "NewName",
+                    "short",
+                    [_databaseId],
+                    true
+                )
+        );
     }
 
     [Fact]
     public async Task UpdateDatabaseUser_WithNonExistentDatabase_ThrowsKeyNotFoundException()
     {
         var user = await CreateTestUser();
-        await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            await _dbLocator.UpdateDatabaseUser(user.Id, "NewName", "ValidPassword1!", [999999], true));
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () =>
+                await _dbLocator.UpdateDatabaseUser(
+                    user.Id,
+                    "NewName",
+                    "ValidPassword1!",
+                    [999999],
+                    true
+                )
+        );
     }
 }
