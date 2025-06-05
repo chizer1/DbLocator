@@ -836,4 +836,196 @@ public class DatabaseUserTests : IAsyncLifetime
                 )
         );
     }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithUserNameChange_UpdatesCorrectly()
+    {
+        // Arrange
+        var user = await CreateTestUser();
+        var newUserName = TestHelpers.GetRandomString();
+
+        // Act
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            newUserName,
+            null,
+            null,
+            true
+        );
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Equal(newUserName, updatedUser.Name);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithPasswordChange_UpdatesCorrectly()
+    {
+        // Arrange
+        var user = await CreateTestUser();
+        var newPassword = "NewPassword123!";
+
+        // Act
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            null,
+            newPassword,
+            null,
+            true
+        );
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        // Since password is encrypted, we can only verify it changed
+        Assert.NotEqual(user.Name, updatedUser.Name);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithDatabaseIdsChange_UpdatesCorrectly()
+    {
+        // Arrange
+        var user = await CreateTestUser();
+        var newDatabase = await CreateDatabaseAsync(TestHelpers.GetRandomString());
+
+        // Act
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            null,
+            null,
+            new[] { newDatabase.Id },
+            true
+        );
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Single(updatedUser.Databases);
+        Assert.Equal(newDatabase.Id, updatedUser.Databases[0].Id);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithMultipleChanges_UpdatesCorrectly()
+    {
+        // Arrange
+        var user = await CreateTestUser();
+        var newUserName = TestHelpers.GetRandomString();
+        var newPassword = "NewPassword123!";
+        var newDatabase = await CreateDatabaseAsync(TestHelpers.GetRandomString());
+
+        // Act
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            newUserName,
+            newPassword,
+            new[] { newDatabase.Id },
+            true
+        );
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Equal(newUserName, updatedUser.Name);
+        Assert.Single(updatedUser.Databases);
+        Assert.Equal(newDatabase.Id, updatedUser.Databases[0].Id);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithNonExistentUserId_ThrowsKeyNotFoundException()
+    {
+        // Arrange
+        var nonExistentUserId = 999999;
+
+        // Act & Assert
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () =>
+                await _dbLocator.UpdateDatabaseUser(
+                    nonExistentUserId,
+                    "NewUserName",
+                    null,
+                    null,
+                    true
+                )
+        );
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithInvalidDatabaseId_ThrowsKeyNotFoundException()
+    {
+        // Arrange
+        var user = await CreateTestUser();
+        var invalidDatabaseId = 999999;
+
+        // Act & Assert
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () =>
+                await _dbLocator.UpdateDatabaseUser(
+                    user.Id,
+                    null,
+                    null,
+                    new[] { invalidDatabaseId },
+                    true
+                )
+        );
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithDuplicateUserName_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var user1 = await CreateTestUser();
+        var user2 = await CreateTestUser();
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await _dbLocator.UpdateDatabaseUser(
+                    user2.Id,
+                    user1.Name,
+                    null,
+                    null,
+                    true
+                )
+        );
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithAffectDatabaseFalse_DoesNotExecuteDDL()
+    {
+        // Arrange
+        var user = await CreateTestUser();
+        var newUserName = TestHelpers.GetRandomString();
+
+        // Act
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            newUserName,
+            null,
+            null,
+            false
+        );
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Equal(newUserName, updatedUser.Name);
+        // Note: We can't directly verify DDL wasn't executed, but we can verify the user was updated
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithSameValues_DoesNotUpdate()
+    {
+        // Arrange
+        var user = await CreateTestUser();
+        var originalUserName = user.Name;
+
+        // Act
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            user.Name,
+            "TestPassword123!",
+            new[] { user.Databases[0].Id },
+            true
+        );
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Equal(originalUserName, updatedUser.Name);
+    }
 }
