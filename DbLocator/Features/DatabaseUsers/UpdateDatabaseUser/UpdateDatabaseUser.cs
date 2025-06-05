@@ -83,6 +83,18 @@ internal class UpdateDatabaseUserHandler(
 
         if (request.UserName != null && request.UserName != user.UserName)
         {
+            // Check for duplicate username
+            var existingUser = await dbContext
+                .Set<DatabaseUserEntity>()
+                .FirstOrDefaultAsync(
+                    u => u.UserName == request.UserName && u.DatabaseUserId != user.DatabaseUserId,
+                    cancellationToken
+                );
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException($"User with name '{request.UserName}' already exists");
+            }
+
             userNameChanged = true;
             user.UserName = request.UserName;
         }
@@ -150,7 +162,7 @@ internal class UpdateDatabaseUserHandler(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // DDL logic for AffectDatabase
-        if (request.AffectDatabase == true && (userNameChanged || passwordChanged))
+        if (request.AffectDatabase != false && (userNameChanged || passwordChanged))
         {
             // Get all databases the user is now associated with
             var userDatabaseIds =
