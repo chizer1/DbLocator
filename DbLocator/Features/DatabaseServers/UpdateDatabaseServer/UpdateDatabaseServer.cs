@@ -83,19 +83,6 @@ internal class UpdateDatabaseServerHandler(
             cancellationToken
         );
 
-        if (!string.IsNullOrEmpty(request.FullyQualifiedDomainName))
-        {
-            var fqdnRegex = new System.Text.RegularExpressions.Regex(
-                @"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63})*\.[A-Za-z]{2,}$"
-            );
-            if (!fqdnRegex.IsMatch(request.FullyQualifiedDomainName))
-            {
-                throw new ValidationException(
-                    "FQDN must be a valid domain name format (e.g., example.com, sub.example.com)"
-                );
-            }
-        }
-
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
         var databaseServer =
