@@ -1,3 +1,4 @@
+#nullable enable
 using DbLocator.Domain;
 using FluentValidation;
 using Microsoft.Data.SqlClient;
@@ -141,83 +142,31 @@ public partial class Locator
     }
 
     /// <summary>
-    /// Updates the name of an existing database server.
-    /// This method allows changing the display name of a database server while preserving all
-    /// other configuration settings. The operation is useful for maintaining clear and
-    /// consistent server naming conventions.
+    /// Updates all properties of an existing database server.
     /// </summary>
-    /// <param name="databaseServerId">
-    /// The unique identifier of the database server to be updated. This ID must correspond to an
-    /// existing database server in the system.
-    /// </param>
-    /// <param name="databaseServerName">
-    /// The new name for the database server. This should be a unique identifier that follows
-    /// the system's naming conventions and is easily recognizable in the management interface.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task completes when the server
-    /// has been successfully updated.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when no database server is found with the given ID.
-    /// This indicates that the server does not exist in the system.</exception>
-    /// <exception cref="ValidationException">Thrown when the new server name violates validation rules.
-    /// This includes checks for proper formatting, length, and uniqueness requirements.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when the update operation fails.
-    /// This includes permission issues, connection problems, or database-specific errors.</exception>
-    public async Task UpdateDatabaseServer(int databaseServerId, string databaseServerName)
-    {
-        await _databaseServerService.UpdateDatabaseServer(
-            databaseServerId,
-            databaseServerName,
-            null,
-            null,
-            null,
-            null
-        );
-    }
-
-    /// <summary>
-    /// Updates the network configuration of an existing database server.
-    /// This method allows changing the fully qualified domain name (FQDN) and IP address of a
-    /// database server while preserving other configuration settings. At least one of the
-    /// network identifiers (FQDN or IP address) must be provided.
-    /// </summary>
-    /// <param name="databaseServerId">
-    /// The unique identifier of the database server to be updated. This ID must correspond to an
-    /// existing database server in the system.
-    /// </param>
-    /// <param name="databaseServerFullyQualifiedDomainName">
-    /// The new fully qualified domain name (FQDN) for the database server. This is the complete
-    /// domain name that uniquely identifies the server on the network. This parameter is
-    /// optional if the IP address is provided.
-    /// </param>
-    /// <param name="databaseServerIpAddress">
-    /// The new IP address for the database server. This can be either IPv4 or IPv6 format.
-    /// This parameter is optional if the FQDN is provided.
-    /// </param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task completes when the server
-    /// has been successfully updated.
-    /// </returns>
-    /// <exception cref="KeyNotFoundException">Thrown when no database server is found with the given ID.
-    /// This indicates that the server does not exist in the system.</exception>
-    /// <exception cref="ArgumentException">Thrown when both FQDN and IP address are null or empty.
-    /// This ensures that the server can be properly identified and accessed.</exception>
-    /// <exception cref="SqlException">Thrown when there is an error connecting to the database or when the update operation fails.
-    /// This includes permission issues, connection problems, or database-specific errors.</exception>
+    /// <param name="databaseServerId">The unique identifier of the database server to be updated.</param>
+    /// <param name="databaseServerName">The new name for the database server (optional).</param>
+    /// <param name="databaseServerHostName">The new host name for the database server (optional).</param>
+    /// <param name="databaseServerFullyQualifiedDomainName">The new FQDN for the database server (optional).</param>
+    /// <param name="databaseServerIpAddress">The new IP address for the database server (optional).</param>
+    /// <param name="isLinkedServer">The new linked server flag (optional).</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public async Task UpdateDatabaseServer(
         int databaseServerId,
-        string databaseServerFullyQualifiedDomainName,
-        string databaseServerIpAddress
+        string? databaseServerName,
+        string? databaseServerHostName,
+        string? databaseServerFullyQualifiedDomainName,
+        string? databaseServerIpAddress,
+        bool? isLinkedServer
     )
     {
         await _databaseServerService.UpdateDatabaseServer(
             databaseServerId,
-            null,
-            null,
+            databaseServerName,
+            databaseServerHostName,
             databaseServerFullyQualifiedDomainName,
             databaseServerIpAddress,
-            null
+            isLinkedServer
         );
     }
 }
