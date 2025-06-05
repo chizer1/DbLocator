@@ -953,7 +953,7 @@ public class DatabaseServerTests : IAsyncLifetime
         Assert.NotNull(server1);
 
         // Verify data is cached
-        var cachedData = await _cache.GetCachedData<DatabaseServer>($"databaseServer_{serverId}");
+        var cachedData = await _cache.GetCachedData<DatabaseServer>($"databaseServer-id-{serverId}");
         Assert.NotNull(cachedData);
         Assert.Equal(serverId, cachedData.Id);
         Assert.Equal(serverName, cachedData.Name);
