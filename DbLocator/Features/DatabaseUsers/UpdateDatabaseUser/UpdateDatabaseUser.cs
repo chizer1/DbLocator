@@ -3,6 +3,7 @@
 using DbLocator.Db;
 using DbLocator.Utilities;
 using FluentValidation;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseUsers.UpdateDatabaseUser;
@@ -99,8 +100,16 @@ internal class UpdateDatabaseUserHandler(
             }
         }
 
+        List<int> newDatabaseIds = new();
         if (request.DatabaseIds != null)
         {
+            // Get current associations before change
+            var currentDatabaseIds = await dbContext
+                .Set<DatabaseUserDatabaseEntity>()
+                .Where(d => d.DatabaseUserId == user.DatabaseUserId)
+                .Select(d => d.DatabaseId)
+                .ToListAsync(cancellationToken);
+
             // Remove existing database relationships
             var existingDatabases = await dbContext
                 .Set<DatabaseUserDatabaseEntity>()
@@ -109,7 +118,7 @@ internal class UpdateDatabaseUserHandler(
             dbContext.Set<DatabaseUserDatabaseEntity>().RemoveRange(existingDatabases);
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            // Add new database relationships
+            // Add new database relationships and track which are new
             foreach (var databaseId in request.DatabaseIds)
             {
                 var database =
@@ -128,7 +137,13 @@ internal class UpdateDatabaseUserHandler(
                         },
                         cancellationToken
                     );
+                if (!currentDatabaseIds.Contains(databaseId))
+                {
+                    newDatabaseIds.Add(databaseId);
+                }
             }
+            // Save changes after adding new associations
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
 
         dbContext.Update(user);
@@ -155,11 +170,22 @@ internal class UpdateDatabaseUserHandler(
             foreach (var database in updatedDatabases)
             {
                 var commands = new List<string>();
-                if (userNameChanged && request.UserName != null && oldUserName != null)
+                var sanitizedDbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
+                var sanitizedOldUserName =
+                    oldUserName != null ? Sql.SanitizeSqlIdentifier(oldUserName) : null;
+                var sanitizedNewUserName =
+                    request.UserName != null ? Sql.SanitizeSqlIdentifier(request.UserName) : null;
+
+                // If this is a new association, create the user in the database
+                if (newDatabaseIds.Contains(database.DatabaseId) && sanitizedNewUserName != null)
                 {
-                    var sanitizedOldUserName = Sql.SanitizeSqlIdentifier(oldUserName);
-                    var sanitizedNewUserName = Sql.SanitizeSqlIdentifier(request.UserName);
-                    var sanitizedDbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
+                    commands.Add(
+                        $"use [{sanitizedDbName}]; create user [{sanitizedNewUserName}] for login [{sanitizedNewUserName}]"
+                    );
+                }
+                // If renaming, alter user in all associated databases
+                if (userNameChanged && sanitizedOldUserName != null && sanitizedNewUserName != null)
+                {
                     commands.Add(
                         $"use [{sanitizedDbName}]; alter user [{sanitizedOldUserName}] with name = [{sanitizedNewUserName}]"
                     );
@@ -167,12 +193,11 @@ internal class UpdateDatabaseUserHandler(
                         $"alter login [{sanitizedOldUserName}] with name = [{sanitizedNewUserName}]"
                     );
                 }
-                if (passwordChanged && request.UserPassword != null && request.UserName != null)
+                if (passwordChanged && sanitizedNewUserName != null && request.UserPassword != null)
                 {
-                    var sanitizedUserName = Sql.SanitizeSqlIdentifier(request.UserName);
                     var sanitizedPassword = request.UserPassword.Replace("'", "''");
                     commands.Add(
-                        $"alter login [{sanitizedUserName}] with password = '{sanitizedPassword}'"
+                        $"alter login [{sanitizedNewUserName}] with password = '{sanitizedPassword}'"
                     );
                 }
                 foreach (var cmd in commands)
