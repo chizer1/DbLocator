@@ -972,4 +972,30 @@ public class DatabaseServerTests : IAsyncLifetime
         Assert.Equal(serverId, server2.Id);
         Assert.Equal(serverName, server2.Name);
     }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithHostName()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            null,
+            ipAddress,
+            null,
+            false
+        );
+
+        // Act
+        var newHostName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseServer(serverId, null, newHostName, null, null, null);
+
+        // Assert
+        var updatedServer = await _dbLocator.GetDatabaseServer(serverId);
+        Assert.NotNull(updatedServer);
+        Assert.Equal(newHostName, updatedServer.HostName);
+        Assert.Equal(serverName, updatedServer.Name);
+        Assert.Equal(ipAddress, updatedServer.IpAddress);
+    }
 }

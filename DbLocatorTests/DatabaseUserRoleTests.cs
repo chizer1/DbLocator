@@ -98,6 +98,22 @@ public class DatabaseUserRoleTests
         Assert.Empty(userRoles);
     }
 
+    [Fact]
+    public async Task DeleteDatabaseUserRole_UserDoesNotHaveRole_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+        var role = DatabaseRole.DataWriter;
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.DeleteDatabaseUserRole(user.Id, role)
+        );
+        
+        Assert.Equal($"User '{userName}' does not have role '{role}'.", exception.Message);
+    }
+
     private async Task<DatabaseUser> CreateDatabaseUserAsync(string userName)
     {
         var databaseName = TestHelpers.GetRandomString();
