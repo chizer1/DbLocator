@@ -309,7 +309,7 @@ public class DatabaseServerTests : IAsyncLifetime
     public async Task CreateDatabaseServer_WithDuplicateServerName_ThrowsInvalidOperationException()
     {
         // Arrange
-        var uniqueName = $"DuplicateNameTestServer_{Guid.NewGuid()}";
+        var uniqueName = $"DuplicateNameTestServer_{Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10)}"; // ensure < 50 chars
         var existingServer = await _dbLocator.CreateDatabaseServer(
             uniqueName,
             null,
@@ -340,7 +340,7 @@ public class DatabaseServerTests : IAsyncLifetime
     public async Task CreateDatabaseServer_WithDuplicateHostName_ThrowsInvalidOperationException()
     {
         // Arrange
-        var uniqueHost = $"duplicate-host-{Guid.NewGuid()}";
+        var uniqueHost = $"duplicate-host-{Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10)}"; // ensure < 50 chars
         var existingServer = await _dbLocator.CreateDatabaseServer(
             "DuplicateHostTestServer1",
             uniqueHost,
