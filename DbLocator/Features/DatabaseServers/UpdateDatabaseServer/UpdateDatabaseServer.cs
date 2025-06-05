@@ -83,19 +83,6 @@ internal class UpdateDatabaseServerHandler(
             cancellationToken
         );
 
-        if (!string.IsNullOrEmpty(request.FullyQualifiedDomainName))
-        {
-            var fqdnRegex = new System.Text.RegularExpressions.Regex(
-                @"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63})*\.[A-Za-z]{2,}$"
-            );
-            if (!fqdnRegex.IsMatch(request.FullyQualifiedDomainName))
-            {
-                throw new ValidationException(
-                    "FQDN must be a valid domain name format (e.g., example.com, sub.example.com)"
-                );
-            }
-        }
-
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
         var databaseServer =
@@ -168,26 +155,7 @@ internal class UpdateDatabaseServerHandler(
         }
 
         if (request.IpAddress != null)
-        {
-            if (
-                !string.IsNullOrWhiteSpace(request.IpAddress)
-                && await dbContext
-                    .Set<DatabaseServerEntity>()
-                    .AnyAsync(
-                        ds =>
-                            ds.DatabaseServerIpaddress == request.IpAddress
-                            && ds.DatabaseServerId != request.DatabaseServerId,
-                        cancellationToken
-                    )
-            )
-                throw new InvalidOperationException(
-                    $"Database server with IP address \"{request.IpAddress}\" already exists"
-                );
             databaseServer.DatabaseServerIpaddress = request.IpAddress;
-        }
-
-        if (request.IsLinkedServer.HasValue)
-            databaseServer.IsLinkedServer = request.IsLinkedServer.Value;
 
         dbContext.Set<DatabaseServerEntity>().Update(databaseServer);
         await dbContext.SaveChangesAsync(cancellationToken);

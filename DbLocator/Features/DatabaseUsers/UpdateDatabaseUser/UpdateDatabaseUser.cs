@@ -83,16 +83,26 @@ internal class UpdateDatabaseUserHandler(
 
         if (request.UserName != null && request.UserName != user.UserName)
         {
+            // Check for duplicate username
+            var existingUser = await dbContext
+                .Set<DatabaseUserEntity>()
+                .FirstOrDefaultAsync(
+                    u => u.UserName == request.UserName && u.DatabaseUserId != user.DatabaseUserId,
+                    cancellationToken
+                );
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException(
+                    $"User with name '{request.UserName}' already exists"
+                );
+            }
+
             userNameChanged = true;
             user.UserName = request.UserName;
         }
 
         if (request.UserPassword != null)
         {
-            if (request.UserPassword.Length < 8)
-            {
-                throw new InvalidOperationException("Password must be at least 8 characters long");
-            }
             if (_encryption.Encrypt(request.UserPassword) != user.UserPassword)
             {
                 passwordChanged = true;
@@ -180,35 +190,65 @@ internal class UpdateDatabaseUserHandler(
                 if (newDatabaseIds.Contains(database.DatabaseId) && sanitizedNewUserName != null)
                 {
                     // Use the provided password or a default one if not changing password
-                    var sanitizedPassword = (request.UserPassword ?? oldPassword ?? "TempP@ssw0rd!").Replace("'", "''");
+                    var sanitizedPassword = (
+                        request.UserPassword ?? oldPassword ?? "TempP@ssw0rd!"
+                    ).Replace("'", "''");
 
                     // Ensure login exists at the server level
                     commands.Add(
-                        "IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = '" + sanitizedNewUserName + "') " +
-                        "BEGIN CREATE LOGIN [" + sanitizedNewUserName + "] WITH PASSWORD = '" + sanitizedPassword + "' END"
+                        "IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = '"
+                            + sanitizedNewUserName
+                            + "') "
+                            + "BEGIN CREATE LOGIN ["
+                            + sanitizedNewUserName
+                            + "] WITH PASSWORD = '"
+                            + sanitizedPassword
+                            + "' END"
                     );
 
                     // Ensure user exists in the database
                     commands.Add(
-                        "USE [" + sanitizedDbName + "]; IF NOT EXISTS (SELECT name FROM sys.database_principals WHERE name = '" + sanitizedNewUserName + "') " +
-                        "BEGIN CREATE USER [" + sanitizedNewUserName + "] FOR LOGIN [" + sanitizedNewUserName + "] END"
+                        "USE ["
+                            + sanitizedDbName
+                            + "]; IF NOT EXISTS (SELECT name FROM sys.database_principals WHERE name = '"
+                            + sanitizedNewUserName
+                            + "') "
+                            + "BEGIN CREATE USER ["
+                            + sanitizedNewUserName
+                            + "] FOR LOGIN ["
+                            + sanitizedNewUserName
+                            + "] END"
                     );
                 }
                 // If renaming, alter user in all associated databases
                 if (userNameChanged && sanitizedOldUserName != null && sanitizedNewUserName != null)
                 {
                     commands.Add(
-                        "use [" + sanitizedDbName + "]; alter user [" + sanitizedOldUserName + "] with name = [" + sanitizedNewUserName + "]"
+                        "use ["
+                            + sanitizedDbName
+                            + "]; alter user ["
+                            + sanitizedOldUserName
+                            + "] with name = ["
+                            + sanitizedNewUserName
+                            + "]"
                     );
                     commands.Add(
-                        "alter login [" + sanitizedOldUserName + "] with name = [" + sanitizedNewUserName + "]"
+                        "alter login ["
+                            + sanitizedOldUserName
+                            + "] with name = ["
+                            + sanitizedNewUserName
+                            + "]"
                     );
                 }
                 if (passwordChanged && sanitizedNewUserName != null && request.UserPassword != null)
                 {
                     var sanitizedPassword = request.UserPassword.Replace("'", "''");
                     commands.Add(
-                        "alter login [" + sanitizedNewUserName + "] with password = '" + sanitizedPassword + "'"
+                        "alter login ["
+                            + sanitizedNewUserName
+                            + "] with password = '"
+                            + sanitizedPassword
+                            + "'"
                     );
                 }
                 foreach (var cmd in commands)

@@ -70,7 +70,7 @@ internal class DatabaseUserService(
                 databaseIds ?? [],
                 userName ?? throw new ArgumentNullException(nameof(userName)),
                 userPassword,
-                affectDatabase ?? true
+                affectDatabase
             )
         );
     }

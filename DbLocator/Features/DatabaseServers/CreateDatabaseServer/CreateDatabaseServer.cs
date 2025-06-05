@@ -32,6 +32,7 @@ internal sealed class CreateDatabaseServerCommandValidator
 
         RuleFor(x => x.FullyQualifiedDomainName)
             .MaximumLength(100)
+            .When(x => !string.IsNullOrEmpty(x.FullyQualifiedDomainName))
             .WithMessage("Fully qualified domain name cannot be more than 100 characters")
             .Matches(@"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63})*\.[A-Za-z]{2,}$")
             .When(x => !string.IsNullOrEmpty(x.FullyQualifiedDomainName))

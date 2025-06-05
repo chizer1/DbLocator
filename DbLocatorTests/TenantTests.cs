@@ -358,4 +358,20 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
         );
         Assert.Contains($"Tenant with code \"{tenantCode1}\" already exists", ex.Message);
     }
+
+    [Fact]
+    public async Task GetTenantById_WithNonExistentId_ThrowsKeyNotFoundException()
+    {
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.GetTenant(999999)
+        );
+    }
+
+    [Fact]
+    public async Task GetTenantByCode_WithNonExistentCode_ThrowsKeyNotFoundException()
+    {
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.GetTenant("NonExistentCode")
+        );
+    }
 }

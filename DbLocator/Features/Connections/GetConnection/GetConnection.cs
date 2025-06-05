@@ -137,54 +137,6 @@ internal class GetConnectionHandler(
             throw new KeyNotFoundException($"Tenant with ID {request.TenantId} not found.");
         }
 
-        if (request.DatabaseTypeId.HasValue && request.DatabaseTypeId.Value <= 0)
-        {
-            throw new KeyNotFoundException(
-                $"Database type with ID {request.DatabaseTypeId} not found."
-            );
-        }
-
-        // Check if tenant exists
-        if (request.TenantId.HasValue)
-        {
-            var tenantExists = await dbContext
-                .Set<TenantEntity>()
-                .AnyAsync(t => t.TenantId == request.TenantId, cancellationToken);
-
-            if (!tenantExists)
-            {
-                throw new KeyNotFoundException($"Tenant with ID {request.TenantId} not found.");
-            }
-        }
-
-        // Check if tenant code exists
-        if (!string.IsNullOrEmpty(request.TenantCode))
-        {
-            var tenantExists = await dbContext
-                .Set<TenantEntity>()
-                .AnyAsync(t => t.TenantCode == request.TenantCode, cancellationToken);
-
-            if (!tenantExists)
-            {
-                throw new KeyNotFoundException($"Tenant with code {request.TenantCode} not found.");
-            }
-        }
-
-        // Check if database type exists
-        if (request.DatabaseTypeId.HasValue)
-        {
-            var databaseTypeExists = await dbContext
-                .Set<DatabaseTypeEntity>()
-                .AnyAsync(dt => dt.DatabaseTypeId == request.DatabaseTypeId, cancellationToken);
-
-            if (!databaseTypeExists)
-            {
-                throw new KeyNotFoundException(
-                    $"Database type with ID {request.DatabaseTypeId} not found."
-                );
-            }
-        }
-
         var queryable = dbContext
             .Set<ConnectionEntity>()
             .Include(c => c.Tenant)
@@ -210,11 +162,6 @@ internal class GetConnectionHandler(
                 cancellationToken
             );
         }
-
-        if (string.IsNullOrEmpty(request.TenantCode))
-        {
-            throw new KeyNotFoundException($"Tenant with code {request.TenantCode} not found.");
-        }
         return await queryable.FirstOrDefaultAsync(
             c =>
                 c.Tenant.TenantCode == request.TenantCode
@@ -239,14 +186,6 @@ internal class GetConnectionHandler(
             serverName = server.DatabaseServerHostName;
         if (string.IsNullOrEmpty(serverName))
             serverName = server.DatabaseServerIpaddress;
-        if (string.IsNullOrEmpty(serverName))
-            serverName = server.DatabaseServerName;
-        if (string.IsNullOrEmpty(serverName))
-        {
-            throw new InvalidOperationException(
-                $"No valid server identifier found for database server {server.DatabaseServerId}"
-            );
-        }
 
         var builder = new SqlConnectionStringBuilder
         {
@@ -266,15 +205,9 @@ internal class GetConnectionHandler(
         if (roles != null && roles.Length > 0 && !database.UseTrustedConnection)
         {
             var user = await GetUserForRoles(connection, roles, dbContext, cancellationToken);
-            if (user == null)
-            {
-                throw new InvalidOperationException(
-                    $"No user found with the specified roles for database {database.DatabaseName}"
-                );
-            }
 
-            builder.UserID = user.UserName;
-            builder.Password = encryption.Decrypt(user.UserPassword);
+            builder.UserID = user?.UserName;
+            builder.Password = encryption.Decrypt(user?.UserPassword);
         }
 
         return builder.ConnectionString;

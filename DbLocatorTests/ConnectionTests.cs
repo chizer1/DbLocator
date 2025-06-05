@@ -360,7 +360,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var tenantName = TestHelpers.GetRandomString();
         var tenantId = await _dbLocator.CreateTenant(tenantName);
 
-        var nonExistentDatabaseTypeId = -1;
+        var nonExistentDatabaseTypeId = (byte)255; // Changed to use a byte value
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
             async () =>
@@ -614,7 +614,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     public async Task GetConnection_WithNonExistentDatabaseTypeId_ThrowsKeyNotFoundException_Explicit()
     {
         var tenantId = await _dbLocator.CreateTenant(TestHelpers.GetRandomString());
-        var nonExistentDatabaseTypeId = -9999;
+        var nonExistentDatabaseTypeId = (byte)255; // Changed to use a byte value
         await Assert.ThrowsAsync<KeyNotFoundException>(
             () => _dbLocator.GetConnection(tenantId, nonExistentDatabaseTypeId, null)
         );
@@ -670,5 +670,139 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
                     new[] { DatabaseRole.DataReader }
                 )
         );
+    }
+
+    [Fact]
+    public async Task GetConnection_WithEmptyTenantCode_ThrowsKeyNotFoundException()
+    {
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName);
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () =>
+                await _dbLocator.GetConnection(
+                    string.Empty,
+                    databaseTypeId,
+                    Array.Empty<DatabaseRole>()
+                )
+        );
+    }
+
+    [Fact]
+    public async Task GetConnection_WithNullTenantCode_ThrowsKeyNotFoundException()
+    {
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName);
+
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () =>
+                await _dbLocator.GetConnection(null!, databaseTypeId, Array.Empty<DatabaseRole>())
+        );
+    }
+
+    [Fact]
+    public async Task GetConnection_WithServerNameFallback()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.CreateTenant(tenantName);
+
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName);
+
+        // Create a server with only hostname (no FQDN)
+        var serverName = TestHelpers.GetRandomString();
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            null, // No FQDN
+            serverName, // Use hostname as fallback
+            null, // No IP
+            false // Not a linked server
+        );
+
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.CreateDatabase(
+            databaseName,
+            serverId,
+            databaseTypeId,
+            Status.Active
+        );
+
+        var connectionId = await _dbLocator.CreateConnection(tenantId, databaseId);
+        var connection = await _dbLocator.GetConnection(
+            tenantId,
+            databaseTypeId,
+            Array.Empty<DatabaseRole>()
+        );
+
+        Assert.NotNull(connection);
+        Assert.Contains(serverName, connection.ConnectionString);
+    }
+
+    [Fact]
+    public async Task GetConnection_WithServerIpFallback()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.CreateTenant(tenantName);
+
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName);
+
+        // Create a server with only IP (no FQDN or hostname)
+        var serverIp = "192.168.1.1";
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            "ServerName",
+            null, // No host
+            serverIp, // Use IP as fallback
+            null, // No FQDN
+            false // Not a linked server
+        );
+
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.CreateDatabase(
+            databaseName,
+            serverId,
+            databaseTypeId,
+            Status.Active
+        );
+
+        var connectionId = await _dbLocator.CreateConnection(tenantId, databaseId);
+        var connection = await _dbLocator.GetConnection(
+            tenantId,
+            databaseTypeId,
+            Array.Empty<DatabaseRole>()
+        );
+
+        Assert.NotNull(connection);
+        Assert.Contains(serverIp, connection.ConnectionString);
+    }
+
+    [Fact]
+    public async Task Connection_TenantProperty_IsCorrectlySet()
+    {
+        // Arrange
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.CreateTenant(tenantName);
+
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName);
+
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.CreateDatabase(
+            databaseName,
+            _databaseServerId,
+            databaseTypeId,
+            Status.Active
+        );
+
+        // Act
+        var connectionId = await _dbLocator.CreateConnection(tenantId, databaseId);
+        var connections = await _dbLocator.GetConnections();
+        var connection = connections.First(c => c.Id == connectionId);
+
+        // Assert
+        Assert.NotNull(connection);
+        Assert.NotNull(connection.Tenant);
+        Assert.Equal(tenantId, connection.Tenant.Id);
+        Assert.Equal(tenantName, connection.Tenant.Name);
     }
 }

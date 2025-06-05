@@ -850,7 +850,6 @@ public class DatabaseServerTests : IAsyncLifetime
     [Fact]
     public async Task UpdateDatabaseServer_WithNonExistentServer_ThrowsKeyNotFoundException()
     {
-        // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(
             async () =>
                 await _dbLocator.UpdateDatabaseServer(999999, "NewName", null, null, null, null)
@@ -939,5 +938,64 @@ public class DatabaseServerTests : IAsyncLifetime
         );
 
         Assert.Contains($"Database server with FQDN \"{fqdn}\" already exists", exception.Message);
+    }
+
+    [Fact]
+    public async Task GetDatabaseServerById_ReturnsCachedData()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            null,
+            ipAddress,
+            null,
+            false
+        );
+
+        // Act - First call should cache the data
+        var server1 = await _dbLocator.GetDatabaseServer(serverId);
+        Assert.NotNull(server1);
+
+        // Verify data is cached
+        var cachedData = await _cache.GetCachedData<DatabaseServer>(
+            $"databaseServer-id-{serverId}"
+        );
+        Assert.NotNull(cachedData);
+        Assert.Equal(serverId, cachedData.Id);
+        Assert.Equal(serverName, cachedData.Name);
+
+        // Act - Second call should return cached data
+        var server2 = await _dbLocator.GetDatabaseServer(serverId);
+        Assert.NotNull(server2);
+        Assert.Equal(serverId, server2.Id);
+        Assert.Equal(serverName, server2.Name);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithHostName()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            null,
+            ipAddress,
+            null,
+            false
+        );
+
+        // Act
+        var newHostName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseServer(serverId, null, newHostName, null, null, null);
+
+        // Assert
+        var updatedServer = await _dbLocator.GetDatabaseServer(serverId);
+        Assert.NotNull(updatedServer);
+        Assert.Equal(newHostName, updatedServer.HostName);
+        Assert.Equal(serverName, updatedServer.Name);
+        Assert.Equal(ipAddress, updatedServer.IpAddress);
     }
 }
