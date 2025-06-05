@@ -809,7 +809,7 @@ public class DatabaseUserTests : IAsyncLifetime
     public async Task UpdateDatabaseUser_WithShortPassword_ThrowsInvalidOperationException()
     {
         var user = await CreateTestUser();
-        await Assert.ThrowsAsync<InvalidOperationException>(
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(
             async () =>
                 await _dbLocator.UpdateDatabaseUser(
                     user.Id,

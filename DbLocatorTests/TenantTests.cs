@@ -363,7 +363,7 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
     public async Task GetTenantById_WithNonExistentId_ThrowsKeyNotFoundException()
     {
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.GetTenant(-999)
+            async () => await _dbLocator.GetTenant(999999)
         );
     }
 
