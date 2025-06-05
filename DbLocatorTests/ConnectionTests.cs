@@ -633,15 +633,15 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     public async Task GetConnection_WithNoValidServerIdentifier_ThrowsInvalidOperationException()
     {
         // Create a database server with all name fields empty
-        var serverId = await _dbLocator.CreateDatabaseServer("", "", "", "", false);
-        var databaseTypeId = await _dbLocator.CreateDatabaseType(TestHelpers.GetRandomString());
-        var databaseId = await _dbLocator.CreateDatabase(TestHelpers.GetRandomString(), serverId, databaseTypeId, Status.Active);
-        var tenantId = await _dbLocator.CreateTenant(TestHelpers.GetRandomString());
-        await _dbLocator.CreateConnection(tenantId, databaseId);
-
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _dbLocator.GetConnection(tenantId, databaseTypeId, null)
-        );
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(async () =>
+        {
+            var serverId = await _dbLocator.CreateDatabaseServer("", "", "", "", false);
+            var databaseTypeId = await _dbLocator.CreateDatabaseType(TestHelpers.GetRandomString());
+            var databaseId = await _dbLocator.CreateDatabase(TestHelpers.GetRandomString(), serverId, databaseTypeId, Status.Active);
+            var tenantId = await _dbLocator.CreateTenant(TestHelpers.GetRandomString());
+            await _dbLocator.CreateConnection(tenantId, databaseId);
+            await _dbLocator.GetConnection(tenantId, databaseTypeId, null);
+        });
     }
 
     [Fact]
