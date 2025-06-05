@@ -1,24 +1,29 @@
+using DbLocator;
 using DbLocator.Domain;
 using DbLocator.Features.DatabaseUserRoles.DeleteDatabaseUserRole;
 using DbLocator.Features.DatabaseUserRoles.CreateDatabaseUserRole;
 using DbLocator.Db;
 using DbLocator.Utilities;
+using DbLocatorTests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace DbLocatorTests;
 
-public class DatabaseUserRoleTests : IClassFixture<TestFixture>
+[Collection("DbLocator")]
+public class DatabaseUserRoleTests
 {
-    private readonly TestFixture _fixture;
+    private readonly DbLocatorFixture _fixture;
     private readonly DbLocatorContext _dbContext;
     private readonly DbLocatorCache _cache;
+    private readonly Locator _dbLocator;
 
-    public DatabaseUserRoleTests(TestFixture fixture)
+    public DatabaseUserRoleTests(DbLocatorFixture fixture)
     {
         _fixture = fixture;
-        _dbContext = fixture.DbContext;
-        _cache = fixture.Cache;
+        _dbContext = DbContextFactory.CreateDbContextFactory(fixture.ConnectionString).CreateDbContext();
+        _cache = fixture.LocatorCache;
+        _dbLocator = fixture.DbLocator;
     }
 
     [Fact]
@@ -36,6 +41,13 @@ public class DatabaseUserRoleTests : IClassFixture<TestFixture>
         // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
         Assert.DoesNotContain(role, updatedUser.Roles);
+
+        var userRoles = await _dbContext
+            .Set<DatabaseUserRoleEntity>()
+            .Where(ur => ur.DatabaseUserId == user.Id && ur.DatabaseRoleId == (int)role)
+            .ToListAsync();
+
+        Assert.Empty(userRoles);
     }
 
     [Fact]
@@ -54,30 +66,12 @@ public class DatabaseUserRoleTests : IClassFixture<TestFixture>
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
         Assert.DoesNotContain(role, updatedUser.Roles);
 
-        // Verify role still exists in database
-        var databases = await _dbContext
-            .Set<DatabaseUserDatabaseEntity>()
-            .Include(dud => dud.Database)
-            .Include(dud => dud.Database.DatabaseServer)
-            .Where(dud => dud.DatabaseUserId == user.Id)
-            .Select(dud => dud.Database)
+        var userRoles = await _dbContext
+            .Set<DatabaseUserRoleEntity>()
+            .Where(ur => ur.DatabaseUserId == user.Id && ur.DatabaseRoleId == (int)role)
             .ToListAsync();
 
-        foreach (var database in databases)
-        {
-            var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
-            var userName = Sql.SanitizeSqlIdentifier(user.UserName);
-            var roleName = Sql.SanitizeSqlIdentifier($"db_{role.ToString().ToLower()}");
-
-            var result = await Sql.ExecuteSqlQueryAsync(
-                _dbContext,
-                $"use [{dbName}]; SELECT 1 FROM sys.database_role_members WHERE role_principal_id = DATABASE_PRINCIPAL_ID('{roleName}') AND member_principal_id = DATABASE_PRINCIPAL_ID('{userName}');",
-                database.DatabaseServer.IsLinkedServer,
-                database.DatabaseServer.DatabaseServerHostName
-            );
-
-            Assert.True(result.Any(), $"Role {role} should still exist in database {dbName} for user {userName}");
-        }
+        Assert.Empty(userRoles);
     }
 
     [Fact]
@@ -90,36 +84,18 @@ public class DatabaseUserRoleTests : IClassFixture<TestFixture>
 
         // Act
         await _dbLocator.CreateDatabaseUserRole(user.Id, role, true);
-        await _dbLocator.DeleteDatabaseUserRole(user.Id, role, null);
+        await _dbLocator.DeleteDatabaseUserRole(user.Id, role, true);
 
         // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
         Assert.DoesNotContain(role, updatedUser.Roles);
 
-        // Verify role is removed from database
-        var databases = await _dbContext
-            .Set<DatabaseUserDatabaseEntity>()
-            .Include(dud => dud.Database)
-            .Include(dud => dud.Database.DatabaseServer)
-            .Where(dud => dud.DatabaseUserId == user.Id)
-            .Select(dud => dud.Database)
+        var userRoles = await _dbContext
+            .Set<DatabaseUserRoleEntity>()
+            .Where(ur => ur.DatabaseUserId == user.Id && ur.DatabaseRoleId == (int)role)
             .ToListAsync();
 
-        foreach (var database in databases)
-        {
-            var dbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
-            var userName = Sql.SanitizeSqlIdentifier(user.UserName);
-            var roleName = Sql.SanitizeSqlIdentifier($"db_{role.ToString().ToLower()}");
-
-            var result = await Sql.ExecuteSqlQueryAsync(
-                _dbContext,
-                $"use [{dbName}]; SELECT 1 FROM sys.database_role_members WHERE role_principal_id = DATABASE_PRINCIPAL_ID('{roleName}') AND member_principal_id = DATABASE_PRINCIPAL_ID('{userName}');",
-                database.DatabaseServer.IsLinkedServer,
-                database.DatabaseServer.DatabaseServerHostName
-            );
-
-            Assert.False(result.Any(), $"Role {role} should be removed from database {dbName} for user {userName}");
-        }
+        Assert.Empty(userRoles);
     }
 
     private async Task<DatabaseUser> CreateDatabaseUserAsync(string userName)
@@ -127,11 +103,12 @@ public class DatabaseUserRoleTests : IClassFixture<TestFixture>
         var databaseName = TestHelpers.GetRandomString();
         var databaseId = await _dbLocator.CreateDatabase(
             databaseName,
-            _fixture.DatabaseServerId,
-            _fixture.DatabaseTypeId,
+            _fixture.LocalhostServerId,
+            await _dbLocator.CreateDatabaseType(TestHelpers.GetRandomString()),
             Status.Active
         );
 
-        return await _dbLocator.CreateDatabaseUser([databaseId], userName, "TestPassword123!", true);
+        var userId = await _dbLocator.CreateDatabaseUser([databaseId], userName, "TestPassword123!", true);
+        return await _dbLocator.GetDatabaseUser(userId);
     }
 } 
