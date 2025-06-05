@@ -884,7 +884,8 @@ public class DatabaseServerTests : IAsyncLifetime
     public async Task CreateDatabaseServer_WithDuplicateHostNameOnCreate_ThrowsInvalidOperationException()
     {
         // Arrange
-        var hostName = $"duplicate-host-create-{Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10)}";
+        var hostName =
+            $"duplicate-host-create-{Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10)}";
         var server1Id = await _dbLocator.CreateDatabaseServer(
             TestHelpers.GetRandomString(),
             hostName,
@@ -905,14 +906,18 @@ public class DatabaseServerTests : IAsyncLifetime
                 )
         );
 
-        Assert.Contains($"Database server with host name \"{hostName}\" already exists", exception.Message);
+        Assert.Contains(
+            $"Database server with host name \"{hostName}\" already exists",
+            exception.Message
+        );
     }
 
     [Fact]
     public async Task CreateDatabaseServer_WithDuplicateFqdnOnCreate_ThrowsInvalidOperationException()
     {
         // Arrange
-        var fqdn = $"duplicate-create-{Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10)}.example.com";
+        var fqdn =
+            $"duplicate-create-{Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10)}.example.com";
         var server1Id = await _dbLocator.CreateDatabaseServer(
             TestHelpers.GetRandomString(),
             null,

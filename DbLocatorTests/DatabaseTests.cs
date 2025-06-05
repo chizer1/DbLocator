@@ -458,4 +458,34 @@ public class DatabaseTests
         var result = await command.ExecuteScalarAsync();
         Assert.Null(result); // Database should not exist physically
     }
+
+    [Fact]
+    public async Task GetDatabaseById_ReturnsFromCache()
+    {
+        // Arrange
+        var dbId = 12345;
+        var dbName = "CachedDb";
+        var cachedDatabase = new Database(
+            dbId,
+            dbName,
+            new DatabaseType(1, "TestType"),
+            new DatabaseServer(2, "ServerName", "HostName", "1.2.3.4", "fqdn.example.com", false),
+            Status.Active,
+            false
+        );
+        var cacheKey = $"database-id-{dbId}";
+        await _cache.CacheData(cacheKey, cachedDatabase);
+
+        // Act
+        var result = await _dbLocator.GetDatabase(dbId);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(cachedDatabase.Id, result.Id);
+        Assert.Equal(cachedDatabase.Name, result.Name);
+        Assert.Equal(cachedDatabase.Type.Id, result.Type.Id);
+        Assert.Equal(cachedDatabase.Server.Id, result.Server.Id);
+        Assert.Equal(cachedDatabase.Status, result.Status);
+        Assert.Equal(cachedDatabase.UseTrustedConnection, result.UseTrustedConnection);
+    }
 }

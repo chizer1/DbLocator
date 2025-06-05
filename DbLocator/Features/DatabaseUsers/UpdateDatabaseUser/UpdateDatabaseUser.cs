@@ -75,22 +75,14 @@ internal class UpdateDatabaseUserHandler(
                 $"Database user with ID {request.DatabaseUserId} not found"
             );
 
-        if (request.UserName != null)
-        {
-            if (
-                await dbContext
-                    .Set<DatabaseUserEntity>()
-                    .AnyAsync(
-                        u =>
-                            u.UserName == request.UserName
-                            && u.DatabaseUserId != request.DatabaseUserId,
-                        cancellationToken
-                    )
-            )
-                throw new InvalidOperationException(
-                    $"Database user with name \"{request.UserName}\" already exists"
-                );
+        var oldUserName = user.UserName;
+        var oldPassword = user.UserPassword != null ? _encryption.Decrypt(user.UserPassword) : null;
+        var userNameChanged = false;
+        var passwordChanged = false;
 
+        if (request.UserName != null && request.UserName != user.UserName)
+        {
+            userNameChanged = true;
             user.UserName = request.UserName;
         }
 
@@ -100,7 +92,11 @@ internal class UpdateDatabaseUserHandler(
             {
                 throw new InvalidOperationException("Password must be at least 8 characters long");
             }
-            user.UserPassword = _encryption.Encrypt(request.UserPassword);
+            if (_encryption.Encrypt(request.UserPassword) != user.UserPassword)
+            {
+                passwordChanged = true;
+                user.UserPassword = _encryption.Encrypt(request.UserPassword);
+            }
         }
 
         if (request.DatabaseIds != null)
@@ -137,6 +133,61 @@ internal class UpdateDatabaseUserHandler(
 
         dbContext.Update(user);
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        // DDL logic for AffectDatabase
+        if (request.AffectDatabase == true && (userNameChanged || passwordChanged))
+        {
+            // Get all databases the user is now associated with
+            var userDatabaseIds =
+                request.DatabaseIds
+                ?? await dbContext
+                    .Set<DatabaseUserDatabaseEntity>()
+                    .Where(d => d.DatabaseUserId == user.DatabaseUserId)
+                    .Select(d => d.DatabaseId)
+                    .ToArrayAsync(cancellationToken);
+
+            var updatedDatabases = await dbContext
+                .Set<DatabaseEntity>()
+                .Include(d => d.DatabaseServer)
+                .Where(d => userDatabaseIds.Contains(d.DatabaseId))
+                .ToListAsync(cancellationToken);
+
+            foreach (var database in updatedDatabases)
+            {
+                var commands = new List<string>();
+                if (userNameChanged && request.UserName != null && oldUserName != null)
+                {
+                    var sanitizedOldUserName = Sql.SanitizeSqlIdentifier(oldUserName);
+                    var sanitizedNewUserName = Sql.SanitizeSqlIdentifier(request.UserName);
+                    var sanitizedDbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
+                    commands.Add(
+                        $"use [{sanitizedDbName}]; alter user [{sanitizedOldUserName}] with name = [{sanitizedNewUserName}]"
+                    );
+                    commands.Add(
+                        $"alter login [{sanitizedOldUserName}] with name = [{sanitizedNewUserName}]"
+                    );
+                }
+                if (passwordChanged && request.UserPassword != null && request.UserName != null)
+                {
+                    var sanitizedUserName = Sql.SanitizeSqlIdentifier(request.UserName);
+                    var sanitizedPassword = request.UserPassword.Replace("'", "''");
+                    commands.Add(
+                        $"alter login [{sanitizedUserName}] with password = '{sanitizedPassword}'"
+                    );
+                }
+                foreach (var cmd in commands)
+                {
+                    await Sql.ExecuteSqlCommandAsync(
+                        dbContext,
+                        cmd,
+                        database.DatabaseServer.IsLinkedServer,
+                        database.DatabaseServer.IsLinkedServer
+                            ? database.DatabaseServer.DatabaseServerHostName
+                            : null
+                    );
+                }
+            }
+        }
 
         if (_cache != null)
         {

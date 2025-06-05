@@ -595,8 +595,8 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     public async Task GetConnection_WithNoParameters_ThrowsKeyNotFoundException()
     {
         // Use invalid tenantId and databaseTypeId to simulate 'no parameters'
-        await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _dbLocator.GetConnection(-1, -1, null)
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => _dbLocator.GetConnection(-1, -1, null)
         );
     }
 
@@ -605,8 +605,8 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     {
         var nonExistentTenantId = -9999;
         var databaseTypeId = await _dbLocator.CreateDatabaseType(TestHelpers.GetRandomString());
-        await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _dbLocator.GetConnection(nonExistentTenantId, databaseTypeId, null)
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => _dbLocator.GetConnection(nonExistentTenantId, databaseTypeId, null)
         );
     }
 
@@ -615,8 +615,8 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     {
         var tenantId = await _dbLocator.CreateTenant(TestHelpers.GetRandomString());
         var nonExistentDatabaseTypeId = -9999;
-        await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _dbLocator.GetConnection(tenantId, nonExistentDatabaseTypeId, null)
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => _dbLocator.GetConnection(tenantId, nonExistentDatabaseTypeId, null)
         );
     }
 
@@ -624,8 +624,8 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     public async Task GetConnection_WithNonExistentTenantCode_ThrowsKeyNotFoundException_Explicit()
     {
         var databaseTypeId = await _dbLocator.CreateDatabaseType(TestHelpers.GetRandomString());
-        await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            _dbLocator.GetConnection("NonExistentCode", databaseTypeId, null)
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            () => _dbLocator.GetConnection("NonExistentCode", databaseTypeId, null)
         );
     }
 
@@ -637,7 +637,12 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         {
             var serverId = await _dbLocator.CreateDatabaseServer("", "", "", "", false);
             var databaseTypeId = await _dbLocator.CreateDatabaseType(TestHelpers.GetRandomString());
-            var databaseId = await _dbLocator.CreateDatabase(TestHelpers.GetRandomString(), serverId, databaseTypeId, Status.Active);
+            var databaseId = await _dbLocator.CreateDatabase(
+                TestHelpers.GetRandomString(),
+                serverId,
+                databaseTypeId,
+                Status.Active
+            );
             var tenantId = await _dbLocator.CreateTenant(TestHelpers.GetRandomString());
             await _dbLocator.CreateConnection(tenantId, databaseId);
             await _dbLocator.GetConnection(tenantId, databaseTypeId, null);
@@ -649,11 +654,21 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     {
         var tenantId = await _dbLocator.CreateTenant(TestHelpers.GetRandomString());
         var databaseTypeId = await _dbLocator.CreateDatabaseType(TestHelpers.GetRandomString());
-        var databaseId = await _dbLocator.CreateDatabase(TestHelpers.GetRandomString(), _databaseServerId, databaseTypeId, Status.Active);
+        var databaseId = await _dbLocator.CreateDatabase(
+            TestHelpers.GetRandomString(),
+            _databaseServerId,
+            databaseTypeId,
+            Status.Active
+        );
         await _dbLocator.CreateConnection(tenantId, databaseId);
         // Do NOT create any user for this database
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _dbLocator.GetConnection(tenantId, databaseTypeId, new[] { DatabaseRole.DataReader })
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () =>
+                _dbLocator.GetConnection(
+                    tenantId,
+                    databaseTypeId,
+                    new[] { DatabaseRole.DataReader }
+                )
         );
     }
 }
