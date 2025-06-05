@@ -939,4 +939,28 @@ public class DatabaseServerTests : IAsyncLifetime
 
         Assert.Contains($"Database server with FQDN \"{fqdn}\" already exists", exception.Message);
     }
+
+    [Fact]
+    public async Task GetDatabaseServerById_ReturnsCachedData()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var serverId = await _dbLocator.CreateDatabaseServer(serverName, null, null, null, false);
+
+        // Act - First call should cache the data
+        var server1 = await _dbLocator.GetDatabaseServerById(serverId);
+        Assert.NotNull(server1);
+
+        // Verify data is cached
+        var cachedData = await _cache.GetCachedData<DatabaseServer>($"databaseServer_{serverId}");
+        Assert.NotNull(cachedData);
+        Assert.Equal(serverId, cachedData.Id);
+        Assert.Equal(serverName, cachedData.Name);
+
+        // Act - Second call should return cached data
+        var server2 = await _dbLocator.GetDatabaseServerById(serverId);
+        Assert.NotNull(server2);
+        Assert.Equal(serverId, server2.Id);
+        Assert.Equal(serverName, server2.Name);
+    }
 }

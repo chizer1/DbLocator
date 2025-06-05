@@ -775,4 +775,34 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         Assert.NotNull(connection);
         Assert.Contains(serverIp, connection.ConnectionString);
     }
+
+    [Fact]
+    public async Task Connection_TenantProperty_IsCorrectlySet()
+    {
+        // Arrange
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.CreateTenant(tenantName);
+
+        var databaseTypeName = TestHelpers.GetRandomString();
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName);
+
+        var databaseName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.CreateDatabase(
+            databaseName,
+            _databaseServerId,
+            databaseTypeId,
+            Status.Active
+        );
+
+        // Act
+        var connectionId = await _dbLocator.CreateConnection(tenantId, databaseId);
+        var connections = await _dbLocator.GetConnections();
+        var connection = connections.First(c => c.Id == connectionId);
+
+        // Assert
+        Assert.NotNull(connection);
+        Assert.NotNull(connection.Tenant);
+        Assert.Equal(tenantId, connection.Tenant.Id);
+        Assert.Equal(tenantName, connection.Tenant.Name);
+    }
 }

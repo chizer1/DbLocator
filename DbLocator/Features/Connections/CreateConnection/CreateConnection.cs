@@ -78,9 +78,6 @@ internal class CreateConnectionHandler(
             .Set<TenantEntity>()
             .AnyAsync(t => t.TenantId == request.TenantId, cancellationToken);
 
-        if (!tenantExists)
-            throw new KeyNotFoundException($"Tenant with ID {request.TenantId} not found");
-
         var databaseExists = await context
             .Set<DatabaseEntity>()
             .AnyAsync(d => d.DatabaseId == request.DatabaseId, cancellationToken);

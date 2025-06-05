@@ -162,11 +162,6 @@ internal class GetConnectionHandler(
                 cancellationToken
             );
         }
-
-        if (string.IsNullOrEmpty(request.TenantCode))
-        {
-            throw new KeyNotFoundException($"Tenant with code {request.TenantCode} not found.");
-        }
         return await queryable.FirstOrDefaultAsync(
             c =>
                 c.Tenant.TenantCode == request.TenantCode

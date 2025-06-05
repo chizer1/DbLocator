@@ -130,7 +130,6 @@ internal class UpdateDatabaseServerHandler(
                 throw new InvalidOperationException(
                     $"Database server with host name \"{request.HostName}\" already exists"
                 );
-            databaseServer.DatabaseServerHostName = request.HostName;
         }
 
         if (request.FullyQualifiedDomainName != null)
@@ -167,14 +166,8 @@ internal class UpdateDatabaseServerHandler(
                         cancellationToken
                     )
             )
-                throw new InvalidOperationException(
-                    $"Database server with IP address \"{request.IpAddress}\" already exists"
-                );
-            databaseServer.DatabaseServerIpaddress = request.IpAddress;
+                databaseServer.DatabaseServerIpaddress = request.IpAddress;
         }
-
-        if (request.IsLinkedServer.HasValue)
-            databaseServer.IsLinkedServer = request.IsLinkedServer.Value;
 
         dbContext.Set<DatabaseServerEntity>().Update(databaseServer);
         await dbContext.SaveChangesAsync(cancellationToken);

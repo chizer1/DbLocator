@@ -76,9 +76,6 @@ internal class DeleteDatabaseUserRoleHandler(
             await _cache.TryClearConnectionStringFromCache(roles: [request.UserRole]);
         }
 
-        if (!(request.AffectDatabase ?? false))
-            return;
-
         await DropDatabaseUserRole(dbContext, databaseUserRoleEntity, cancellationToken);
     }
 
