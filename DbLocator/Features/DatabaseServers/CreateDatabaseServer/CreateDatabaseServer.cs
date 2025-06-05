@@ -81,7 +81,7 @@ internal class CreateDatabaseServerHandler(
                 .AnyAsync(ds => ds.DatabaseServerName == request.Name, cancellationToken)
         )
             throw new InvalidOperationException(
-                $"Database server with name \"{request.Name}\" already exists"
+                $"Database Server Name '{request.Name}' already exists"
             );
         if (
             !string.IsNullOrWhiteSpace(request.HostName)

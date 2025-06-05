@@ -730,7 +730,7 @@ public class DatabaseServerTests : IAsyncLifetime
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            async () => await _dbLocator.UpdateDatabaseServer(server2Id, null, hostName)
+            async () => await _dbLocator.UpdateDatabaseServer(server2Id, null, null, hostName, null, null)
         );
 
         Assert.Contains($"Database server with host name \"{hostName}\" already exists", exception.Message);
