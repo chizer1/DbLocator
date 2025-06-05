@@ -497,4 +497,64 @@ public class DatabaseTests
         var value = await _cache.GetCachedData<string>("test-key");
         Assert.Null(value);
     }
+
+    [Fact]
+    public async Task DbLocatorCache_GetCachedData_ReturnsExpectedResults()
+    {
+        // Test 1: Cache is null
+        var nullCache = new DbLocatorCache(null);
+        var result1 = await nullCache.GetCachedData<string>("test-key");
+        Assert.Null(result1);
+
+        // Test 2: Cache key doesn't exist
+        var result2 = await _cache.GetCachedData<string>("non-existent-key");
+        Assert.Null(result2);
+
+        // Test 3: Cache key exists with string data
+        const string stringData = "test string data";
+        await _cache.CacheData("string-key", stringData);
+        var result3 = await _cache.GetCachedData<string>("string-key");
+        Assert.Equal(stringData, result3);
+
+        // Test 4: Cache key exists with complex object data
+        var databaseType = new DatabaseType(1, "TestType");
+        await _cache.CacheData("complex-key", databaseType);
+        var result4 = await _cache.GetCachedData<DatabaseType>("complex-key");
+        Assert.NotNull(result4);
+        Assert.Equal(databaseType.Id, result4.Id);
+        Assert.Equal(databaseType.Name, result4.Name);
+    }
+
+    [Fact]
+    public async Task DbLocatorCache_NullCache_HandlesAllOperations()
+    {
+        // Arrange
+        var nullCache = new DbLocatorCache(null);
+        var testKey = "test-key";
+        var testData = "test-data";
+        var testConnectionString = "test-connection-string";
+        var testRoles = new[] { DatabaseRole.DataReader };
+
+        // Act & Assert - Test CacheData
+        await nullCache.CacheData(testKey, testData); // Should not throw
+
+        // Act & Assert - Test CacheConnectionString
+        await nullCache.CacheConnectionString(testKey, testConnectionString); // Should not throw
+
+        // Act & Assert - Test Remove
+        await nullCache.Remove(testKey); // Should not throw
+
+        // Act & Assert - Test TryClearConnectionStringFromCache
+        await nullCache.TryClearConnectionStringFromCache(
+            tenantId: 1,
+            databaseTypeId: 1,
+            connectionId: 1,
+            tenantCode: "test",
+            roles: testRoles
+        ); // Should not throw
+
+        // Verify no data was actually cached
+        var result = await nullCache.GetCachedData<string>(testKey);
+        Assert.Null(result);
+    }
 }
