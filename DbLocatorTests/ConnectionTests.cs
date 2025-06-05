@@ -590,4 +590,70 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var connectionsAfterCacheRemoval = await _dbLocator.GetConnections();
         Assert.Contains(connectionsAfterCacheRemoval, cn => cn.Id == connectionId);
     }
+
+    [Fact]
+    public async Task GetConnection_WithNoParameters_ThrowsKeyNotFoundException()
+    {
+        // Use invalid tenantId and databaseTypeId to simulate 'no parameters'
+        await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+            _dbLocator.GetConnection(-1, -1, null)
+        );
+    }
+
+    [Fact]
+    public async Task GetConnection_WithNonExistentTenantId_ThrowsKeyNotFoundException_Explicit()
+    {
+        var nonExistentTenantId = -9999;
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(TestHelpers.GetRandomString());
+        await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+            _dbLocator.GetConnection(nonExistentTenantId, databaseTypeId, null)
+        );
+    }
+
+    [Fact]
+    public async Task GetConnection_WithNonExistentDatabaseTypeId_ThrowsKeyNotFoundException_Explicit()
+    {
+        var tenantId = await _dbLocator.CreateTenant(TestHelpers.GetRandomString());
+        var nonExistentDatabaseTypeId = -9999;
+        await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+            _dbLocator.GetConnection(tenantId, nonExistentDatabaseTypeId, null)
+        );
+    }
+
+    [Fact]
+    public async Task GetConnection_WithNonExistentTenantCode_ThrowsKeyNotFoundException_Explicit()
+    {
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(TestHelpers.GetRandomString());
+        await Assert.ThrowsAsync<KeyNotFoundException>(() =>
+            _dbLocator.GetConnection("NonExistentCode", databaseTypeId, null)
+        );
+    }
+
+    [Fact]
+    public async Task GetConnection_WithNoValidServerIdentifier_ThrowsInvalidOperationException()
+    {
+        // Create a database server with all name fields empty
+        var serverId = await _dbLocator.CreateDatabaseServer("", "", "", "", false);
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(TestHelpers.GetRandomString());
+        var databaseId = await _dbLocator.CreateDatabase(TestHelpers.GetRandomString(), serverId, databaseTypeId, Status.Active);
+        var tenantId = await _dbLocator.CreateTenant(TestHelpers.GetRandomString());
+        await _dbLocator.CreateConnection(tenantId, databaseId);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _dbLocator.GetConnection(tenantId, databaseTypeId, null)
+        );
+    }
+
+    [Fact]
+    public async Task GetConnection_WithNoUserForRoles_ThrowsInvalidOperationException()
+    {
+        var tenantId = await _dbLocator.CreateTenant(TestHelpers.GetRandomString());
+        var databaseTypeId = await _dbLocator.CreateDatabaseType(TestHelpers.GetRandomString());
+        var databaseId = await _dbLocator.CreateDatabase(TestHelpers.GetRandomString(), _databaseServerId, databaseTypeId, Status.Active);
+        await _dbLocator.CreateConnection(tenantId, databaseId);
+        // Do NOT create any user for this database
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _dbLocator.GetConnection(tenantId, databaseTypeId, new[] { DatabaseRole.DataReader })
+        );
+    }
 }
