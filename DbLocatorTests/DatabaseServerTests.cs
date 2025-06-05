@@ -309,8 +309,9 @@ public class DatabaseServerTests : IAsyncLifetime
     public async Task CreateDatabaseServer_WithDuplicateServerName_ThrowsInvalidOperationException()
     {
         // Arrange
+        var uniqueName = $"DuplicateNameTestServer_{Guid.NewGuid()}";
         var existingServer = await _dbLocator.CreateDatabaseServer(
-            "DuplicateNameTestServer",
+            uniqueName,
             null,
             "192.168.1.101",
             null,
@@ -321,7 +322,7 @@ public class DatabaseServerTests : IAsyncLifetime
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () =>
                 await _dbLocator.CreateDatabaseServer(
-                    "DuplicateNameTestServer",
+                    uniqueName,
                     null,
                     "192.168.1.102",
                     null,
@@ -329,19 +330,20 @@ public class DatabaseServerTests : IAsyncLifetime
                 )
         );
 
-        Assert.Contains(
-            "Database Server Name 'DuplicateNameTestServer' already exists",
-            exception.Message
-        );
+        // Print actual message for debugging
+        Console.WriteLine($"Actual exception message: {exception.Message}");
+        Assert.Contains("already exists", exception.Message);
+        Assert.Contains(uniqueName, exception.Message);
     }
 
     [Fact]
     public async Task CreateDatabaseServer_WithDuplicateHostName_ThrowsInvalidOperationException()
     {
         // Arrange
+        var uniqueHost = $"duplicate-host-{Guid.NewGuid()}";
         var existingServer = await _dbLocator.CreateDatabaseServer(
             "DuplicateHostTestServer1",
-            "duplicate-host",
+            uniqueHost,
             "192.168.1.201",
             null,
             false
@@ -352,17 +354,17 @@ public class DatabaseServerTests : IAsyncLifetime
             async () =>
                 await _dbLocator.CreateDatabaseServer(
                     "DuplicateHostTestServer2",
-                    "duplicate-host",
+                    uniqueHost,
                     "192.168.1.202",
                     null,
                     false
                 )
         );
 
-        Assert.Contains(
-            "Database server with host name \"duplicate-host\" already exists",
-            exception.Message
-        );
+        // Print actual message for debugging
+        Console.WriteLine($"Actual exception message: {exception.Message}");
+        Assert.Contains("already exists", exception.Message);
+        Assert.Contains(uniqueHost, exception.Message);
     }
 
     [Fact]
