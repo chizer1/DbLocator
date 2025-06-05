@@ -162,7 +162,7 @@ internal class UpdateDatabaseUserHandler(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         // DDL logic for AffectDatabase
-        if (request.AffectDatabase != false && (userNameChanged || passwordChanged))
+        if (request.AffectDatabase == true && (userNameChanged || passwordChanged))
         {
             // Get all databases the user is now associated with
             var userDatabaseIds =
