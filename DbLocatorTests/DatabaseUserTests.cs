@@ -3,6 +3,7 @@ using DbLocator.Db;
 using DbLocator.Domain;
 using DbLocator.Utilities;
 using DbLocatorTests.Fixtures;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace DbLocatorTests;
@@ -845,13 +846,7 @@ public class DatabaseUserTests : IAsyncLifetime
         var newUserName = TestHelpers.GetRandomString();
 
         // Act
-        await _dbLocator.UpdateDatabaseUser(
-            user.Id,
-            newUserName,
-            null,
-            null,
-            true
-        );
+        await _dbLocator.UpdateDatabaseUser(user.Id, newUserName, null, null, true);
 
         // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
@@ -866,13 +861,7 @@ public class DatabaseUserTests : IAsyncLifetime
         var newPassword = "NewPassword123!";
 
         // Act
-        await _dbLocator.UpdateDatabaseUser(
-            user.Id,
-            user.Name,
-            newPassword,
-            null,
-            true
-        );
+        await _dbLocator.UpdateDatabaseUser(user.Id, user.Name, newPassword, null, true);
 
         // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
@@ -917,7 +906,7 @@ public class DatabaseUserTests : IAsyncLifetime
             newUserName,
             newPassword,
             new[] { newDatabase.Id },
-            false  // Set to false to avoid SQL errors
+            false // Set to false to avoid SQL errors
         );
 
         // Assert
@@ -975,14 +964,7 @@ public class DatabaseUserTests : IAsyncLifetime
 
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(
-            async () =>
-                await _dbLocator.UpdateDatabaseUser(
-                    user2.Id,
-                    user1.Name,
-                    null,
-                    null,
-                    false
-                )
+            async () => await _dbLocator.UpdateDatabaseUser(user2.Id, user1.Name, null, null, false)
         );
     }
 
@@ -994,13 +976,7 @@ public class DatabaseUserTests : IAsyncLifetime
         var newUserName = TestHelpers.GetRandomString();
 
         // Act
-        await _dbLocator.UpdateDatabaseUser(
-            user.Id,
-            newUserName,
-            null,
-            null,
-            false
-        );
+        await _dbLocator.UpdateDatabaseUser(user.Id, newUserName, null, null, false);
 
         // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
@@ -1027,5 +1003,35 @@ public class DatabaseUserTests : IAsyncLifetime
         // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
         Assert.Equal(originalUserName, updatedUser.Name);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseUser_WithNewDatabaseAssociation_CreatesLoginAndUser()
+    {
+        // Arrange
+        var userName = TestHelpers.GetRandomString();
+        var user = await CreateDatabaseUserAsync(userName);
+        var newDatabase = await CreateDatabaseAsync(TestHelpers.GetRandomString());
+
+        // Act
+        await _dbLocator.UpdateDatabaseUser(
+            user.Id,
+            userName,
+            "NewPassword123!",
+            new[] { newDatabase.Id },
+            true
+        );
+
+        // Assert
+        var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+        Assert.Contains(updatedUser.Databases, d => d.Id == newDatabase.Id);
+
+        // Verify the SQL commands were executed by checking if we can connect with the user
+        var connectionString =
+            $"Server=localhost;Database={newDatabase.Name};User Id={userName};Password=NewPassword123!;TrustServerCertificate=True";
+        using var connection = new SqlConnection(connectionString);
+        await connection.OpenAsync();
+        Assert.Equal(System.Data.ConnectionState.Open, connection.State);
+        await connection.CloseAsync();
     }
 }

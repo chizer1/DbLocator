@@ -92,7 +92,9 @@ internal class UpdateDatabaseUserHandler(
                 );
             if (existingUser != null)
             {
-                throw new InvalidOperationException($"User with name '{request.UserName}' already exists");
+                throw new InvalidOperationException(
+                    $"User with name '{request.UserName}' already exists"
+                );
             }
 
             userNameChanged = true;
@@ -101,10 +103,6 @@ internal class UpdateDatabaseUserHandler(
 
         if (request.UserPassword != null)
         {
-            if (request.UserPassword.Length < 8)
-            {
-                throw new InvalidOperationException("Password must be at least 8 characters long");
-            }
             if (_encryption.Encrypt(request.UserPassword) != user.UserPassword)
             {
                 passwordChanged = true;
