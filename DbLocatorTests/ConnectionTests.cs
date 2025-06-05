@@ -707,10 +707,10 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var serverName = TestHelpers.GetRandomString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            string.Empty, // No FQDN
-            serverName,   // Use hostname as fallback
-            string.Empty, // No IP
-            true         // Active
+            null,      // No FQDN
+            serverName, // Use hostname as fallback
+            null,      // No IP
+            false      // Not a linked server
         );
 
         var databaseName = TestHelpers.GetRandomString();
@@ -741,10 +741,10 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var serverIp = "192.168.1.1";
         var serverId = await _dbLocator.CreateDatabaseServer(
             "ServerName",
-            string.Empty, // No FQDN
-            string.Empty, // No hostname
-            serverIp,     // Use IP as fallback
-            true         // Active
+            null,      // No FQDN
+            null,      // No hostname
+            serverIp,  // Use IP as fallback
+            false      // Not a linked server
         );
 
         var databaseName = TestHelpers.GetRandomString();
