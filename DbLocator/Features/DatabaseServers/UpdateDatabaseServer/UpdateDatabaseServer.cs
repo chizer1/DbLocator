@@ -130,6 +130,7 @@ internal class UpdateDatabaseServerHandler(
                 throw new InvalidOperationException(
                     $"Database server with host name \"{request.HostName}\" already exists"
                 );
+            databaseServer.DatabaseServerHostName = request.HostName;
         }
 
         if (request.FullyQualifiedDomainName != null)
