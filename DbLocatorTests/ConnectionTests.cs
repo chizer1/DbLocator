@@ -360,7 +360,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var tenantName = TestHelpers.GetRandomString();
         var tenantId = await _dbLocator.CreateTenant(tenantName);
 
-        var nonExistentDatabaseTypeId = 999; // Changed from -1 to 999
+        var nonExistentDatabaseTypeId = (byte)255; // Changed to use a byte value
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
             async () =>
@@ -614,7 +614,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
     public async Task GetConnection_WithNonExistentDatabaseTypeId_ThrowsKeyNotFoundException_Explicit()
     {
         var tenantId = await _dbLocator.CreateTenant(TestHelpers.GetRandomString());
-        var nonExistentDatabaseTypeId = 999; // Changed from -9999 to 999
+        var nonExistentDatabaseTypeId = (byte)255; // Changed to use a byte value
         await Assert.ThrowsAsync<KeyNotFoundException>(
             () => _dbLocator.GetConnection(tenantId, nonExistentDatabaseTypeId, null)
         );
