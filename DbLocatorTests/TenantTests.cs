@@ -6,100 +6,265 @@ using DbLocatorTests.Fixtures;
 namespace DbLocatorTests;
 
 [Collection("DbLocator")]
-public class TenantTests(DbLocatorFixture dbLocatorFixture)
+public class TenantTests : IAsyncLifetime
 {
-    private readonly Locator _dbLocator = dbLocatorFixture.DbLocator;
-    private readonly DbLocatorCache _cache = dbLocatorFixture.LocatorCache;
+    private readonly Locator _dbLocator;
+    private readonly DbLocatorCache _cache;
+    private readonly List<Tenant> _testTenants = new();
 
+    public TenantTests(DbLocatorFixture dbLocatorFixture)
+    {
+        _dbLocator = dbLocatorFixture.DbLocator;
+        _cache = dbLocatorFixture.LocatorCache;
+    }
+
+    public Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    public async Task DisposeAsync()
+    {
+        foreach (var tenant in _testTenants)
+        {
+            try
+            {
+                await _dbLocator.DeleteTenant(tenant.Id);
+            }
+            catch { }
+        }
+        _testTenants.Clear();
+        await _cache.Remove("tenants");
+    }
+
+    private async Task<Tenant> CreateTenantAsync(
+        string name = null,
+        string code = null,
+        Status status = Status.Active)
+    {
+        name ??= TestHelpers.GetRandomString();
+        code ??= TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.CreateTenant(name, code, status);
+        var tenant = await _dbLocator.GetTenant(tenantId);
+        _testTenants.Add(tenant);
+        return tenant;
+    }
+
+    #region Creation Tests
     [Fact]
     public async Task CreateMultipleTenantsAndSearchByKeyWord()
     {
-        var tenantName1 = TestHelpers.GetRandomString();
-        var tenantCode1 = TestHelpers.GetRandomString();
-        await _dbLocator.CreateTenant(tenantName1, tenantCode1, Status.Active);
-
-        var tenantName2 = TestHelpers.GetRandomString();
-        var tenantCode2 = TestHelpers.GetRandomString();
-        await _dbLocator.CreateTenant(tenantName2, tenantCode2, Status.Active);
+        var tenant1 = await CreateTenantAsync();
+        var tenant2 = await CreateTenantAsync();
 
         var tenants = (await _dbLocator.GetTenants()).ToList();
-        Assert.Contains(tenants, t => t.Name == tenantName1 && t.Code == tenantCode1);
-        Assert.Contains(tenants, t => t.Name == tenantName2 && t.Code == tenantCode2);
+        Assert.Contains(tenants, t => t.Name == tenant1.Name && t.Code == tenant1.Code);
+        Assert.Contains(tenants, t => t.Name == tenant2.Name && t.Code == tenant2.Code);
     }
 
+    [Fact]
+    public async Task CreateTenantWithOnlyName()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.CreateTenant(tenantName);
+        var tenant = await _dbLocator.GetTenant(tenantId);
+        _testTenants.Add(tenant);
+
+        Assert.Equal(tenantId, tenant.Id);
+        Assert.Equal(tenantName, tenant.Name);
+        Assert.Null(tenant.Code);
+        Assert.Equal(Status.Active, tenant.Status);
+    }
+
+    [Fact]
+    public async Task CreateTenantWithNameAndStatus()
+    {
+        var tenantName = TestHelpers.GetRandomString();
+        var tenantId = await _dbLocator.CreateTenant(tenantName, Status.Inactive);
+        var tenant = await _dbLocator.GetTenant(tenantId);
+        _testTenants.Add(tenant);
+
+        Assert.Equal(tenantId, tenant.Id);
+        Assert.Equal(tenantName, tenant.Name);
+        Assert.Null(tenant.Code);
+        Assert.Equal(Status.Inactive, tenant.Status);
+    }
+
+    [Fact]
+    public async Task CreateTenantButTenantNameAlreadyExists()
+    {
+        var tenant = await CreateTenantAsync();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.CreateTenant(tenant.Name)
+        );
+    }
+    #endregion
+
+    #region Cache Tests
     [Fact]
     public async Task VerifyTenantsAreCached()
     {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantCode = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
+        var tenant = await CreateTenantAsync();
 
         var tenants = await _dbLocator.GetTenants();
-        Assert.Contains(tenants, t => t.Id == tenantId);
+        Assert.Contains(tenants, t => t.Id == tenant.Id);
 
         var cachedTenants = await _cache.GetCachedData<List<Tenant>>("tenants");
         Assert.NotNull(cachedTenants);
-        Assert.Contains(cachedTenants, t => t.Id == tenantId);
+        Assert.Contains(cachedTenants, t => t.Id == tenant.Id);
     }
 
     [Fact]
-    public async Task GetTenantById()
+    public async Task GetTenantById_ReturnsCachedData()
     {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantCode = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
+        var tenant = await CreateTenantAsync();
 
-        var tenant = await _dbLocator.GetTenant(tenantId);
-        Assert.Equal(tenantId, tenant.Id);
-        Assert.Equal(tenantName, tenant.Name);
-        Assert.Equal(tenantCode, tenant.Code);
-        Assert.Equal(Status.Active, tenant.Status);
+        // First call should populate cache
+        var firstCall = await _dbLocator.GetTenant(tenant.Id);
+        Assert.NotNull(firstCall);
+
+        // Delete the tenant to ensure we're getting from cache
+        await _dbLocator.DeleteTenant(tenant.Id);
+
+        // Second call should use cache
+        var secondCall = await _dbLocator.GetTenant(tenant.Id);
+        Assert.NotNull(secondCall);
+        Assert.Equal(tenant.Id, secondCall.Id);
+        Assert.Equal(tenant.Name, secondCall.Name);
+        Assert.Equal(tenant.Code, secondCall.Code);
     }
 
     [Fact]
-    public async Task GetTenantByCode()
+    public async Task GetTenantByCode_ReturnsCachedData()
     {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantCode = TestHelpers.GetRandomString();
-        await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
+        var tenant = await CreateTenantAsync();
 
-        var tenant = await _dbLocator.GetTenant(tenantCode);
-        Assert.Equal(tenantName, tenant.Name);
-        Assert.Equal(tenantCode, tenant.Code);
-        Assert.Equal(Status.Active, tenant.Status);
+        // First call should populate cache
+        var firstCall = await _dbLocator.GetTenant(tenant.Code);
+        Assert.NotNull(firstCall);
+
+        // Delete the tenant to ensure we're getting from cache
+        await _dbLocator.DeleteTenant(tenant.Id);
+
+        // Second call should use cache
+        var secondCall = await _dbLocator.GetTenant(tenant.Code);
+        Assert.NotNull(secondCall);
+        Assert.Equal(tenant.Id, secondCall.Id);
+        Assert.Equal(tenant.Name, secondCall.Name);
+        Assert.Equal(tenant.Code, secondCall.Code);
     }
+    #endregion
 
+    #region Update Tests
     [Fact]
-    public async Task UpdateTenant()
+    public async Task UpdateTenant_WithAllProperties()
     {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantCode = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
-
+        var tenant = await CreateTenantAsync();
         var newName = TestHelpers.GetRandomString();
         var newCode = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateTenant(tenantId, newName, newCode);
-        await _dbLocator.UpdateTenant(tenantId, Status.Inactive);
 
-        var updatedTenant = await _dbLocator.GetTenant(tenantId);
+        await _dbLocator.UpdateTenant(tenant.Id, newName, newCode);
+        await _dbLocator.UpdateTenant(tenant.Id, Status.Inactive);
+
+        var updatedTenant = await _dbLocator.GetTenant(tenant.Id);
         Assert.Equal(newName, updatedTenant.Name);
         Assert.Equal(newCode, updatedTenant.Code);
         Assert.Equal(Status.Inactive, updatedTenant.Status);
     }
 
     [Fact]
-    public async Task DeleteTenant()
+    public async Task UpdateTenant_StatusOnly()
     {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantCode = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
+        var tenant = await CreateTenantAsync();
 
-        await _dbLocator.DeleteTenant(tenantId);
+        await _dbLocator.UpdateTenant(tenant.Id, Status.Inactive);
 
-        var tenants = await _dbLocator.GetTenants();
-        Assert.DoesNotContain(tenants, t => t.Id == tenantId);
+        var updatedTenant = await _dbLocator.GetTenant(tenant.Id);
+        Assert.Equal(Status.Inactive, updatedTenant.Status);
+        Assert.Equal(tenant.Name, updatedTenant.Name);
+        Assert.Equal(tenant.Code, updatedTenant.Code);
     }
 
+    [Fact]
+    public async Task UpdateTenant_NameOnly()
+    {
+        var tenant = await CreateTenantAsync();
+        var newName = TestHelpers.GetRandomString();
+
+        await _dbLocator.UpdateTenant(tenant.Id, newName);
+
+        var updatedTenant = await _dbLocator.GetTenant(tenant.Id);
+        Assert.Equal(newName, updatedTenant.Name);
+        Assert.Equal(tenant.Code, updatedTenant.Code);
+        Assert.Equal(Status.Active, updatedTenant.Status);
+    }
+
+    [Fact]
+    public async Task UpdateTenant_NameAndCode()
+    {
+        var tenant = await CreateTenantAsync();
+        var newName = TestHelpers.GetRandomString();
+        var newCode = TestHelpers.GetRandomString();
+
+        await _dbLocator.UpdateTenant(tenant.Id, newName, newCode);
+
+        var updatedTenant = await _dbLocator.GetTenant(tenant.Id);
+        Assert.Equal(newName, updatedTenant.Name);
+        Assert.Equal(newCode, updatedTenant.Code);
+        Assert.Equal(Status.Active, updatedTenant.Status);
+    }
+
+    [Fact]
+    public async Task UpdateTenant_ToDuplicateName_ThrowsInvalidOperationException()
+    {
+        var tenant1 = await CreateTenantAsync();
+        var tenant2 = await CreateTenantAsync();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.UpdateTenant(tenant2.Id, tenant1.Name)
+        );
+    }
+
+    [Fact]
+    public async Task UpdateTenant_ToDuplicateCode_ThrowsInvalidOperationException()
+    {
+        var tenant1 = await CreateTenantAsync();
+        var tenant2 = await CreateTenantAsync();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.UpdateTenant(tenant2.Id, null, tenant1.Code)
+        );
+    }
+    #endregion
+
+    #region Delete Tests
+    [Fact]
+    public async Task DeleteTenant()
+    {
+        var tenant = await CreateTenantAsync();
+        await _dbLocator.DeleteTenant(tenant.Id);
+
+        var tenants = await _dbLocator.GetTenants();
+        Assert.DoesNotContain(tenants, t => t.Id == tenant.Id);
+    }
+
+    [Fact]
+    public async Task CannotDeleteTenantWithActiveConnections()
+    {
+        var tenant = await CreateTenantAsync();
+
+        var dbName = TestHelpers.GetRandomString();
+        var databaseId = await _dbLocator.CreateDatabase(dbName, 1, 1, false);
+        await _dbLocator.CreateConnection(tenant.Id, databaseId);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.DeleteTenant(tenant.Id)
+        );
+    }
+    #endregion
+
+    #region Validation Tests
     [Fact]
     public async Task GetNonExistentTenantById_ThrowsKeyNotFoundException()
     {
@@ -123,255 +288,5 @@ public class TenantTests(DbLocatorFixture dbLocatorFixture)
             async () => await _dbLocator.DeleteTenant(-1)
         );
     }
-
-    [Fact]
-    public async Task CannotDeleteTenantWithActiveConnections()
-    {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantCode = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
-
-        var dbName = TestHelpers.GetRandomString();
-        var databaseId = await _dbLocator.CreateDatabase(dbName, 1, 1, false);
-        await _dbLocator.CreateConnection(tenantId, databaseId);
-
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            async () => await _dbLocator.DeleteTenant(tenantId)
-        );
-    }
-
-    [Fact]
-    public async Task GetTenantById_Cached()
-    {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantCode = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
-
-        var tenantFromDb = await _dbLocator.GetTenant(tenantId);
-        Assert.Equal(tenantId, tenantFromDb.Id);
-        Assert.Equal(tenantName, tenantFromDb.Name);
-        Assert.Equal(tenantCode, tenantFromDb.Code);
-        Assert.Equal(Status.Active, tenantFromDb.Status);
-
-        var tenantFromCache = await _dbLocator.GetTenant(tenantId);
-        Assert.Equal(tenantId, tenantFromCache.Id);
-        Assert.Equal(tenantName, tenantFromCache.Name);
-        Assert.Equal(tenantCode, tenantFromCache.Code);
-        Assert.Equal(Status.Active, tenantFromCache.Status);
-    }
-
-    [Fact]
-    public async Task GetTenantByCode_Cached()
-    {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantCode = TestHelpers.GetRandomString();
-        await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
-
-        var tenantFromDb = await _dbLocator.GetTenant(tenantCode);
-        Assert.Equal(tenantName, tenantFromDb.Name);
-        Assert.Equal(tenantCode, tenantFromDb.Code);
-        Assert.Equal(Status.Active, tenantFromDb.Status);
-
-        var tenantFromCache = await _dbLocator.GetTenant(tenantCode);
-        Assert.Equal(tenantName, tenantFromCache.Name);
-        Assert.Equal(tenantCode, tenantFromCache.Code);
-        Assert.Equal(Status.Active, tenantFromCache.Status);
-    }
-
-    [Fact]
-    public async Task CreateTenantWithOnlyName()
-    {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.CreateTenant(tenantName);
-
-        var tenant = await _dbLocator.GetTenant(tenantId);
-        Assert.Equal(tenantId, tenant.Id);
-        Assert.Equal(tenantName, tenant.Name);
-        Assert.Null(tenant.Code);
-        Assert.Equal(Status.Active, tenant.Status);
-    }
-
-    [Fact]
-    public async Task UpdateTenant_StatusOnly()
-    {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantCode = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
-
-        await _dbLocator.UpdateTenant(tenantId, Status.Inactive);
-
-        var updatedTenant = await _dbLocator.GetTenant(tenantId);
-        Assert.Equal(Status.Inactive, updatedTenant.Status);
-        Assert.Equal(tenantName, updatedTenant.Name);
-        Assert.Equal(tenantCode, updatedTenant.Code);
-    }
-
-    [Fact]
-    public async Task UpdateTenant_NameOnly()
-    {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantCode = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
-
-        var newName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateTenant(tenantId, newName);
-
-        var updatedTenant = await _dbLocator.GetTenant(tenantId);
-        Assert.Equal(newName, updatedTenant.Name);
-        Assert.Equal(tenantCode, updatedTenant.Code);
-        Assert.Equal(Status.Active, updatedTenant.Status);
-    }
-
-    [Fact]
-    public async Task UpdateTenant_NameAndCode()
-    {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantCode = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
-
-        var newName = TestHelpers.GetRandomString();
-        var newCode = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateTenant(tenantId, newName, newCode);
-
-        var updatedTenant = await _dbLocator.GetTenant(tenantId);
-        Assert.Equal(newName, updatedTenant.Name);
-        Assert.Equal(newCode, updatedTenant.Code);
-        Assert.Equal(Status.Active, updatedTenant.Status);
-    }
-
-    [Fact]
-    public async Task CreateTenantWithNameAndStatus()
-    {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.CreateTenant(tenantName, Status.Active);
-
-        var tenant = await _dbLocator.GetTenant(tenantId);
-        Assert.Equal(tenantId, tenant.Id);
-        Assert.Equal(tenantName, tenant.Name);
-        Assert.Null(tenant.Code);
-        Assert.Equal(Status.Active, tenant.Status);
-    }
-
-    [Fact]
-    public async Task CreateTenantButTenantNameAlreadyExists()
-    {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantCode = TestHelpers.GetRandomString();
-        await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
-        await Assert.ThrowsAsync<ArgumentException>(
-            async () => await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active)
-        );
-    }
-
-    [Fact]
-    public async Task GetTenants_ReturnsCachedData()
-    {
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantCode = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
-
-        var tenants = await _dbLocator.GetTenants();
-        Assert.Contains(tenants, t => t.Id == tenantId);
-
-        var cachedTenants = await _dbLocator.GetTenants();
-
-        Assert.NotNull(cachedTenants);
-        Assert.Contains(cachedTenants, t => t.Id == tenantId);
-        Assert.Contains(cachedTenants, t => t.Name == tenantName);
-        Assert.Contains(cachedTenants, t => t.Code == tenantCode);
-        Assert.Contains(cachedTenants, t => t.Status == Status.Active);
-
-        var cacheKey = "tenants";
-        var cachedData = await _cache.GetCachedData<List<Tenant>>(cacheKey);
-        Assert.NotNull(cachedData);
-        Assert.Equal(cachedTenants.Count, cachedData.Count);
-        Assert.Equal(cachedTenants[0].Id, cachedData[0].Id);
-        Assert.Equal(cachedTenants[0].Name, cachedData[0].Name);
-        Assert.Equal(cachedTenants[0].Code, cachedData[0].Code);
-        Assert.Equal(cachedTenants[0].Status, cachedData[0].Status);
-    }
-
-    [Fact]
-    public async Task UpdateTenant_WithAllProperties()
-    {
-        // Arrange
-        var tenantName = TestHelpers.GetRandomString();
-        var tenantCode = TestHelpers.GetRandomString();
-        var tenantId = await _dbLocator.CreateTenant(tenantName, tenantCode, Status.Active);
-
-        // Act
-        var newName = TestHelpers.GetRandomString();
-        var newCode = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateTenant(tenantId, newName, newCode, Status.Inactive);
-
-        // Assert
-        var updatedTenant = await _dbLocator.GetTenant(tenantId);
-        Assert.NotNull(updatedTenant);
-        Assert.Equal(newName, updatedTenant.Name);
-        Assert.Equal(newCode, updatedTenant.Code);
-        Assert.Equal(Status.Inactive, updatedTenant.Status);
-
-        // Verify cache is updated
-        var cachedTenants = await _cache.GetCachedData<List<Tenant>>("tenants");
-        Assert.NotNull(cachedTenants);
-        var cachedTenant = cachedTenants.FirstOrDefault(t => t.Id == tenantId);
-        Assert.NotNull(cachedTenant);
-        Assert.Equal(newName, cachedTenant.Name);
-        Assert.Equal(newCode, cachedTenant.Code);
-        Assert.Equal(Status.Inactive, cachedTenant.Status);
-    }
-
-    [Fact]
-    public async Task UpdateTenant_ToDuplicateName_ThrowsInvalidOperationException()
-    {
-        // Arrange
-        var tenantName1 = TestHelpers.GetRandomString();
-        var tenantCode1 = TestHelpers.GetRandomString();
-        var tenantId1 = await _dbLocator.CreateTenant(tenantName1, tenantCode1, Status.Active);
-
-        var tenantName2 = TestHelpers.GetRandomString();
-        var tenantCode2 = TestHelpers.GetRandomString();
-        var tenantId2 = await _dbLocator.CreateTenant(tenantName2, tenantCode2, Status.Active);
-
-        // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
-            async () => await _dbLocator.UpdateTenant(tenantId2, tenantName1, tenantCode2)
-        );
-        Assert.Contains($"Tenant with name \"{tenantName1}\" already exists", ex.Message);
-    }
-
-    [Fact]
-    public async Task UpdateTenant_ToDuplicateCode_ThrowsInvalidOperationException()
-    {
-        // Arrange
-        var tenantName1 = TestHelpers.GetRandomString();
-        var tenantCode1 = TestHelpers.GetRandomString();
-        var tenantId1 = await _dbLocator.CreateTenant(tenantName1, tenantCode1, Status.Active);
-
-        var tenantName2 = TestHelpers.GetRandomString();
-        var tenantCode2 = TestHelpers.GetRandomString();
-        var tenantId2 = await _dbLocator.CreateTenant(tenantName2, tenantCode2, Status.Active);
-
-        // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
-            async () => await _dbLocator.UpdateTenant(tenantId2, tenantName2, tenantCode1)
-        );
-        Assert.Contains($"Tenant with code \"{tenantCode1}\" already exists", ex.Message);
-    }
-
-    [Fact]
-    public async Task GetTenantById_WithNonExistentId_ThrowsKeyNotFoundException()
-    {
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.GetTenant(999999)
-        );
-    }
-
-    [Fact]
-    public async Task GetTenantByCode_WithNonExistentCode_ThrowsKeyNotFoundException()
-    {
-        await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.GetTenant("NonExistentCode")
-        );
-    }
+    #endregion
 }
