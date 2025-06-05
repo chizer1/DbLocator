@@ -36,7 +36,9 @@ internal sealed class CreateDatabaseServerCommandValidator
             .WithMessage("Fully qualified domain name cannot be more than 100 characters")
             .Matches(@"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63})*\.[A-Za-z]{2,}$")
             .When(x => !string.IsNullOrEmpty(x.FullyQualifiedDomainName))
-            .WithMessage("FQDN must be a valid domain name format (e.g., example.com, sub.example.com)");
+            .WithMessage(
+                "FQDN must be a valid domain name format (e.g., example.com, sub.example.com)"
+            );
 
         RuleFor(x => x.IpAddress)
             .MaximumLength(15)

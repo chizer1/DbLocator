@@ -679,7 +679,12 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.GetConnection(string.Empty, databaseTypeId, Array.Empty<DatabaseRole>())
+            async () =>
+                await _dbLocator.GetConnection(
+                    string.Empty,
+                    databaseTypeId,
+                    Array.Empty<DatabaseRole>()
+                )
         );
     }
 
@@ -690,7 +695,8 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var databaseTypeId = await _dbLocator.CreateDatabaseType(databaseTypeName);
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
-            async () => await _dbLocator.GetConnection(null!, databaseTypeId, Array.Empty<DatabaseRole>())
+            async () =>
+                await _dbLocator.GetConnection(null!, databaseTypeId, Array.Empty<DatabaseRole>())
         );
     }
 
@@ -707,10 +713,10 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var serverName = TestHelpers.GetRandomString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            null,      // No FQDN
+            null, // No FQDN
             serverName, // Use hostname as fallback
-            null,      // No IP
-            false      // Not a linked server
+            null, // No IP
+            false // Not a linked server
         );
 
         var databaseName = TestHelpers.GetRandomString();
@@ -722,8 +728,12 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         );
 
         var connectionId = await _dbLocator.CreateConnection(tenantId, databaseId);
-        var connection = await _dbLocator.GetConnection(tenantId, databaseTypeId, Array.Empty<DatabaseRole>());
-        
+        var connection = await _dbLocator.GetConnection(
+            tenantId,
+            databaseTypeId,
+            Array.Empty<DatabaseRole>()
+        );
+
         Assert.NotNull(connection);
         Assert.Contains(serverName, connection.ConnectionString);
     }
@@ -741,10 +751,10 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var serverIp = "192.168.1.1";
         var serverId = await _dbLocator.CreateDatabaseServer(
             "ServerName",
-            null,      // No FQDN
-            null,      // No hostname
-            serverIp,  // Use IP as fallback
-            false      // Not a linked server
+            null, // No host
+            serverIp, // Use IP as fallback
+            null, // No FQDN
+            false // Not a linked server
         );
 
         var databaseName = TestHelpers.GetRandomString();
@@ -756,8 +766,12 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         );
 
         var connectionId = await _dbLocator.CreateConnection(tenantId, databaseId);
-        var connection = await _dbLocator.GetConnection(tenantId, databaseTypeId, Array.Empty<DatabaseRole>());
-        
+        var connection = await _dbLocator.GetConnection(
+            tenantId,
+            databaseTypeId,
+            Array.Empty<DatabaseRole>()
+        );
+
         Assert.NotNull(connection);
         Assert.Contains(serverIp, connection.ConnectionString);
     }
