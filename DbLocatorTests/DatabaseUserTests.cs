@@ -668,7 +668,7 @@ public class DatabaseUserTests : IAsyncLifetime
 
         var newServerName = TestHelpers.GetRandomString();
         var newHostName = $"server-{TestHelpers.GetRandomString()}";
-        var newIpAddress = $"192.168.1.{new Random().Next(1, 255)}";
+        var newIpAddress = $"10.0.{new Random().Next(1, 255)}.{new Random().Next(1, 255)}";
         var newServerId = await _dbLocator.CreateDatabaseServer(
             newServerName,
             null,
@@ -677,25 +677,32 @@ public class DatabaseUserTests : IAsyncLifetime
             false
         );
 
-        var newTypeName = TestHelpers.GetRandomString();
-        var newTypeId = await _dbLocator.CreateDatabaseType(newTypeName);
+        try
+        {
+            var newTypeName = TestHelpers.GetRandomString();
+            var newTypeId = await _dbLocator.CreateDatabaseType(newTypeName);
 
-        var newDatabaseName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabase(
-            databaseId,
-            newDatabaseName,
-            newServerId,
-            newTypeId,
-            null,
-            Status.Inactive,
-            true
-        );
+            var newDatabaseName = TestHelpers.GetRandomString();
+            await _dbLocator.UpdateDatabase(
+                databaseId,
+                newDatabaseName,
+                newServerId,
+                newTypeId,
+                null,
+                Status.Inactive,
+                true
+            );
 
-        var updatedDatabase = await _dbLocator.GetDatabase(databaseId);
-        Assert.Equal(newDatabaseName, updatedDatabase.Name);
-        Assert.Equal(newServerId, updatedDatabase.Server.Id);
-        Assert.Equal(newTypeId, updatedDatabase.Type.Id);
-        Assert.Equal(Status.Inactive, updatedDatabase.Status);
+            var updatedDatabase = await _dbLocator.GetDatabase(databaseId);
+            Assert.Equal(newDatabaseName, updatedDatabase.Name);
+            Assert.Equal(newServerId, updatedDatabase.Server.Id);
+            Assert.Equal(newTypeId, updatedDatabase.Type.Id);
+            Assert.Equal(Status.Inactive, updatedDatabase.Status);
+        }
+        finally
+        {
+            await _dbLocator.DeleteDatabaseServer(newServerId);
+        }
     }
 
     [Fact]
