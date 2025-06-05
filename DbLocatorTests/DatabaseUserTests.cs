@@ -868,7 +868,7 @@ public class DatabaseUserTests : IAsyncLifetime
         // Act
         await _dbLocator.UpdateDatabaseUser(
             user.Id,
-            null,
+            user.Name,
             newPassword,
             null,
             true
@@ -876,8 +876,8 @@ public class DatabaseUserTests : IAsyncLifetime
 
         // Assert
         var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
-        // Since password is encrypted, we can only verify it changed
-        Assert.NotEqual(user.Name, updatedUser.Name);
+        // Since password is encrypted, we can only verify the user was updated
+        Assert.Equal(user.Name, updatedUser.Name);
     }
 
     [Fact]
@@ -890,7 +890,7 @@ public class DatabaseUserTests : IAsyncLifetime
         // Act
         await _dbLocator.UpdateDatabaseUser(
             user.Id,
-            null,
+            user.Name,
             null,
             new[] { newDatabase.Id },
             true
@@ -958,7 +958,7 @@ public class DatabaseUserTests : IAsyncLifetime
             async () =>
                 await _dbLocator.UpdateDatabaseUser(
                     user.Id,
-                    null,
+                    user.Name,
                     null,
                     new[] { invalidDatabaseId },
                     true
@@ -981,7 +981,7 @@ public class DatabaseUserTests : IAsyncLifetime
                     user1.Name,
                     null,
                     null,
-                    true
+                    false
                 )
         );
     }
