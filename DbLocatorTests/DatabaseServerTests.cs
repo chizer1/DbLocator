@@ -946,14 +946,22 @@ public class DatabaseServerTests : IAsyncLifetime
         // Arrange
         var serverName = TestHelpers.GetRandomString();
         var ipAddress = TestHelpers.GetRandomIpAddressString();
-        var serverId = await _dbLocator.CreateDatabaseServer(serverName, null, ipAddress, null, false);
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            null,
+            ipAddress,
+            null,
+            false
+        );
 
         // Act - First call should cache the data
         var server1 = await _dbLocator.GetDatabaseServer(serverId);
         Assert.NotNull(server1);
 
         // Verify data is cached
-        var cachedData = await _cache.GetCachedData<DatabaseServer>($"databaseServer-id-{serverId}");
+        var cachedData = await _cache.GetCachedData<DatabaseServer>(
+            $"databaseServer-id-{serverId}"
+        );
         Assert.NotNull(cachedData);
         Assert.Equal(serverId, cachedData.Id);
         Assert.Equal(serverName, cachedData.Name);

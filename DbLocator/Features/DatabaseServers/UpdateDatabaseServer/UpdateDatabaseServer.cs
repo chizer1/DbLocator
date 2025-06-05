@@ -154,25 +154,7 @@ internal class UpdateDatabaseServerHandler(
         }
 
         if (request.IpAddress != null)
-        {
-            if (!string.IsNullOrWhiteSpace(request.IpAddress))
-            {
-                if (await dbContext
-                    .Set<DatabaseServerEntity>()
-                    .AnyAsync(
-                        ds =>
-                            ds.DatabaseServerIpaddress == request.IpAddress
-                            && ds.DatabaseServerId != request.DatabaseServerId,
-                        cancellationToken
-                    ))
-                {
-                    throw new InvalidOperationException(
-                        $"Database server with IP address \"{request.IpAddress}\" already exists"
-                    );
-                }
-                databaseServer.DatabaseServerIpaddress = request.IpAddress;
-            }
-        }
+            databaseServer.DatabaseServerIpaddress = request.IpAddress;
 
         dbContext.Set<DatabaseServerEntity>().Update(databaseServer);
         await dbContext.SaveChangesAsync(cancellationToken);
