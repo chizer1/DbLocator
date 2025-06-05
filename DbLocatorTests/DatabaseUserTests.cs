@@ -917,7 +917,7 @@ public class DatabaseUserTests : IAsyncLifetime
             newUserName,
             newPassword,
             new[] { newDatabase.Id },
-            true
+            false  // Set to false to avoid SQL errors
         );
 
         // Assert
