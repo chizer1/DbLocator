@@ -671,7 +671,7 @@ public class DatabaseServerTests : IAsyncLifetime
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ValidationException>(
-            async () => await _dbLocator.UpdateDatabaseServer(serverId, "invalid-fqdn")
+            async () => await _dbLocator.UpdateDatabaseServer(serverId, "invalid-fqdn", null)
         );
 
         Assert.Contains("FQDN must be a valid domain name format", exception.Message);
