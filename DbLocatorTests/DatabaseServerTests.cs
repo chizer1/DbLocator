@@ -654,4 +654,224 @@ public class DatabaseServerTests : IAsyncLifetime
         Assert.Equal(ipAddress, updatedServer.IpAddress);
         Assert.Equal(initialIsLinkedServer, updatedServer.IsLinkedServer); // Note: IsLinkedServer cannot be updated with current API
     }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithInvalidFqdn_ThrowsValidationException()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            null,
+            ipAddress,
+            null,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ValidationException>(
+            async () => await _dbLocator.UpdateDatabaseServer(serverId, "invalid-fqdn")
+        );
+
+        Assert.Contains("FQDN must be a valid domain name format", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithDuplicateName_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var server1Name = "DuplicateNameTestServer";
+        var server1Id = await _dbLocator.CreateDatabaseServer(
+            server1Name,
+            null,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
+        );
+
+        var server2Name = "AnotherServer";
+        var server2Id = await _dbLocator.CreateDatabaseServer(
+            server2Name,
+            null,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.UpdateDatabaseServer(server2Id, server1Name)
+        );
+
+        Assert.Contains($"Database server with name \"{server1Name}\" already exists", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithDuplicateHostName_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var hostName = "duplicate-host";
+        var server1Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            hostName,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
+        );
+
+        var server2Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            null,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.UpdateDatabaseServer(server2Id, null, hostName, null, null, null)
+        );
+
+        Assert.Contains($"Database server with host name \"{hostName}\" already exists", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithDuplicateFqdn_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var fqdn = "duplicate.example.com";
+        var server1Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            null,
+            TestHelpers.GetRandomIpAddressString(),
+            fqdn,
+            false
+        );
+
+        var server2Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            null,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.UpdateDatabaseServer(server2Id, null, null, fqdn, null, null)
+        );
+
+        Assert.Contains($"Database server with FQDN \"{fqdn}\" already exists", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithDuplicateIpAddress_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var ipAddress = "192.168.1.100";
+        var server1Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            null,
+            ipAddress,
+            null,
+            false
+        );
+
+        var server2Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            null,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.UpdateDatabaseServer(server2Id, null, null, null, ipAddress, null)
+        );
+
+        Assert.Contains($"Database server with IP address \"{ipAddress}\" already exists", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_UpdatesCache()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            null,
+            ipAddress,
+            null,
+            false
+        );
+
+        // Ensure cache is populated
+        var servers = await _dbLocator.GetDatabaseServers();
+        Assert.Contains(servers, s => s.Id == serverId);
+
+        // Act
+        var newName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseServer(serverId, newName);
+
+        // Assert
+        var updatedServers = await _dbLocator.GetDatabaseServers();
+        var updatedServer = updatedServers.First(s => s.Id == serverId);
+        Assert.Equal(newName, updatedServer.Name);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithIsLinkedServer()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            null,
+            ipAddress,
+            null,
+            false
+        );
+
+        // Act
+        await _dbLocator.UpdateDatabaseServer(serverId, null, null, null, null, true);
+
+        // Assert
+        var updatedServer = await _dbLocator.GetDatabaseServer(serverId);
+        Assert.True(updatedServer.IsLinkedServer);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithNonExistentServer_ThrowsKeyNotFoundException()
+    {
+        // Act & Assert
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () => await _dbLocator.UpdateDatabaseServer(999999, "NewName")
+        );
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithNoChanges_ThrowsValidationException()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            null,
+            ipAddress,
+            null,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ValidationException>(
+            async () => await _dbLocator.UpdateDatabaseServer(serverId, null, null, null, null, null)
+        );
+
+        Assert.Contains("At least one field must be provided for update", exception.Message);
+    }
 }
