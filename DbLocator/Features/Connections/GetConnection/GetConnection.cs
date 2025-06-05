@@ -10,11 +10,11 @@ using Microsoft.EntityFrameworkCore;
 namespace DbLocator.Features.Connections.GetConnection;
 
 internal record GetConnectionQuery(
-    int? TenantId = null,
-    int? DatabaseTypeId = null,
-    int? ConnectionId = null,
-    string? TenantCode = null,
-    DatabaseRole[]? Roles = null
+    int? TenantId,
+    int? DatabaseTypeId,
+    int? ConnectionId,
+    string? TenantCode,
+    DatabaseRole[]? Roles
 );
 
 internal sealed class GetConnectionQueryValidator : AbstractValidator<GetConnectionQuery>
@@ -40,8 +40,6 @@ internal sealed class GetConnectionQueryValidator : AbstractValidator<GetConnect
             .NotEmpty()
             .When(query => query.ConnectionId == null)
             .WithMessage("DatabaseTypeId is required when not using ConnectionId.");
-
-        // Roles are optional - removed the NotEmpty validation
     }
 }
 
@@ -60,7 +58,6 @@ internal class GetConnectionHandler(
         CancellationToken cancellationToken = default
     )
     {
-        // Only validate if we have a valid request
         if (
             request.ConnectionId.HasValue
             || request.TenantId.HasValue

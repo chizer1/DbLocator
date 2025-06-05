@@ -11,7 +11,7 @@ internal record CreateDatabaseUserCommand(
     string UserName,
     string UserPassword,
     int[] DatabaseIds,
-    bool AffectDatabase = true
+    bool AffectDatabase
 );
 
 internal sealed class CreateDatabaseUserCommandValidator
@@ -59,7 +59,7 @@ internal class CreateDatabaseUserHandler(
             )
             .ToList();
 
-        if (nonExistentDatabaseIds.Any())
+        if (nonExistentDatabaseIds.Count != 0)
         {
             throw new KeyNotFoundException(
                 $"Database(s) not found with ID(s): {string.Join(", ", nonExistentDatabaseIds)}"

@@ -10,12 +10,12 @@ namespace DbLocator.Features.Databases.UpdateDatabase;
 
 internal record UpdateDatabaseCommand(
     int Id,
-    string? Name = null,
-    int? DatabaseServerId = null,
-    int? DatabaseTypeId = null,
-    bool? UseTrustedConnection = null,
-    Status? Status = null,
-    bool AffectDatabase = true
+    string? Name,
+    int? DatabaseServerId,
+    int? DatabaseTypeId,
+    bool? UseTrustedConnection,
+    Status? Status,
+    bool? AffectDatabase
 );
 
 internal sealed class UpdateDatabaseCommandValidator : AbstractValidator<UpdateDatabaseCommand>
@@ -108,14 +108,21 @@ internal class UpdateDatabaseHandler(
                 );
         }
 
-        if (request.AffectDatabase && request.Name != null && database.DatabaseName != request.Name)
+        if (
+            (request.AffectDatabase ?? false)
+            && request.Name != null
+            && database.DatabaseName != request.Name
+        )
         {
             var oldDbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
             var newDbName = Sql.SanitizeSqlIdentifier(request.Name);
-            var serverName = database.DatabaseServer.DatabaseServerHostName 
-                ?? database.DatabaseServer.DatabaseServerName 
-                ?? throw new InvalidOperationException("Database server must have either a host name or server name");
-                
+            var serverName =
+                database.DatabaseServer.DatabaseServerHostName
+                ?? database.DatabaseServer.DatabaseServerName
+                ?? throw new InvalidOperationException(
+                    "Database server must have either a host name or server name"
+                );
+
             await Sql.ExecuteSqlCommandAsync(
                 dbContext,
                 $"alter database [{oldDbName}] modify name = [{newDbName}]",

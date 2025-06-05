@@ -1,3 +1,5 @@
+#nullable enable
+
 using DbLocator.Domain;
 using Microsoft.Data.SqlClient;
 
@@ -7,8 +9,12 @@ internal interface IConnectionService
 {
     Task<int> CreateConnection(int tenantId, int databaseId);
     Task DeleteConnection(int connectionId);
-    Task<SqlConnection> GetConnection(int tenantId, int databaseTypeId, DatabaseRole[] roles);
-    Task<SqlConnection> GetConnection(int connectionId, DatabaseRole[] roles);
-    Task<SqlConnection> GetConnection(string tenantCode, int databaseTypeId, DatabaseRole[] roles);
+    Task<SqlConnection> GetConnection(
+        int? tenantId = null,
+        int? databaseTypeId = null,
+        int? connectionId = null,
+        string? tenantCode = null,
+        DatabaseRole[]? roles = null
+    );
     Task<List<Domain.Connection>> GetConnections();
 }

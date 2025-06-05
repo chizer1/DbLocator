@@ -1,3 +1,5 @@
+#nullable enable
+
 using DbLocator.Db;
 using DbLocator.Features.DatabaseServers.CreateDatabaseServer;
 using DbLocator.Features.DatabaseServers.DeleteDatabaseServer;
@@ -26,10 +28,10 @@ internal class DatabaseServerService(
 
     public async Task<int> CreateDatabaseServer(
         string databaseServerName,
-        bool isLinkedServer,
-        string databaseServerHostName = null,
-        string databaseServerIpAdress = null,
-        string databaseServerFullyQualifiedDomainName = null
+        string databaseServerHostName,
+        string databaseServerIpAddress,
+        string databaseServerFullyQualifiedDomainName,
+        bool isLinkedServer
     )
     {
         return await _createDatabaseServer.Handle(
@@ -37,7 +39,7 @@ internal class DatabaseServerService(
                 databaseServerName,
                 databaseServerHostName,
                 databaseServerFullyQualifiedDomainName,
-                databaseServerIpAdress,
+                databaseServerIpAddress,
                 isLinkedServer
             )
         );
@@ -62,11 +64,11 @@ internal class DatabaseServerService(
 
     public async Task UpdateDatabaseServer(
         int databaseServerId,
-        string databaseServerName,
-        string databaseServerHostName,
-        string databaseServerFullyQualifiedDomainName,
-        string databaseServerIpAddress,
-        bool isLinkedServer
+        string? databaseServerName,
+        string? databaseServerHostName,
+        string? databaseServerFullyQualifiedDomainName,
+        string? databaseServerIpAddress,
+        bool? isLinkedServer
     )
     {
         await _updateDatabaseServer.Handle(

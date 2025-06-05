@@ -6,19 +6,19 @@ using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace DbLocator.Features.Databases.GetDatabase;
+namespace DbLocator.Features.Databases.GetDatabaseById;
 
-internal record GetDatabaseQuery(int Id);
+internal record GetDatabaseByIdQuery(int Id);
 
-internal sealed class GetDatabaseQueryValidator : AbstractValidator<GetDatabaseQuery>
+internal sealed class GetDatabaseByIdQueryValidator : AbstractValidator<GetDatabaseByIdQuery>
 {
-    internal GetDatabaseQueryValidator()
+    internal GetDatabaseByIdQueryValidator()
     {
         RuleFor(x => x.Id).GreaterThan(0).WithMessage("Database Id must be greater than 0.");
     }
 }
 
-internal class GetDatabaseHandler(
+internal class GetDatabaseByIdHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     DbLocatorCache? cache = null
 )
@@ -27,11 +27,11 @@ internal class GetDatabaseHandler(
     private readonly DbLocatorCache? _cache = cache;
 
     public async Task<Database> Handle(
-        GetDatabaseQuery request,
+        GetDatabaseByIdQuery request,
         CancellationToken cancellationToken = default
     )
     {
-        await new GetDatabaseQueryValidator().ValidateAndThrowAsync(request, cancellationToken);
+        await new GetDatabaseByIdQueryValidator().ValidateAndThrowAsync(request, cancellationToken);
 
         const string cacheKeyPrefix = "database-id-";
         var cacheKey = $"{cacheKeyPrefix}{request.Id}";

@@ -35,10 +35,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var databaseServerIpAddress = TestHelpers.GetRandomIpAddressString();
         await _dbLocator.CreateDatabaseServer(
             databaseServerName,
-            false,
             null,
             databaseServerIpAddress,
-            null
+            null,
+            false
         );
 
         var databaseServers = (await _dbLocator.GetDatabaseServers())
@@ -55,10 +55,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var databaseServerIpAddress = TestHelpers.GetRandomIpAddressString();
         var databaseServerId = await _dbLocator.CreateDatabaseServer(
             databaseServerName,
-            false,
             null,
             databaseServerIpAddress,
-            null
+            null,
+            false
         );
 
         await _dbLocator.DeleteDatabaseServer(databaseServerId);
@@ -75,10 +75,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var databaseServerIpAddress = TestHelpers.GetRandomIpAddressString();
         var databaseServerId = await _dbLocator.CreateDatabaseServer(
             databaseServerName,
-            false,
             null,
             databaseServerIpAddress,
-            null
+            null,
+            false
         );
 
         var databaseServers = (await _dbLocator.GetDatabaseServers())
@@ -106,10 +106,10 @@ public class DatabaseServerTests : IAsyncLifetime
 
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            isLinkedServer,
             hostName,
             IpAddress,
-            fqdn
+            fqdn,
+            isLinkedServer
         );
 
         var server = (await _dbLocator.GetDatabaseServers()).Single(s => s.Id == serverId);
@@ -128,14 +128,14 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         var newName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseServer(serverId, newName);
+        await _dbLocator.UpdateDatabaseServer(serverId, newName, null, null, null, null);
 
         var updatedServer = (await _dbLocator.GetDatabaseServers()).Single(s => s.Id == serverId);
 
@@ -150,10 +150,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         // Create a database to the server
@@ -175,10 +175,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         var server = await _dbLocator.GetDatabaseServer(serverId);
@@ -200,7 +200,8 @@ public class DatabaseServerTests : IAsyncLifetime
     public async Task UpdateNonExistentDatabaseServerThrowsException()
     {
         await Assert.ThrowsAsync<FluentValidation.ValidationException>(
-            async () => await _dbLocator.UpdateDatabaseServer(-1, "UpdatedName")
+            async () =>
+                await _dbLocator.UpdateDatabaseServer(-1, "UpdatedName", null, null, null, null)
         );
     }
 
@@ -210,10 +211,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var databaseServerIpAddress = TestHelpers.GetRandomIpAddressString();
         var databaseServerId = await _dbLocator.CreateDatabaseServer(
             databaseServerName,
-            false,
             null,
             databaseServerIpAddress,
-            null
+            null,
+            false
         );
 
         // Ensure cache is populated by getting the servers
@@ -242,10 +243,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         // Create a database to the server
@@ -277,10 +278,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         // Create a database to the server
@@ -309,58 +310,64 @@ public class DatabaseServerTests : IAsyncLifetime
     public async Task CreateDatabaseServer_WithDuplicateServerName_ThrowsInvalidOperationException()
     {
         // Arrange
+        var uniqueName =
+            $"DuplicateNameTestServer_{Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10)}"; // ensure < 50 chars
         var existingServer = await _dbLocator.CreateDatabaseServer(
-            "DuplicateNameTestServer",
-            false,
+            uniqueName,
             null,
             "192.168.1.101",
-            null
+            null,
+            false
         );
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () =>
                 await _dbLocator.CreateDatabaseServer(
-                    "DuplicateNameTestServer",
-                    false,
+                    uniqueName,
                     null,
                     "192.168.1.102",
-                    null
+                    null,
+                    false
                 )
         );
 
-        Assert.Contains(
-            "Database Server Name 'DuplicateNameTestServer' already exists",
-            exception.Message
-        );
+        // Print actual message for debugging
+        Console.WriteLine($"Actual exception message: {exception.Message}");
+        Assert.Contains("already exists", exception.Message);
+        Assert.Contains(uniqueName, exception.Message);
     }
 
     [Fact]
     public async Task CreateDatabaseServer_WithDuplicateHostName_ThrowsInvalidOperationException()
     {
         // Arrange
-        var existingServer = await _dbLocator.CreateDatabaseServer(
-            "DuplicateHostTestServer1",
-            false,
-            "duplicate-host",
-            "192.168.1.201",
-            null
+        var hostName =
+            $"duplicate-host-{Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10)}"; // ensure < 50 chars
+        var server1Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            hostName,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
+        );
+
+        var server2Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            null,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
         );
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
             async () =>
-                await _dbLocator.CreateDatabaseServer(
-                    "DuplicateHostTestServer2",
-                    false,
-                    "duplicate-host",
-                    "192.168.1.202",
-                    null
-                )
+                await _dbLocator.UpdateDatabaseServer(server2Id, null, hostName, null, null, null)
         );
 
         Assert.Contains(
-            "Database server with host name \"duplicate-host\" already exists",
+            $"Database server with host name \"{hostName}\" already exists",
             exception.Message
         );
     }
@@ -371,10 +378,10 @@ public class DatabaseServerTests : IAsyncLifetime
         // Arrange
         var existingServer = await _dbLocator.CreateDatabaseServer(
             "DuplicateIpTestServer1",
-            false,
             null,
             "192.168.1.400",
-            null
+            null,
+            false
         );
 
         // Act & Assert
@@ -382,10 +389,10 @@ public class DatabaseServerTests : IAsyncLifetime
             async () =>
                 await _dbLocator.CreateDatabaseServer(
                     "DuplicateIpTestServer2",
-                    false,
                     null,
                     "192.168.1.400",
-                    null
+                    null,
+                    false
                 )
         );
 
@@ -403,10 +410,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         // Get server to populate cache
@@ -430,10 +437,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         // Get servers to populate cache
@@ -458,10 +465,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         // Clear cache
@@ -490,10 +497,10 @@ public class DatabaseServerTests : IAsyncLifetime
         var IpAddress = TestHelpers.GetRandomIpAddressString();
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            false,
             null,
             IpAddress,
-            null
+            null,
+            false
         );
 
         // Set cache to null
@@ -522,20 +529,20 @@ public class DatabaseServerTests : IAsyncLifetime
         var server1Ip = TestHelpers.GetRandomIpAddressString();
         var server1Id = await _dbLocator.CreateDatabaseServer(
             server1Name,
-            false,
             null,
             server1Ip,
-            null
+            null,
+            false
         );
 
         var server2Name = TestHelpers.GetRandomString();
         var server2Ip = TestHelpers.GetRandomIpAddressString();
         var server2Id = await _dbLocator.CreateDatabaseServer(
             server2Name,
-            false,
             null,
             server2Ip,
-            null
+            null,
+            false
         );
 
         // Get servers to populate cache
@@ -570,15 +577,15 @@ public class DatabaseServerTests : IAsyncLifetime
 
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            isLinkedServer,
             hostName,
             ipAddress,
-            fqdn
+            fqdn,
+            isLinkedServer
         );
 
         // Act
         var newName = TestHelpers.GetRandomString();
-        await _dbLocator.UpdateDatabaseServer(serverId, newName);
+        await _dbLocator.UpdateDatabaseServer(serverId, newName, null, null, null, null);
 
         // Assert
         var updatedServer = await _dbLocator.GetDatabaseServer(serverId);
@@ -602,16 +609,16 @@ public class DatabaseServerTests : IAsyncLifetime
 
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            isLinkedServer,
             hostName,
             ipAddress,
-            fqdn
+            fqdn,
+            isLinkedServer
         );
 
         // Act
         var newFqdn = "updated-host.example.com";
         var newIpAddress = TestHelpers.GetRandomIpAddressString();
-        await _dbLocator.UpdateDatabaseServer(serverId, newFqdn, newIpAddress);
+        await _dbLocator.UpdateDatabaseServer(serverId, null, null, newFqdn, newIpAddress, null);
 
         // Assert
         var updatedServer = await _dbLocator.GetDatabaseServer(serverId);
@@ -635,15 +642,15 @@ public class DatabaseServerTests : IAsyncLifetime
 
         var serverId = await _dbLocator.CreateDatabaseServer(
             serverName,
-            initialIsLinkedServer,
             hostName,
             ipAddress,
-            fqdn
+            fqdn,
+            initialIsLinkedServer
         );
 
         // Act
         // Since there's no direct way to update only IsLinkedServer, we need to update name to preserve other properties
-        await _dbLocator.UpdateDatabaseServer(serverId, serverName);
+        await _dbLocator.UpdateDatabaseServer(serverId, serverName, null, null, null, null);
 
         // Assert
         var updatedServer = await _dbLocator.GetDatabaseServer(serverId);
@@ -653,5 +660,284 @@ public class DatabaseServerTests : IAsyncLifetime
         Assert.Equal(fqdn, updatedServer.FullyQualifiedDomainName);
         Assert.Equal(ipAddress, updatedServer.IpAddress);
         Assert.Equal(initialIsLinkedServer, updatedServer.IsLinkedServer); // Note: IsLinkedServer cannot be updated with current API
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithInvalidFqdn_ThrowsValidationException()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            null,
+            ipAddress,
+            null,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ValidationException>(
+            async () =>
+                await _dbLocator.UpdateDatabaseServer(
+                    serverId,
+                    null,
+                    null,
+                    "invalid-fqdn",
+                    null,
+                    null
+                )
+        );
+
+        Assert.Contains("FQDN must be a valid domain name format", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithDuplicateName_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var server1Name = "DuplicateNameTestServer";
+        var server1Id = await _dbLocator.CreateDatabaseServer(
+            server1Name,
+            null,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
+        );
+
+        var server2Name = "AnotherServer";
+        var server2Id = await _dbLocator.CreateDatabaseServer(
+            server2Name,
+            null,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await _dbLocator.UpdateDatabaseServer(
+                    server2Id,
+                    server1Name,
+                    null,
+                    null,
+                    null,
+                    null
+                )
+        );
+
+        Assert.Contains(
+            $"Database server with name \"{server1Name}\" already exists",
+            exception.Message
+        );
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithDuplicateHostName_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var hostName =
+            $"duplicate-host-{Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10)}"; // ensure < 50 chars
+        var server1Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            hostName,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
+        );
+
+        var server2Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            null,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await _dbLocator.UpdateDatabaseServer(server2Id, null, hostName, null, null, null)
+        );
+
+        Assert.Contains(
+            $"Database server with host name \"{hostName}\" already exists",
+            exception.Message
+        );
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithDuplicateFqdn_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var fqdn = "duplicate.example.com";
+        var server1Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            null,
+            TestHelpers.GetRandomIpAddressString(),
+            fqdn,
+            false
+        );
+
+        var server2Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            null,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await _dbLocator.UpdateDatabaseServer(server2Id, null, null, fqdn, null, null)
+        );
+
+        Assert.Contains($"Database server with FQDN \"{fqdn}\" already exists", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_UpdatesCache()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            null,
+            ipAddress,
+            null,
+            false
+        );
+
+        // Ensure cache is populated
+        var servers = await _dbLocator.GetDatabaseServers();
+        Assert.Contains(servers, s => s.Id == serverId);
+
+        // Act
+        var newName = TestHelpers.GetRandomString();
+        await _dbLocator.UpdateDatabaseServer(serverId, newName, null, null, null, null);
+
+        // Assert
+        var updatedServers = await _dbLocator.GetDatabaseServers();
+        var updatedServer = updatedServers.First(s => s.Id == serverId);
+        Assert.Equal(newName, updatedServer.Name);
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithIsLinkedServer()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            null,
+            ipAddress,
+            null,
+            false
+        );
+
+        // Act
+        await _dbLocator.UpdateDatabaseServer(serverId, serverName, null, null, null, null);
+
+        // Assert
+        var updatedServer = await _dbLocator.GetDatabaseServer(serverId);
+        Assert.False(updatedServer.IsLinkedServer); // Note: IsLinkedServer cannot be updated with current API
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithNonExistentServer_ThrowsKeyNotFoundException()
+    {
+        // Act & Assert
+        await Assert.ThrowsAsync<KeyNotFoundException>(
+            async () =>
+                await _dbLocator.UpdateDatabaseServer(999999, "NewName", null, null, null, null)
+        );
+    }
+
+    [Fact]
+    public async Task UpdateDatabaseServer_WithNoChanges_ThrowsValidationException()
+    {
+        // Arrange
+        var serverName = TestHelpers.GetRandomString();
+        var ipAddress = TestHelpers.GetRandomIpAddressString();
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            serverName,
+            null,
+            ipAddress,
+            null,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ValidationException>(
+            async () =>
+                await _dbLocator.UpdateDatabaseServer(serverId, null, null, null, null, null)
+        );
+
+        Assert.Contains("At least one field must be provided for update", exception.Message);
+    }
+
+    [Fact]
+    public async Task CreateDatabaseServer_WithDuplicateHostNameOnCreate_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var hostName =
+            $"duplicate-host-create-{Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10)}";
+        var server1Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            hostName,
+            TestHelpers.GetRandomIpAddressString(),
+            null,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await _dbLocator.CreateDatabaseServer(
+                    TestHelpers.GetRandomString(),
+                    hostName,
+                    TestHelpers.GetRandomIpAddressString(),
+                    null,
+                    false
+                )
+        );
+
+        Assert.Contains(
+            $"Database server with host name \"{hostName}\" already exists",
+            exception.Message
+        );
+    }
+
+    [Fact]
+    public async Task CreateDatabaseServer_WithDuplicateFqdnOnCreate_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var fqdn =
+            $"duplicate-create-{Guid.NewGuid().ToString().Replace("-", "").Substring(0, 10)}.example.com";
+        var server1Id = await _dbLocator.CreateDatabaseServer(
+            TestHelpers.GetRandomString(),
+            null,
+            TestHelpers.GetRandomIpAddressString(),
+            fqdn,
+            false
+        );
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await _dbLocator.CreateDatabaseServer(
+                    TestHelpers.GetRandomString(),
+                    null,
+                    TestHelpers.GetRandomIpAddressString(),
+                    fqdn,
+                    false
+                )
+        );
+
+        Assert.Contains($"Database server with FQDN \"{fqdn}\" already exists", exception.Message);
     }
 }

@@ -20,18 +20,11 @@ internal class DatabaseUserRoleService(
     public async Task CreateDatabaseUserRole(
         int databaseUserId,
         DatabaseRole userRole,
-        bool updateUser
+        bool affectDatabase
     )
     {
         await _createDatabaseUserRole.Handle(
-            new CreateDatabaseUserRoleCommand(databaseUserId, userRole, updateUser)
-        );
-    }
-
-    public async Task CreateDatabaseUserRole(int databaseUserId, DatabaseRole userRole)
-    {
-        await _createDatabaseUserRole.Handle(
-            new CreateDatabaseUserRoleCommand(databaseUserId, userRole, true)
+            new CreateDatabaseUserRoleCommand(databaseUserId, userRole, affectDatabase)
         );
     }
 
@@ -45,11 +38,11 @@ internal class DatabaseUserRoleService(
     public async Task DeleteDatabaseUserRole(
         int databaseUserId,
         DatabaseRole userRole,
-        bool deleteDatabaseUserRole
+        bool affectDatabase
     )
     {
         await _deleteDatabaseUserRole.Handle(
-            new DeleteDatabaseUserRoleCommand(databaseUserId, userRole, deleteDatabaseUserRole)
+            new DeleteDatabaseUserRoleCommand(databaseUserId, userRole, affectDatabase)
         );
     }
 }

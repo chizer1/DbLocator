@@ -59,10 +59,10 @@ public class DbLocatorFixture : IDisposable, IAsyncLifetime
         var databaseServerHostName = "localhost";
         LocalhostServerId = await DbLocator.CreateDatabaseServer(
             databaseServerName,
-            false,
-            null,
             databaseServerHostName,
-            null
+            null,
+            null,
+            false
         );
     }
 

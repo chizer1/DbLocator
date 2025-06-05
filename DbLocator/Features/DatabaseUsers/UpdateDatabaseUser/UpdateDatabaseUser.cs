@@ -3,16 +3,17 @@
 using DbLocator.Db;
 using DbLocator.Utilities;
 using FluentValidation;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace DbLocator.Features.DatabaseUsers.UpdateDatabaseUser;
 
 internal record UpdateDatabaseUserCommand(
     int DatabaseUserId,
-    int[] DatabaseIds,
+    int[]? DatabaseIds,
     string? UserName,
     string? UserPassword,
-    bool AffectDatabase = true
+    bool? AffectDatabase
 );
 
 internal sealed class UpdateDatabaseUserCommandValidator
@@ -64,27 +65,25 @@ internal class UpdateDatabaseUserHandler(
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var user = await dbContext
-            .Set<DatabaseUserEntity>()
-            .FirstOrDefaultAsync(u => u.DatabaseUserId == request.DatabaseUserId, cancellationToken)
-            ?? throw new KeyNotFoundException($"Database user with ID {request.DatabaseUserId} not found");
+        var user =
+            await dbContext
+                .Set<DatabaseUserEntity>()
+                .FirstOrDefaultAsync(
+                    u => u.DatabaseUserId == request.DatabaseUserId,
+                    cancellationToken
+                )
+            ?? throw new KeyNotFoundException(
+                $"Database user with ID {request.DatabaseUserId} not found"
+            );
 
-        if (request.UserName != null)
+        var oldUserName = user.UserName;
+        var oldPassword = user.UserPassword != null ? _encryption.Decrypt(user.UserPassword) : null;
+        var userNameChanged = false;
+        var passwordChanged = false;
+
+        if (request.UserName != null && request.UserName != user.UserName)
         {
-            if (
-                await dbContext
-                    .Set<DatabaseUserEntity>()
-                    .AnyAsync(
-                        u =>
-                            u.UserName == request.UserName
-                            && u.DatabaseUserId != request.DatabaseUserId,
-                        cancellationToken
-                    )
-            )
-                throw new InvalidOperationException(
-                    $"Database user with name \"{request.UserName}\" already exists"
-                );
-
+            userNameChanged = true;
             user.UserName = request.UserName;
         }
 
@@ -94,11 +93,23 @@ internal class UpdateDatabaseUserHandler(
             {
                 throw new InvalidOperationException("Password must be at least 8 characters long");
             }
-            user.UserPassword = _encryption.Encrypt(request.UserPassword);
+            if (_encryption.Encrypt(request.UserPassword) != user.UserPassword)
+            {
+                passwordChanged = true;
+                user.UserPassword = _encryption.Encrypt(request.UserPassword);
+            }
         }
 
+        List<int> newDatabaseIds = new();
         if (request.DatabaseIds != null)
         {
+            // Get current associations before change
+            var currentDatabaseIds = await dbContext
+                .Set<DatabaseUserDatabaseEntity>()
+                .Where(d => d.DatabaseUserId == user.DatabaseUserId)
+                .Select(d => d.DatabaseId)
+                .ToListAsync(cancellationToken);
+
             // Remove existing database relationships
             var existingDatabases = await dbContext
                 .Set<DatabaseUserDatabaseEntity>()
@@ -107,7 +118,7 @@ internal class UpdateDatabaseUserHandler(
             dbContext.Set<DatabaseUserDatabaseEntity>().RemoveRange(existingDatabases);
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            // Add new database relationships
+            // Add new database relationships and track which are new
             foreach (var databaseId in request.DatabaseIds)
             {
                 var database =
@@ -115,20 +126,104 @@ internal class UpdateDatabaseUserHandler(
                         .Set<DatabaseEntity>()
                         .FirstOrDefaultAsync(d => d.DatabaseId == databaseId, cancellationToken)
                     ?? throw new KeyNotFoundException($"Database with ID {databaseId} not found.");
-                
-                await dbContext.Set<DatabaseUserDatabaseEntity>().AddAsync(
-                    new DatabaseUserDatabaseEntity
-                    {
-                        DatabaseId = database.DatabaseId,
-                        DatabaseUserId = user.DatabaseUserId
-                    },
-                    cancellationToken
-                );
+
+                await dbContext
+                    .Set<DatabaseUserDatabaseEntity>()
+                    .AddAsync(
+                        new DatabaseUserDatabaseEntity
+                        {
+                            DatabaseId = database.DatabaseId,
+                            DatabaseUserId = user.DatabaseUserId
+                        },
+                        cancellationToken
+                    );
+                if (!currentDatabaseIds.Contains(databaseId))
+                {
+                    newDatabaseIds.Add(databaseId);
+                }
             }
+            // Save changes after adding new associations
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
 
         dbContext.Update(user);
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        // DDL logic for AffectDatabase
+        if (request.AffectDatabase == true && (userNameChanged || passwordChanged))
+        {
+            // Get all databases the user is now associated with
+            var userDatabaseIds =
+                request.DatabaseIds
+                ?? await dbContext
+                    .Set<DatabaseUserDatabaseEntity>()
+                    .Where(d => d.DatabaseUserId == user.DatabaseUserId)
+                    .Select(d => d.DatabaseId)
+                    .ToArrayAsync(cancellationToken);
+
+            var updatedDatabases = await dbContext
+                .Set<DatabaseEntity>()
+                .Include(d => d.DatabaseServer)
+                .Where(d => userDatabaseIds.Contains(d.DatabaseId))
+                .ToListAsync(cancellationToken);
+
+            foreach (var database in updatedDatabases)
+            {
+                var commands = new List<string>();
+                var sanitizedDbName = Sql.SanitizeSqlIdentifier(database.DatabaseName);
+                var sanitizedOldUserName =
+                    oldUserName != null ? Sql.SanitizeSqlIdentifier(oldUserName) : null;
+                var sanitizedNewUserName =
+                    request.UserName != null ? Sql.SanitizeSqlIdentifier(request.UserName) : null;
+
+                // If this is a new association, ensure login and user exist
+                if (newDatabaseIds.Contains(database.DatabaseId) && sanitizedNewUserName != null)
+                {
+                    // Use the provided password or a default one if not changing password
+                    var sanitizedPassword = (request.UserPassword ?? oldPassword ?? "TempP@ssw0rd!").Replace("'", "''");
+
+                    // Ensure login exists at the server level
+                    commands.Add(
+                        "IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = '" + sanitizedNewUserName + "') " +
+                        "BEGIN CREATE LOGIN [" + sanitizedNewUserName + "] WITH PASSWORD = '" + sanitizedPassword + "' END"
+                    );
+
+                    // Ensure user exists in the database
+                    commands.Add(
+                        "USE [" + sanitizedDbName + "]; IF NOT EXISTS (SELECT name FROM sys.database_principals WHERE name = '" + sanitizedNewUserName + "') " +
+                        "BEGIN CREATE USER [" + sanitizedNewUserName + "] FOR LOGIN [" + sanitizedNewUserName + "] END"
+                    );
+                }
+                // If renaming, alter user in all associated databases
+                if (userNameChanged && sanitizedOldUserName != null && sanitizedNewUserName != null)
+                {
+                    commands.Add(
+                        "use [" + sanitizedDbName + "]; alter user [" + sanitizedOldUserName + "] with name = [" + sanitizedNewUserName + "]"
+                    );
+                    commands.Add(
+                        "alter login [" + sanitizedOldUserName + "] with name = [" + sanitizedNewUserName + "]"
+                    );
+                }
+                if (passwordChanged && sanitizedNewUserName != null && request.UserPassword != null)
+                {
+                    var sanitizedPassword = request.UserPassword.Replace("'", "''");
+                    commands.Add(
+                        "alter login [" + sanitizedNewUserName + "] with password = '" + sanitizedPassword + "'"
+                    );
+                }
+                foreach (var cmd in commands)
+                {
+                    await Sql.ExecuteSqlCommandAsync(
+                        dbContext,
+                        cmd,
+                        database.DatabaseServer.IsLinkedServer,
+                        database.DatabaseServer.IsLinkedServer
+                            ? database.DatabaseServer.DatabaseServerHostName
+                            : null
+                    );
+                }
+            }
+        }
 
         if (_cache != null)
         {

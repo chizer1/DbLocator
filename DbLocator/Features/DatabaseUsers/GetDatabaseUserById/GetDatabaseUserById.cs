@@ -6,13 +6,14 @@ using DbLocator.Utilities;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace DbLocator.Features.DatabaseUsers.GetDatabaseUser;
+namespace DbLocator.Features.DatabaseUsers.GetDatabaseUserById;
 
-internal record GetDatabaseUserQuery(int DatabaseUserId);
+internal record GetDatabaseUserByIdQuery(int DatabaseUserId);
 
-internal sealed class GetDatabaseUserQueryValidator : AbstractValidator<GetDatabaseUserQuery>
+internal sealed class GetDatabaseUserByIdQueryValidator
+    : AbstractValidator<GetDatabaseUserByIdQuery>
 {
-    internal GetDatabaseUserQueryValidator()
+    internal GetDatabaseUserByIdQueryValidator()
     {
         RuleFor(x => x.DatabaseUserId)
             .GreaterThan(0)
@@ -20,7 +21,7 @@ internal sealed class GetDatabaseUserQueryValidator : AbstractValidator<GetDatab
     }
 }
 
-internal class GetDatabaseUserHandler(
+internal class GetDatabaseUserByIdHandler(
     IDbContextFactory<DbLocatorContext> dbContextFactory,
     DbLocatorCache? cache
 )
@@ -29,11 +30,14 @@ internal class GetDatabaseUserHandler(
     private readonly DbLocatorCache? _cache = cache;
 
     public async Task<DatabaseUser> Handle(
-        GetDatabaseUserQuery request,
+        GetDatabaseUserByIdQuery request,
         CancellationToken cancellationToken = default
     )
     {
-        await new GetDatabaseUserQueryValidator().ValidateAndThrowAsync(request, cancellationToken);
+        await new GetDatabaseUserByIdQueryValidator().ValidateAndThrowAsync(
+            request,
+            cancellationToken
+        );
 
         var cacheKey = $"databaseUser-{request.DatabaseUserId}";
         if (_cache != null)

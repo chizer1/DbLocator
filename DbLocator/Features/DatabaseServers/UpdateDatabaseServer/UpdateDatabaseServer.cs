@@ -9,11 +9,11 @@ namespace DbLocator.Features.DatabaseServers.UpdateDatabaseServer;
 
 internal record UpdateDatabaseServerCommand(
     int DatabaseServerId,
-    string? Name = null,
-    string? HostName = null,
-    string? FullyQualifiedDomainName = null,
-    string? IpAddress = null,
-    bool? IsLinkedServer = null
+    string? Name,
+    string? HostName,
+    string? FullyQualifiedDomainName,
+    string? IpAddress,
+    bool? IsLinkedServer
 );
 
 internal sealed class UpdateDatabaseServerCommandValidator
@@ -34,9 +34,9 @@ internal sealed class UpdateDatabaseServerCommandValidator
             .WithMessage("Database Server Name cannot be more than 50 characters.");
 
         RuleFor(x => x.HostName)
-            .MaximumLength(255)
+            .MaximumLength(50)
             .When(x => x.HostName != null)
-            .WithMessage("Host Name cannot be more than 255 characters.");
+            .WithMessage("Host Name cannot be more than 50 characters.");
 
         RuleFor(x => x.FullyQualifiedDomainName)
             .MaximumLength(100)
