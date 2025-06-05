@@ -701,6 +701,7 @@ public class DatabaseUserTests : IAsyncLifetime
         }
         finally
         {
+            await _dbLocator.DeleteDatabase(databaseId);
             await _dbLocator.DeleteDatabaseServer(newServerId);
         }
     }
