@@ -78,6 +78,10 @@ internal class UpdateDatabaseTypeHandler(
         {
             await _cache.Remove("database-types");
             await _cache.Remove($"database-type-id-{request.DatabaseTypeId}");
+            await _cache.Remove("connections");
+            await _cache.TryClearConnectionStringFromCache(databaseTypeId: request.DatabaseTypeId);
+            await _cache.Remove("databaseTypes");
+            await _cache.Remove("databases");
         }
     }
 }

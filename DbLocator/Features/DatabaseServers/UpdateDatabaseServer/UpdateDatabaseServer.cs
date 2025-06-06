@@ -100,7 +100,7 @@ internal class UpdateDatabaseServerHandler(
             && request.IsLinkedServer == null
         )
         {
-            throw new InvalidOperationException("At least one field must be provided for update");
+            return; // Allow updates with no changes
         }
 
         // Check for duplicate properties
@@ -109,7 +109,7 @@ internal class UpdateDatabaseServerHandler(
             var existingServer = await dbContext
                 .Set<DatabaseServerEntity>()
                 .FirstOrDefaultAsync(
-                    s => s.DatabaseServerName == request.Name,
+                    s => s.DatabaseServerName == request.Name && s.DatabaseServerId != request.DatabaseServerId,
                     cancellationToken
                 );
             if (existingServer != null)
@@ -125,7 +125,7 @@ internal class UpdateDatabaseServerHandler(
             var existingServer = await dbContext
                 .Set<DatabaseServerEntity>()
                 .FirstOrDefaultAsync(
-                    s => s.DatabaseServerHostName == request.HostName,
+                    s => s.DatabaseServerHostName == request.HostName && s.DatabaseServerId != request.DatabaseServerId,
                     cancellationToken
                 );
             if (existingServer != null)
@@ -142,7 +142,7 @@ internal class UpdateDatabaseServerHandler(
             var existingServer = await dbContext
                 .Set<DatabaseServerEntity>()
                 .FirstOrDefaultAsync(
-                    s => s.DatabaseServerFullyQualifiedDomainName == request.FullyQualifiedDomainName,
+                    s => s.DatabaseServerFullyQualifiedDomainName == request.FullyQualifiedDomainName && s.DatabaseServerId != request.DatabaseServerId,
                     cancellationToken
                 );
             if (existingServer != null)
@@ -158,7 +158,7 @@ internal class UpdateDatabaseServerHandler(
             var existingServer = await dbContext
                 .Set<DatabaseServerEntity>()
                 .FirstOrDefaultAsync(
-                    s => s.DatabaseServerIpaddress == request.IpAddress,
+                    s => s.DatabaseServerIpaddress == request.IpAddress && s.DatabaseServerId != request.DatabaseServerId,
                     cancellationToken
                 );
             if (existingServer != null)

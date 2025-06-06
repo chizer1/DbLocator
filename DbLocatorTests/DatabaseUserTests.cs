@@ -132,8 +132,9 @@ public class DatabaseUserTests : IAsyncLifetime
 
         if (withRoles)
         {
-            Assert.Contains(DatabaseRole.Owner, user.Roles);
-            Assert.Contains(DatabaseRole.SecurityAdmin, user.Roles);
+            var updatedUser = await _dbLocator.GetDatabaseUser(user.Id);
+            Assert.Contains(DatabaseRole.Owner, updatedUser.Roles);
+            Assert.Contains(DatabaseRole.SecurityAdmin, updatedUser.Roles);
         }
     }
 
@@ -198,11 +199,21 @@ public class DatabaseUserTests : IAsyncLifetime
     [Fact]
     public async Task UpdateDatabaseUser_WithAllParameters_UpdatesCorrectly()
     {
+        // Create initial user with a database
         var user = await CreateDatabaseUserAsync();
         var newUserName = TestHelpers.GetRandomString();
         var newPassword = "NewPassword123!";
+        
+        // Create a new database and ensure the user has access to it
         var newDatabase = await CreateDatabaseAsync(TestHelpers.GetRandomString());
+        await _dbLocator.CreateDatabaseUser(
+            [newDatabase.Id],
+            user.Name,
+            "TestPassword123!",
+            true
+        );
 
+        // Now update the user with new properties
         await _dbLocator.UpdateDatabaseUser(
             user.Id,
             newUserName,

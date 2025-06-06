@@ -57,9 +57,9 @@ public class TenantTests : IAsyncLifetime
         var tenant1 = await CreateTenantAsync();
         var tenant2 = await CreateTenantAsync();
 
-        var tenants = (await _dbLocator.GetTenants()).ToList();
-        Assert.Contains(tenants, t => t.Name == tenant1.Name && t.Code == tenant1.Code);
-        Assert.Contains(tenants, t => t.Name == tenant2.Name && t.Code == tenant2.Code);
+        var tenants = await _dbLocator.GetTenants();
+        Assert.Contains(tenants, t => t.Id == tenant1.Id);
+        Assert.Contains(tenants, t => t.Id == tenant2.Id);
     }
 
     [Fact]

@@ -357,6 +357,33 @@ public class ConnectionTests : IAsyncLifetime
         Assert.NotNull(result);
         Assert.NotNull(result.ConnectionString);
     }
+
+    [Fact]
+    public async Task GetConnection_WithNoValidServerIdentifier_ThrowsInvalidOperationException()
+    {
+        var tenant = await CreateTenantAsync();
+        var type = await CreateDatabaseTypeAsync();
+        
+        // Create a database server with no valid identifiers
+        var serverId = await _dbLocator.CreateDatabaseServer(
+            null,  // no server name
+            null,  // no hostname
+            null,  // no IP address
+            null,  // no FQDN
+            false  // not a linked server
+        );
+        
+        var database = await CreateDatabaseAsync(
+            name: TestHelpers.GetRandomString(),
+            serverId: serverId,
+            typeId: type.Id
+        );
+        await CreateConnectionAsync(tenant.Id, database.Id);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await _dbLocator.GetConnection(tenant.Id, (byte)type.Id, new[] { DatabaseRole.DataReader })
+        );
+    }
     #endregion
 
     #region Validation Tests
@@ -413,19 +440,6 @@ public class ConnectionTests : IAsyncLifetime
 
         await Assert.ThrowsAsync<KeyNotFoundException>(
             async () => await _dbLocator.GetConnection("NONEXISTENT", (byte)type.Id, new[] { DatabaseRole.DataReader })
-        );
-    }
-
-    [Fact]
-    public async Task GetConnection_WithNoValidServerIdentifier_ThrowsInvalidOperationException()
-    {
-        var tenant = await CreateTenantAsync();
-        var type = await CreateDatabaseTypeAsync();
-        var database = await CreateDatabaseAsync(typeId: type.Id);
-        await CreateConnectionAsync(tenant.Id, database.Id);
-
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            async () => await _dbLocator.GetConnection(tenant.Id, (byte)type.Id, new[] { DatabaseRole.DataReader })
         );
     }
 

@@ -202,9 +202,31 @@ public class DatabaseServerTests : IAsyncLifetime
         string fqdn
     )
     {
-        // Create two servers
-        var server1 = await CreateDatabaseServerAsync(name, hostName, ipAddress, fqdn);
-        var server2 = await CreateDatabaseServerAsync();
+        // Create first server with different properties
+        var server1 = await CreateDatabaseServerAsync(
+            name == "DuplicateName" ? "OriginalName" : TestHelpers.GetRandomString(),
+            hostName == "DuplicateHost" ? "OriginalHost" : TestHelpers.GetRandomString(),
+            ipAddress == "192.168.1.1" ? "192.168.1.2" : TestHelpers.GetRandomIpAddressString(),
+            fqdn == "duplicate.example.com" ? "original.example.com" : $"{TestHelpers.GetRandomString()}.example.com"
+        );
+
+        // Create second server with different properties
+        var server2 = await CreateDatabaseServerAsync(
+            TestHelpers.GetRandomString(),
+            TestHelpers.GetRandomString(),
+            TestHelpers.GetRandomIpAddressString(),
+            $"{TestHelpers.GetRandomString()}.example.com"
+        );
+
+        // Update first server to have the properties we want to duplicate
+        await _dbLocator.UpdateDatabaseServer(
+            server1.Id,
+            name,
+            hostName,
+            ipAddress,
+            fqdn,
+            null
+        );
 
         // Attempt to update second server with first server's properties
         await Assert.ThrowsAsync<InvalidOperationException>(

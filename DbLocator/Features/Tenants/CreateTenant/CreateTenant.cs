@@ -62,7 +62,7 @@ internal class CreateTenantHandler(
         var tenant = new TenantEntity
         {
             TenantName = command.TenantName,
-            TenantCode = command.TenantCode ?? GenerateRandomString(10),
+            TenantCode = command.TenantCode,
             TenantStatusId = (int)Status.Active
         };
 

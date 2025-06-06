@@ -126,26 +126,14 @@ internal class GetConnectionHandler(
         CancellationToken cancellationToken
     )
     {
-        // Validate query parameters
-        if (request.ConnectionId.HasValue && request.ConnectionId.Value <= 0)
-        {
-            throw new KeyNotFoundException($"Connection with ID {request.ConnectionId} not found.");
-        }
-
-        if (request.TenantId.HasValue && request.TenantId.Value <= 0)
-        {
-            throw new KeyNotFoundException($"Tenant with ID {request.TenantId} not found.");
-        }
-
         var queryable = dbContext
             .Set<ConnectionEntity>()
-            .Include(c => c.Tenant)
             .Include(c => c.Database)
             .ThenInclude(d => d.DatabaseServer)
-            .Include(c => c.Database)
-            .ThenInclude(d => d.DatabaseType);
+            .Include(c => c.Tenant);
 
         ConnectionEntity? connection = null;
+
         if (request.ConnectionId.HasValue)
         {
             connection = await queryable.FirstOrDefaultAsync(
@@ -153,7 +141,7 @@ internal class GetConnectionHandler(
                 cancellationToken
             );
         }
-        else if (request.TenantId.HasValue)
+        else if (request.TenantId.HasValue && request.DatabaseTypeId.HasValue)
         {
             connection = await queryable.FirstOrDefaultAsync(
                 c =>
@@ -174,7 +162,15 @@ internal class GetConnectionHandler(
 
         if (connection == null)
         {
-            throw new InvalidOperationException("No valid server identifier found for the connection.");
+            if (!string.IsNullOrEmpty(request.TenantCode))
+            {
+                throw new KeyNotFoundException($"Tenant with code '{request.TenantCode}' not found.");
+            }
+            if (request.DatabaseTypeId.HasValue)
+            {
+                throw new KeyNotFoundException($"Database type with ID {request.DatabaseTypeId} not found.");
+            }
+            throw new KeyNotFoundException("Connection not found.");
         }
 
         return connection;
@@ -189,35 +185,38 @@ internal class GetConnectionHandler(
     )
     {
         var server = connection.Database.DatabaseServer;
-        var database = connection.Database;
+        var serverIdentifier = server.DatabaseServerFullyQualifiedDomainName
+            ?? server.DatabaseServerHostName
+            ?? server.DatabaseServerIpaddress
+            ?? server.DatabaseServerName;
 
-        var serverName = server.DatabaseServerFullyQualifiedDomainName;
-        if (string.IsNullOrEmpty(serverName))
-            serverName = server.DatabaseServerHostName;
-        if (string.IsNullOrEmpty(serverName))
-            serverName = server.DatabaseServerIpaddress;
+        if (string.IsNullOrEmpty(serverIdentifier))
+        {
+            throw new InvalidOperationException("No valid server identifier found for the connection.");
+        }
 
         var builder = new SqlConnectionStringBuilder
         {
-            DataSource = serverName,
-            InitialCatalog = database.DatabaseName,
-            Encrypt = true,
-            TrustServerCertificate = true,
-            ConnectTimeout = 30
+            DataSource = serverIdentifier,
+            InitialCatalog = connection.Database.DatabaseName,
+            IntegratedSecurity = connection.Database.UseTrustedConnection
         };
 
-        if (database.UseTrustedConnection)
+        if (!connection.Database.UseTrustedConnection)
         {
-            builder["Integrated Security"] = "True";
-        }
+            var user = await dbContext
+                .Set<DatabaseUserDatabaseEntity>()
+                .Include(u => u.User)
+                .ThenInclude(u => u.UserRoles)
+                .ThenInclude(r => r.Role)
+                .FirstOrDefaultAsync(
+                    u => u.DatabaseId == connection.DatabaseId && u.User.UserRoles.Any(r => roles.Contains((DatabaseRole)r.Role.DatabaseRoleId)),
+                    cancellationToken
+                )
+                ?? throw new InvalidOperationException("No user found with the specified roles.");
 
-        // Only try to get a user if roles are specified and not using trusted connection
-        if (roles != null && roles.Length > 0 && !database.UseTrustedConnection)
-        {
-            var user = await GetUserForRoles(connection, roles, dbContext, cancellationToken);
-
-            builder.UserID = user?.UserName;
-            builder.Password = encryption.Decrypt(user?.UserPassword);
+            builder.UserID = user.User.UserName;
+            builder.Password = encryption.Decrypt(user.User.UserPassword);
         }
 
         return builder.ConnectionString;
