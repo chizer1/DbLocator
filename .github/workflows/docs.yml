@@ -33,7 +33,7 @@ jobs:
 
       - name: Generate Documentation
         run: |
-          docfx init -q
+          cd docs
           docfx build
 
       - name: Setup Pages
@@ -43,7 +43,3 @@ jobs:
         uses: actions/upload-pages-artifact@v2
         with:
           path: ./docs/_site
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2 
