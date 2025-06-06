@@ -86,29 +86,6 @@ internal class CreateDatabaseUserHandler(
         await dbContext.Set<DatabaseUserEntity>().AddAsync(databaseUser, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        if (request.AffectDatabase)
-        {
-            var databaseServers = await dbContext
-                .Set<DatabaseEntity>()
-                .Where(d => request.DatabaseIds.Contains(d.DatabaseId))
-                .Select(d => d.DatabaseServer)
-                .Distinct()
-                .ToListAsync(cancellationToken);
-
-            var processedServers = new HashSet<int>();
-            foreach (var databaseServer in databaseServers)
-            {
-                await Sql.ExecuteSqlCommandAsync(
-                    dbContext,
-                    $"create login [{request.UserName}] with password = '{request.UserPassword}'",
-                    databaseServer.IsLinkedServer,
-                    databaseServer.DatabaseServerHostName
-                );
-
-                processedServers.Add(databaseServer.DatabaseServerId);
-            }
-        }
-
         var databaseUserId = databaseUser.DatabaseUserId;
 
         var databaseUserDatabases = request
@@ -126,6 +103,28 @@ internal class CreateDatabaseUserHandler(
 
         if (request.AffectDatabase)
         {
+            var databaseServers = await dbContext
+                .Set<DatabaseEntity>()
+                .Where(d => request.DatabaseIds.Contains(d.DatabaseId))
+                .Select(d => d.DatabaseServer)
+                .Distinct()
+                .ToListAsync(cancellationToken);
+
+            var processedServers = new HashSet<int>();
+            foreach (var databaseServer in databaseServers)
+            {
+                if (!processedServers.Contains(databaseServer.DatabaseServerId))
+                {
+                    await Sql.ExecuteSqlCommandAsync(
+                        dbContext,
+                        $"create login [{request.UserName}] with password = '{request.UserPassword}'",
+                        databaseServer.IsLinkedServer,
+                        databaseServer.DatabaseServerHostName
+                    );
+                    processedServers.Add(databaseServer.DatabaseServerId);
+                }
+            }
+
             foreach (var databaseId in request.DatabaseIds)
             {
                 await using var scopedDbContext = await _dbContextFactory.CreateDbContextAsync();

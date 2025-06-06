@@ -35,28 +35,36 @@ internal class CreateDatabaseTypeHandler(
         CancellationToken cancellationToken = default
     )
     {
-        await new CreateDatabaseTypeCommandValidator().ValidateAndThrowAsync(
-            request,
-            cancellationToken
-        );
+        if (string.IsNullOrWhiteSpace(request.DatabaseTypeName))
+        {
+            throw new ArgumentException("Database type name is required");
+        }
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
-        if (
-            await dbContext
-                .Set<DatabaseTypeEntity>()
-                .AnyAsync(dt => dt.DatabaseTypeName == request.DatabaseTypeName, cancellationToken)
-        )
-            throw new InvalidOperationException(
-                $"Database type with name \"{request.DatabaseTypeName}\" already exists"
+        var existingType = await dbContext
+            .Set<DatabaseTypeEntity>()
+            .FirstOrDefaultAsync(
+                dt => dt.DatabaseTypeName == request.DatabaseTypeName,
+                cancellationToken
             );
 
+        if (existingType != null)
+        {
+            throw new InvalidOperationException(
+                $"Database type with name '{request.DatabaseTypeName}' already exists"
+            );
+        }
+
         var databaseType = new DatabaseTypeEntity { DatabaseTypeName = request.DatabaseTypeName };
-        dbContext.Add(databaseType);
+
+        dbContext.Set<DatabaseTypeEntity>().Add(databaseType);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         if (_cache != null)
-            await _cache.Remove("databaseTypes");
+        {
+            await _cache.Remove("database-types");
+        }
 
         return databaseType.DatabaseTypeId;
     }

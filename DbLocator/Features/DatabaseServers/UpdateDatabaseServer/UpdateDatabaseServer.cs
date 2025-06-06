@@ -85,85 +85,108 @@ internal class UpdateDatabaseServerHandler(
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var databaseServer =
+        var server =
             await dbContext
                 .Set<DatabaseServerEntity>()
-                .FirstOrDefaultAsync(
-                    ds => ds.DatabaseServerId == request.DatabaseServerId,
-                    cancellationToken
-                )
-            ?? throw new KeyNotFoundException(
-                $"Database Server with ID {request.DatabaseServerId} not found."
-            );
+                .FirstOrDefaultAsync(s => s.DatabaseServerId == request.DatabaseServerId, cancellationToken)
+            ?? throw new KeyNotFoundException($"Database server with ID {request.DatabaseServerId} not found.");
 
-        if (request.Name != null)
+        // Check if any changes are provided
+        if (
+            request.Name == null
+            && request.HostName == null
+            && request.IpAddress == null
+            && request.FullyQualifiedDomainName == null
+            && request.IsLinkedServer == null
+        )
         {
-            if (
-                await dbContext
-                    .Set<DatabaseServerEntity>()
-                    .AnyAsync(
-                        ds =>
-                            ds.DatabaseServerName == request.Name
-                            && ds.DatabaseServerId != request.DatabaseServerId,
-                        cancellationToken
-                    )
-            )
-                throw new InvalidOperationException(
-                    $"Database server with name \"{request.Name}\" already exists"
-                );
-            databaseServer.DatabaseServerName = request.Name;
+            throw new InvalidOperationException("At least one field must be provided for update");
         }
 
-        if (request.HostName != null)
+        // Check for duplicate properties
+        if (request.Name != null && request.Name != server.DatabaseServerName)
         {
-            if (
-                !string.IsNullOrWhiteSpace(request.HostName)
-                && await dbContext
-                    .Set<DatabaseServerEntity>()
-                    .AnyAsync(
-                        ds =>
-                            ds.DatabaseServerHostName == request.HostName
-                            && ds.DatabaseServerId != request.DatabaseServerId,
-                        cancellationToken
-                    )
-            )
+            var existingServer = await dbContext
+                .Set<DatabaseServerEntity>()
+                .FirstOrDefaultAsync(
+                    s => s.DatabaseServerName == request.Name,
+                    cancellationToken
+                );
+            if (existingServer != null)
+            {
+                throw new InvalidOperationException(
+                    $"Database Server Name '{request.Name}' already exists"
+                );
+            }
+        }
+
+        if (request.HostName != null && request.HostName != server.DatabaseServerHostName)
+        {
+            var existingServer = await dbContext
+                .Set<DatabaseServerEntity>()
+                .FirstOrDefaultAsync(
+                    s => s.DatabaseServerHostName == request.HostName,
+                    cancellationToken
+                );
+            if (existingServer != null)
+            {
                 throw new InvalidOperationException(
                     $"Database server with host name \"{request.HostName}\" already exists"
                 );
-            databaseServer.DatabaseServerHostName = request.HostName;
+            }
         }
 
-        if (request.FullyQualifiedDomainName != null)
+        if (request.FullyQualifiedDomainName != null
+            && request.FullyQualifiedDomainName != server.DatabaseServerFullyQualifiedDomainName)
         {
-            if (
-                !string.IsNullOrWhiteSpace(request.FullyQualifiedDomainName)
-                && await dbContext
-                    .Set<DatabaseServerEntity>()
-                    .AnyAsync(
-                        ds =>
-                            ds.DatabaseServerFullyQualifiedDomainName
-                                == request.FullyQualifiedDomainName
-                            && ds.DatabaseServerId != request.DatabaseServerId,
-                        cancellationToken
-                    )
-            )
+            var existingServer = await dbContext
+                .Set<DatabaseServerEntity>()
+                .FirstOrDefaultAsync(
+                    s => s.DatabaseServerFullyQualifiedDomainName == request.FullyQualifiedDomainName,
+                    cancellationToken
+                );
+            if (existingServer != null)
+            {
                 throw new InvalidOperationException(
                     $"Database server with FQDN \"{request.FullyQualifiedDomainName}\" already exists"
                 );
-            databaseServer.DatabaseServerFullyQualifiedDomainName =
-                request.FullyQualifiedDomainName;
+            }
         }
 
-        if (request.IpAddress != null)
-            databaseServer.DatabaseServerIpaddress = request.IpAddress;
+        if (request.IpAddress != null && request.IpAddress != server.DatabaseServerIpaddress)
+        {
+            var existingServer = await dbContext
+                .Set<DatabaseServerEntity>()
+                .FirstOrDefaultAsync(
+                    s => s.DatabaseServerIpaddress == request.IpAddress,
+                    cancellationToken
+                );
+            if (existingServer != null)
+            {
+                throw new InvalidOperationException(
+                    $"Database server with IP address '{request.IpAddress}' already exists"
+                );
+            }
+        }
 
-        dbContext.Set<DatabaseServerEntity>().Update(databaseServer);
+        // Update server properties
+        if (request.Name != null)
+            server.DatabaseServerName = request.Name;
+        if (request.HostName != null)
+            server.DatabaseServerHostName = request.HostName;
+        if (request.IpAddress != null)
+            server.DatabaseServerIpaddress = request.IpAddress;
+        if (request.FullyQualifiedDomainName != null)
+            server.DatabaseServerFullyQualifiedDomainName = request.FullyQualifiedDomainName;
+        if (request.IsLinkedServer.HasValue)
+            server.IsLinkedServer = request.IsLinkedServer.Value;
+
         await dbContext.SaveChangesAsync(cancellationToken);
 
         if (_cache != null)
         {
-            await _cache.Remove("databaseServers");
-            await _cache.Remove($"databaseServer-id-{request.DatabaseServerId}");
+            await _cache.Remove("database-servers");
+            await _cache.Remove($"database-server-id-{request.DatabaseServerId}");
         }
     }
 }

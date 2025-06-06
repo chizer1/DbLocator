@@ -37,10 +37,10 @@ internal class UpdateDatabaseTypeHandler(
         CancellationToken cancellationToken = default
     )
     {
-        await new UpdateDatabaseTypeCommandValidator().ValidateAndThrowAsync(
-            request,
-            cancellationToken
-        );
+        if (string.IsNullOrWhiteSpace(request.DatabaseTypeName))
+        {
+            throw new ArgumentException("Database type name is required");
+        }
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
@@ -52,35 +52,32 @@ internal class UpdateDatabaseTypeHandler(
                     cancellationToken
                 )
             ?? throw new KeyNotFoundException(
-                $"Database type with ID {request.DatabaseTypeId} not found"
+                $"Database type with ID {request.DatabaseTypeId} not found."
             );
 
-        if (
-            await dbContext
-                .Set<DatabaseTypeEntity>()
-                .AnyAsync(
-                    dt =>
-                        dt.DatabaseTypeName == request.DatabaseTypeName
-                        && dt.DatabaseTypeId != request.DatabaseTypeId,
-                    cancellationToken
-                )
-        )
-            throw new InvalidOperationException(
-                $"Database type with name \"{request.DatabaseTypeName}\" already exists"
+        var existingType = await dbContext
+            .Set<DatabaseTypeEntity>()
+            .FirstOrDefaultAsync(
+                dt =>
+                    dt.DatabaseTypeName == request.DatabaseTypeName
+                    && dt.DatabaseTypeId != request.DatabaseTypeId,
+                cancellationToken
             );
+
+        if (existingType != null)
+        {
+            throw new InvalidOperationException(
+                $"Database type with name '{request.DatabaseTypeName}' already exists"
+            );
+        }
 
         databaseType.DatabaseTypeName = request.DatabaseTypeName;
-
-        dbContext.Update(databaseType);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         if (_cache != null)
         {
-            await _cache.Remove("databaseTypes");
-            await _cache.Remove("connections");
-            await _cache.TryClearConnectionStringFromCache(
-                databaseTypeId: databaseType.DatabaseTypeId
-            );
+            await _cache.Remove("database-types");
+            await _cache.Remove($"database-type-id-{request.DatabaseTypeId}");
         }
     }
 }

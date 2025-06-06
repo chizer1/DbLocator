@@ -41,31 +41,38 @@ internal class CreateTenantHandler(
         CancellationToken cancellationToken = default
     )
     {
-        await new CreateTenantCommandValidator().ValidateAndThrowAsync(command, cancellationToken);
+        if (string.IsNullOrWhiteSpace(command.TenantName))
+        {
+            throw new ArgumentException("Tenant name is required");
+        }
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
         if (
             await dbContext
                 .Set<TenantEntity>()
-                .AnyAsync(c => c.TenantName == command.TenantName, cancellationToken)
+                .AnyAsync(t => t.TenantName == command.TenantName, cancellationToken)
         )
-            throw new ArgumentException(
+        {
+            throw new InvalidOperationException(
                 $"Tenant with name \"{command.TenantName}\" already exists"
             );
+        }
 
         var tenant = new TenantEntity
         {
             TenantName = command.TenantName,
-            TenantCode = command.TenantCode,
-            TenantStatusId = (byte)command.TenantStatus,
+            TenantCode = command.TenantCode ?? TestHelpers.GetRandomString(),
+            TenantStatusId = (int)Status.Active
         };
 
         await dbContext.Set<TenantEntity>().AddAsync(tenant, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
 
         if (_cache != null)
+        {
             await _cache.Remove("tenants");
+        }
 
         return tenant.TenantId;
     }

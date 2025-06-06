@@ -145,29 +145,39 @@ internal class GetConnectionHandler(
             .Include(c => c.Database)
             .ThenInclude(d => d.DatabaseType);
 
+        ConnectionEntity? connection = null;
         if (request.ConnectionId.HasValue)
         {
-            return await queryable.FirstOrDefaultAsync(
+            connection = await queryable.FirstOrDefaultAsync(
                 c => c.ConnectionId == request.ConnectionId,
                 cancellationToken
             );
         }
-
-        if (request.TenantId.HasValue)
+        else if (request.TenantId.HasValue)
         {
-            return await queryable.FirstOrDefaultAsync(
+            connection = await queryable.FirstOrDefaultAsync(
                 c =>
                     c.TenantId == request.TenantId
                     && c.Database.DatabaseTypeId == request.DatabaseTypeId,
                 cancellationToken
             );
         }
-        return await queryable.FirstOrDefaultAsync(
-            c =>
-                c.Tenant.TenantCode == request.TenantCode
-                && c.Database.DatabaseTypeId == request.DatabaseTypeId,
-            cancellationToken
-        );
+        else if (!string.IsNullOrEmpty(request.TenantCode))
+        {
+            connection = await queryable.FirstOrDefaultAsync(
+                c =>
+                    c.Tenant.TenantCode == request.TenantCode
+                    && c.Database.DatabaseTypeId == request.DatabaseTypeId,
+                cancellationToken
+            );
+        }
+
+        if (connection == null)
+        {
+            throw new InvalidOperationException("No valid server identifier found for the connection.");
+        }
+
+        return connection;
     }
 
     private static async Task<string> GetConnectionString(
