@@ -1,0 +1,42 @@
+name: Generate Documentation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0.x'
+
+      - name: Install DocFX
+        run: |
+          dotnet tool install -g docfx
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: Build Project
+        run: dotnet build DbLocator.sln
+
+      - name: Generate Documentation
+        run: |
+          docfx init -q
+          docfx build
+          docfx serve _site
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site 
