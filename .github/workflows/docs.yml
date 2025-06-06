@@ -45,15 +45,18 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/_site
+          retention-days: 1
 
       - name: Wait for artifact processing
         run: sleep 10
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v3
+        uses: actions/deploy-pages@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check deployment status
         if: failure()
@@ -63,4 +66,5 @@ jobs:
           echo "   https://github.com/chizer1/DbLocator/settings/pages"
           echo "2. The repository has the correct permissions for GitHub Pages"
           echo "3. The build artifacts were successfully generated"
+          echo "4. The workflow run ID: ${{ github.run_id }}"
           exit 1
