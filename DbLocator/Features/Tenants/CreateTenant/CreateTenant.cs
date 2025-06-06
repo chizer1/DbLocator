@@ -62,7 +62,7 @@ internal class CreateTenantHandler(
         var tenant = new TenantEntity
         {
             TenantName = command.TenantName,
-            TenantCode = command.TenantCode ?? TestHelpers.GetRandomString(),
+            TenantCode = command.TenantCode ?? GenerateRandomString(10),
             TenantStatusId = (int)Status.Active
         };
 
@@ -75,5 +75,13 @@ internal class CreateTenantHandler(
         }
 
         return tenant.TenantId;
+    }
+
+    private static string GenerateRandomString(int length)
+    {
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        var random = new Random();
+        return new string(Enumerable.Repeat(chars, length)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 }
