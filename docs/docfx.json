@@ -6,7 +6,8 @@
         {
           "src": "../DbLocator",
           "files": [
-            "**/*.csproj"
+            "**/*.csproj",
+            "**/*.xml"
           ],
           "exclude": [
             "**/bin/**",
@@ -16,7 +17,10 @@
       ],
       "dest": "api",
       "disableGitFeatures": false,
-      "disableDefaultFilter": false
+      "disableDefaultFilter": false,
+      "properties": {
+        "TargetFramework": "net9.0"
+      }
     }
   ],
   "build": {
@@ -31,6 +35,12 @@
           "_site/**",
           "**/bin/**",
           "**/obj/**"
+        ]
+      },
+      {
+        "files": [
+          "api/**.yml",
+          "api/index.md"
         ]
       }
     ],
