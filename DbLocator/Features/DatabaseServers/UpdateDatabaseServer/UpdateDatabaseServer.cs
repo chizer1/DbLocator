@@ -35,22 +35,22 @@ internal sealed class UpdateDatabaseServerCommandValidator
 
         RuleFor(x => x.HostName)
             .MaximumLength(50)
-            .When(x => x.HostName != null)
+            .When(x => x.HostName != null && !string.IsNullOrEmpty(x.HostName))
             .WithMessage("Host Name cannot be more than 50 characters.");
 
         RuleFor(x => x.FullyQualifiedDomainName)
             .MaximumLength(100)
-            .When(x => x.FullyQualifiedDomainName != null)
+            .When(x => x.FullyQualifiedDomainName != null && !string.IsNullOrEmpty(x.FullyQualifiedDomainName))
             .WithMessage("Fully Qualified Domain Name cannot be more than 100 characters.")
-            .Matches(@"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.[A-Za-z0-9-]{1,63})*\.[A-Za-z]{2,}$")
-            .When(x => !string.IsNullOrEmpty(x.FullyQualifiedDomainName))
+            .Matches(@"^[a-zA-Z0-9][a-zA-Z0-9-_.]*[a-zA-Z0-9](\.[a-zA-Z0-9][a-zA-Z0-9-_.]*[a-zA-Z0-9])*$")
+            .When(x => x.FullyQualifiedDomainName != null && !string.IsNullOrEmpty(x.FullyQualifiedDomainName))
             .WithMessage(
                 "FQDN must be a valid domain name format (e.g., example.com, sub.example.com)"
             );
 
         RuleFor(x => x.IpAddress)
             .MaximumLength(15)
-            .When(x => x.IpAddress != null)
+            .When(x => x.IpAddress != null && !string.IsNullOrEmpty(x.IpAddress))
             .WithMessage("IP Address cannot be more than 15 characters.");
     }
 }

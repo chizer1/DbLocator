@@ -216,8 +216,15 @@ internal class GetConnectionHandler(
                 query = query.Where(u => u.User.UserRoles.Any(r => roles.Contains((DatabaseRole)r.Role.DatabaseRoleId)));
             }
 
-            var user = await query.FirstOrDefaultAsync(cancellationToken)
-                ?? throw new InvalidOperationException("No user found for the database.");
+            var user = await query.FirstOrDefaultAsync(cancellationToken);
+            if (user == null)
+            {
+                if (roles != null && roles.Length > 0)
+                {
+                    throw new InvalidOperationException("No user found with the specified roles for the database.");
+                }
+                throw new InvalidOperationException("No user found for the database.");
+            }
 
             builder.UserID = user.User.UserName;
             builder.Password = encryption.Decrypt(user.User.UserPassword);

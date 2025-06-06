@@ -28,6 +28,7 @@ internal sealed class CreateDatabaseServerCommandValidator
 
         RuleFor(x => x.HostName)
             .MaximumLength(50)
+            .When(x => !string.IsNullOrEmpty(x.HostName))
             .WithMessage("Host name cannot be more than 50 characters");
 
         RuleFor(x => x.FullyQualifiedDomainName)
@@ -42,6 +43,7 @@ internal sealed class CreateDatabaseServerCommandValidator
 
         RuleFor(x => x.IpAddress)
             .MaximumLength(15)
+            .When(x => !string.IsNullOrEmpty(x.IpAddress))
             .WithMessage("IP address cannot be more than 15 characters");
     }
 }
