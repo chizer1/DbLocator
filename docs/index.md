@@ -28,4 +28,4 @@ For detailed API documentation, visit our [API Reference](api/).
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](../CONTRIBUTING.md) for more information.
+We welcome contributions! Please see our [Contributing Guide](https://github.com/yourusername/DbLocator/blob/master/CONTRIBUTING.md) for more information.
