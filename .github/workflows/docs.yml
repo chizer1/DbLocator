@@ -37,25 +37,19 @@ jobs:
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
-        with:
-          enablement: true
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v1
         with:
-          path: docs/_site
+          path: docs/_site  # <-- make sure this is where your static output is
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v3
 
       - name: Check deployment status
-        if: steps.deployment.outcome == 'failure'
+        if: failure()
         run: |
-          echo "Deployment failed. Please ensure GitHub Pages is enabled in your repository settings."
-          echo "Visit: https://github.com/chizer1/DbLocator/settings/pages"
-          echo "Also check that your repository has the following permissions enabled:"
-          echo "- Pages: Write"
-          echo "- Contents: Write"
-          echo "- ID-Token: Write"
+          echo "Deployment failed. Please ensure GitHub Pages is enabled in your repository settings:"
+          echo "https://github.com/chizer1/DbLocator/settings/pages"
           exit 1
