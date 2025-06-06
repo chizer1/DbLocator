@@ -46,13 +46,21 @@ jobs:
         with:
           path: docs/_site
 
+      - name: Wait for artifact processing
+        run: sleep 10
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check deployment status
         if: failure()
         run: |
-          echo "Deployment failed. Please ensure GitHub Pages is enabled in your repository settings:"
-          echo "https://github.com/chizer1/DbLocator/settings/pages"
+          echo "Deployment failed. Please check the following:"
+          echo "1. GitHub Pages is enabled in your repository settings:"
+          echo "   https://github.com/chizer1/DbLocator/settings/pages"
+          echo "2. The repository has the correct permissions for GitHub Pages"
+          echo "3. The build artifacts were successfully generated"
           exit 1
