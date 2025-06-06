@@ -35,13 +35,16 @@ jobs:
           cd docs
           ./build-docs.sh
 
+      - name: Debug: List built files
+        run: ls -alR docs/_site
+
       - name: Setup Pages
         uses: actions/configure-pages@v3
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v2
         with:
-          path: docs/_site  # <-- make sure this is where your static output is
+          path: docs/_site
 
       - name: Deploy to GitHub Pages
         id: deployment
