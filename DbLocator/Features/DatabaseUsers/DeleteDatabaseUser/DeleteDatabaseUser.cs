@@ -71,8 +71,11 @@ internal class DeleteDatabaseUserHandler(
         dbContext.Set<DatabaseUserDatabaseEntity>().RemoveRange(databaseUserDatabases);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        dbContext.Set<DatabaseUserEntity>().Remove(databaseUserEntity);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        if (request.DeleteDatabaseUser ?? true)
+        {
+            dbContext.Set<DatabaseUserEntity>().Remove(databaseUserEntity);
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
 
         if (_cache != null)
         {

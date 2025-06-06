@@ -37,10 +37,11 @@ internal class UpdateDatabaseTypeHandler(
         CancellationToken cancellationToken = default
     )
     {
-        if (string.IsNullOrWhiteSpace(request.DatabaseTypeName))
-        {
-            throw new ArgumentException("Database type name is required");
-        }
+        // Validate the request first
+        await new UpdateDatabaseTypeCommandValidator().ValidateAndThrowAsync(
+            request,
+            cancellationToken
+        );
 
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
@@ -55,20 +56,24 @@ internal class UpdateDatabaseTypeHandler(
                 $"Database type with ID {request.DatabaseTypeId} not found."
             );
 
-        var existingType = await dbContext
-            .Set<DatabaseTypeEntity>()
-            .FirstOrDefaultAsync(
-                dt =>
-                    dt.DatabaseTypeName == request.DatabaseTypeName
-                    && dt.DatabaseTypeId != request.DatabaseTypeId,
-                cancellationToken
-            );
-
-        if (existingType != null)
+        // Only check for duplicates if the name is actually changing
+        if (databaseType.DatabaseTypeName != request.DatabaseTypeName)
         {
-            throw new InvalidOperationException(
-                $"Database type with name '{request.DatabaseTypeName}' already exists"
-            );
+            var existingType = await dbContext
+                .Set<DatabaseTypeEntity>()
+                .FirstOrDefaultAsync(
+                    dt =>
+                        dt.DatabaseTypeName == request.DatabaseTypeName
+                        && dt.DatabaseTypeId != request.DatabaseTypeId,
+                    cancellationToken
+                );
+
+            if (existingType != null)
+            {
+                throw new InvalidOperationException(
+                    $"Database type with name '{request.DatabaseTypeName}' already exists"
+                );
+            }
         }
 
         databaseType.DatabaseTypeName = request.DatabaseTypeName;

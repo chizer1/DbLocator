@@ -93,7 +93,7 @@ internal class UpdateDatabaseUserHandler(
             if (existingUser != null)
             {
                 throw new InvalidOperationException(
-                    $"User with name '{request.UserName}' already exists"
+                    $"Database user with name '{request.UserName}' already exists"
                 );
             }
 
@@ -210,33 +210,25 @@ internal class UpdateDatabaseUserHandler(
                             + sanitizedNewUserName
                             + "]"
                     );
-                    commands.Add(
-                        "alter login ["
-                            + sanitizedOldUserName
-                            + "] with name = ["
-                            + sanitizedNewUserName
-                            + "]"
-                    );
                 }
-                if (passwordChanged && sanitizedNewUserName != null && request.UserPassword != null)
+                if (passwordChanged && sanitizedNewUserName != null)
                 {
-                    var sanitizedPassword = request.UserPassword.Replace("'", "''");
                     commands.Add(
                         "alter login ["
                             + sanitizedNewUserName
                             + "] with password = '"
-                            + sanitizedPassword
+                            + request.UserPassword
                             + "'"
                     );
                 }
-                foreach (var cmd in commands)
+
+                foreach (var command in commands)
                 {
                     await Sql.ExecuteSqlCommandAsync(
                         dbContext,
-                        cmd,
+                        command,
                         database.DatabaseServer.IsLinkedServer,
                         database.DatabaseServer.DatabaseServerHostName
-                            ?? database.DatabaseServer.DatabaseServerName
                     );
                 }
             }
@@ -245,9 +237,10 @@ internal class UpdateDatabaseUserHandler(
         if (_cache != null)
         {
             await _cache.Remove("databaseUsers");
-            await _cache.Remove($"database-user-id-{request.DatabaseUserId}");
+            await _cache.Remove($"databaseUser-{request.DatabaseUserId}");
             await _cache.Remove("connections");
-            await _cache.TryClearConnectionStringFromCache(user.DatabaseUserId);
+            await _cache.TryClearConnectionStringFromCache(request.DatabaseUserId);
+            await _cache.Remove("databaseUserRoles");
         }
     }
 }

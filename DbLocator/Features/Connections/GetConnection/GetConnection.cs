@@ -95,6 +95,19 @@ internal class GetConnectionHandler(
         var connection =
             await GetConnectionEntity(request, dbContext, cancellationToken)
             ?? throw new KeyNotFoundException("Connection not found.");
+
+        // Check for valid server identifier before proceeding
+        var server = connection.Database.DatabaseServer;
+        var serverIdentifier = server.DatabaseServerFullyQualifiedDomainName
+            ?? server.DatabaseServerHostName
+            ?? server.DatabaseServerIpaddress
+            ?? server.DatabaseServerName;
+
+        if (string.IsNullOrEmpty(serverIdentifier))
+        {
+            throw new InvalidOperationException("No valid server identifier found for the connection.");
+        }
+
         var connectionString = await GetConnectionString(
             connection,
             request.Roles ?? Array.Empty<DatabaseRole>(),
@@ -223,7 +236,18 @@ internal class GetConnectionHandler(
                 {
                     throw new InvalidOperationException("No user found with the specified roles for the database.");
                 }
-                throw new InvalidOperationException("No user found for the database.");
+                // When no roles are specified, we should still try to find any user for the database
+                var anyUser = await dbContext
+                    .Set<DatabaseUserDatabaseEntity>()
+                    .Include(u => u.User)
+                    .Where(u => u.DatabaseId == connection.DatabaseId)
+                    .FirstOrDefaultAsync(cancellationToken);
+                
+                if (anyUser == null)
+                {
+                    throw new InvalidOperationException("No user found for the database.");
+                }
+                user = anyUser;
             }
 
             builder.UserID = user.User.UserName;

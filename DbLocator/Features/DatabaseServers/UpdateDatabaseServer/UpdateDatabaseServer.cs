@@ -68,11 +68,6 @@ internal class UpdateDatabaseServerHandler(
         CancellationToken cancellationToken = default
     )
     {
-        await new UpdateDatabaseServerCommandValidator().ValidateAndThrowAsync(
-            request,
-            cancellationToken
-        );
-
         await using var dbContext = _dbContextFactory.CreateDbContext();
 
         var server =
@@ -90,10 +85,10 @@ internal class UpdateDatabaseServerHandler(
             && request.IsLinkedServer == null
         )
         {
-            return; // Allow updates with no changes
+            throw new ValidationException("No changes provided for update.");
         }
 
-        // Check for duplicate properties
+        // Check for duplicate properties before validation
         if (request.Name != null && request.Name != server.DatabaseServerName)
         {
             var existingServer = await dbContext
@@ -158,6 +153,12 @@ internal class UpdateDatabaseServerHandler(
                 );
             }
         }
+
+        // Now validate the request
+        await new UpdateDatabaseServerCommandValidator().ValidateAndThrowAsync(
+            request,
+            cancellationToken
+        );
 
         // Update server properties
         if (request.Name != null)
