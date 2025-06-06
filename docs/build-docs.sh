@@ -16,7 +16,7 @@ rm -rf _site
 rm -rf api
 
 # Generate documentation
-docfx init -q
+docfx init
 docfx metadata
 docfx build
 

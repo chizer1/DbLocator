@@ -20,12 +20,6 @@
       "disableDefaultFilter": false,
       "properties": {
         "TargetFramework": "net9.0"
-      },
-      "shouldSkipMarkup": false,
-      "properties": {
-        "TargetFramework": "net9.0",
-        "EnableSourceCode": true,
-        "EnableSourceCodeLink": true
       }
     }
   ],
@@ -65,16 +59,14 @@
     "globalMetadata": {
       "_appName": "DbLocator",
       "_appTitle": "DbLocator Documentation",
-      "_enableSearch": true,
-      "_enableNewTab": true,
-      "_disableContribution": true,
+      "_enableSearch": "true",
+      "_enableNewTab": "true",
+      "_disableContribution": "true",
       "_lang": "en-us",
-      "pdf": true,
-      "_enableApiFilter": true,
-      "_enableNewTab": true,
-      "_enableSearch": true,
-      "_enableSourceCode": true,
-      "_enableSourceCodeLink": true
+      "pdf": "true",
+      "_enableApiFilter": "true",
+      "_enableSourceCode": "true",
+      "_enableSourceCodeLink": "true"
     },
     "fileMetadata": {
       "**/*.yml": {
