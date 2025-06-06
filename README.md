@@ -2,6 +2,10 @@
 
 DbLocator is a library designed to simplify database interactions for multi-database tenant applications on SQL Server by managing and cataloging multiple separate database connections for each tenant.
 
+## Documentation
+
+📚 Full documentation is available at [https://chizer1.github.io/DbLocator](https://chizer1.github.io/DbLocator)
+
 ## Features
 
 - Dynamically manages the retrieval and creation of database connections.
@@ -41,13 +45,13 @@ DbLocator is a library designed to simplify database interactions for multi-data
   +------------+      +-----------+                +------------+
 ```
 
-## How to run
+## Quick Start
 
-### 1. Add package to your .Net project
+### 1. Add package to your .NET project
 
-Package is available on nuget.org (https://www.nuget.org/packages/DbLocator)
+Package is available on [NuGet](https://www.nuget.org/packages/DbLocator)
 
-```csharp
+```bash
 dotnet add package DbLocator
 ```
 
@@ -59,89 +63,39 @@ You will need an instance of SQL Server running. For local development, you can 
 - Install SQL Server directly on your machine (https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
 - Spin up a new SQL Server instance in the cloud. **Note**: This library may not play nicely with Azure SQL as this library has code that relies on traditional SQL Server logins which Azure SQL doesn't support.
 
-### 3. Initialization
-
-After installing the DbLocator package and setting up SQL Server, you can start using the library. The primary class of the library is **Locator**, which can be initialized in several ways, allowing for optional configurations such as encryption and caching.
-
-- The **EncryptionKey** is an optional parameter that can be provided when initializing the Locator. It enables the encryption of passwords, offering an added layer of security for your database connection strings.
-- The cache parameter is also optional and can be used for caching purposes. If you wish to improve performance by caching database-related information, you can provide an IDistributedCache instance, which DbLocator will utilize for storing and retrieving data efficiently.
+### 3. Basic Usage
 
 ```csharp
-// Initialize Locator with just the connection string
-Locator dbLocator = new("YourConnectionString");
+// Initialize Locator with connection string
+var dbLocator = new Locator("YourConnectionString");
 
-// Initialize Locator with connection string and encryption key for added security
-Locator dbLocator = new("YourConnectionString", "EncryptionKey");
+// Add a tenant
+var tenantId = await dbLocator.AddTenant("Acme Corp", "acme", Status.Active);
 
-// Full example for caching, omitted for brevity
-IDistributedCache cache = builder
-    .Services.BuildServiceProvider()
-    .GetRequiredService<IDistributedCache>();
-
-// Initialize Locator with connection string, encryption key, and caching
-Locator dbLocator = new("YourConnectionString", "EncryptionKey", cache);
-```
-
-In a real world scenario, you probably wouldn't want to connect an sysadmin login to this library for security purposes (Principle of Least Privilege).
-You would want to create a login with these server level roles:
-
-1. **dbcreator**: If you want to create databases from this library
-2. **securityadmin**: If you want to create logins from this library.
-3. No server level roles, if you don't want to autocreate databases or logins and just map to existing ones.
-
-After initializing the Locator object and running your application, it will automatically create the DbLocator database and you can start using its methods.
-
-### 4. Code example
-
-```csharp
-
-var tenantCode = "acme";
-var tenantId = await dbLocator.AddTenant("Acme Corp", tenantCode, Status.Active);
-
+// Add a database type
 var databaseTypeId = await dbLocator.AddDatabaseType("Client");
 
-// using hostname to connect to server (localhost if using docker image from repo)
-var databaseServerId = await dbLocator.AddDatabaseServer("Docker SQL Server", null, "localhost", null, false);
+// Add a database server
+var databaseServerId = await dbLocator.AddDatabaseServer("Local SQL Server", null, "localhost", null, false);
 
+// Add a database
 var databaseId = await dbLocator.AddDatabase("Acme_Client", databaseServerId, databaseTypeId, Status.Active, true);
 
-// if using a trusted connection, specifying a user is not required
-var databaseUserId = await dbLocator.AddDatabaseUser(databaseId, "acme_client_user", "acme_client_user_password", true);
-
-var connectionId = await dbLocator.AddConnection(tenantId, databaseId);
-
-// several ways to start a SQL Connection
-SqlConnection connection1 = await dbLocator.GetConnection(connectionId);
-SqlConnection connection2 = await dbLocator.GetConnection(tenantId, databaseTypeId);
-SqlConnection connection3 = await dbLocator.GetConnection(tenantCode, databaseTypeId);
-SqlConnection connection4 = await dbLocator.GetConnection(tenantCode, databaseTypeId, new[] { DatabaseRole.DataReader });
+// Get a connection
+using var connection = await dbLocator.GetConnection(tenantId, databaseTypeId);
 ```
 
-### 5. Linked Servers
+For more detailed examples and advanced usage, please visit our [documentation](https://chizer1.github.io/DbLocator).
 
-If you plan to use multiple database servers with the DbLocator library, you may want to connect them to the server that hosts the DbLocator database. While the library does not automatically create linked servers for you, once set up, you can leverage them for seamless cross-server connections.
+## Examples and Implementations
 
-More about Linked Servers (https://learn.microsoft.com/en-us/sql/relational-databases/linked-servers/linked-servers-database-engine?view=sql-server-ver16)
+- [Example Project](https://github.com/chizer1/DbLocatorExample)
+- [Full Documentation](https://chizer1.github.io/DbLocator)
 
-Here is an example if you want set it up:
+## Contributing
 
-```sql
+Contributions are welcome! Please feel free to submit a Pull Request.
 
--- Run the following stored procedures from the server that hosts the DbLocator database
-exec sp_addlinkedserver
-    @server = 'RemoteServerName',  -- Name of the linked server (hostname)
-    @srvproduct = '',
-    @provider = 'SQLNCLI',
-    @datasrc = 'RemoteServerInstance';  -- Remote SQL Server instance (ip address or fully qualified domain name)
+## License
 
-exec sp_addlinkedsrvlogin
-    @rmtsrvname = 'RemoteServerName',  -- Name of the linked server (hostname)
-    @locallogin = NULL,
-    @rmtuser = 'sa', -- which ever user you want to connect for linked server access
-    @rmtpassword = 'YourRemotePassword'; -- that user's password
-
-```
-
-## Implementations
-
-- [https://github.com/chizer1/DbLocatorExample](https://github.com/chizer1/DbLocatorExample)
+This project is licensed under the MIT License - see the LICENSE file for details.
