@@ -35,7 +35,7 @@ jobs:
           cd docs
           ./build-docs.sh
 
-      - name: Debug: List built files
+      - name: List built files
         run: ls -alR docs/_site
 
       - name: Setup Pages
