@@ -62,8 +62,8 @@ internal class CreateTenantHandler(
         var tenant = new TenantEntity
         {
             TenantName = command.TenantName,
-            TenantCode = command.TenantCode,
-            TenantStatusId = (int)Status.Active
+            TenantCode = command.TenantCode ?? GenerateRandomString(10),
+            TenantStatusId = (byte)command.TenantStatus
         };
 
         await dbContext.Set<TenantEntity>().AddAsync(tenant, cancellationToken);

@@ -189,38 +189,16 @@ internal class UpdateDatabaseUserHandler(
                 // If this is a new association, ensure login and user exist
                 if (newDatabaseIds.Contains(database.DatabaseId) && sanitizedNewUserName != null)
                 {
-                    // Use the provided password or a default one if not changing password
-                    var sanitizedPassword = (
-                        request.UserPassword ?? oldPassword ?? "TempP@ssw0rd!"
-                    ).Replace("'", "''");
-
-                    // Ensure login exists at the server level
                     commands.Add(
-                        "IF NOT EXISTS (SELECT name FROM sys.server_principals WHERE name = '"
-                            + sanitizedNewUserName
-                            + "') "
-                            + "BEGIN CREATE LOGIN ["
-                            + sanitizedNewUserName
-                            + "] WITH PASSWORD = '"
-                            + sanitizedPassword
-                            + "' END"
-                    );
-
-                    // Ensure user exists in the database
-                    commands.Add(
-                        "USE ["
+                        "use ["
                             + sanitizedDbName
-                            + "]; IF NOT EXISTS (SELECT name FROM sys.database_principals WHERE name = '"
+                            + "]; create user ["
                             + sanitizedNewUserName
-                            + "') "
-                            + "BEGIN CREATE USER ["
+                            + "] for login ["
                             + sanitizedNewUserName
-                            + "] FOR LOGIN ["
-                            + sanitizedNewUserName
-                            + "] END"
+                            + "]"
                     );
                 }
-                // If renaming, alter user in all associated databases
                 if (userNameChanged && sanitizedOldUserName != null && sanitizedNewUserName != null)
                 {
                     commands.Add(
@@ -257,9 +235,8 @@ internal class UpdateDatabaseUserHandler(
                         dbContext,
                         cmd,
                         database.DatabaseServer.IsLinkedServer,
-                        database.DatabaseServer.IsLinkedServer
-                            ? database.DatabaseServer.DatabaseServerHostName
-                            : null
+                        database.DatabaseServer.DatabaseServerHostName
+                            ?? database.DatabaseServer.DatabaseServerName
                     );
                 }
             }

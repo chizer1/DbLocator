@@ -43,16 +43,6 @@ internal sealed class CreateDatabaseServerCommandValidator
         RuleFor(x => x.IpAddress)
             .MaximumLength(15)
             .WithMessage("IP address cannot be more than 15 characters");
-
-        RuleFor(x => x)
-            .Must(x =>
-                !string.IsNullOrEmpty(x.HostName)
-                || !string.IsNullOrEmpty(x.FullyQualifiedDomainName)
-                || !string.IsNullOrEmpty(x.IpAddress)
-            )
-            .WithMessage(
-                "At least one network identifier (host name, FQDN, or IP address) is required"
-            );
     }
 }
 

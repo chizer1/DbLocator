@@ -52,16 +52,6 @@ internal sealed class UpdateDatabaseServerCommandValidator
             .MaximumLength(15)
             .When(x => x.IpAddress != null)
             .WithMessage("IP Address cannot be more than 15 characters.");
-
-        RuleFor(x => x)
-            .Must(x =>
-                x.Name != null
-                || x.HostName != null
-                || x.FullyQualifiedDomainName != null
-                || x.IpAddress != null
-                || x.IsLinkedServer.HasValue
-            )
-            .WithMessage("At least one field must be provided for update");
     }
 }
 
