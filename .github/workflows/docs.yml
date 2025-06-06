@@ -3,6 +3,10 @@ name: Generate Documentation
 on:
   push:
     branches: [ master ]
+    paths:
+      - 'DbLocator/**'
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
   workflow_dispatch:
 
 jobs:
@@ -23,21 +27,18 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
-      - name: Install DocFX
-        run: |
-          dotnet tool install -g docfx
-          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+      - name: Make build script executable
+        run: chmod +x docs/build-docs.sh
 
-      - name: Build Project
-        run: dotnet build DbLocator.sln
-
-      - name: Generate Documentation
+      - name: Build Project and Generate Documentation
         run: |
           cd docs
-          docfx build
+          ./build-docs.sh
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
+        with:
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -47,3 +48,11 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v3
+        continue-on-error: true
+
+      - name: Check deployment status
+        if: steps.deployment.outcome == 'failure'
+        run: |
+          echo "Deployment failed. Please ensure GitHub Pages is enabled in your repository settings."
+          echo "Visit: https://github.com/chizer1/DbLocator/settings/pages"
+          exit 1

@@ -20,6 +20,12 @@
       "disableDefaultFilter": false,
       "properties": {
         "TargetFramework": "net9.0"
+      },
+      "shouldSkipMarkup": false,
+      "properties": {
+        "TargetFramework": "net9.0",
+        "EnableSourceCode": true,
+        "EnableSourceCodeLink": true
       }
     }
   ],
@@ -63,12 +69,28 @@
       "_enableNewTab": true,
       "_disableContribution": true,
       "_lang": "en-us",
-      "pdf": true
+      "pdf": true,
+      "_enableApiFilter": true,
+      "_enableNewTab": true,
+      "_enableSearch": true,
+      "_enableSourceCode": true,
+      "_enableSourceCodeLink": true
     },
     "fileMetadata": {
       "**/*.yml": {
         "YamlMime": "TableOfContent"
       }
-    }
+    },
+    "overwrite": [
+      {
+        "files": [
+          "api/**.md"
+        ],
+        "exclude": [
+          "obj/**",
+          "_site/**"
+        ]
+      }
+    ]
   }
 }

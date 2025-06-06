@@ -8,8 +8,13 @@ if ! command -v docfx &> /dev/null; then
     dotnet tool install -g docfx
 fi
 
+# Clean previous build
+rm -rf _site
+rm -rf api
+
 # Generate documentation
 docfx init -q
+docfx metadata
 docfx build
 
 echo "Documentation has been generated in the _site directory" 
