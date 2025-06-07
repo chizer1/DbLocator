@@ -59,7 +59,11 @@ Here's a complete example of setting up a tenant with a database, user, and role
 
 ```csharp
 // Add a tenant
-var tenantId = await dbLocator.AddTenant("Acme Corp", "acme", Status.Active);
+var tenantId = await dbLocator.AddTenant(
+    "Acme Corp",     // Name
+    "acme",          // Code
+    Status.Active    // Status
+);
 
 // Add a database type
 var databaseTypeId = await dbLocator.AddDatabaseType("Client");

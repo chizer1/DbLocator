@@ -49,7 +49,7 @@ For more complex scenarios, refer to our [Advanced Configuration Guide](articles
 
 ## API Reference
 
-For detailed API documentation, visit our [API Reference](api/).
+For detailed API documentation, visit our [API Reference](/api/DbLocator).
 
 ## Contributing
 

@@ -19,14 +19,9 @@ public interface IConnectionProvider
 Example implementation:
 
 ```csharp
-public class CustomConnectionProvider : IConnectionProvider
+public class CustomConnectionProvider(ILogger<CustomConnectionProvider> logger) : IConnectionProvider
 {
-    private readonly ILogger<CustomConnectionProvider> _logger;
-
-    public CustomConnectionProvider(ILogger<CustomConnectionProvider> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<CustomConnectionProvider> _logger = logger;
 
     public async Task<SqlConnection> GetConnectionAsync(
         string connectionString,
@@ -53,20 +48,14 @@ public class CustomConnectionProvider : IConnectionProvider
 DbLocator can be integrated with Entity Framework Core for multi-tenant applications:
 
 ```csharp
-public class TenantDbContext : DbContext
+public class TenantDbContext(
+    DbContextOptions<TenantDbContext> options,
+    ITenantContext tenantContext,
+    Locator dbLocator
+) : DbContext(options)
 {
-    private readonly ITenantContext _tenantContext;
-    private readonly Locator _dbLocator;
-
-    public TenantDbContext(
-        DbContextOptions<TenantDbContext> options,
-        ITenantContext tenantContext,
-        Locator dbLocator
-    ) : base(options)
-    {
-        _tenantContext = tenantContext;
-        _dbLocator = dbLocator;
-    }
+    private readonly ITenantContext _tenantContext = tenantContext;
+    private readonly Locator _dbLocator = dbLocator;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -89,19 +78,13 @@ public class TenantDbContext : DbContext
 DbLocator can be used in background services for maintenance tasks:
 
 ```csharp
-public class DatabaseMaintenanceService : BackgroundService
+public class DatabaseMaintenanceService(
+    Locator dbLocator,
+    ILogger<DatabaseMaintenanceService> logger
+) : BackgroundService
 {
-    private readonly Locator _dbLocator;
-    private readonly ILogger<DatabaseMaintenanceService> _logger;
-
-    public DatabaseMaintenanceService(
-        Locator dbLocator,
-        ILogger<DatabaseMaintenanceService> logger
-    )
-    {
-        _dbLocator = dbLocator;
-        _logger = logger;
-    }
+    private readonly Locator _dbLocator = dbLocator;
+    private readonly ILogger<DatabaseMaintenanceService> _logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -164,5 +147,4 @@ public class DatabaseMaintenanceService : BackgroundService
 
 - Review the [API Reference](../api/) for detailed method documentation
 - Check out the [Examples](examples.md) for common usage patterns
-- Learn about [Getting Started](getting-started.md) for basic setup 
-   ``` 
+- Learn about [Getting Started](getting-started.md) for basic setup

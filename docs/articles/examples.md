@@ -36,8 +36,8 @@ var dbId = await dbLocator.CreateDatabase(
     serverId,        // Server ID
     clientDbTypeId,  // Database type ID
     Status.Active,   // Status
-    true,           // Auto-create database (creates the database if it doesn't exist)
-    false           // Use Windows authentication (false = SQL Server authentication)
+    autoCreateDatabase: true,           // Auto-create database (creates the database if it doesn't exist)
+    useTrustedConnection: false           // Use Windows authentication (false = SQL Server authentication)
 );
 
 // Create a database user
@@ -77,8 +77,8 @@ var clientDbId = await dbLocator.CreateDatabase(
     serverId, 
     clientDbTypeId, 
     Status.Active, 
-    true,           // Auto-create database
-    false           // Use SQL Server authentication
+    autoCreateDatabase: true,           // Auto-create database
+    useTrustedConnection: false           // Use SQL Server authentication
 );
 
 var biDbId = await dbLocator.CreateDatabase(
@@ -86,8 +86,8 @@ var biDbId = await dbLocator.CreateDatabase(
     serverId, 
     biDbTypeId, 
     Status.Active, 
-    true,           // Auto-create database
-    false           // Use SQL Server authentication
+    autoCreateDatabase: true,           // Auto-create database
+    useTrustedConnection: false           // Use SQL Server authentication
 );
 
 var reportingDbId = await dbLocator.CreateDatabase(
@@ -95,8 +95,8 @@ var reportingDbId = await dbLocator.CreateDatabase(
     serverId, 
     reportingDbTypeId, 
     Status.Active, 
-    true,           // Auto-create database
-    false           // Use SQL Server authentication
+    autoCreateDatabase: true,           // Auto-create database
+    useTrustedConnection: false           // Use SQL Server authentication
 );
 
 // Create a user with access to all databases
@@ -171,19 +171,10 @@ builder.Services.AddSingleton<Locator>(sp =>
 });
 
 // In your service
-public class TenantService
+public class TenantService(Locator dbLocator, ILogger<TenantService> logger)
 {
-    private readonly Locator _dbLocator;
-    private readonly ILogger<TenantService> _logger;
-
-    public TenantService(
-        Locator dbLocator,
-        ILogger<TenantService> logger
-    )
-    {
-        _dbLocator = dbLocator;
-        _logger = logger;
-    }
+    private readonly Locator _dbLocator = dbLocator;
+    private readonly ILogger<TenantService> _logger = logger;
 
     public async Task<SqlConnection> GetTenantConnectionAsync(
         string tenantCode,
