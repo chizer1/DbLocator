@@ -1,73 +1,75 @@
 # DbLocator
 
-DbLocator is a library designed to simplify database interactions for multi-database tenant applications on SQL Server by managing and cataloging multiple separate database connections for each tenant.
+DbLocator is a .NET library that simplifies database interactions for multi-database tenant applications on SQL Server.
 
-## Documentation
+## 🎯 Key Features
 
-📚 Full documentation is available at [https://chizer1.github.io/DbLocator](https://chizer1.github.io/DbLocator)
+- 🔐 Multi-tenant database management
+- 👥 Role-based access control
+- 🖥️ Database server management
+- 🔌 Connection management
+- 🔒 Data encryption
+- ⚡ High performance
+- 🛡️ Security best practices
 
-## Features
+## 📊 Architecture
 
-- Dynamically manages the retrieval and creation of database connections.
-- Enables tenants to utilize multiple databases, each dedicated to distinct functional purposes.
-- Implements database-level role management for SQL Server, offering fine-grained control over built-in database roles such as read/write privileges, while also supporting trusted connections that do not require a database user.
-- Facilitates horizontal scaling by distributing tenant databases across multiple servers.
-- Allows for automating the creation of databases, logins, users, and roles, eliminating the need for some manual scripting.
-
-## Limitations
-
-- Does not manage schema definitions, modifications, or data structure enforcement.
-- Does not automate SQL Server instance setup.
-- Does not handle DBA tasks such as backups or database migrations.
-
+### Diagram
+```mermaid
+graph TD
+    subgraph DbLocator
+        subgraph Tenants
+            A[Tenant A<br/>AcmeCorp]
+            B[Tenant B<br/>BetaCorp]
+            C[Tenant C<br/>GammaCorp]
+        end
+        
+        subgraph Servers
+            S1[Database Server<br/>localhost]
+            S2[Database Server<br/>192.168.1.2]
+        end
+        
+        subgraph Databases
+            D1[Client DB<br/>Acme_Client]
+            D2[Reporting DB<br/>Acme_Report]
+            D3[Client DB<br/>Beta_Client]
+            D4[Reporting DB<br/>Beta_Report]
+            D5[Client DB<br/>Gamma_Client]
+            D6[Reporting DB<br/>Gamma_Report]
+        end
+        
+        A --> S1
+        B --> S1
+        C --> S2
+        S1 --> D1
+        S1 --> D2
+        S1 --> D3
+        S1 --> D4
+        S2 --> D5
+        S2 --> D6
+    end
 ```
-                         +--------------+
-                         |   DbLocator  |
-                         +--------------+
-                                 |
-      +--------------------------------------------------+
-      |                     |                            |
-+------------------+   +------------------+    +------------------+
-| Tenant: AcmeCorp |   | Tenant: BetaCorp |    | Tenant: GammaCorp |
-+------------------+   +------------------+    +------------------+
-      |                     |                            |
-      +---------------------+                            |
-                  |                                      |
-            +-------------+                        +-------------+
-            | DB Server A |                        | DB Server B |
-            +-------------+                        +-------------+
-                  |                                      |
-         +--------+--------+                             |
-         |                 |                             |
-  +------------+      +-----------+                +------------+
-  |  Acme DB   |      |  Beta DB  |                |  Gamma DB  |
-  |    (BI)    |      |  (Client) |                |    (BI)    |
-  +------------+      +-----------+                +------------+
-```
 
-## Quick Start
+## 📚 Documentation
 
-### 1. Add package to your .NET project
+Full documentation is available at [https://chizer1.github.io/DbLocator](https://chizer1.github.io/DbLocator)
 
-Package is available on [NuGet](https://www.nuget.org/packages/DbLocator)
+## 🚀 Quick Start
+
+### Installation
+
+The package is available on [NuGet](https://www.nuget.org/packages/DbLocator):
 
 ```bash
 dotnet add package DbLocator
 ```
 
-### 2. SQL Server setup
-
-You will need an instance of SQL Server running. For local development, you can either:
-
-- Use the SQL Server Docker image in this repository by running `docker compose up` from the DbLocatorTests folder. This requires Docker Desktop to be installed (https://docs.docker.com/get-started/get-docker/)
-- Install SQL Server directly on your machine (https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
-- Spin up a new SQL Server instance in the cloud. **Note**: This library may not play nicely with Azure SQL as this library has code that relies on traditional SQL Server logins which Azure SQL doesn't support.
-
-### 3. Basic Usage
+### Basic Usage
 
 ```csharp
-// Initialize Locator with connection string
-var dbLocator = new Locator("YourConnectionString");
+// Initialize Locator with trusted connection
+var connectionString = "Server=localhost;Trusted_Connection=True;";
+var dbLocator = new Locator(connectionString);
 
 // Add a tenant
 var tenantId = await dbLocator.AddTenant("Acme Corp", "acme", Status.Active);
@@ -76,26 +78,52 @@ var tenantId = await dbLocator.AddTenant("Acme Corp", "acme", Status.Active);
 var databaseTypeId = await dbLocator.AddDatabaseType("Client");
 
 // Add a database server
-var databaseServerId = await dbLocator.AddDatabaseServer("Local SQL Server", null, "localhost", null, false);
+var databaseServerId = await dbLocator.CreateDatabaseServer(
+    "Local SQL Server",    // Name
+    "localhost",          // HostName
+    "127.0.0.1",         // IP Address
+    "localhost.local",    // FQDN
+    false                 // Is Linked Server
+);
 
 // Add a database
-var databaseId = await dbLocator.AddDatabase("Acme_Client", databaseServerId, databaseTypeId, Status.Active, true);
+var databaseId = await dbLocator.CreateDatabase(
+    "Acme_Client",        // Database name
+    databaseServerId,     // Server ID
+    databaseTypeId,       // Database type ID
+    Status.Active,        // Status
+    true                  // Auto-create database
+);
 
-// Get a connection
+// Create a connection for the tenant
+await dbLocator.CreateConnection(tenantId, databaseTypeId);
+
+// Get the connection
 using var connection = await dbLocator.GetConnection(tenantId, databaseTypeId);
+
+// Example: Execute a query using the connection
+using var command = connection.CreateCommand();
+command.CommandText = "SELECT * FROM Users";
+using var reader = await command.ExecuteReaderAsync();
 ```
 
-For more detailed examples and advanced usage, please visit our [documentation](https://chizer1.github.io/DbLocator).
-
-## Examples and Implementations
+## 📖 Examples
 
 - [Example Project](https://github.com/chizer1/DbLocatorExample)
 - [Full Documentation](https://chizer1.github.io/DbLocator)
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We welcome contributions! Here's how you can help:
 
-## License
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Please read our [Contributing Guidelines](CONTRIBUTING.md) for more details.
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
