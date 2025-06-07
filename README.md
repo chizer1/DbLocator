@@ -25,8 +25,8 @@ graph TD
         end
         
         subgraph Servers
-            S1[Database Server<br/>localhost]
-            S2[Database Server<br/>192.168.1.2]
+            S1[Database Server<br/>one.dblocator.com]
+            S2[Database Server<br/>two.dblocator.com]
         end
         
         subgraph Databases
