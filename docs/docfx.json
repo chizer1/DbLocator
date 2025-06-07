@@ -53,6 +53,7 @@
     ],
     "output": "_site",
     "template": [
+      "_template",
       "default",
       "modern"
     ],
@@ -66,7 +67,10 @@
       "pdf": "true",
       "_enableApiFilter": "true",
       "_enableSourceCode": "true",
-      "_enableSourceCodeLink": "true"
+      "_enableSourceCodeLink": "true",
+      "_customCss": [
+        "styles/custom.css"
+      ]
     },
     "fileMetadata": {
       "**/*.yml": {
