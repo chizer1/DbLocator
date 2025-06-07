@@ -2,6 +2,8 @@ name: "Deploy Nuget"
 
 on:
   workflow_dispatch:
+  release:
+    types: [published]
 
 jobs: 
     deploy:
@@ -21,6 +23,7 @@ jobs:
                   versionSpec: '6.0.x'
 
             - name: Determine Version
+              id: gitversion
               uses: gittools/actions/gitversion/execute@v3.1.1
               with:
                   useConfigFile: true
@@ -37,7 +40,7 @@ jobs:
               run: dotnet build --configuration Release
 
             - name: Pack NuGet package
-              run: dotnet pack --configuration Release /p:PackageVersion=${{ env.semVer }}
+              run: dotnet pack --configuration Release /p:PackageVersion=${{ steps.gitversion.outputs.semVer }}
 
             - name: Push to GitHub
               run: dotnet nuget push DbLocator/bin/Release/*.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.PAT }} --skip-duplicate
