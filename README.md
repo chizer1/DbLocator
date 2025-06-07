@@ -95,8 +95,8 @@ var databaseId = await dbLocator.CreateDatabase(
     "Acme_Client",        // Database name
     databaseServerId,     // Server ID
     databaseTypeId,       // Database type ID
-    Status.Active,        // Status
-    true                  // Auto-create database
+    true,                 // Auto-create database
+    true                  // Use trusted connection
 );
 
 // Create a connection for the tenant
