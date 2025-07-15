@@ -2,16 +2,6 @@
 
 DbLocator is a .NET library that simplifies database interactions for multi-database tenant applications on SQL Server.
 
-## 🎯 Key Features
-
-- 🔐 Multi-tenant database management
-- 👥 Role-based access control
-- 🖥️ Database server management
-- 🔌 Connection management
-- 🔒 Data encryption
-- ⚡ High performance
-- 🛡️ Security best practices
-
 ## 📊 Architecture
 
 ### Diagram
@@ -67,19 +57,18 @@ dotnet add package DbLocator
 ### Basic Usage
 
 ```csharp
-// Initialize Locator with trusted connection
-var connectionString = "Server=localhost;Trusted_Connection=True;";
+var connectionString = "{yourConnectionString}";
 var dbLocator = new Locator(connectionString);
 
 // Add a tenant
-var tenantId = await dbLocator.AddTenant(
+var tenantId = await dbLocator.CreateTenant(
     "Acme Corp",     // Name
     "acme",          // Code
     Status.Active    // Status
 );
 
 // Add a database type
-var databaseTypeId = await dbLocator.AddDatabaseType("Client");
+var databaseTypeId = await dbLocator.CreateDatabaseType("Client");
 
 // Add a database server
 var databaseServerId = await dbLocator.CreateDatabaseServer(
