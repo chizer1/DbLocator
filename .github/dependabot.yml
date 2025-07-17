@@ -7,3 +7,12 @@ updates:
       day: "monday" 
       time: "08:00"
       timezone: "America/Chicago"
+
+  - package-ecosystem: "nuget"
+    directory: "/DbLocatorTests"
+    schedule:
+      interval: "monthly"
+      day: "monday" 
+      time: "08:00"
+      timezone: "America/Chicago"
+
