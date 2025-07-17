@@ -4,40 +4,59 @@ DbLocator is a .NET library that simplifies database interactions for multi-data
 
 ## 📊 Architecture
 
-### Diagram
 ```mermaid
 graph TD
+    %% Groups
     subgraph DbLocator
+
         subgraph Tenants
-            A[Tenant A<br/>AcmeCorp]
-            B[Tenant B<br/>BetaCorp]
-            C[Tenant C<br/>GammaCorp]
+            T1[Acme Corp]
+            T2[Beta Corp]
+            T3[Gamma Corp]
         end
-        
-        subgraph Servers
-            S1[Database Server<br/>one.dblocator.com]
-            S2[Database Server<br/>two.dblocator.com]
+
+        subgraph Database Types
+            DT1[Client]
+            DT2[Reporting]
         end
-        
+
+        subgraph Database Servers
+            S1[Database Server 1]
+            S2[Database Server 2]
+        end
+
         subgraph Databases
-            D1[Client DB<br/>Acme_Client]
-            D2[Reporting DB<br/>Acme_Report]
-            D3[Client DB<br/>Beta_Client]
-            D4[Reporting DB<br/>Beta_Report]
-            D5[Client DB<br/>Gamma_Client]
-            D6[Reporting DB<br/>Gamma_Report]
+            D1[Acme_Client]
+            D2[Acme_Reporting]
+            D3[Beta_Client]
+            D4[Beta_Reporting]
+            D5[Gamma_Client]
+            D6[Gamma_Reporting]
         end
-        
-        A --> S1
-        B --> S1
-        C --> S2
-        S1 --> D1
-        S1 --> D2
-        S1 --> D3
-        S1 --> D4
-        S2 --> D5
-        S2 --> D6
+
     end
+
+    T1 --> DT1
+    T1 --> DT2
+    T2 --> DT1
+    T2 --> DT2
+    T3 --> DT1
+    T3 --> DT2
+
+    DT1 --> D1
+    DT2 --> D2
+    DT1 --> D3
+    DT2 --> D4
+    DT1 --> D5
+    DT2 --> D6
+
+    %% Database to Server mapping
+    D1 --> S1
+    D2 --> S1
+    D3 --> S1
+    D4 --> S1
+    D5 --> S2
+    D6 --> S2
 ```
 
 ## 📚 Documentation
@@ -54,60 +73,64 @@ The package is available on [NuGet](https://www.nuget.org/packages/DbLocator):
 dotnet add package DbLocator
 ```
 
-### Basic Usage
+### Basic usage
 
 ```csharp
 var connectionString = "{yourConnectionString}";
 var dbLocator = new Locator(connectionString);
 
-// Add a tenant
+var tenantCode = "Acme";
 var tenantId = await dbLocator.CreateTenant(
-    "Acme Corp",     // Name
-    "acme",          // Code
-    Status.Active    // Status
+    tenantName: "Acme Corp",
+    tenantCode: tenantCode,
+    tenantStatus: Status.Active
 );
 
-// Add a database type
-var databaseTypeId = await dbLocator.CreateDatabaseType("Client");
+var databaseTypeName = "Client";
+var databaseTypeId = await dbLocator.CreateDatabaseType(databaseTypeName: databaseTypeName);
 
-// Add a database server
 var databaseServerId = await dbLocator.CreateDatabaseServer(
-    "Local SQL Server",    // Name
-    "localhost",          // HostName
-    "127.0.0.1",         // IP Address
-    "localhost.local",    // FQDN
-    false                 // Is Linked Server
+    databaseServerName: "Database Server",
+    databaseServerHostName: "localhost",
+    databaseServerIpAddress: null,
+    databaseServerFullyQualifiedDomainName: null,
+    isLinkedServer: false
 );
 
-// Add a database
 var databaseId = await dbLocator.CreateDatabase(
-    "Acme_Client",        // Database name
-    databaseServerId,     // Server ID
-    databaseTypeId,       // Database type ID
-    true,                 // Auto-create database
-    true                  // Use trusted connection
+    databaseName: $"{tenantCode}_{databaseTypeName}",
+    databaseServerId: databaseServerId,
+    databaseTypeId: databaseTypeId,
+    affectDatabase: true,
+    useTrustedConnection: true
 );
 
-// Create a connection for the tenant
-await dbLocator.CreateConnection(tenantId, databaseTypeId);
+await dbLocator.CreateConnection(
+    tenantId: tenantId,
+    databaseTypeId: databaseTypeId
+);
 
-// Get the connection
-using var connection = await dbLocator.GetConnection(tenantId, databaseTypeId);
+using var connection = await dbLocator.GetConnection(
+    tenantId: tenantId,
+    databaseTypeId: databaseTypeId
+);
 
-// Example: Execute a query using the connection
 using var command = connection.CreateCommand();
 command.CommandText = "SELECT * FROM Users";
+
 using var reader = await command.ExecuteReaderAsync();
+while (await reader.ReadAsync())
+    Console.WriteLine($"User: {reader["Name"]}");
 ```
 
 ## 📖 Examples
 
-- [Example Project](https://github.com/chizer1/DbLocatorExample)
-- [Full Documentation](https://chizer1.github.io/DbLocator)
+- [DbLocatorExample](https://github.com/chizer1/DbLocatorExample)
+- [aspire-multi-tenant-starter](https://github.com/chizer1/aspire-multi-tenant-starter)
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how you can help:
+I welcome contributions! Here's how you can help:
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -115,7 +138,7 @@ We welcome contributions! Here's how you can help:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-Please read our [Contributing Guidelines](CONTRIBUTING.md) for more details.
+Please read [Contributing Guidelines](CONTRIBUTING.md) for more details.
 
 ## 📝 License
 
