@@ -9,7 +9,6 @@ Welcome to the DbLocator documentation. This documentation will help you underst
 ## What is DbLocator?
 
 DbLocator is a .NET library that simplifies database interactions for multi-database tenant applications on SQL Server. It provides a robust foundation for managing connections, roles, and sharding logic—all with built-in security features.
-Key Features & Use Cases
 
 1. Multi-Tenant Database Management
 Seamlessly manage isolated databases for each tenant—ideal for SaaS platforms needing data separation and centralized control.
@@ -37,13 +36,9 @@ To get started with DbLocator, check out [Getting Started Guide](articles/gettin
 
 Check out the [Examples](articles/examples.md) to see DbLocator in action.
 
-## Advanced Configuration
-
-For more complex scenarios, refer to our [Advanced Configuration Guide](articles/advanced-configuration.md):
-
 ## API Reference
 
-For detailed API documentation, visit our [API Reference](/DbLocator/api/DbLocator).
+For detailed API documentation, visit [API Reference](/DbLocator/api/DbLocator).
 
 ## Contributing
 

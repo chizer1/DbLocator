@@ -75,9 +75,9 @@ dotnet add package DbLocator
 
 ### Basic usage
 
+Setup
 ```csharp
-var connectionString = "{yourConnectionString}";
-var dbLocator = new Locator(connectionString);
+var dbLocator = new Locator("{yourConnectionString}");
 
 var tenantCode = "Acme";
 var tenantId = await dbLocator.CreateTenant(
@@ -109,7 +109,20 @@ await dbLocator.CreateConnection(
     tenantId: tenantId,
     databaseTypeId: databaseTypeId
 );
+```
 
+Run script in database
+```sql
+CREATE TABLE User (
+    Id INT PRIMARY KEY IDENTITY,
+    Name NVARCHAR(100) NOT NULL
+);
+
+INSERT INTO User (Name) VALUES ('Alice'), ('Bob'), ('Charlie');
+```
+
+Connect and query
+```csharp
 using var connection = await dbLocator.GetConnection(
     tenantId: tenantId,
     databaseTypeId: databaseTypeId

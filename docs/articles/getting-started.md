@@ -47,8 +47,9 @@ var dbLocator = new Locator("{YourConnectionString}", "{YourEncryptionKey}", you
 
 ## Setting Up a Multi-tenant Environment
 
-Here's a complete example of setting up a tenant with a database, user, and role-based access:
+1. Set up a tenant with a database, user, and role-based access:
 
+Setup
 ```csharp
 var tenantCode = "Acme";
 var tenantId = await dbLocator.CreateTenant(
@@ -101,6 +102,7 @@ CREATE TABLE User (
 INSERT INTO User (Name) VALUES ('Alice'), ('Bob'), ('Charlie');
 ```
 
+Connect and query
 ```csharp
 using var connection = await dbLocator.GetConnection(
     tenantId: tenantId,
@@ -116,8 +118,68 @@ while (await reader.ReadAsync())
     Console.WriteLine($"User: {reader["Name"]}");
 ```
 
+2. Set up a tenant with a database that has a trusted connection.
+
+Setup
+```csharp
+var tenantCode = "Acme";
+var tenantId = await dbLocator.CreateTenant(
+    tenantName: "Acme Corp",
+    tenantCode: tenantCode,
+    tenantStatus: Status.Active
+);
+
+var databaseTypeName = "Client";
+var databaseTypeId = await dbLocator.CreateDatabaseType(databaseTypeName: databaseTypeName);
+
+var databaseServerId = await dbLocator.CreateDatabaseServer(
+    databaseServerName: "Database Server",
+    databaseServerHostName: "localhost",
+    databaseServerIpAddress: null,
+    databaseServerFullyQualifiedDomainName: null,
+    isLinkedServer: false
+);
+
+var databaseId = await dbLocator.CreateDatabase(
+    databaseName: $"{tenantCode}_{databaseTypeName}",
+    databaseServerId: databaseServerId,
+    databaseTypeId: databaseTypeId,
+    affectDatabase: true,
+    useTrustedConnection: true
+);
+
+await dbLocator.CreateConnection(
+    tenantId: tenantId,
+    databaseTypeId: databaseTypeId
+);
+```
+
+Run script in database
+```sql
+CREATE TABLE User (
+    Id INT PRIMARY KEY IDENTITY,
+    Name NVARCHAR(100) NOT NULL
+);
+
+INSERT INTO User (Name) VALUES ('Alice'), ('Bob'), ('Charlie');
+```
+
+Connect and query
+```csharp
+using var connection = await dbLocator.GetConnection(
+    tenantId: tenantId,
+    databaseTypeId: databaseTypeId
+);
+
+using var command = connection.CreateCommand();
+command.CommandText = "SELECT * FROM Users";
+
+using var reader = await command.ExecuteReaderAsync();
+while (await reader.ReadAsync())
+    Console.WriteLine($"User: {reader["Name"]}");
+```
+
 ## Next Steps
 
-- Learn about [Advanced Configuration](advanced-configuration.md) for more complex scenarios
 - Check out the [Examples](examples.md) for common usage patterns
 - Review the [API Reference](../api/) for detailed method documentation
