@@ -1,7 +1,5 @@
 # Getting Started with DbLocator
 
-DbLocator is a library designed to simplify database interactions for multi-database tenant applications on SQL Server. This guide will help you get started with DbLocator in your .NET application.
-
 ## Prerequisites
 
 - .NET 9.0 (required)
@@ -15,20 +13,11 @@ Add the DbLocator NuGet package to your project:
 dotnet add package DbLocator
 ```
 
-## Key Features
-
-- **Multi-tenant Database Management**: Manage multiple databases for different tenants with ease
-- **Role-Based Access Control**: Implement fine-grained access control using SQL Server database roles
-- **Database Server Management**: Support for multiple server identification methods (hostname, FQDN, IP)
-- **Connection Management**: Secure connection handling with SQL Server authentication
-- **Distributed Caching**: Optional caching support for improved performance
-- **Data Encryption**: Built-in encryption for sensitive connection information
-
 ## Basic Setup
 
-1. First, ensure you have a SQL Server instance running. For local development, you have several options:
+1. First, ensure you have a SQL Server instance running. For local development, you have a couple options:
 
-   ### Option 1: Using Docker (Recommended for Development)
+   ### Option 1: Using Docker
    ```bash
    docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong@Passw0rd" -p 1433:1433 --name sql1 --hostname sql1 -d mcr.microsoft.com/mssql/server:2022-latest
    ```
@@ -46,11 +35,11 @@ using DbLocator;
 // Basic initialization
 var dbLocator = new Locator("YourConnectionString");
 
-// With encryption (recommended for production)
+// With encryption
 var dbLocator = new Locator("YourConnectionString", "YourEncryptionKey");
 
-// With caching (for better performance)
-var dbLocator = new Locator("YourConnectionString", "YourEncryptionKey", cache);
+// With caching
+var dbLocator = new Locator("YourConnectionString", "YourEncryptionKey", yourCachingMechanism);
 ```
 
 ## Setting Up a Multi-tenant Environment
@@ -58,55 +47,59 @@ var dbLocator = new Locator("YourConnectionString", "YourEncryptionKey", cache);
 Here's a complete example of setting up a tenant with a database, user, and role-based access:
 
 ```csharp
-// Add a tenant
-var tenantId = await dbLocator.AddTenant(
-    "Acme Corp",     // Name
-    "acme",          // Code
-    Status.Active    // Status
+
+var tenantCode = "Acme";
+var tenantId = await dbLocator.CreateTenant(
+    tenantName: "Acme Corp",
+    tenantCode: tenantCode,
+    tenantStatus: Status.Active
 );
 
-// Add a database type
-var databaseTypeId = await dbLocator.AddDatabaseType("Client");
+var databaseTypeName = "Client";
+var databaseTypeId = await dbLocator.CreateDatabaseType(databaseTypeName: databaseTypeName);
 
-// Add a database server
 var databaseServerId = await dbLocator.CreateDatabaseServer(
-    "Local SQL Server",    // Name
-    "localhost",          // HostName
-    "127.0.0.1",         // IP Address
-    "localhost.local",    // Fully Qualified Domain Name
-    false                 // Is Linked Server
+    databaseServerName: "Database Server",
+    databaseServerHostName: "localhost",
+    databaseServerIpAddress: null,
+    databaseServerFullyQualifiedDomainName: null,
+    isLinkedServer: false
 );
 
-// Add a database
 var databaseId = await dbLocator.CreateDatabase(
-    "Acme_Client",        // Database name
-    databaseServerId,     // Server ID
-    databaseTypeId,       // Database type ID
-    Status.Active,        // Status
-    true                  // Auto-create database
+    databaseName: $"{tenantCode}_{databaseTypeName}",
+    databaseServerId: databaseServerId,
+    databaseTypeId: databaseTypeId,
+    affectDatabase: true,
+    useTrustedConnection: false
 );
 
-// Create a database user
-var userId = await dbLocator.CreateDatabaseUser(
-    new[] { databaseId },  // Database IDs
-    "acme_user",          // Username
-    "Strong@Passw0rd",    // Password
-    true                  // Create user on database server
+var databaseUserId = await dbLocator.CreateDatabaseUser(
+    databaseIds: new[] { databaseId },
+    userName: $"{tenantCode}_{databaseTypeName}_User",
+    userPassword: "YourStrongSecure@Passw0rd",
+    affectDatabase: true
 );
 
-// Assign roles to the user
 await dbLocator.CreateDatabaseUserRole(
-    userId,               // User ID
-    DatabaseRole.DataReader,  // Role
-    true                  // Update user on database server
+    databaseUserId: databaseUserId,
+    userRole: DatabaseRole.DataReader,
+    affectDatabase: true
 );
 
-// Get a SqlConnection with specific role
 using var connection = await dbLocator.GetConnection(
-    tenantId, 
-    databaseTypeId,
-    new[] { DatabaseRole.DataReader }  // Required roles
+    tenantId: tenantId,
+    databaseTypeId: databaseTypeId
+    roles: new[] { DatabaseRole.DataReader }
 );
+
+using var command = connection.CreateCommand();
+command.CommandText = "SELECT * FROM Users";
+
+using var reader = await command.ExecuteReaderAsync();
+while (await reader.ReadAsync())
+    Console.WriteLine($"User: {reader["Name"]}");
+
 ```
 
 ## Available Database Roles
@@ -122,29 +115,22 @@ DbLocator supports the following SQL Server database roles:
 
 ## Connection String Management
 
-DbLocator handles connection strings in several ways:
+DbLocator handles connection strings in two ways:
 
-1. **Basic Connection**: Uses SQL Server authentication
-   ```csharp
-   var connection = await dbLocator.GetConnection(tenantId, databaseTypeId);
-   ```
-
-2. **Role-Based Connection**: Ensures user has specific roles
+1. **Role-Based Connection**:
    ```csharp
    var connection = await dbLocator.GetConnection(
-       tenantId, 
-       databaseTypeId,
-       new[] { DatabaseRole.DataReader, DatabaseRole.DataWriter }
+        tenantId: tenantId,
+        databaseTypeId: databaseTypeId
+        roles: new[] { DatabaseRole.DataReader, DatabaseRole.DataWriter }
    );
    ```
 
-3. **Trusted Connection**: Uses Windows authentication
+2. **Trusted Connection**:
    ```csharp
-   var databaseId = await dbLocator.CreateDatabase(
-       "MyDatabase",
-       serverId,
-       typeId,
-       useTrustedConnection: true
+   var connection = await dbLocator.GetConnection(
+        tenantId: tenantId,
+        databaseTypeId: databaseTypeId
    );
    ```
 

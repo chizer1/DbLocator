@@ -30,7 +30,7 @@ To get started with DbLocator, check out our [Getting Started Guide](articles/ge
 
 ## Examples
 
-Check out our [Examples](articles/examples.md) to see DbLocator in action:
+Check out the [Examples](articles/examples.md) to see DbLocator in action:
 
 - Basic tenant setup
 - Multi-database tenant configuration

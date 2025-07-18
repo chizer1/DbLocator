@@ -5,7 +5,7 @@ This page contains practical examples of DbLocator usage in common scenarios.
 ## Basic Tenant Setup
 
 ```csharp
-// Initialize DbLocator with encryption (recommended for production)
+// Initialize DbLocator with encryption
 var dbLocator = new Locator(
     "YourConnectionString",
     "YourEncryptionKey"
@@ -156,42 +156,3 @@ using var adminConnection = await dbLocator.GetConnection(
     new[] { DatabaseRole.DbOwner }
 );
 ```
-
-## Using with Dependency Injection
-
-```csharp
-// In Program.cs
-builder.Services.AddSingleton<Locator>(sp =>
-{
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    return new Locator(
-        configuration.GetConnectionString("DbLocator"),
-        configuration["DbLocator:EncryptionKey"]
-    );
-});
-
-// In your service
-public class TenantService(Locator dbLocator, ILogger<TenantService> logger)
-{
-    private readonly Locator _dbLocator = dbLocator;
-    private readonly ILogger<TenantService> _logger = logger;
-
-    public async Task<SqlConnection> GetTenantConnectionAsync(
-        string tenantCode,
-        string databaseType,
-        DatabaseRole[] roles
-    )
-    {
-        try
-        {
-            var tenant = await _dbLocator.GetTenant(tenantCode);
-            return await _dbLocator.GetConnection(tenant.Id, databaseType, roles);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to get connection for tenant {TenantCode}", tenantCode);
-            throw;
-        }
-    }
-}
-``` 

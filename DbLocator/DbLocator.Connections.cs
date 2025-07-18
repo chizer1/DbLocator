@@ -13,14 +13,6 @@ namespace DbLocator;
 /// - Retrieval of connections with role-based access control
 /// - Deletion of connections with validation
 /// - Connection configuration and management
-///
-/// The connection management system supports:
-/// - Role-based access control (RBAC)
-/// - Multi-tenant database environments
-/// - SQL Server database categorization (operational, analytical, reporting)
-/// - Secure connection handling with SQL Server authentication
-/// - Connection validation and enforcement
-/// - Connection dependency management
 /// </summary>
 public partial class Locator
 {

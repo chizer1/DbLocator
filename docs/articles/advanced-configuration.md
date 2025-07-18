@@ -92,14 +92,10 @@ public class DatabaseMaintenanceService(
         {
             try
             {
-                // Get all active tenants
-                var tenants = await _dbLocator.GetTenants(Status.Active);
+                var databases = await _dbLocator.GetDatabases(Status.Active);
 
-                foreach (var tenant in tenants)
-                {
-                    // Perform maintenance tasks for each tenant
-                    await PerformMaintenanceAsync(tenant);
-                }
+                foreach (var database in databases)
+                    await PerformMaintenanceAsync(database);
             }
             catch (Exception ex)
             {
@@ -110,7 +106,7 @@ public class DatabaseMaintenanceService(
         }
     }
 
-    private async Task PerformMaintenanceAsync(Tenant tenant)
+    private async Task PerformMaintenanceAsync(Database database)
     {
         // Example maintenance tasks:
         // - Update statistics
@@ -120,28 +116,6 @@ public class DatabaseMaintenanceService(
     }
 }
 ```
-
-## Security Best Practices
-
-1. **Encryption**
-   - Always use encryption for sensitive connection information
-   - Store encryption keys securely (e.g., Azure Key Vault)
-   - Rotate encryption keys regularly
-
-2. **Role-Based Access**
-   - Follow the principle of least privilege
-   - Use specific roles for different operations
-   - Regularly audit role assignments
-
-3. **Trusted Connections**
-   - Use Windows authentication when possible
-   - Configure service accounts with minimal permissions
-   - Use managed identities in cloud environments
-
-4. **Connection Security**
-   - Use encrypted connections (TrustServerCertificate = false)
-   - Implement connection timeouts
-   - Use connection pooling appropriately
 
 ## Next Steps
 

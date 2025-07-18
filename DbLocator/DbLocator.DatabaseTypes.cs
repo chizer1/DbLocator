@@ -11,24 +11,16 @@ namespace DbLocator;
 /// - Retrieval of database type information
 /// - Updates to database type settings
 /// - Deletion of database types
-///
-/// The database type management system supports:
-/// - SQL Server database categorization (e.g., Operational, Analytical, Reporting)
-/// - Type-specific configuration and validation
-/// - Version compatibility tracking
-/// - Database type dependencies
 /// </summary>
 public partial class Locator
 {
     /// <summary>
     /// Creates a new database type in the system.
-    /// This method establishes a new database type that can be used to categorize and manage
-    /// different database technologies supported by the system.
+    /// This method establishes a new database type that can be used to categorize and manage different categories
     /// </summary>
     /// <param name="databaseTypeName">
-    /// The name of the database type to be created. This should be a descriptive name that identifies
-    /// the database technology (e.g., "SQL Server", "MySQL", "PostgreSQL"). The name should be unique
-    /// and meaningful for administrative purposes.
+    /// The name of the database type to be created. This should be a descriptive name that identifies its purpose (e.g., Operational, Analytical, Reporting).
+    /// The name should be unique and meaningful for administrative purposes.
     /// </param>
     /// <returns>
     /// The unique identifier of the newly created database type. This ID can be used to reference
@@ -48,8 +40,7 @@ public partial class Locator
 
     /// <summary>
     /// Retrieves a single database type by its unique identifier.
-    /// This method returns detailed information about a specific database type, including its
-    /// configuration and associated metadata.
+    /// This method returns information about a specific database type.
     /// </summary>
     /// <param name="databaseTypeId">
     /// The unique identifier of the database type to retrieve. This ID must correspond to an
@@ -72,8 +63,7 @@ public partial class Locator
     /// <summary>
     /// Retrieves a list of all available database types in the system.
     /// This method returns comprehensive information about all database types, including their
-    /// configuration and associated metadata. The list can be used for administrative purposes
-    /// or to audit the system's database type configuration.
+    /// configuration and associated metadata.
     /// </summary>
     /// <returns>
     /// A list of <see cref="DatabaseType"/> objects, each containing detailed information about a database type,
@@ -96,7 +86,7 @@ public partial class Locator
     /// </param>
     /// <param name="databaseTypeName">
     /// The new name for the database type. This should be a descriptive name that identifies
-    /// the database technology. The name should be unique and meaningful for administrative purposes.
+    /// its purpose. The name should be unique and meaningful for administrative purposes.
     /// </param>
     /// <returns>
     /// A task that represents the asynchronous operation. The task completes when the database type

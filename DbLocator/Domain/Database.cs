@@ -88,7 +88,7 @@ public class Database(
 
     /// <summary>
     /// Gets or sets the type of the database.
-    /// This property specifies the type of the database (e.g., SQL Server, MySQL, etc.)
+    /// This property specifies the logical type of the database (e.g., Operational, Analytical, Reporting)
     /// and can be used to configure system behavior based on the specific database engine.
     /// The type helps categorize databases based on their intended use and determines
     /// how the system interacts with the database. This property can be modified

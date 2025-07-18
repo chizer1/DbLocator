@@ -55,7 +55,7 @@ jobs:
               run: dotnet build --configuration Release
 
             - name: Pack NuGet package
-              run: dotnet pack --configuration Release /p:PackageVersion=1.3
+              run: dotnet pack --configuration Release /p:PackageVersion=${{ steps.gitversion.outputs.semVer }}
 
             - name: Publish to NuGet
               run: dotnet nuget push DbLocator/bin/Release/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key ${{ secrets.NUGET_KEY }} --skip-duplicate

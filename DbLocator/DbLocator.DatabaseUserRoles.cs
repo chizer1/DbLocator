@@ -11,13 +11,6 @@ namespace DbLocator;
 /// - Removal of role assignments
 /// - Role validation and enforcement
 /// - Role-based access control
-///
-/// The database user role management system supports:
-/// - SQL Server built-in database roles
-/// - Role-based access control (RBAC)
-/// - Role validation and enforcement
-/// - Role assignment tracking
-/// - Role dependency management
 /// </summary>
 public partial class Locator
 {
