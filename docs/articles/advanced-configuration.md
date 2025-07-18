@@ -2,6 +2,52 @@
 
 This guide covers advanced configuration options and patterns for DbLocator.
 
+## Available Database Roles
+
+DbLocator supports the following SQL Server database roles:
+
+- **DataReader**: Read-only access to all user tables
+- **DataWriter**: Can insert, update, and delete data in all user tables
+- **DdlAdmin**: Can create, modify, and drop database objects
+- **BackupOperator**: Can perform backup and restore operations
+- **SecurityAdmin**: Can manage database security settings
+- **DbOwner**: Full control over the database
+
+## Connection String Management
+
+DbLocator handles connection strings in two ways:
+
+1. **Role-Based Connection**:
+   ```csharp
+   var connection = await dbLocator.GetConnection(
+        tenantId: tenantId,
+        databaseTypeId: databaseTypeId
+        roles: new[] { DatabaseRole.DataReader, DatabaseRole.DataWriter }
+   );
+   ```
+
+2. **Trusted Connection**:
+   ```csharp
+   var connection = await dbLocator.GetConnection(
+        tenantId: tenantId,
+        databaseTypeId: databaseTypeId
+   );
+   ```
+
+## Security Considerations
+
+When setting up DbLocator, consider these security best practices:
+
+1. Use encryption for database user passwords
+2. Follow the principle of least privilege:
+   - Use `dbcreator` role if you need to create databases
+   - Use `securityadmin` role if you need to create logins
+   - No server roles if you're just mapping to existing databases
+3. Use trusted connections when possible
+4. Implement proper password policies for database users
+5. Regularly audit database access and permissions
+
+
 ## Custom Connection Provider
 
 DbLocator allows you to implement custom connection providers by implementing the `IConnectionProvider` interface:

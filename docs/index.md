@@ -8,44 +8,38 @@ Welcome to the DbLocator documentation. This documentation will help you underst
 
 ## What is DbLocator?
 
-DbLocator is a .NET library that simplifies database interactions for multi-database tenant applications on SQL Server. It provides a robust solution for managing database connections, implementing role-based access control, and handling multi-tenant scenarios.
+DbLocator is a .NET library that simplifies database interactions for multi-database tenant applications on SQL Server. It provides a robust foundation for managing connections, roles, and sharding logic—all with built-in security features.
+Key Features & Use Cases
 
-### Key Features
+1. Multi-Tenant Database Management
+Seamlessly manage isolated databases for each tenant—ideal for SaaS platforms needing data separation and centralized control.
 
-- **Multi-tenant Database Management**: Manage multiple databases for different tenants with ease
-- **Role-Based Access Control**: Implement fine-grained access control using SQL Server database roles
-- **Database Server Management**: Support for multiple server identification methods (hostname, FQDN, IP)
-- **Connection Management**: Secure connection handling with SQL Server authentication
-- **Data Encryption**: Built-in encryption for sensitive connection information
+2. Database Sharding Across Servers
+Scale horizontally by distributing tenant databases across multiple SQL Server instances, identified by hostname, FQDN, or IP address.
+
+3. Role-Based Access Control
+Enforce fine-grained user permissions by integrating with SQL Server roles. Easily map application roles to database roles.
+
+4. Secure Connection Handling
+Supports SQL Server authentication with options for trusted or username/password connections, including database user provisioning if desired.
+
+5. Data Encryption
+Encrypt and decrypt credentials or other secure metadata using a custom key, ensuring compliance and security.
+
+6. Connection Caching for Performance
+Integrate custom or built-in caching to avoid repeated resolution of tenant configurations, improving performance under load.
 
 ## Getting Started
 
-To get started with DbLocator, check out our [Getting Started Guide](articles/getting-started.md). This guide will walk you through:
-
-- Installation and setup
-- Basic configuration
-- Creating your first tenant
-- Managing database connections
-- Implementing role-based access
+To get started with DbLocator, check out [Getting Started Guide](articles/getting-started.md).
 
 ## Examples
 
-Check out the [Examples](articles/examples.md) to see DbLocator in action:
-
-- Basic tenant setup
-- Multi-database tenant configuration
-- Role-based access implementation
-- Integration with dependency injection
+Check out the [Examples](articles/examples.md) to see DbLocator in action.
 
 ## Advanced Configuration
 
 For more complex scenarios, refer to our [Advanced Configuration Guide](articles/advanced-configuration.md):
-
-- Custom connection providers
-- Entity Framework Core integration
-- Background service implementation
-- Advanced error handling
-- Security best practices
 
 ## API Reference
 
@@ -53,7 +47,7 @@ For detailed API documentation, visit our [API Reference](/DbLocator/api/DbLocat
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](https://github.com/chizer1/DbLocator/blob/master/CONTRIBUTING.md) for more information.
+I welcome contributions! Please see [Contributing Guide](https://github.com/chizer1/DbLocator/blob/master/CONTRIBUTING.md) for more information.
 
 ## License
 
