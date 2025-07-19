@@ -18,44 +18,40 @@ jobs:
               run: dotnet restore
             - name: Build
               run: dotnet build --no-restore
-
     deploy:
-        needs: build
-        runs-on: ubuntu-latest
-        permissions:
-          contents: read
-          packages: write
-        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+      needs: build
+      runs-on: ubuntu-latest
+      permissions:
+        contents: read
+        packages: write
+      if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
 
-        steps:
-            - uses: actions/checkout@v4
-              with:
-                fetch-depth: 0
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
 
-            - name: Install GitVersion
-              uses: gittools/actions/gitversion/setup@v3.1.1
-              with:
-                  versionSpec: '6.0.x'
+        - name: Setup .NET
+          uses: actions/setup-dotnet@v4
+          with:
+            dotnet-version: 9.0.x
 
-            - name: Determine Version
-              id: gitversion
-              uses: gittools/actions/gitversion/execute@v3.1.1
-              with:
-                  useConfigFile: true
+        - name: Extract version from tag
+          id: extract_version
+          run: |
+            TAG=${GITHUB_REF##*/}
+            VERSION=${TAG#v}
+            echo "Using tag $TAG -> version $VERSION"
+            echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
-            - name: Download dotnet
-              uses: actions/setup-dotnet@v4
-              with:
-                dotnet-version: 9.0.x
+        - name: Restore dependencies
+          run: dotnet restore
 
-            - name: Restore dependencies
-              run: dotnet restore
+        - name: Build project
+          run: dotnet build --configuration Release
 
-            - name: Build project
-              run: dotnet build --configuration Release
+        - name: Pack NuGet package
+          run: dotnet pack --configuration Release /p:PackageVersion=${{ steps.extract_version.outputs.VERSION }}
 
-            - name: Pack NuGet package
-              run: dotnet pack --configuration Release /p:PackageVersion=${{ steps.gitversion.outputs.semVer }}
-
-            - name: Publish to NuGet
-              run: dotnet nuget push DbLocator/bin/Release/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key ${{ secrets.NUGET_KEY }} --skip-duplicate
+        - name: Publish to NuGet
+          run: dotnet nuget push DbLocator/bin/Release/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key ${{ secrets.NUGET_KEY }} --skip-duplicate
