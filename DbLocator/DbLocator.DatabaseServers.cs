@@ -12,12 +12,6 @@ namespace DbLocator;
 /// - Retrieval of server information
 /// - Updates to server settings and network configuration
 /// - Deletion of servers
-///
-/// The database server management system supports:
-/// - Multiple server identification methods (hostname, FQDN, IP)
-/// - Linked server configurations
-/// - Network connectivity management
-/// - Server metadata tracking
 /// </summary>
 public partial class Locator
 {

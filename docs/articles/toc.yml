@@ -1,7 +1,5 @@
 ### YamlMime:TableOfContent
 - name: Getting Started
   href: getting-started.md
-- name: Advanced Configuration
-  href: advanced-configuration.md
 - name: Examples
   href: examples.md 

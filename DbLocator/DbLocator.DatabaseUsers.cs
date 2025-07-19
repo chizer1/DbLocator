@@ -13,12 +13,6 @@ namespace DbLocator;
 /// - Retrieval of user information
 /// - Updates to user settings and permissions
 /// - Deletion of users
-///
-/// The database user management system supports:
-/// - Multi-database user assignments
-/// - Secure password management
-/// - Database-level DDL operations
-/// - User access control and permissions
 /// </summary>
 public partial class Locator
 {

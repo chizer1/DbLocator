@@ -1,197 +1,137 @@
-# Examples
+# DbLocator Examples
 
-This page contains practical examples of DbLocator usage in common scenarios.
+This guide covers possibe real-world examples for using **DbLocator**.
 
-## Basic Tenant Setup
+---
 
-```csharp
-// Initialize DbLocator with encryption (recommended for production)
-var dbLocator = new Locator(
-    "YourConnectionString",
-    "YourEncryptionKey"
-);
+## Custom Connection Provider
 
-// Create a new tenant
-var tenantId = await dbLocator.AddTenant(
-    "Acme Corp",     // Name
-    "acme",          // Code
-    Status.Active    // Status
-);
-
-// Set up their client database
-var clientDbTypeId = await dbLocator.AddDatabaseType("Client");
-
-// Add a database server with all identification methods
-var serverId = await dbLocator.CreateDatabaseServer(
-    "Local SQL",     // Name
-    "localhost",     // HostName
-    "127.0.0.1",    // IP Address
-    "localhost.local", // FQDN
-    false           // Is Linked Server
-);
-
-// Create the database
-var dbId = await dbLocator.CreateDatabase(
-    "Acme_Client",   // Database name
-    serverId,        // Server ID
-    clientDbTypeId,  // Database type ID
-    Status.Active,   // Status
-    autoCreateDatabase: true,           // Auto-create database (creates the database if it doesn't exist)
-    useTrustedConnection: false           // Use Windows authentication (false = SQL Server authentication)
-);
-
-// Create a database user
-var userId = await dbLocator.CreateDatabaseUser(
-    new[] { dbId },  // Database IDs
-    "acme_user",     // Username
-    "Strong@Passw0rd", // Password
-    true            // Create user on database server (creates the login and user)
-);
-
-// Assign roles to the user
-await dbLocator.CreateDatabaseUserRole(
-    userId,          // User ID
-    DatabaseRole.DataReader, // Role
-    true            // Update user on database server (grants the role)
-);
-
-// Get a SqlConnection with specific role
-using var connection = await dbLocator.GetConnection(
-    tenantId, 
-    clientDbTypeId,
-    new[] { DatabaseRole.DataReader }
-);
-```
-
-## Multi-Database Tenant
+You can implement a custom provider if you need additional control:
 
 ```csharp
-// Set up multiple database types for a tenant
-var clientDbTypeId = await dbLocator.AddDatabaseType("Client");
-var biDbTypeId = await dbLocator.AddDatabaseType("BI");
-var reportingDbTypeId = await dbLocator.AddDatabaseType("Reporting");
-
-// Add databases for each type
-var clientDbId = await dbLocator.CreateDatabase(
-    "Acme_Client", 
-    serverId, 
-    clientDbTypeId, 
-    Status.Active, 
-    autoCreateDatabase: true,           // Auto-create database
-    useTrustedConnection: false           // Use SQL Server authentication
-);
-
-var biDbId = await dbLocator.CreateDatabase(
-    "Acme_BI", 
-    serverId, 
-    biDbTypeId, 
-    Status.Active, 
-    autoCreateDatabase: true,           // Auto-create database
-    useTrustedConnection: false           // Use SQL Server authentication
-);
-
-var reportingDbId = await dbLocator.CreateDatabase(
-    "Acme_Reporting", 
-    serverId, 
-    reportingDbTypeId, 
-    Status.Active, 
-    autoCreateDatabase: true,           // Auto-create database
-    useTrustedConnection: false           // Use SQL Server authentication
-);
-
-// Create a user with access to all databases
-var userId = await dbLocator.CreateDatabaseUser(
-    new[] { clientDbId, biDbId, reportingDbId },
-    "acme_user",
-    "Strong@Passw0rd",
-    true            // Create user on database server
-);
-
-// Assign different roles for different databases
-await dbLocator.CreateDatabaseUserRole(userId, DatabaseRole.DataReader, true);  // Client DB
-await dbLocator.CreateDatabaseUserRole(userId, DatabaseRole.DataWriter, true);  // BI DB
-await dbLocator.CreateDatabaseUserRole(userId, DatabaseRole.DbOwner, true);     // Reporting DB
-
-// Get connections to different databases with appropriate roles
-using var clientConnection = await dbLocator.GetConnection(
-    tenantId, 
-    clientDbTypeId,
-    new[] { DatabaseRole.DataReader }
-);
-
-using var biConnection = await dbLocator.GetConnection(
-    tenantId, 
-    biDbTypeId,
-    new[] { DatabaseRole.DataWriter }
-);
-
-using var reportingConnection = await dbLocator.GetConnection(
-    tenantId, 
-    reportingDbTypeId,
-    new[] { DatabaseRole.DbOwner }
-);
-```
-
-## Role-Based Access
-
-```csharp
-// Get a connection with specific database roles
-using var readerConnection = await dbLocator.GetConnection(
-    tenantId, 
-    clientDbTypeId, 
-    new[] { DatabaseRole.DataReader }
-);
-
-// Get a connection with multiple roles
-using var writerConnection = await dbLocator.GetConnection(
-    tenantId, 
-    clientDbTypeId, 
-    new[] { DatabaseRole.DataReader, DatabaseRole.DataWriter }
-);
-
-// Get a connection with administrative access
-using var adminConnection = await dbLocator.GetConnection(
-    tenantId, 
-    clientDbTypeId, 
-    new[] { DatabaseRole.DbOwner }
-);
-```
-
-## Using with Dependency Injection
-
-```csharp
-// In Program.cs
-builder.Services.AddSingleton<Locator>(sp =>
+public class CustomConnectionProvider : IConnectionProvider
 {
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    return new Locator(
-        configuration.GetConnectionString("DbLocator"),
-        configuration["DbLocator:EncryptionKey"]
-    );
-});
+    private readonly ILogger<CustomConnectionProvider> _logger;
 
-// In your service
-public class TenantService(Locator dbLocator, ILogger<TenantService> logger)
-{
-    private readonly Locator _dbLocator = dbLocator;
-    private readonly ILogger<TenantService> _logger = logger;
+    public CustomConnectionProvider(ILogger<CustomConnectionProvider> logger)
+        => _logger = logger;
 
-    public async Task<SqlConnection> GetTenantConnectionAsync(
-        string tenantCode,
-        string databaseType,
-        DatabaseRole[] roles
-    )
+    public async Task<SqlConnection> GetConnectionAsync(
+        string connectionString,
+        bool useTrustedConnection = false)
     {
         try
         {
-            var tenant = await _dbLocator.GetTenant(tenantCode);
-            return await _dbLocator.GetConnection(tenant.Id, databaseType, roles);
+            var connection = new SqlConnection(connectionString);
+            await connection.OpenAsync();
+            return connection;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to get connection for tenant {TenantCode}", tenantCode);
+            _logger.LogError(ex, "Connection failed");
             throw;
         }
     }
 }
-``` 
+```
+
+## Integrating with Entity Framework Core
+
+```csharp
+public class TenantDbContext : DbContext
+{
+    private readonly ITenantContext _tenantContext;
+    private readonly Locator _dbLocator;
+
+    public TenantDbContext(
+        DbContextOptions<TenantDbContext> options,
+        ITenantContext tenantContext,
+        Locator dbLocator)
+        : base(options)
+    {
+        _tenantContext = tenantContext;
+        _dbLocator = dbLocator;
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            var connection = _dbLocator.GetConnection(
+                _tenantContext.TenantId,
+                "Client",
+                new[] { DatabaseRole.DataReader }
+            ).GetAwaiter().GetResult();
+
+            optionsBuilder.UseSqlServer(connection);
+        }
+    }
+}
+```
+
+## Using in Background Services
+
+```csharp
+public class DatabaseMaintenanceService : BackgroundService
+{
+    private readonly Locator _dbLocator;
+    private readonly ILogger<DatabaseMaintenanceService> _logger;
+
+    public DatabaseMaintenanceService(Locator dbLocator, ILogger<DatabaseMaintenanceService> logger)
+    {
+        _dbLocator = dbLocator;
+        _logger = logger;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                var databases = await _dbLocator.GetDatabases(Status.Active);
+                foreach (var db in databases)
+                    await PerformMaintenanceAsync(db);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Maintenance error");
+            }
+
+            await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
+        }
+    }
+
+    private async Task PerformMaintenanceAsync(Database db)
+    {
+        // Rebuild indexes, update stats, check integrity, etc.
+    }
+}
+```
+
+## Example: Multi-Database Tenant Setup
+```csharp
+var clientDbTypeId = await dbLocator.AddDatabaseType("Client");
+var biDbTypeId = await dbLocator.AddDatabaseType("BI");
+var reportingDbTypeId = await dbLocator.AddDatabaseType("Reporting");
+
+var clientDbId = await dbLocator.CreateDatabase("Acme_Client", serverId, clientDbTypeId, Status.Active, true, false);
+var biDbId = await dbLocator.CreateDatabase("Acme_BI", serverId, biDbTypeId, Status.Active, true, false);
+var reportingDbId = await dbLocator.CreateDatabase("Acme_Reporting", serverId, reportingDbTypeId, Status.Active, true, false);
+
+var userId = await dbLocator.CreateDatabaseUser(
+    new[] { clientDbId, biDbId, reportingDbId },
+    "acme_user", "Strong@Passw0rd", true);
+
+await dbLocator.CreateDatabaseUserRole(userId, DatabaseRole.DataReader, true);   // Client DB
+await dbLocator.CreateDatabaseUserRole(userId, DatabaseRole.DataWriter, true);   // BI DB
+await dbLocator.CreateDatabaseUserRole(userId, DatabaseRole.DbOwner, true);      // Reporting DB
+
+using var clientConnection = await dbLocator.GetConnection(tenantId, clientDbTypeId, new[] { DatabaseRole.DataReader });
+using var biConnection = await dbLocator.GetConnection(tenantId, biDbTypeId, new[] { DatabaseRole.DataWriter });
+using var reportingConnection = await dbLocator.GetConnection(tenantId, reportingDbTypeId, new[] { DatabaseRole.DbOwner });
+```
+
+## Next Steps
+
+- Review the [API Reference](../api/) for detailed method documentation

@@ -11,12 +11,6 @@ namespace DbLocator;
 /// - Retrieval of database information
 /// - Updates to database settings and properties
 /// - Deletion of databases with optional physical removal
-///
-/// The database management system supports:
-/// - Multiple database types (operational, analytical, etc.)
-/// - Different database statuses (active, inactive, etc.)
-/// - Trusted connection configurations
-/// - Server-specific database placement
 /// </summary>
 public partial class Locator
 {

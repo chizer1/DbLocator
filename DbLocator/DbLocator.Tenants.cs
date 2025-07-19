@@ -11,12 +11,6 @@ namespace DbLocator;
 /// - Retrieval of tenant information
 /// - Updates to tenant settings and properties
 /// - Deletion of tenants
-///
-/// The tenant management system supports:
-/// - Multi-tenant database environments
-/// - Different tenant statuses (active, inactive, etc.)
-/// - Unique tenant codes for identification
-/// - Tenant-specific database access control
 /// </summary>
 public partial class Locator
 {
@@ -31,8 +25,7 @@ public partial class Locator
     /// </param>
     /// <param name="tenantCode">
     /// The unique code assigned to the tenant. This code is used as a short identifier for the tenant
-    /// and must be unique across all tenants in the system. It is typically used in connection strings
-    /// and configuration settings.
+    /// and must be unique across all tenants in the system.
     /// </param>
     /// <param name="tenantStatus">
     /// The initial status of the tenant (e.g., Active, Inactive). This status determines whether the tenant
