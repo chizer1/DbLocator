@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -62,7 +62,8 @@ jobs:
             echo "Coverage below required threshold (100%)"
             exit 1
           fi
-          echo "Coverage OK (100%)"
+
+          echo "Coverage is 100%"
 
       - name: Upload Coverage Report
         if: always()
