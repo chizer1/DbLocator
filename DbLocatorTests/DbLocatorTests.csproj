@@ -5,7 +5,6 @@
     <RunSettingsFilePath>.runsettings</RunSettingsFilePath>
     <CollectCoverage>true</CollectCoverage>
     <CoverletOutputFormat>cobertura</CoverletOutputFormat>
-    <CoverletOutput>TestResults/</CoverletOutput>
     <Threshold>100</Threshold>
     <ThresholdType>line</ThresholdType>
     <ThresholdStat>total</ThresholdStat>

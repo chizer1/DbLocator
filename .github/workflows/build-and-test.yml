@@ -31,15 +31,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bc
 
-      - name: Build
+      - name: Build all TFMs
         run: dotnet build --configuration Release /warnAsError
-
-      - name: Run Tests (Multi-TFM) with Coverage
+        
+      - name: Run tests with coverage
         run: |
-          dotnet test --no-build --results-directory TestResults \
-            -p:CollectCoverage=true \
-            -p:CoverletOutputFormat=cobertura \
-            -p:CoverletOutput=TestResults/coverage-%2f/
+            dotnet test --no-build --results-directory TestResults \
+              -p:CollectCoverage=true \
+              -p:CoverletOutputFormat=cobertura \
+              -p:CoverletOutput=TestResults/coverage-%2f/
 
       - name: Generate Merged Coverage Report
         run: |
