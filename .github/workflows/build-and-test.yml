@@ -14,12 +14,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.x.x
+          dotnet-version: |
+            9.x.x
+            10.x.x
 
       - name: Install dependencies
         run: |
@@ -29,39 +31,46 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bc
 
-      - name: Build Project
-        run: dotnet build /warnAsError
+      - name: Build
+        run: dotnet build --configuration Release /warnAsError
 
-      - name: Run Tests with Coverage
+      - name: Run Tests (Multi-TFM) with Coverage
         run: |
-          dotnet test --no-build --collect:"XPlat Code Coverage" --results-directory:TestResults /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
-          if [ $? -ne 0 ]; then
-            echo "Tests failed"
-            exit 1
-          fi
+          dotnet test --no-build \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=cobertura \
+            /p:CoverletOutput=TestResults/coverage-%2f/ \
+            --results-directory TestResults
 
-      - name: Generate Coverage Report
-        run: reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" -targetdir:CoverageReport
+      - name: Generate Merged Coverage Report
+        run: |
+          reportgenerator \
+            -reports:"TestResults/coverage-*/coverage.cobertura.xml" \
+            -targetdir:"CoverageReport" \
+            -reporttypes:Html
 
       - name: Check Coverage Threshold
-        id: coverage
+        id: coverage-check
         continue-on-error: true
         run: |
-          coverage=$(grep -A 1 "Line coverage" CoverageReport/index.html | grep -o '[0-9]\+\.[0-9]\+%' | cut -d'%' -f1)
-          echo "Current coverage: ${coverage}%"
+          coverage=$(grep -A 1 "Line coverage" CoverageReport/index.html \
+            | grep -o '[0-9]\+\.[0-9]\+%' \
+            | cut -d'%' -f1)
+
+          echo "Coverage detected: ${coverage}%"
           if (( $(echo "$coverage < 100" | bc -l) )); then
-            echo "Coverage is below 100%"
+            echo "Coverage below required threshold (100%)"
             exit 1
           fi
-          echo "Coverage is at 100%"
+          echo "Coverage OK (100%)"
 
       - name: Upload Coverage Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Code-Coverage-Report
-          path: ${{ github.workspace }}/CoverageReport
+          name: CoverageReport
+          path: CoverageReport
 
       - name: Fail if coverage below threshold
-        if: steps.coverage.outcome == 'failure'
+        if: steps.coverage-check.outcome == 'failure'
         run: exit 1
