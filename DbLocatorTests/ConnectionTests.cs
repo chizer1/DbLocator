@@ -267,7 +267,6 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
             Status.Active
         );
 
-        var connectionId = await _dbLocator.CreateConnection(tenantId, databaseId);
         var dbUserId = await _dbLocator.CreateDatabaseUser(
             [databaseId],
             TestHelpers.GetRandomString(),
@@ -279,7 +278,7 @@ public class ConnectionTests(DbLocatorFixture dbLocatorFixture)
         var connection = await _dbLocator.GetConnection(
             tenantId,
             databaseTypeId,
-            [DatabaseRole.DataReader]
+            new[] { DatabaseRole.DataReader }
         );
         Assert.NotNull(connection);
         Assert.NotNull(connection.ConnectionString);
