@@ -34,12 +34,19 @@ jobs:
       - name: Build all TFMs
         run: dotnet build --configuration Release /warnAsError
         
-      - name: Run tests with coverage
+      - name: Run tests with coverage (net 9.0)
         run: |
-            dotnet test --no-build --results-directory TestResults \
-              -p:CollectCoverage=true \
-              -p:CoverletOutputFormat=cobertura \
-              -p:CoverletOutput=TestResults/coverage-%2f/
+          dotnet test --framework net9.0 --results-directory TestResults/net9.0 \
+            -p:CollectCoverage=true \
+            -p:CoverletOutputFormat=cobertura \
+            -p:CoverletOutput=TestResults/net9.0/coverage/
+
+      - name: Run tests with coverage (net 10.0)
+        run: |
+          dotnet test --framework net10.0 --results-directory TestResults/net10.0 \
+            -p:CollectCoverage=true \
+            -p:CoverletOutputFormat=cobertura \
+            -p:CoverletOutput=TestResults/net10.0/coverage/
 
       - name: Generate Merged Coverage Report
         run: |
